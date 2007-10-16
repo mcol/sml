@@ -1,0 +1,31 @@
+OOPSHOME = /home/agr/oops/oops_cvs
+AMPLSOLVER = /home/agr/struct_model/amplsolver
+YACC = bison
+LEX = flex
+CFLAGS = -g 
+CXXFLAGS = -I$(AMPLSOLVER) -I$(OOPSHOME)/include -g
+#COMPILE.cpp = g++ -g -c
+CC = g++ -g
+LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -lmetis -lgfortran
+
+all: sml
+
+sml: ampl.yy.o ampl.tab.cpp symtab.o nodes.o backend.o AmplModel.o model_comp.o ExpandedModel.o AmplsolverCalls.o sml-oops.o OOPSBlock.o
+	$(CC) -o$@ $^ $(LDFLAGS) -lfl -ldl
+
+%.yy.cpp: %.l %.tab.h
+	$(LEX) -o$@ $<
+
+%.tab.cpp %.tab.h: %.ypp
+	$(YACC) -d -v -t $<
+
+clean:
+	-rm -rf *.tab.cpp
+	-rm -rf *.tab.hpp
+	-rm -rf *.yy.cpp
+	-rm -rf *.o
+	-rm -rf sml
+
+# dependencies
+symtab.cpp: nodes.h symtab.h ampl.tab.h
+nodes.cpp: nodes.h
