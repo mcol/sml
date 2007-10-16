@@ -1,0 +1,9 @@
+*.row
+*.nl
+*.col
+root*
+latex
+html
+*.tab.*
+script.scr
+sml
