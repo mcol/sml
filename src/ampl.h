@@ -92,6 +92,10 @@ class AmplModel{
   opNodeIx *ix;       ///< indexing expression
 
   // -------------------------- methods ----------------------------------
+
+  /** Constructor */
+  AmplModel();
+
   /** set global name by concatenating ancestor names */
   void setGlobalName();      
 

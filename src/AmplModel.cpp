@@ -53,9 +53,22 @@ addCompToModel(AmplModel *model, model_comp *comp)
     model->last = comp;
     lastinmodel->next = comp;
   }
-  
-
 }
+
+/** Constructor */
+AmplModel::AmplModel() :
+  n_vars(0),
+  n_cons(0),
+  n_params(0),
+  n_sets(0),
+  n_objs(0),
+  n_submodels(0),
+  n_total(0),
+  level(0),
+  first(NULL),
+  last(NULL),
+  parent(NULL),
+  ix(NULL) {}
 
 /* ---------------------------------------------------------------------------
 AmplModel::setGlobalName()
@@ -81,8 +94,8 @@ void AmplModel::writeTaggedComponents(){writeTaggedComponents(stdout);}
 void
 AmplModel::writeTaggedComponents(FILE *fout)
 {
-  
-  opNodeIx *ix = node->indexing;
+
+  ix = node->indexing;
 
   if (!ix->done_split) {
     printf("All opNodeIx should have the expression split done!\n");
@@ -425,7 +438,4 @@ AmplModel::print()
       am->print();
     }
   }
-
-
-
 }
