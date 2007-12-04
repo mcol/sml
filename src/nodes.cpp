@@ -241,7 +241,7 @@ opNode::print()
       return print_opNode((opNode*)node->values[0]);
       /* these are terminals */
     case INT_VAL:
-      buffer = (char *)malloc(10*sizeof(char));
+      buffer = (char *)malloc(10);
       i = sprintf(buffer, "%d", *((int *)(node->values[0])));
       if (i>10) {
 	printf("integer constant too long: %d",*(int *)(node->values[0]));
@@ -249,7 +249,7 @@ opNode::print()
       }
       return buffer;
     case FLOAT_VAL:
-      buffer = (char *)malloc(15*sizeof(char));
+      buffer = (char *)malloc(15);
       i = sprintf(buffer, "%f", *(double *)(node->values[0]));
       if (i>15) {
 	printf("float constant too long: %f",*(double *)(node->values[0]));
@@ -438,7 +438,7 @@ opNode::print()
 	char *tmp1 = print_opNode((opNode*)node->values[0]);
 	char *tmp2 = print_opNode((opNode*)node->values[1]);
 	int len = strlen(tmp1)+strlen(tmp2)+3+6+1;
-	char *ret = (char*)malloc(len*sizeof(char));
+	char *ret = (char*)malloc(len);
 	sprintf(ret, "if %s then %s",tmp1, tmp2);
 	free(tmp1);
 	free(tmp2);
@@ -449,7 +449,7 @@ opNode::print()
 	char *tmp2 = print_opNode((opNode*)node->values[1]);
 	char *tmp3 = print_opNode((opNode*)node->values[2]);
 	int len = strlen(tmp1)+strlen(tmp2)+strlen(tmp3)+3+6+6+1;
-	char *ret = (char*)malloc(len*sizeof(char));
+	char *ret = (char*)malloc(len);
 	sprintf(ret, "if %s then %s else %s",tmp1, tmp2, tmp3);
 	free(tmp1);
 	free(tmp2);
@@ -516,7 +516,7 @@ print_opNodesymb(opNode *node)
     int len = 20;
     char *s0 = print_opNodesymb((opNode*)node->values[0]);
     len += strlen(s0);
-    buffer = (char*)malloc(len*sizeof(char));
+    buffer = (char*)malloc(len);
     sprintf(buffer, "(%d %s)",node->opCode, s0);
     free(s0);
     return buffer;
@@ -526,7 +526,7 @@ print_opNodesymb(opNode *node)
     char *s1 = print_opNodesymb((opNode*)node->values[1]);
     len += strlen(s0);
     len += strlen(s1);
-    buffer = (char*)malloc(len*sizeof(char));
+    buffer = (char*)malloc(len);
     sprintf(buffer, "(%d %s %s)",node->opCode, s0, s1);
     return buffer;
   } else if (node->nval==3){
@@ -537,11 +537,11 @@ print_opNodesymb(opNode *node)
     len += strlen(s0);
     len += strlen(s1);
     len += strlen(s2);
-    buffer = (char*)malloc(len*sizeof(char));
+    buffer = (char*)malloc(len);
     sprintf(buffer, "(%d, %s, %s, %s)",node->opCode, s0, s1, s2);
     return buffer;
   } else {
-    buffer = (char*)malloc(20*sizeof(char));
+    buffer = (char*)malloc(20);
     sprintf(buffer, "(nval = %d)",node->nval);
     return buffer;
   }
