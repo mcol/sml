@@ -151,9 +151,8 @@ void fill_model_list_(AmplModel *model, AmplModel **list, int *pos);
 void
 process_model(AmplModel *model) /* should be called with model==root */
 {
-  int i, j, k, n_models, n_local_model, n;
+  int i, j, k, n_models, n;
   AmplModel **model_list;
-  AmplModel *local_model_list[10]; /* up to 10 levels of models */
   FILE *fout;
   FILE *fscript;
   char buffer[200];   /* this is the name of the model file */

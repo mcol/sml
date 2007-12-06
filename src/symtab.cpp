@@ -13,8 +13,8 @@ void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
 {
   char *nametype;
   int hash;
-   symb_entry *cur_entry, *last_entry, *this_symbol;
-   symb_entry **sht, **sht_above;
+   symb_entry *cur_entry, *this_symbol;
+   symb_entry **sht_above;
    AmplModel *mod_above;
 
 

@@ -292,7 +292,6 @@ getRhsAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 {
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  int tt_nz;
   
   printf("Opening %s\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
@@ -329,7 +328,6 @@ getObjAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 {
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  int tt_nz;
   
   printf("Opening %s\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
@@ -365,7 +363,6 @@ getBndAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 {
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  int tt_nz;
   
   printf("Opening %s\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());

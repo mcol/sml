@@ -262,7 +262,6 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
   char namebuffer[200];
   char arglistbuffer[200];
   int n_index = 0;
-  int p_ix_list = n_addIndex-1;
   int i;
 
   /* need to get list of model names and argument list to prefix */
