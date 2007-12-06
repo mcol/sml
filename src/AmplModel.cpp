@@ -288,7 +288,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
       // - create the ExpandedModel nodes by calling this routine
       
       string nameSetFile = smodelname+"_"+string(mc->id);
-      if (strlen(sinstanceStub.c_str())>0) nameSetFile += "_"+sinstanceStub;
+      if (sinstanceStub.length() > 0)
+	nameSetFile += "_" + sinstanceStub;
       
       // get cardinality of this node in the ExpandedModel
       ifstream fcrd((nameSetFile+".crd").c_str());
@@ -310,7 +311,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
       for(list<string>::iterator p=li->begin();p!=li->end();p++){
 	string subModelName = smodelname+"_"+string(mc->id);
 	string subModelInst;
-	if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
+	if (sinstanceStub.length() > 0)
+	  subModelInst = sinstanceStub + "_";
 	subModelInst += crush((*p).c_str());
 	cout << subModelName+":"+subModelInst+'\n';
 	AmplModel *subampl = (AmplModel*)mc->other;
