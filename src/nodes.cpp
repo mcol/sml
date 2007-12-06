@@ -239,6 +239,7 @@ opNode::print()
     {
     case 0:
       return print_opNode((opNode*)node->values[0]);
+
       /* these are terminals */
     case INT_VAL:
       buffer = (char *)malloc(10);
@@ -248,6 +249,7 @@ opNode::print()
 	exit(1);
       }
       return buffer;
+
     case FLOAT_VAL:
       buffer = (char *)malloc(15);
       i = sprintf(buffer, "%f", *(double *)(node->values[0]));
@@ -256,12 +258,13 @@ opNode::print()
 	exit(1);
       }
       return buffer;
+
       /* these are lots of simple binary operators */
     case ID:
       /* in this case the values[0] is simply a pointer to a name */
       buffer = strdup((const char*)node->values[0]);
       return buffer;
-      break;
+
     case IDREF:
       if (use_global_names){
 	buffer = getGlobalName((model_comp*)node->values[0], node, default_model, WITHARG);
@@ -284,6 +287,7 @@ opNode::print()
       return buffer;
       }
       break;
+
     case IDREFM:
       /* this is the new ID processor (for submodels) */
       thism = (AmplModel*)node->values[0];
@@ -291,16 +295,16 @@ opNode::print()
       /* in this case the values[0] is simply a pointer to a name */
       //buffer = node->values[0];
       return buffer;
-      break;
+
     case ' ':
       buffer = strdup(" ");
       return print_stropstr(node, buffer);
-      break;
+
     case DOT:
       buffer = strdup(".");
       return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case COMMA:
       /* a comma can have any number of arguments */
       if (node->nval==1){
@@ -313,88 +317,88 @@ opNode::print()
 	buffer2 =  strcat2(strcat2(buffer2, buffer), print_opNode((opNode*)node->values[i]));
       }
       return buffer2;
-      break;
+
     case IN:
       buffer = strdup(" in ");
       return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case GE:
       buffer = strdup(">=");
       return print_stropstr(node, buffer);
-      break;
+
     case GT:
       buffer = strdup(">");
       return print_stropstr(node, buffer);
-      break;
+
     case LE:
       buffer = strdup("<=");
       return print_stropstr(node, buffer);
-      break;
+
     case LT:
       buffer = strdup("<");
       return print_stropstr(node, buffer);
-      break;
+
     case EQ:
       buffer = strdup("==");
       return print_stropstr(node, buffer);
-      break;
+
     case DIFF:
       buffer = strdup(" diff ");
       return print_stropstr(node, buffer);
-      break;
+
     case CROSS:
       buffer = strdup(" cross ");
       return print_stropstr(node, buffer);
-      break;
+
     case '+':
       buffer = strdup("+");
       return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case '-':
       buffer = strdup("-");
       return print_stropstr(node, buffer);
-      break;
+
     case '*':
       buffer = strdup("*");
       return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case '/':
       buffer = strdup("/");
       return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case SUM:
       buffer = strdup("sum ");
       return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case MAX:
       buffer = strdup("max ");
       return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
     case MIN:
       buffer = strdup("min ");
       return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
 		     print_opNode((opNode*)node->values[1]));
-      break;
+
       // -------------------------functions f(..) --------------------------
     case ORD:
       buffer = strdup("ord");
       return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-      break;
+
       // -------------------------terminals --------------------------
     case ORDERED:
       return strdup(" ordered");
-      break;
+
       /* these are lots of simple unary operators */
     case WITHIN:
       buffer = strdup("within ");
       return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-      break;
+
     case LSBRACKET:
       buffer = strdup("[");
       buffer2 = strdup("]");
@@ -404,17 +408,17 @@ opNode::print()
 	return strcat2(print_opNode((opNode*)node->values[0]), 
 		       strcat2(strcat2(buffer, print_opNode((opNode*)node->values[1])),buffer2));
       }
-      break;
+
     case LBRACE:
       buffer = strdup("{");
       buffer2 = strdup("}");
       return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),buffer2);
-      break;
+
     case LBRACKET:
       buffer = strdup("(");
       buffer2 = strdup(")");
       return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),buffer2);
-      break;
+
     case ASSIGN:
       buffer = strdup("=");
       if (node->nval==1){
@@ -424,6 +428,7 @@ opNode::print()
 		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
       }
       break;
+
     case COLON:
       buffer = strdup(":");
       if (node->nval==1){
@@ -433,6 +438,7 @@ opNode::print()
 		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
       }
       break;
+
     case IF:
       if (node->nval==2){
 	char *tmp1 = print_opNode((opNode*)node->values[0]);
@@ -465,7 +471,6 @@ opNode::print()
       }
       exit(1);
     }
-
 }
 
 char *
@@ -476,7 +481,6 @@ print_stropstr(opNode *node, char *buffer){
   }else{
     return strcat2(buffer, print_opNode((opNode*)node->values[0]));
   }
-
 }
 
 /* this is a strcat function that allocates space for the return string
@@ -495,8 +499,7 @@ char *
 print_opNodesymb(opNode *node)
 {
   char *buffer;
-  char *buffer2;
-  int i;
+
   if (node==NULL){
     buffer = strdup("NULL");
     return buffer;
