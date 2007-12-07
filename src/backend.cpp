@@ -67,6 +67,16 @@ void do_stuff(AmplModel *model)
   process_model(model);
 }
 
+static void
+print_entry(const model_comp *entry) {
+  char *tmp1 = print_opNode(entry->indexing);
+  char *tmp2 = print_opNode(entry->attributes);
+  printf("    %s\n", entry->id);
+  printf("       %s\n", tmp1);
+  printf("       %s\n", tmp2);
+  free(tmp1);
+  free(tmp2);
+}
 
 void
 print_model(AmplModel *model)
@@ -80,9 +90,7 @@ print_model(AmplModel *model)
   entry = model->first;
   while(entry!=NULL){
     if (entry->type==TSET){
-      printf("    %s\n",entry->id);
-      printf("       %s\n",print_opNode(entry->indexing));
-      printf("       %s\n",print_opNode(entry->attributes));
+      print_entry(entry);
     }
     entry = entry->next;
   }
@@ -90,9 +98,7 @@ print_model(AmplModel *model)
   entry = model->first;
   while(entry!=NULL){
     if (entry->type==TCON){
-      printf("    %s\n",entry->id);
-      printf("       %s\n",print_opNode(entry->indexing));
-      printf("       %s\n",print_opNode(entry->attributes));
+      print_entry(entry);
     }
     entry = entry->next;
   }
@@ -100,9 +106,7 @@ print_model(AmplModel *model)
   entry = model->first;
   while(entry!=NULL){
     if (entry->type==TVAR){
-      printf("    %s\n",entry->id);
-      printf("       %s\n",print_opNode(entry->indexing));
-      printf("       %s\n",print_opNode(entry->attributes));
+      print_entry(entry);
     }
     entry = entry->next;
   }
@@ -110,9 +114,7 @@ print_model(AmplModel *model)
   entry = model->first;
   while(entry!=NULL){
     if (entry->type==TPARAM){
-      printf("    %s\n",entry->id);
-      printf("       %s\n",print_opNode(entry->indexing));
-      printf("       %s\n",print_opNode(entry->attributes));
+      print_entry(entry);
     }
     entry = entry->next;
   }
@@ -126,8 +128,6 @@ print_model(AmplModel *model)
     }
     entry = entry->next;
   }
-  
-
 }
 
 
@@ -287,10 +287,14 @@ process_model(AmplModel *model) /* should be called with model==root */
       //fprintf(fscript, "for {i%d in %s }{\n", k, print_opNode(set));
       //for(j=1;j<=k;j++) fprintf(fscript,"  ");
       //fprintf(fscript, "let %s_SUB := {i%d};\n", print_opNode(set), k);
+      char *tmp1 = dummyVar->print();
+      char *tmp2 = print_opNode(set);
       for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
-      fprintf(fscript, "for {%s in %s }{\n", dummyVar->print(), print_opNode(set));
+      fprintf(fscript, "for {%s in %s }{\n", tmp1, tmp2);
       for(j=1;j<=k;j++) fprintf(fscript,"  ");
-      fprintf(fscript, "let %s_SUB := {%s};\n", print_opNode(set), dummyVar->print());
+      fprintf(fscript, "let %s_SUB := {%s};\n", tmp2, tmp1);
+      free(tmp1);
+      free(tmp2);
     }
 
     /* FIXME: still need to take the "print card()" statement from the
@@ -903,6 +907,7 @@ void
 modified_write(FILE *fout, model_comp *comp)
 {
   int i;
+  char *tmp;
   opNode *ixsn;
 
   if (comp->type!=TMODEL){
@@ -919,7 +924,9 @@ modified_write(FILE *fout, model_comp *comp)
       add_index *ix = l_addIndex[i];
       if (first){first = 0;}else{fprintf(fout, ",");}
       if (ix->dummyVar){
-	fprintf(fout, "%s in ",print_opNode(ix->dummyVar));
+	tmp = print_opNode(ix->dummyVar);
+	fprintf(fout, "%s in ", tmp);
+	free(tmp);
       }
       ixsn = ix->set;
       if (ixsn->opCode==LBRACE) ixsn=(opNode*)ixsn->values[0]; 
@@ -930,7 +937,9 @@ modified_write(FILE *fout, model_comp *comp)
       if (first){first = 0;}else{fprintf(fout, ",");}
       ixsn = comp->indexing;
       if (ixsn->opCode==LBRACE) ixsn=(opNode*)ixsn->values[0]; 
-      fprintf(fout, "%s", print_opNode(ixsn));
+      tmp = print_opNode(ixsn);
+      fprintf(fout, "%s", tmp);
+      free(tmp);
     }
     if (n_addIndex>0 || comp->indexing)
       fprintf(fout, "}");
@@ -939,7 +948,9 @@ modified_write(FILE *fout, model_comp *comp)
     if (comp->type==TCON||comp->type==TOBJ) fprintf(fout, ":");
     
     /* write out the rest of the expression */
-    fprintf(fout, "%s;\n",(comp->attributes)->print());
+    tmp = (comp->attributes)->print();
+    fprintf(fout, "%s;\n", tmp);
+    free(tmp);
     //fprintf(fout, "%s;\n",print_opNode(comp->attributes));
     //fprintf(fout, "%s;\n", print_opNodesymb(comp->attributes));
   }

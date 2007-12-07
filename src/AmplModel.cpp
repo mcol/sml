@@ -412,13 +412,13 @@ AmplModel::print
 void 
 AmplModel::print()
 {
-
+  char *tmp = ix->print();
   printf("AM: ------------------------------------------------------------\n");
   printf("AM: This is AmplModel: %s\n",name);
   printf("AM: global name: %s\n",global_name.c_str());
   printf("AM: level: %d\n",level);
   printf("AM: parent: %s\n",(parent)?parent->name:"NULL");
-  printf("AM: indexing: %s\n",ix->print());
+  printf("AM: indexing: %s\n", tmp);
   printf("AM: Nb submodels  : %d\n", n_submodels);
   printf("AM: Nb sets       : %d\n", n_sets);
   printf("AM: Nb parameters : %d\n", n_params);
@@ -427,6 +427,7 @@ AmplModel::print()
   printf("AM: Nb constraints: %d\n", n_cons);
   printf("AM: Nb objectives: %d\n", n_submodels);
   printf("AM: Entities declared:\n");
+  free(tmp);
   for(model_comp *mc = first;mc;mc=mc->next){
     mc->printBrief();
   }

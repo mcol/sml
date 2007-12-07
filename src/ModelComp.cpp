@@ -79,7 +79,9 @@ model_comp::model_comp(char *id, compType type,
     }
   }
   if (attrib){
-    printf("  dependencies in attributes: %s\n", attrib->print());
+    char *tmp = attrib->print();
+    printf("  dependencies in attributes: %s\n", tmp);
+    free(tmp);
     //attrib->findIDREF();
     list<model_comp*> lmc;
     attrib->findIDREF(&lmc);
@@ -351,7 +353,9 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
       if (n_index==0){
 	opNode *dv = l_addIndex[i]->dummyVar;
 	if (dv) {
-	  sprintf(arglistbuffer, "%s", dv->printDummyVar());
+	  char *tmp1 = dv->printDummyVar();
+	  sprintf(arglistbuffer, "%s", tmp1);
+	  free(tmp1);
 	  //printf("add dummy variable: %s\n",print_opNode(dv));
 	  n_index++;
 	}
@@ -359,8 +363,10 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
 	/* need to put subscript before the current list */
 	opNode *dv = l_addIndex[i]->dummyVar;
 	if (dv){
+	  char *tmp1 = dv->printDummyVar();
 	  strcat(arglistbuffer,",");
-	  strcat(arglistbuffer,dv->printDummyVar());
+	  strcat(arglistbuffer, tmp1);
+	  free(tmp1);
 	  //printf("add dummy variable: %s\n",print_opNode(dv));
 	  n_index++;
 	}

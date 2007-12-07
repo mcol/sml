@@ -395,8 +395,12 @@ identifier: iditem {
 	      }
 	      local_context = (AmplModel*)((model_comp*)($1->values[0]))->other;
 
-	      printf("Trying to merge \n identifier %s",print_opNode($1));
-	      printf(" and iditem %s\n", print_opNode($3));
+	      char *tmp1 = print_opNode($1);
+	      char *tmp2 = print_opNode($3);
+	      printf("Trying to merge \n identifier %s", tmp1);
+	      printf(" and iditem %s\n", tmp2);
+	      free(tmp1);
+	      free(tmp2);
 	      $$ = find_var_ref_in_context(local_context, $3);
 
 	      /* merge argument lists */
@@ -419,7 +423,9 @@ identifier: iditem {
 iditem: ID {                               /* simple identifier */
           $$=newUnaryOp(ID, $1);}
       | ID LSBRACKET expr_list RSBRACKET { /* subscripted id'fier */
-	printf("%s\n", print_opNodesymb($3));
+        char *tmp = print_opNodesymb($3);
+        printf("%s\n", tmp);
+        free(tmp);
 	$$ = newBinOp(LSBRACKET, newUnaryOp(ID,$1), $3);
         //printf("%s\n", print_opNodesymb($$));
       }
@@ -896,7 +902,9 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
 
   if (argNode){
     void *tmp2 = idNode->values[0];
-    printf("Adding argument list to node: %s\n",print_opNode(argNode));
+    char *tmp1 = print_opNode(argNode);
+    printf("Adding argument list to node: %s\n", tmp1);
+    free(tmp1);
     free(idNode->values);
     idNode->values = (void **)calloc(argNode->nval+1, sizeof(void *));
     for (i=0;i<argNode->nval;i++){
@@ -927,10 +935,14 @@ find_var_ref_in_context_(AmplModel *context, opNode *ref)
   for(i=0;i<context->n_total;i++){
     if (strcmp(name, thismc->id)==0){
       /* this is a match */
+      char *tmp1 = print_opNode(thismc->indexing);
+      char *tmp2 = print_opNode(thismc->attributes);
       printf("Found Match: %s refers to %s\n",name, nameTypes[thismc->type]);
       printf("    %s\n",thismc->id);
-      printf("       %s\n",print_opNode(thismc->indexing));
-      printf("       %s\n",print_opNode(thismc->attributes));
+      printf("       %s\n", tmp1);
+      printf("       %s\n", tmp2);
+      free(tmp1);
+      free(tmp2);
       ref->values[0] = (void*)thismc;
       ref->opCode = IDREF;
       if (thismc->type==TMODEL){
@@ -1101,10 +1113,14 @@ find_var_ref_in_indexing(char *name)
 -------------------------------------------------------------------------- */
 void 
 add_indexing(opNodeIx *indexing){
+  char *tmp1 = print_opNode(indexing);
+  char *tmp2 = print_opNodesymb(indexing);
   list_of_indexing[n_indexing] = indexing;
-  printf("add indexing expression to list: %s\n",print_opNode(indexing));
-  printf("Symbolic indexing: %s\n",print_opNodesymb(indexing)); 
+  printf("add indexing expression to list: %s\n", tmp1);
+  printf("Symbolic indexing: %s\n", tmp2);
   printf("length of indexing now: %d\n",n_indexing+1);
+  free(tmp1);
+  free(tmp2);
   n_indexing++;
 }
 
@@ -1112,7 +1128,9 @@ void
 rem_indexing(opNodeIx *indexing){
   if (indexing){
     assert(indexing==list_of_indexing[n_indexing-1]);
-    printf("rem indexing expression to list: %s\n",print_opNode(indexing));
+    char *tmp = print_opNode(indexing);
+    printf("rem indexing expression to list: %s\n", tmp);
+    free(tmp);
   }
   printf("length of indexing now: %d\n",n_indexing-1);
   n_indexing--;
