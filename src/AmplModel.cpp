@@ -86,11 +86,13 @@ AmplModel::setGlobalName()
   //cout << "\n\ndefined model: " + global_name + "\n\n"; 
 }
 
-/* ---------------------------------------------------------------------------
-AmplModel::writeTaggedComponents()
----------------------------------------------------------------------------- */
-void AmplModel::writeTaggedComponents(){writeTaggedComponents(stdout);}
-
+/**
+ *  Write all tagged model components in this model and submodels to a file.
+ *
+ *  @param fout:
+ *         Name of the file to which to write. If not indicated, the writing
+ *         will be directed to the standard output.
+ */
 void
 AmplModel::writeTaggedComponents(FILE *fout)
 {
@@ -129,7 +131,6 @@ AmplModel::writeTaggedComponents(FILE *fout)
     }
   }
   n_addIndex--;
-
 }
 
 /* ---------------------------------------------------------------------------
