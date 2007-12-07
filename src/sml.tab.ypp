@@ -586,7 +586,7 @@ begin_model(char *name, opNode *indexing) {
   newmc->other = new_mod;
 
   new_mod->node = newmc;            /* add pointer-to-node to the model */
-  addCompToModel(current_model, newmc);
+  current_model->addComponent(newmc);
  
   new_mod->setGlobalName();	 
   /* and change current model */
@@ -608,7 +608,7 @@ void
 add_set_to_model(char *id, opNode *indx, opNode *attrib){
   model_comp *newmc = new model_comp(id, TSET, indx, attrib);
 
-  addCompToModel(current_model, newmc);
+  current_model->addComponent(newmc);
   /*
   if (current_model->sets==NULL){
     current_model->sets = newmc;
@@ -629,7 +629,7 @@ add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib){
   model_comp *newmc = new model_comp(id, TOBJ, indx, attrib);
   newmc->ismin = (token==MINIMIZE);
 
-  addCompToModel(current_model, newmc);
+  current_model->addComponent(newmc);
   /*
   if (current_model->objs==NULL){
     current_model->objs = newmc;
@@ -649,7 +649,7 @@ void
 add_cons_to_model(char *id, opNode *indx, opNode *attrib){
   //model_comp *newmc = newModelComp(id, TCON, indx, attrib);
   model_comp *newmc = new model_comp(id, TCON, indx, attrib)	;
-  addCompToModel(current_model, newmc);
+  current_model->addComponent(newmc);
 
   /*
   if (current_model->cons==NULL){
@@ -668,7 +668,7 @@ add_var_to_model
 void
 add_var_to_model(char *id, opNode *indx, opNode *attrib){
   model_comp *newmc = new model_comp(id, TVAR, indx, attrib);
-  addCompToModel(current_model, newmc);
+  current_model->addComponent(newmc);
 
   /*
   if (current_model->vars==NULL){
@@ -689,7 +689,7 @@ add_param_to_model
 void
 add_param_to_model(char *id, opNode *indx, opNode *attrib){
   model_comp *newmc = new model_comp(id, TPARAM, indx, attrib);
-  addCompToModel(current_model, newmc);
+  current_model->addComponent(newmc);
 
   /*
   if (current_model->params==NULL){

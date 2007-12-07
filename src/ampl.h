@@ -71,7 +71,6 @@ class AmplModel{
   /** the model_comp node correspding to this model 
    * (this is defined if this is not root) */
   model_comp *node; 
-		       
 
   /* how do we lift single members of the collection to models
      higher up ? */
@@ -96,6 +95,9 @@ class AmplModel{
   /** Constructor */
   AmplModel();
 
+  /** Add a component to the model */
+  void addComponent(model_comp *comp);
+
   /** set global name by concatenating ancestor names */
   void setGlobalName();      
 
@@ -116,7 +118,5 @@ void begin_model(char *name, opNode *indexing);
 void end_model();
 void add_set_to_model(char *id, opNode *indx, opNode *attrib);
 void add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib);
-void addCompToModel(AmplModel *model, model_comp *comp);
-
 
 #endif

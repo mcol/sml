@@ -13,44 +13,44 @@ extern void modified_write(FILE *fout, model_comp *comp);
 
 extern int n_addIndex;
 extern add_index *l_addIndex[];
-void
-addCompToModel(AmplModel *model, model_comp *comp)
-{
-  AmplModel *subm;
-  model_comp *lastinmodel = model->last;
+
+/** Add a component to the model */
+void AmplModel::addComponent(model_comp *comp) {
+
+  model_comp *lastinmodel = last;
   switch(comp->type)
     {
     case TVAR:
-      model->n_vars++;
+      n_vars++;
       break;
     case TCON:
-      model->n_cons++;
+      n_cons++;
       break;
     case TSET:
-      model->n_sets++;
+      n_sets++;
       break;
     case TPARAM:
-      model->n_params++;
+      n_params++;
       break;
     case TOBJ:
-      model->n_objs++;
+      n_objs++;
       break;
     case TMODEL:
-      model->n_submodels++;
-      subm = (AmplModel*)comp->other;
-      subm->parent = model;
+      n_submodels++;
+      AmplModel *subm = (AmplModel*)comp->other;
+      subm->parent = this;
       break;
     }
-  model->n_total++;
-  comp->model = model;
+  n_total++;
+  comp->model = this;
   comp->next = NULL;
   comp->prev = lastinmodel;
   
-  if (model->first==NULL){
-    model->first=comp;
-    model->last = comp;
+  if (!first) {
+    first = comp;
+    last  = comp;
   }else{
-    model->last = comp;
+    last = comp;
     lastinmodel->next = comp;
   }
 }
