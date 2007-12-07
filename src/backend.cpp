@@ -364,10 +364,11 @@ process_model(AmplModel *model) /* should be called with model==root */
 	// of the form stub_1.2.crd
 	// where 1, 2 are  the values of the iteration indices in the 
 	// scriptfile
-	fprintf(fscript, "print card(%s) > (\"%s);\n", print_opNode(set), buffer);
+	char *tmp = print_opNode(set);
+	fprintf(fscript, "print card(%s) > (\"%s);\n", tmp, buffer);
 	sprintf(p1, "&\".set\"");
-	fprintf(fscript, "display %s > (\"%s);\n", print_opNode(set), buffer);
-
+	fprintf(fscript, "display %s > (\"%s);\n", tmp, buffer);
+	free(tmp);
 
 	*p=0; //delete the extension again	       
       }
@@ -697,9 +698,11 @@ write_ampl_for_submodel_(FILE *fout, int thislevel, int sublevel,
 	    opNode *setn = l_addIndex[n_addIndex]->set;
 	    opNode *newn = new opNode();
 	    model_comp *tmp;
-	    char *newname; 
+	    char *newname, *tmp1;
+	    tmp1 = print_opNode(setn);
 	    fprintf(fout, "set %s_SUB within %s;\n", 
-		   print_opNode(setn), print_opNode(setn));
+		    tmp1, tmp1);
+	    free(tmp1);
 	    /* and now modify the set declaration */
 	    if (setn->opCode!=IDREF){
 	      printf("At the moment can index blocks only with simple sets\n");
@@ -930,7 +933,9 @@ modified_write(FILE *fout, model_comp *comp)
       }
       ixsn = ix->set;
       if (ixsn->opCode==LBRACE) ixsn=(opNode*)ixsn->values[0]; 
-      fprintf(fout, "%s",print_opNode(ixsn));
+      tmp = print_opNode(ixsn);
+      fprintf(fout, "%s", tmp);
+      free(tmp);
     }
     /* write out the index of this component */
     if (comp->indexing) {

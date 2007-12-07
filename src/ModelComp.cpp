@@ -161,12 +161,17 @@ model_comp::print()
 void
 model_comp::print()
 {
+  char *tmp;
   printf("------------------------------------------------------------\n");
   printf("model_comp: %s\n",id);
   printf("  type: %s\n",nameTypes[type]);
   printf("   (ismin: %d)\n",ismin);
-  printf("  attributes: %s\n",print_opNode(attributes));
-  printf("  indexing: %s\n", print_opNode(indexing));
+  tmp = print_opNode(attributes);
+  printf("  attributes: %s\n", tmp);
+  free(tmp);
+  tmp = print_opNode(indexing);
+  printf("  indexing: %s\n", tmp);
+  free(tmp);
   if (indexing) indexing->printDiagnostic();
   printf("  next: %s\n",(next==NULL)?"NULL":next->id);
   printf("  next: %s\n",(prev==NULL)?"NULL":prev->id);

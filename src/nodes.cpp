@@ -187,7 +187,9 @@ addItemToList(opNode *list, opNode *newitem)
   printf("Current list: opCode= %d, nval = %d\n",list->opCode, list->nval);
   tmp = (indexNode *)(list->values[0]);
   for(i=0;i<list->nval;i++){
-    printf("> %s\n",print_opNodesymb(tmp->value));
+    char *tmpbuf = print_opNodesymb(tmp->value);
+    printf("> %s\n", tmpbuf);
+    free(tmpbuf);
     tmp = tmp->next;
   }
 
