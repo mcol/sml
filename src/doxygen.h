@@ -372,6 +372,110 @@ needs to be avoided in NlFile.cpp
 /**
 \page language The Structured Modelling Language (SML)
 
+\section block Blocks (Submodels)
+
+The main extension of SML over AMPL is the introduction of the keyword
+'block':
+\code
+ set COMMODITIES;
+ block Net{k in COMMODITIES}: 
+    var Flow{ARCS} >=0;
+    ...
+ end block;
+\endcode
+A block groups a set of model declarations (set, var, param, subject
+to, minimize/maximize) together. These can be repeated over an
+indexing set (as any AMPL entity can). A block is a natural
+representation of a subproblem in AMPL.
+
+Blocks can be nested. Several blocks can be defined on the
+same level, thus creating a tree of blocks.
+
+All entities within the block are local variables to this block. They
+are all repeated over the indexing set indicated in the block
+command. The above piece of code actually defines a variable Net_Flow:
+\code
+ var Net_Flow{k in COMMIDITIES, ARCS} >=0;
+\endcode
+
+\subsection Scoping 
+
+From within the block all model components that were defined in the
+block and its ancestor blocks can be used in definitions. Model
+components defined in a sublock can be used by need to be accessed
+"through" the name of the subblock. That is from outside the block
+variable Flow can be refered to as
+\code
+ Net[k].Flow[j];
+\endcode
+
+Model components defined in sister blocks (i.e. blocks defined on the
+same level) or their child blocks cannot be used.
+
+\section sml_sp Stochastic Programming
+
+A stochastic programming block can be defined as
+\code
+ sblock alm using (STAGES, NODES, ANCESTORS, PROBS):
+   ...
+ end sblock;
+\endcode
+
+Here 'alm' is the name of the block, 'STAGES' and 'NODES' are sets of
+stages and nodes respectively, 'ANCESTORS{NODES}, PROBS{NODES}' are
+parameter arrays indexed over the set NODES that give the ancestor
+node and the conditional probability of a given node respectively.
+The ancestors arrays must imply the same number of stages as are given
+in the STAGES set.
+
+There are a variety of specifiers that can be applied to model
+components declared within an sblock:
+<ul>
+<li> Components can be declared in only some of the stages. This can be specified in two ways: 
+- either by using the 'stages' keyword in the definition
+  \code
+    subject to Inventory{i in ASSETS} stages (STAGES diff {first(STAGES)}):
+      ...
+  \endcode
+- or by specifying a stage block:
+  \code
+    set first := STAGES diff {first(STAGES)};
+    stage first:
+      subject to Inventory{i in ASSETS}:
+        ...
+    end stage
+  \endcode
+  @bug this second way is not implemented yet
+
+<li> All model components declared in an sblbock are by default
+     indexed over the NODES set. Some parameters or variables only have one
+     value for every stage not for every node within the stage. These can
+     be defined by the 'deterministic' keyword:
+    \code
+      param Liability deterministic, >=0;
+    \endcode
+
+  @bug This is understood by the parse, but not implemented yet in the backend
+
+<li> It is possible to explicitely refer to the node or stage of a component (for example to refer to parameters declared outside the sblock):
+\code
+ param Liability{STAGES}; //an alternative deterministic parameter
+ sblock alm using (STAGES, NODES, ANCESTORS, PROBS):
+   subject to CashBalance:
+      sum{i in ASSETS} xs[i] =  Liability[stage] + sum{i in ASSETS} xb[i];
+   ...
+ end sblock;
+ \endcode
+
+ Here the constraint CashBalance is repeated over all nodes in the
+ sblock, whereas the keyword 'stage' in the constraint is replaced by
+ the stage of the constraint.
+
+</ul>
+
+@bug Currently *all* parameters must be global (i.e. declared in the top
+level block). This should be fixed once SML understands data files.
+
 @bug variables that are defined over higher dimensional indexing sets
 *must* have a dummy variable in their definition,i.e.
 \code
@@ -392,5 +496,6 @@ they are defined in different stages, i.e.
 \endcode
 This can probably remedied by encoding the stages information in the
 internally used global name somehow.
+
 
 */
