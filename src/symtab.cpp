@@ -4,7 +4,8 @@
 
 #include "nodes.h"
 #include "symtab.h"
-#include "ampl.h"
+//#include "ampl.h"
+#include "AmplModel.h"
 
 #include "ampl.tab.hpp"
 unsigned long hash_function(char *str);
@@ -93,9 +94,9 @@ void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
    printf("defined %s of type %s\n", id, nametype);
 }
 
-/* ------------------------------------------------------------------------------
+/* ----------------------------------------------------------------------------
 hash function:
------------------------------------------------------------------------------ */
+---------------------------------------------------------------------------- */
 /* this is djb2 (k=33) of dan bernstein taken from 
    http://www.cse.yorku.ca/~oz/hash.html
 */
