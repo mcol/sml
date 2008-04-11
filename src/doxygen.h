@@ -471,7 +471,18 @@ components declared within an sblock:
  sblock, whereas the keyword 'stage' in the constraint is replaced by
  the stage of the constraint.
 
+ @bug Rather than implementing this as keywords 'node'/'stage' this
+ should be done by declaring dummy variables for the NODES, STAGES
+ set:
+\code
+ sblock alm using (st in STAGES, nd in NODES, ANCESTORS, PROBS):
+  ..
+      ...  Liability[st] +...
+ \endcode
+
 </ul>
+
+\section problems Known Problems
 
 @bug Currently *all* parameters must be global (i.e. declared in the top
 level block). This should be fixed once SML understands data files.
