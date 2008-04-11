@@ -7,3 +7,8 @@ html
 *.tab.*
 script.scr
 sml
+*.yy.cpp
+*.output
+tmp*
+mat.m
+out
