@@ -1,0 +1,244 @@
+%debug
+
+%{
+   #include <stdio.h>
+   #include <stdlib.h>
+   #include "nodes.h"
+   int datalex(void);
+   void dataerror(char *s);
+   extern FILE *datain;
+%}
+
+%union
+{
+  long *ival;
+  double *fval;
+  char *string;
+  opNode *opPtr;
+  opNodeIx *opPtrIx;
+}
+
+%type <opPtr> number entry entry_list string setelement setelements
+
+%token <string> ID 
+%token <ival> INT_VAL
+%token <fval> FLOAT_VAL 
+%token INFINITY COEFF COVER OBJ DEFAULT FROM TO TO_COME MODELTYPE
+%token NET_IN NET_OUT DIMEN ORDERED CIRCULAR REVERSED SYMBOLIC ARC
+%token INTEGER BINARY CHECK CLOSE DISPLAY DROP INCLUDE PRINT PRINTF QUIT RESET
+%token RESTORE SOLVE UPDATE WRITE SHELL MODEL DATA OPTION LET SOLUTION FIX
+%token UNFIX END FUNCTION PIPE FORMAT SETOF BY LESS MOD DIV MIN MAX IF THEN
+%token ELSE AND OR EXISTS FORALL NOT WITHIN WHILE REPEAT FOR CARD NEXT NEXTW
+%token PREV PREVW FIRST LAST MEMBER ORD ORD_ZERO VAR PARAM SET MAXIMIZE MINIMIZE
+%token OBJECTIVE SUBJECTTO SUM PROD IN POWER NE LE GE EQ LT GT UNION DIFF
+%token CROSS INTER SYMDIFF LBRACE RBRACE COMMA SEMICOLON LSBRACKET RSBRACKET
+%token COLON LBRACKET RBRACKET DEFINED LOGICAL_OR LOGICAL_AND ELLIPSE
+%token PUBLIC CORE DOT BEG TIMESTAGE RANDOM SUFFIX BLOCK IDREF IDREFM
+%token SBLOCK USING DETERMINISTIC EXPECTATION STOCHASTIC STAGES
+%token STAGE NODE
+%token TR
+
+%nonassoc SEMICOLON
+%right ASSIGN
+%left LOGICAL_OR
+%left LOGICAL_AND
+%left EQ NE
+%left LT LE GT GE
+%left '+' '-'
+%left '*' '/'
+%right POWER
+%left '!'
+%left ELLIPSE
+
+//%expect 10
+
+%%
+data_statements: /* empty */
+          | data_statements data_statement 
+          ;
+
+data_statement: data_paramdef SEMICOLON
+              | data_paramdef_alt SEMICOLON
+              | data_setdef SEMICOLON
+              ;
+
+data_setdef: SET ID DEFINED setelements {
+               //$2 is the set being defined
+               
+             }
+
+setelements: /* empty */ {$$=NULL;}
+           | setelements setelement {
+	     addItemToListOrCreate(' ', $1, $2);}
+           ;
+
+setelement: ID {newUnaryOp(ID,$1);}
+         
+data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list
+//             | PARAM param_name paramdefault_opt 
+
+//data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_item_list
+data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_list
+//                 | PARAM paramdefault_opt COLON set_name COLON param_name_list DEFINED value_item_list
+                 | PARAM paramdefault_opt COLON set_name COLON param_name_list DEFINED value_list
+                 ;
+
+param_name_list: param_name
+               | param_name_list param_name
+               ;
+param_name: ID {newUnaryOp(ID,$1);}
+set_name: ID {newUnaryOp(ID,$1);}
+
+//value_item_list: value_item
+//               | value_item_list value_item
+//               ;    
+
+//FIXME: this does not work! There is no way the grammar can work out which 
+//       of the items listed in a paradef is an object and which is an entry
+//       We would need to look at the dimension of the sets involved and then
+//       count
+//       => object and entries treated the same, after the definition try
+//          to analyse?
+
+//value_item: object_list entry
+
+value_list: /* empty */
+          | value_list value
+          ;
+
+paramdefault_opt: /* empty */
+                | DEFAULT number
+                ;
+
+paramspec_list: /* empty */
+              | paramspec_list paramspec
+              ;
+
+//paramspec: param_template_opt value_item_list
+paramspec: param_template_opt value value_list
+         | param_template_opt value_table_list
+         ;
+
+value_table_list: value_table
+                | value_table_list value_table
+                ;
+
+value_table: TR COLON col_label_list DEFINED value_table_row_list
+           | COLON col_label_list DEFINED value_table_row_list
+           ;
+
+//tr_opt: /* empty */
+//      | TR
+//      ;
+
+col_label_list: col_label
+              |col_label_list col_label
+              ;
+
+value_table_row_list: value_table_row
+                    | value_table_row_list value_table_row
+                    ;
+
+value_table_row: row_label entry_list
+
+param_template_opt: /* empty */
+	          | param_template
+                  ;
+param_template: LSBRACKET templ_item_list RSBRACKET
+
+templ_item_list: templ_item
+               | templ_item_list COMMA templ_item
+               ;
+
+templ_item: object
+          | '*'
+          ;
+
+/* an entry is an actual parameter value */
+
+entry_list: entry {
+	      $$ = newUnaryOp(' ',$1);}
+          | entry_list entry{
+	      $$ = addItemToListNew($1, $2);}
+          ;
+
+entry: number {$$=$1;}
+     | string {$$=$1;}
+     | DOT {$$=newUnaryOp(DOT, NULL);}
+     ;
+ 
+string: ID {newUnaryOp(ID,$1);}
+
+col_label: object
+row_label: object
+
+value: entry
+
+
+/* an object is a member of a set that is used to identify which entry of
+   a parameter array is to be defined */
+
+//object_list: object
+//           | object_list object
+//           ;
+
+object: ID
+
+
+
+//setlist_opt: /*empty*/
+//           | COLON setlist
+//           ;
+
+//setlist: ID
+//       | setlist ID
+//       ;
+
+//numberlist: number
+//         | numberlist number
+//         ;
+
+number: INT_VAL {
+  /* not entirly sure what is returned here as $1 */
+  // Aparently a pointer to long int
+          $$=newUnaryOp(INT_VAL, $1);
+       }
+     | FLOAT_VAL { 
+         $$=newUnaryOp(FLOAT_VAL, $1);
+       }
+//     | identifier { 
+//          $$=newUnaryOp(0, $1);
+//       }
+     | INFINITY { 
+          $$ = (opNode *) malloc(sizeof(opNode));
+          $$->opCode = INFINITY;
+          $$->values = NULL;
+       }
+     ;
+
+%%
+
+//int datalex(void){
+//  return yylex();
+//}
+
+//int datawrap(void){
+//  return 1;
+//}
+
+
+void dataerror(char *s) {
+  //fprintf(stderr, "%s on line %i\n", s, yylineno);
+  fprintf(stderr, "%s\n", s);
+}
+
+void parse_data(AmplModel *current_model, char *datafilename){
+  datain = fopen(datafilename,"r");
+  if (datain==NULL){
+    printf("ERROR: Data file '%s' not found\n",datafilename);
+    exit(1);
+  }
+	  
+  dataparse();
+  exit(1);
+}
