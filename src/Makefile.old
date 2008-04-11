@@ -8,16 +8,32 @@ CXXFLAGS = -I$(AMPLSOLVER) -I$(OOPSHOME)/include -g
 CC = g++ -g
 LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -lmetis -lgfortran
 
+# for parallel uncomment this
+#CXXFLAGS += -DWITH_MPI -DMPI_PATH="\"mpi.h\"" 
+#CXX = mpic++
+
+OBJECT := ampl.yy.o ampl.tab.cpp symtab.o nodes.o backend.o AmplModel.o \
+          model_comp.o ExpandedModel.o AmplsolverCalls.o sml-oops.o \
+	  OOPSBlock.o StochModel.o StochModelComp.o data.tab.o data.yy.o
+
 all: sml
 
-sml: ampl.yy.o ampl.tab.cpp symtab.o nodes.o backend.o AmplModel.o model_comp.o ExpandedModel.o AmplsolverCalls.o sml-oops.o OOPSBlock.o
+
+sml: $(OBJECT)
 	$(CC) -o$@ $^ $(LDFLAGS) -lfl -ldl
 
-%.yy.cpp: %.l %.tab.h
-	$(LEX) -o$@ $<
 
-%.tab.cpp %.tab.h: %.ypp
+ampl.yy.cpp: ampl.l ampl.tab.h
+	$(LEX) -d -o$@ $<
+
+data.yy.cpp: data.l data.tab.h
+	$(LEX) -Pdata -d -o$@ $<
+
+ampl.tab.cpp ampl.tab.h: ampl.ypp
 	$(YACC) -d -v -t $<
+
+data.tab.cpp data.tab.h: data.ypp
+	$(YACC) -pdata -d -v -t $<
 
 clean:
 	-rm -rf *.tab.cpp
@@ -25,6 +41,7 @@ clean:
 	-rm -rf *.yy.cpp
 	-rm -rf *.o
 	-rm -rf sml
+	-rm -rf smlp
 
 # dependencies
 symtab.cpp: nodes.h symtab.h ampl.tab.h
