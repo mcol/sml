@@ -1,0 +1,4 @@
+#!/bin/bash
+rm global.dat
+ln -s alm.dat global.dat
+
