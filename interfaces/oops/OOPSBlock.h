@@ -13,7 +13,7 @@ class OOPSBlock;
  *     in this block
  *   - A list of variable definitions (given as the start of variable names)
  *     that should be used from the NlFile.
- *  This clss will do the necessary interfacing (i.e. extract a list
+ *  This class will do the necessary interfacing (i.e. extract a list
  *  of variable indices from the NlFile that should be used and indicate
  *  In which positions these should appear in the block
  */
