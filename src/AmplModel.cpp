@@ -1,4 +1,5 @@
 #include "ampl.h"
+#include "ampl.tab.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,52 +10,23 @@
 #include "ExpandedModel.h"
 #include "AmplsolverCalls.h"
 
+list<changeitem*> AmplModel::changes; //initialize to empty list
+AmplModel *AmplModel::root = NULL; //initialize root to NULL
+
 extern void modified_write(FILE *fout, model_comp *comp);
 
-extern int n_addIndex;
-extern add_index *l_addIndex[];
+//extern int n_addIndex;
+//extern add_index *l_addIndex[];
 
-/** Add a component to the model */
-void AmplModel::addComponent(model_comp *comp) {
-
-  model_comp *lastinmodel = last;
-  switch(comp->type)
-    {
-    case TVAR:
-      n_vars++;
-      break;
-    case TCON:
-      n_cons++;
-      break;
-    case TSET:
-      n_sets++;
-      break;
-    case TPARAM:
-      n_params++;
-      break;
-    case TOBJ:
-      n_objs++;
-      break;
-    case TMODEL:
-      n_submodels++;
-      AmplModel *subm = (AmplModel*)comp->other;
-      subm->parent = this;
-      break;
-    }
-  n_total++;
-  comp->model = this;
-  comp->next = NULL;
-  comp->prev = lastinmodel;
-  
-  if (!first) {
-    first = comp;
-    last  = comp;
-  }else{
-    last = comp;
-    lastinmodel->next = comp;
-  }
+void
+addCompToModel(AmplModel *model, model_comp *comp)
+{
+  model->addComp(comp);
 }
 
+/* ---------------------------------------------------------------------------
+AmplModel::AmplModel()
+---------------------------------------------------------------------------- */
 /** Constructor */
 AmplModel::AmplModel() :
   n_vars(0),
@@ -65,10 +37,11 @@ AmplModel::AmplModel() :
   n_submodels(0),
   n_total(0),
   level(0),
-  first(NULL),
-  last(NULL),
+  //first(NULL),
+  //last(NULL),
   parent(NULL),
   ix(NULL) {}
+
 
 /* ---------------------------------------------------------------------------
 AmplModel::setGlobalName()
@@ -86,6 +59,31 @@ AmplModel::setGlobalName()
   //cout << "\n\ndefined model: " + global_name + "\n\n"; 
 }
 
+/* ---------------------------------------------------------------------------
+AmplModel::setGlobalNameRecursive()
+---------------------------------------------------------------------------- */
+void 
+AmplModel::setGlobalNameRecursive()
+{
+  model_comp *mc;
+  setGlobalName();
+  
+  // loop through all model components
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    mc = *p;
+    if (mc->type==TMODEL){
+      AmplModel *am = (AmplModel*)mc->other;
+      am->setGlobalNameRecursive();
+    }
+    //mc = mc->next;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+AmplModel::writeTaggedComponents()
+---------------------------------------------------------------------------- */
+void AmplModel::writeTaggedComponents(){writeTaggedComponents(stdout);}
+
 /**
  *  Write all tagged model components in this model and submodels to a file.
  *
@@ -96,41 +94,54 @@ AmplModel::setGlobalName()
 void
 AmplModel::writeTaggedComponents(FILE *fout)
 {
-
-  ix = node->indexing;
-
-  if (!ix->done_split) {
-    printf("All opNodeIx should have the expression split done!\n");
-    exit(1);
-  }
   
-  if (ix->ncomp>1){
-    printf("More than 1 indexing expression is not supported yet\n");
-    printf("Expression: %s\n",ix->print());
-  }
-  // FIXME: need to check for number of expressions and place them all
-  // onto the stack
+  opNode::default_model = this;
+  opNodeIx *ix = node->indexing;
 
-  //Place the indexing expression of the current model onto the addIndex stack 
-  // first make sure that there is space
-  if (l_addIndex[n_addIndex]==NULL){
-    l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
-  }
+  list <add_index*>*li = new list<add_index*>;
+  if (ix){
 
-  l_addIndex[n_addIndex]->dummyVar = ix->dummyVarExpr[0];
-  l_addIndex[n_addIndex]->set = ix->sets[0];
-  n_addIndex++;
-  
+    if (!ix->done_split) {
+      printf("All opNodeIx should have the expression split done!\n");
+      exit(1);
+    }
+    
+    if (ix->ncomp>1){
+      printf("More than 1 indexing expression is not supported yet\n");
+      printf("Expression: %s\n",ix->print());
+      exit(1);
+    }
+    // FIXME: need to check for number of expressions and place them all
+    // onto the stack
+    
+    //Place the indexing expression of the current model onto the addIndex stack 
+    // first make sure that there is space
+    //if (l_addIndex[n_addIndex]==NULL){
+    //  l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
+    //}
+    add_index *ai = (add_index*)calloc(1, sizeof(add_index));
+    ai->dummyVar = ix->dummyVarExpr[0];
+    ai->set = ix->sets[0];
+    //    l_addIndex[n_addIndex]->dummyVar = ix->dummyVarExpr[0];
+    //    l_addIndex[n_addIndex]->set = ix->sets[0];
+    li->push_back(ai);
+    //n_addIndex++;
+  }
+  l_addIndex.push_back(li);
+
   // loop through all model components
-  for (model_comp *c = first;c!=NULL;c=c->next){
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    model_comp *c = *p;
     //if (c->tag) printf("%s\n",c->id);
     if (c->tag) modified_write(fout, c);
     if (c->type==TMODEL) {
       AmplModel *am = (AmplModel *)c->other;
-      am->writeTaggedComponents();
+      am->writeTaggedComponents(fout);
     }
   }
-  n_addIndex--;
+  //  if (ix) n_addIndex--;
+  l_addIndex.pop_back();
+
 }
 
 /* ---------------------------------------------------------------------------
@@ -224,7 +235,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
   // I assume that *all* constraints declared in the *.nl file are part of 
   // the node
   
-  for(model_comp *mc = ampl->first;mc!=ampl->last;mc=mc->next){
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    model_comp *mc = *p;
     if (mc->type == TVAR){
       // need to translate this into the global name of the variable, tgether
       // with any applicable indexing expression
@@ -299,31 +311,43 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
 	exit(1);
       }
 
-      ifstream fset((nameSetFile+".set").c_str());
-      if (!fcrd) {
-	cout << "Cannot open file: "+ nameSetFile+".set\n";
-	exit(1);
-      }
-
       fcrd >> card;
-      getline(fset, setElements); // FIXME: can this be more than one line?
 
-      list<string>* li = getListOfInstances(setElements);
-      for(list<string>::iterator p=li->begin();p!=li->end();p++){
+      // if this node is indeed repeated over an indexing set
+      if (card>0){
+	ifstream fset((nameSetFile+".set").c_str());
+	if (!fset) {
+	  cout << "Cannot open file: "+ nameSetFile+".set\n";
+	  exit(1);
+	}
+
+	getline(fset, setElements); // FIXME: can this be more than one line?
+
+	list<string>* li = getListOfInstances(setElements);
+
+	for(list<string>::iterator p=li->begin();p!=li->end();p++){
+	  string subModelName = smodelname+"_"+string(mc->id);
+	  string subModelInst;
+	  if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
+	  subModelInst += crush((*p).c_str());
+	  cout << subModelName+":"+subModelInst+'\n';
+	  AmplModel *subampl = (AmplModel*)mc->other;
+	  ExpandedModel::pathToNodeStack.push_back(*p);
+	  ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
+	  ExpandedModel::pathToNodeStack.pop_back();
+	  subem->parent = em;
+	  (em->children).push_back(subem);
+	}
+      }else{
+	// if this node is not repeated over an indexing set
 	string subModelName = smodelname+"_"+string(mc->id);
 	string subModelInst;
-	if (sinstanceStub.length() > 0)
-	  subModelInst = sinstanceStub + "_";
-	subModelInst += crush((*p).c_str());
-	cout << subModelName+":"+subModelInst+'\n';
+	cout << subModelName+":"+sinstanceStub+'\n';
 	AmplModel *subampl = (AmplModel*)mc->other;
-	ExpandedModel::pathToNodeStack.push_back(*p);
-	ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
-	ExpandedModel::pathToNodeStack.pop_back();
+	ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);
 	subem->parent = em;
 	(em->children).push_back(subem);
       }
-      
 
     }
   }
@@ -413,13 +437,18 @@ AmplModel::print
 void 
 AmplModel::print()
 {
-  char *tmp = ix->print();
+  char *tmp;
   printf("AM: ------------------------------------------------------------\n");
   printf("AM: This is AmplModel: %s\n",name);
   printf("AM: global name: %s\n",global_name.c_str());
   printf("AM: level: %d\n",level);
   printf("AM: parent: %s\n",(parent)?parent->name:"NULL");
-  printf("AM: indexing: %s\n", tmp);
+  if (ix){ tmp = ix->print();
+    printf("AM: indexing: %s\n", tmp);
+    free( tmp);
+  }else{
+    printf("AM: indexing: NULL\n");
+  }
   printf("AM: Nb submodels  : %d\n", n_submodels);
   printf("AM: Nb sets       : %d\n", n_sets);
   printf("AM: Nb parameters : %d\n", n_params);
@@ -428,18 +457,366 @@ AmplModel::print()
   printf("AM: Nb constraints: %d\n", n_cons);
   printf("AM: Nb objectives: %d\n", n_submodels);
   printf("AM: Entities declared:\n");
-  free(tmp);
-  for(model_comp *mc = first;mc;mc=mc->next){
-    mc->printBrief();
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    (*p)->printBrief();
   }
 
   if (n_submodels>0)
     printf("AM: now list the submodels:\n");
   
-  for(model_comp *mc = first;mc;mc=mc->next){
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    model_comp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
       am->print();
     }
   }
+}
+/* ---------------------------------------------------------------------------
+AmplModel::dump()
+---------------------------------------------------------------------------- */
+void 
+AmplModel::dump()
+{
+
+  printf("DUMP: ----------------------------------------------------------\n");
+  printf("DP: This is AmplModel (%p): %s\n",this, name);
+  printf("DP: global name: %s\n",global_name.c_str());
+  printf("DP: level: %d\n",level);
+  printf("DP: parent: %s\n",(parent)?parent->name:"NULL");
+  printf("DP: indexing: %s\n",(ix)?ix->print():"NULL");
+  ix->dump();
+  printf("DP: Nb submodels  : %d\n", n_submodels);
+  printf("DP: Nb sets       : %d\n", n_sets);
+  printf("DP: Nb parameters : %d\n", n_params);
+  printf("DP: Nb objectives : %d\n", n_objs);
+  printf("DP: Nb variables  : %d\n", n_vars);
+  printf("DP: Nb constraints: %d\n", n_cons);
+  printf("DP: Nb objectives: %d\n", n_submodels);
+  printf("DP: List components:\n");
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    (*p)->dump();
+  }
+
+  if (n_submodels>0)
+    printf("DP: now list the submodels:\n");
+  
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    model_comp *mc = *p;
+    if (mc->type == TMODEL){
+      AmplModel *am = (AmplModel*)mc->other;
+      am->dump();
+    }
+  }
+
+
+
+}
+
+/* ---------------------------------------------------------------------------
+AmplModel::check()
+---------------------------------------------------------------------------- */
+/** Check consistency of the instance */
+void
+AmplModel::check()
+{
+  if (name==NULL){
+    printf("AmplModel::check: AmplModel has no name given\n");
+    exit(1);
+  }
+  if (global_name==""){
+    printf("AmplModel %s has no global name set\n");
+    exit(1);
+  }
+  if (node==NULL && strcmp(name,"root")!=0){
+    printf("AmplModel %s is not root but has no model_comp node associated\n",
+	   name);
+    exit(1);
+  }
+  
+  if (n_vars<0){
+    printf("AmplModel %s: n_vars = %d\n",name, n_vars);
+    exit(1);
+  }
+  if (n_vars<0){
+    printf("AmplModel %s: n_cons = %d\n",name, n_cons);
+    exit(1);
+  }
+  if (n_vars<0){
+    printf("AmplModel %s: n_params = %d\n",name, n_params);
+    exit(1);
+  }
+  if (n_vars<0){
+    printf("AmplModel %s: n_sets = %d\n",name, n_sets);
+    exit(1);
+  }
+  if (n_vars<0){
+    printf("AmplModel %s: n_objs = %d\n",name, n_objs);
+    exit(1);
+  }
+  if (n_vars<0){
+    printf("AmplModel %s: n_submodels = %d\n",name, n_submodels);
+    exit(1);
+  }
+  if (n_vars+n_cons+n_params+n_sets+n_submodels+n_objs!=n_total){
+    printf("AmplModel %s: n_total does not equal sum of comps\n");
+    exit(1);
+  }
+  
+  if (parent==NULL && strcmp(name,"root")!=0){
+    printf("AmplModel %s is not root but has no parent\n",name);
+    exit(1);
+  }
+  
+}
+
+
+/* ---------------------------------------------------------------------------
+AmplModel::addDummyObjective()
+---------------------------------------------------------------------------- */
+/** AMPL will remove variables from the model that are not used in any
+ *  constraint/objective within the model. In order to prevent this,
+ *  we need to add a dummy objective that uses every defined variable
+ *  (by simply summing them up)
+ *
+ *  This routine creates a list of all variable declaration in the 
+ *  model and creates a dummy objective function that uses them all
+ */
+void
+AmplModel::addDummyObjective()
+{
+  model_comp *newobj;
+  vector<opNode*> list_on_sum;
+  opNode *attr;
+  model_comp *comp;
+  int i;
+
+  // get list of all variable declarations in the model:
+  /* build up list_on_sum which is a list of all variable definitions in this
+     model:
+      - for variables without indexing expression a opNodeIDREF pointing
+        to this model_comp is added
+      - for variables with indexing expression an opNode tree that encodes
+          sum {dumN in SET} var[dumN]
+        is added
+  */
+
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    comp = *p;
+    if (comp->type==TVAR){
+      // if there is no indexing expression, simply add this
+      if (comp->indexing){
+	opNodeIx *ix = comp->indexing;
+	// Need to create "sum{dummy in set} var[dummy]":
+	// 1) create "dummy in set"
+	vector<opNode*> commaseplist;
+	opNode *commasepon;
+	for(i=0;i<ix->ncomp;i++){
+	  if (ix->dummyVarExpr[i]){
+	    opNode *newon = newBinOp(IN, ix->dummyVarExpr[i], ix->sets[i]);
+	    commaseplist.push_back(newon);
+	  }else{
+	    // need to make up a dummy variable
+	    char buffer[20];
+	    sprintf(buffer, "dum%d", i);
+	    opNode *newon = newBinOp(IN, newUnaryOp(ID, strdup(buffer)), 
+				     ix->sets[i]);
+	    commaseplist.push_back(newon);
+	  }
+	} // end for
+	// make the commaseplist
+	if (ix->ncomp==1){
+	  commasepon = commaseplist[0];
+	}else{
+	  commasepon = new opNode();
+	  commasepon->nval = ix->ncomp;
+	  commasepon->opCode = COMMA;
+	  commasepon->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
+	  for(i=0;i<ix->ncomp;i++){
+	    commasepon->values[i] = commaseplist[i];
+	  }
+	}
+	opNodeIDREF *onref = new opNodeIDREF(comp);
+	onref->nval = ix->ncomp;
+	onref->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
+	for(i=0;i<ix->ncomp;i++){
+	  // this is the dummy variable of the i-th indexing expression
+	  opNode *ondum = (opNode*)commaseplist[i]->values[0];
+	  if (ondum->opCode==LBRACKET) ondum=(opNode*)ondum->values[0];
+	  onref->values[i] = ondum;
+	}
+	// make the sum part
+	commasepon = newUnaryOp(LBRACE, commasepon);
+	list_on_sum.push_back(newBinOp(SUM, commasepon, onref));
+
+      }else{ // no indexing expression, simply add this node
+	list_on_sum.push_back(new opNodeIDREF(comp));
+      } // end if (indexing)
+    }
+  }
+
+  // we have now build a list of opNodes representing the components:
+  // build the attribute opNode as a sum of them all
+  if (list_on_sum.size()==1){
+    attr = list_on_sum[0];
+  }else{
+    attr = newBinOp('+', list_on_sum[0],list_on_sum[1]);
+    for(i=2;i<list_on_sum.size();i++){
+      attr = newBinOp('+', attr, list_on_sum[i]);
+    }
+  }
+  
+  newobj = new model_comp(strdup("dummy"), TMIN, NULL, attr);
+  addCompToModel(this, newobj);
+  
+  // and recursively do this for all AmplModels below this one
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    comp = *p;
+    if (comp->type==TMODEL){
+      // might be that we need to add the indexing expression on the stack 
+      ((AmplModel*)(comp->other))->addDummyObjective();
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+AmplModel::removeComp()
+---------------------------------------------------------------------------- */
+void
+AmplModel::removeComp(model_comp *comp)
+{
+  // FIXME: check of comp is indeed on the list
+  
+  bool found = false;
+  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    if (strcmp((*p)->id,comp->id)==0){
+      comps.erase(p); // this invalidates the iterator => break from loop
+      found = true;
+      break;
+    }
+  }
+  if (!found){
+    printf("Attempting to remove component %s from model %s:\n",
+	   comp->id, name);
+    printf("Component is not in model!\n");
+    exit(1);
+  }
+  n_total--;
+  switch(comp->type){
+    case TVAR: 
+      n_vars--;
+      break;
+    case TCON: 
+      n_cons--;
+      break;
+    case TPARAM: 
+      n_params--;
+      break;
+    case TSET: 
+      n_sets--;
+      break;
+    case TMIN: 
+    case TMAX: 
+      n_objs--;
+      break;
+    case TMODEL: 
+      n_submodels--;
+      break;
+  }
+}
+/* --------------------------------------------------------------------------
+AmplModel::removeComp()
+---------------------------------------------------------------------------- */
+void
+AmplModel::addComp(model_comp *comp)
+{
+  AmplModel *subm;
+  //model_comp *lastinmodel = model->last;
+  switch(comp->type)
+  {
+    case TVAR:
+      n_vars++;
+      break;
+    case TCON:
+      n_cons++;
+      break;
+    case TSET:
+      n_sets++;
+      break;
+    case TPARAM:
+      n_params++;
+      break;
+    case TMIN:
+      n_objs++;
+      break;
+    case TMAX:
+      n_objs++;
+      break;
+    case TMODEL:
+      n_submodels++;
+      subm = (AmplModel*)comp->other;
+      subm->parent = this;
+      break;
+    }
+  n_total++;
+  comp->model = this;
+  //comp->next = NULL;
+  //comp->prev = lastinmodel;
+  comps.push_back(comp);
+
+  comp->setUpDependencies();
+  //if (model->first==NULL){
+  //  model->first=comp;
+  //  model->last = comp;
+  //}else{
+  //  model->last = comp;
+  //  lastinmodel->next = comp;
+  // }
+  
+
+}
+
+/* --------------------------------------------------------------------------
+AmplModel::applyChanges()
+---------------------------------------------------------------------------- */
+//static   // for some weird reason 'static' is not allowed here 
+void
+AmplModel::applyChanges()
+{
+  for(list<changeitem*>::iterator p=changes.begin();p!=changes.end();p++){
+    changeitem *ch = (*p);
+    if (ch->action==CHANGE_REM){
+      (ch->model)->removeComp(ch->comp);
+    }
+    if (ch->action==CHANGE_ADD){
+      (ch->model)->addComp(ch->comp);
+    }
+  }
+  changes.clear();
+}
+
+/* --------------------------------------------------------------------------
+AmplModel::reassignDependencies()
+---------------------------------------------------------------------------- */
+/** In the process of building the AmplModel tree from the StochModelTree
+ *  some of the IDREF dependency nodes still point to the StochModelComp
+ *  nodes from the StochModel tree (or the intermediate tree)
+ *
+ *  This routine goes through all components and makes sure that IDREF
+ *  nodes are resolved with respet to the correct ModelComp and that
+ *  the dependency lists are in order.
+ *  Recursively follows down submodels.
+ */
+void
+AmplModel::reassignDependencies()
+{
+  for(list<model_comp*>::iterator p=comps.begin();p!=comps.end();p++){
+    if ((*p)->type==TMODEL){
+      AmplModel *submodel = (AmplModel*)((*p)->other);
+      submodel->reassignDependencies();
+    }else{
+      (*p)->reassignDependencies();
+    }
+  }
+
 }
