@@ -323,6 +323,21 @@ getRhsAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 /* ----------------------------------------------------------------------------
 getObjAMPL
 ---------------------------------------------------------------------------- */
+/** Evaluates the objective gradient (linear coefficients) stored in a 
+ *  given *.nl file
+ *  @bug This only works for linear objective functions: 
+ *       No vector x at which the objective should be evaluated is passed in
+ *
+ *  @attention Assume that the last objective defined in a model is the 
+ *             dummy objective so this will be ignored
+ *
+ *  @param nlfilename The name of the *.nl file that should be evaluated
+ *  @param nvar Number of coefficients that should be evaluated
+ *  @param lvar List of (local) indices of variables that should be evaluated
+ *  @param elts Vector to return the objective coefficients in
+ */
+
+
 void 
 getObjAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 {
@@ -342,14 +357,18 @@ getObjAMPL(string nlfilename, int nvar, int *lvar, double *elts)
     exit(1);
   }
   
-  real *c = (real *)Malloc(n_var*sizeof(real));
-
-  for(int i=0;i<n_var;i++) c[i] = 0;
-  for (ograd *og = Ograd[0];og;og=og->next)
-    c[og->varno] = og->coef;
-  for(int i=0;i<nvar;i++){
-    int ix = lvar[i];
-    elts[i] = c[ix];
+  
+  if (n_obj>1){
+    real *c = (real *)Malloc(n_var*sizeof(real));
+    real objsign = objtype[n_obj-2] ? -1. : 1; //set to -1 for maximise
+    
+    for(int i=0;i<n_var;i++) c[i] = 0;
+    for (ograd *og = Ograd[n_obj-2];og;og=og->next)
+      c[og->varno] = objsign*og->coef;
+    for(int i=0;i<nvar;i++){
+      int ix = lvar[i];
+      elts[i] = c[ix];
+    }
   }
 
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
