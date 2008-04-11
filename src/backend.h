@@ -3,6 +3,8 @@
 
 #include "nodes.h"
 #include "ampl.h"
+#include <list>
+#include <vector>
 /* this struct stores an indexing expression in an easy to modify form:
    the add_index below will be rendered as
    val(dummyVar) in val(set) 
@@ -37,8 +39,9 @@ typedef struct add_index_st {
 } add_index;
 
 /* some global variables that change the behaviour of some printing routines */
-extern int n_addIndex;           /* number and list of indexing expressions */
-extern add_index *l_addIndex[5];  /* to add to all statements */
+//extern int n_addIndex;           /* number and list of indexing expressions */
+//extern add_index *l_addIndex[5];  /* to add to all statements */
+extern vector <list <add_index*>* > l_addIndex;
 
 void do_stuff(AmplModel *model);
 
