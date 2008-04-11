@@ -1,0 +1,391 @@
+10/04/08:
+  - looking at ampl_msnd...mod:
+    for some reason the IDREFM processor in nodes.cpp:360 thinks that
+    node->ref is (AmplModel*) when in fact it is (model_comp*)
+
+09/04/08:
+  - make sure that it is still working for the msnd model. Then
+    commit to cvs
+09/04/08:
+  - Objective is still wrong: if looking at mat.m:c in octave
+    There are entries of 1.000 for all non-leaf node variables. 
+    These should be 0
+    => this is due to the "dummy" row. Need to take this out
+03/04/08:
+  - Something's certainly odd here. Don't seem to be able to see with 
+    debugging if the two IDREFs for S1:indS1 are indeed identical
+    -> in the process of writing a AmplModel::dump() that recuresively
+       prints *all* model information including the actual value of
+       all the pointers, so that it can be worked out from the output
+       which IDREF nodes refer to what model_comp, and vice versa what
+       model_comps are refered to by which IDREF nodes
+     - should also print which are actually opNodeIDREF and what are
+       normal opNode's with opCode=IDREF
+
+03/04/08:
+  - why has almS0_S1_indS1[] have two ix0 indices in var
+    almS0_S1_S2_xh in root_almS0.mod?
+    -> Does changing the local indexing for almS0_S1_indS1 when
+       referenced in ExpCons change it here as well? I would have
+       thought not, I would have thought that these two expressions
+       have different IDREF nodes to almS0_S1_indS1.
+	
+ 
+
+02/04/08:
+  - ExpCons is a constraint that was initially written for S2:
+    + almS0_S1_S2_xh[i] is refered to as xh[i] (and has only [i] as arguments) 
+    + in the transcription routine the sum expression is added:
+      sum {ix0 in almS0_indS0,ix1 in almS0_S1_indS1}
+      (without any extra indexing)
+    => I guess the transcription routine should change this from an 
+       S2 c/s to a almS0 c/s by:
+       - adding all the dummy variables in the sum expression to all
+         the IDREF nodes used
+         (really all, or just the S2 ones? what about the S1 ones?)
+       - adding partial indexing expressions to the sets in the sum
+         (almS0_S1_indS1 should become almS0_S1_indS1[ix0])
+         -> this is the same treatment as above: indS1 is a S1 object,
+	    hence it gets [ix0] added to it
+    => Have a routine that processes the ExpCons constraint that
+       + gets a list of all IDREF nodes in the attribute section of c/s
+       + adds the correct list of dummy variables to all the nodes
+
+01/04/08(3):
+  - I thought the problem is that modified_write is called in 
+    write_submodel_for_ampl_ with the wrong setting for opNode::default_model
+    default_model should(?) be the model for which this model_comp was
+    originally written (in case of the expectation constraint?)
+    -> however adding a line to set default_model before the
+       modified_write call does not make any difference
+    => check what the value of default_model is when printing out the 
+       definition for S2::xh in root_almS0
+    => it might be that the error is in the indexing expression 
+       of S2::xh
+       What happens to ExpCons then? I guess this would need to be
+       marked to be "really" part of S2 rather than almS0?
+
+01/04/08(2):
+  - getGlobalNameNew written: still does not do the trick w.r.t the 
+    expectation constraint:
+    opNode::print() is calls getGlobalNameNew with current_model=almS0,
+    therefor only indexing expressions below almS0 (i.e. none) are
+    added
+    -> can we consistently add the indexing expressions in between?	
+	
+01/04/08:
+  - The subindexing of referenced model_comp's in the expectation
+    constraint is not correct
+    => might have to change modified write so that it takes extra
+       indexing expressions not from the addIndex stack but directly
+       from the indexing expressions of the models up to this level
+	
+
+31/03/08:
+  - For the expectation constraint the dependencies are not set
+    correctly:
+    + if we follow through the tagDependencies (backend.cpp:681)
+      the correct dependencies are tagged, however
+    + if we follow through writeAllTagged (backend.cpp:687) then
+      the components in S2 are all not tagged
+    -> looks like these are two different copies of S2 components
+       How can we check for this?
+    => The problem seems to be the following:
+       - in StochModel::_transcribeComponents the old ->comps of a
+         model is taken, all its StochModelComp's are transcribed to
+	 model_comp's, these are assembled onto a newcomps and finally
+	 the newcomps replaces the original ->comps entry for the
+         model
+       - FIXME: the dependencies section of each model_comp still
+                points to the StochModelComp of the intermediate model
+		(might even point to the original StochModelComps)
+		
+       => Can we run the analyse dependencies over the whole thing
+          again?
+          - this might give a problem with xh.ancestor(1)-like dependecies
+       => The code in StochModelComp.cpp:108ff tries to resolve IDREF
+          dependencies with respect to the "new" model. However it
+          uses the "intermediate" model and not the "new" one
+	
+
+27/03/08:
+  - The newmc that is added to the (root) model after dealing with the
+    Expectation node has its IDREF dependencies not set correctly?
+    the indexing sets almS0_S1_indS1 for example are not defined in
+    the root_almS0.mod model, so they probably do not appear in the
+    dependency list of ExpCons
+    -> the first part of transcribeModelComp transcribes the original 
+       IDREFs with respect to the new AmplModel tree. 
+       Do we need to do something similar with this constraint
+       (and its indexing nodes?).
+       The references variables (xh) are not pulled in either -> are
+       those dependencies set correctly?
+    => changed backend::print_model to output dependencies for cons
+       looks like dependencies *are* correct. Why are they not used in
+       model files?
+	
+    
+
+27/03/08:
+  - moveUp (and related routines): The problem with moving a
+    model_comp from one model to the parent, is that this is done
+    *while* there are iterators on the model_comps in both the source
+    and the target model for this component. These iterators are
+    invalidated by modifiying the comps lists.
+ 
+	
+
+24/03/08:
+  - Do Exp()-constraints:
+     + Added moveUp method to model_comp that should remove
+       a component from a model and moves it to a parent
+       => still need a removeComp method for the AmplModel to make
+          this work
+     + The transcribeToModelComp method takes a Exp constraints
+       replaces Exp(..) by CP[ix0]*CP[ix0]*(...) and adds a 
+       sum{ix0 in almS0_indS0, ix1 in almS0_S1_indS1[ix0]} to it.
+       The arguments of the sum are the indexng expressions of the
+       AmplModel blocks on the way to the leaf. The ModelComp is then
+       lifted up to the root model by model_comp::moveUp
+       It is hoped that the definitions of almS0_S1_indS1 and so on
+       are automatically "pulled in" to the root model (where the
+       Exp()-constraint then lives - and where the indexing
+       expressions, and its dependencies, are not defined)
+	
+21/03/08:
+  - Finish changing list of model_comps to list<model_comp*>:
+    need to change the last bits in StochModel.cpp where the
+    original list is replaced by a new list of transcribed model
+    comps:
+    + The original code works by building up a new linked list (and
+      not just dropping in the new component into the old list).
+      (it had a bug in that the pointer to the last element was never updated)
+    + Can do this with the new arrangement: build a new
+      list<model_comp*> and once built replace the original list with
+      it
+	
+20/03/08(3):
+  - Seems to do the trick now? SUB and [ix0] are in the wrong order
+
+20/03/08(2):
+  - Need to set current_model and l_addIndex correcly when writing the
+    script file in backend.cpp
+    => default model is set, we do look at indexing set in backend.cpp
+       already -> need to put tis on the l_addIndex stack
+       (look at how this is done when printing the models, and use
+        that process)
+
+20/03/08:
+  - script does not index the indexing sets
+    + properly document what is happening in getGlobalName
+      (what does it depend on: use_global_name, current_model, etc
+      how is the indexing expression that is appended determined?)
+
+16/03/08:
+  - What should we do with objective components? 
+        maximize almS0_S1_S2_FinalWealth {ix0 in almS0_indS0_SUB,
+            ix1 in almS0_S1_indS1_SUB[ix0]}: 
+               sum{i in ASSETS} almS0_S1_S2_xh[ix0,ix1];
+    should be changed to
+        maximize almS0_S1_S2_FinalWealth: 
+           sum{ix0 in almS0_indS0_SUB}CP[ix0]*
+             sum{ix1 in almS0_S1_indS1_SUB[ix0]}CP[ix1]*
+               (sum{i in ASSETS}almS0_S1_S2_xh[ix0,ix1,i]);
+    I think this is a general desired behaviour and not just for
+    stochastic programming. What would this look like for a different
+    problem (with/without additively separable objective) where
+    subblock variables affect the objective function?
+
+  - There is a stub under item (4) in StochModelComp::transcribe...
+
+15/03/08: 
+  - objective: looks like we only need to replace the Exp(X) with 
+         CP[ix0]*CP[ix1]*X
+       + how does this work in general? Do we need to keep TIME
+         (saying in which time period we want the expectation?)
+         => probably not for the objective, more likely for the constraints
+       + where would we do this? 
+         - Have a different modified_write()
+           version of Exp? Would this work in constraints as well?
+         - Alternatively we could modify Exp to the correct version
+           whenever it is parsed.
+
+	 
+14/03/08:
+ - Why is FinalWealth repeated in all time periods?
+ - Fix objective and Exp(...) constraints
+
+ - in root_almS0_S1_S2.mod:
+     set almS0_S1_indS1 {ix0 in almS0_indS0_SUB}:={this_nd in NODES:A[this_nd]==almS0_indS0};
+     set almS0_S1_indS1[ix0]_SUB within almS0_S1_indS1[ix0];
+   should read
+     set almS0_S1_indS1 {ix0 in almS0_indS0_SUB}:={this_nd in NODES:A[this_nd]==ix0};
+     set almS0_S1_indS1_SUB{ix0 in almS0_indS0_SUB} within almS0_S1_indS1[ix0];
+   second line needs to be changed.
+
+12/03/08:
+ - The script_targ.scr reports an error:
+      Error at _cmdno 25 executing "let" command
+      (file script_targ.scr, line 49, offset 1007):
+      error processing set almS0_S1_indS1_SUB:
+              invalid subscript almS0_S1_indS1_SUB['N01'] discarded.
+   This is created by almS0_S1_indS1_SUB being defined as
+   set almS0_S1_indS1_SUB{ix0 in almS0_indS0_SUB}
+    
+   in the second outer iteration almS0_indS0_SUB is redefined to be
+   'N02', rather than 'N01'. This makes the already existing
+   definition for almS0_S1_indS1_SUB['N01'] invalid.
+   Look like AMPL just does the right thing anyhow, but reports the
+   error (which should just be a warning).
+ - Couple of remaining issues:
+   + How should ret be indexed correctly? 
+     - ret{NODES, ASSETS}? 
+     - ret{nd1 in NODES_STAGE1,NODES_STAGE2[nd1],ASSETS}?
+     Feels like the first should be the case, can we do this?
+     => It *SHOULD* be possible to do the whole thing with a one
+        dimensional node array of which every submodel only sees a slice?
+        -> this would violate the nested SML model structure. 
+        -> would need a dedicated ExpandedModel generator for the 
+           StochModelBlock
+   + Various errors in the models:
+     Inventory does not refer to the correct ancestors
+
+10/03/08: 
+ - There is a problem with submodels which are not indexed or have 
+   several indices:
+     code in model_comp.cpp:537(getGlobalName) assumes that
+     there is one expression on the addIndex stack for every level
+   => change addIndex stack so that l_addIndex is a list of lists of
+      (addIndex *): (addIndex*) is an indexing expression. For every
+      level of submodels there is a list on the stack, this list
+      may be empty if there is no indexing expression
+
+04/03/08:
+ - The 'set indS0 := {....}' is set up in the AmplModel tree as a
+   model_comp (rather than a StochModelComp). Should this be the case?
+   Should it be a StochModelComp? Or should the whole setting up the 
+   indexing set and adding this to the AmplModel be part of phase 2?
+   There is the issue of how to resolve references that are used in
+   the indexing set declaration.
+
+ - Might be time to write down what the resulting SML model and the
+   subproblem AMPL models should look like for the ALM example.
+	
+	
+
+03/03/08:
+ - in StochModelComp::transcribeToModelComp
+   Code is there to identify which model a referenced should be
+   resolved in, but
+   - The IDREFs in the dependency list point to model S2 and not alm
+     => if on line 61 is not satisfied
+     ==> problem is line StochModelComp.cpp:81
+         this changes the ref list in the original StochModelComp
+         we need to do a deep copy of the StochModelComp, so that we
+         can change references without affecting the original StochModelComp
+   - There is no code to change the IDREF to one with respect to the
+     current AmplModel
+   - In the current way of building AmplModels from leaf node first
+     (last time stage first), there is no way of resolving ancestor 
+     model_comps. 
+     => do we need two passes? One to set up the chain of AmplModels
+        and the model_comps in them and another to resolve all the
+        references in dependencies with respect to the AmplModels and
+        not the StochModel.
+
+01/03/08:
+ - in root_almS0_S1.mod:
+   There seems to be a problem if the indexing set of a block (such as
+   almS0_indS0) is itself indexed (just by being defined in a block)
+   some references are rendered as almS0_indS0[ix0]_SUB
+   
+   also can a set of the form almS0_indS0_SUB[ix0] be defined in the
+   script? I guess this should be done without the [ix0]? How is this
+   done for the normal models?
+   -> In the msnd model both levels are indexed by sets (ARCS,COMM)
+      which are global variables, so the problem is not apparent there.
+ - in root_almS0.mod: 
+   References are resolved with respect to the wrong model (almS0_S1_S2)
+   This is a problem in transcribeToModelComp?
+   Is the wrong current_model passed into transcribeToModelComp?
+   -> no looks correct, still have a look at how this is resolved
+
+28/02/08:
+ - There is a problem with the StochModel *model declaration in 
+   StochModelComp.h:
+   This hides the AmplModel *model in model_comp.h. However in 
+   translateToModelComp the this-> passed in has the accessible
+   ->model set to NULL, whereas the hidden ->model is set to the
+   actual AmplModel (StochModel?) that this entity belongs to
+    
+    => where is ->model set for StochModelComps? 
+
+
+23/02/08:
+ - in ampl.ypp:1144 stochrecourse seems to be used in the same way as
+   we now have used stochparent. Only difference is that stochrecourse
+   was a opNode* rather than an int (so would need to be interpreted
+   by AMPL). 
+   stochrecourse is not used anywhere else, so can probably be deleted
+
+22/02/08:
+ - when ent(-1;...) is read in it is set up as an opNodeID with
+   ->stochparent set to -1;
+   when this is translated into and IDREF (whereever that is the case)
+   the ->stochparent setting needs to be copied as well
+
+19/02/08:
+ - In StochModel.cpp:359 need to replace the smc->clone() call with an
+   smc->transcribeToModelComp() call that translates all references in
+   the StochModelComp smc to model_comps in the StochModel into
+   references to model_comps in the newly created FlatModels. 
+   Also needs to deal with parent(-1;...) expressions and Exp(...)
+   Should do:
+    - get all IDREF nodes and modify them:
+      + find the corresponding model_comp in the current model (how)
+        OR in the parent model (how is this represented in the IDREF
+        node?)
+    - find Exp(...) nodes and modify them (not sure how)
+	
+
+06/02/08:
+ - Need a function
+     model_comp.getSetMembership()
+   associated with a model_comp of type set, that
+    - untags all model_comp's (call model_com.untagAll())
+    - calls tagDependencies on this model_comp
+    - writes all its dependencies to a model file
+    - writes a script that loads this model file, the global data file
+      and writes out the membership of the set in question 
+    - reads the membership back in and returns that as a list
+ - Also need to be able to understand the data file enough that we can
+    - have a list of dependencies
+    - have a list of DataComp objects with their dependencies, so that
+      A subset of DataComp objects can be written out to a data file
+      and processed separatly
+    - All model_comp dependencies also need to include data
+      dependencies
+ + This is more urgent than thought: a data filed loaded for a
+   subproblem *cannot* have definitions of any entities in it that are
+   unknown to the submodel.
+   FIX: automatically include all global sets and parameters in the
+        submodels
+   FIXME: this should not be done eventually
+ 	
+ - For the sblock (Stochastic Programming) need to
+    - create a submodel *.mod file for all stages (that's why we need
+      to be able to expand the set stages)
+    - this submodel is indexed over all nodes at this stage
+    - tidy up the x(-1,...) and Exp(..) references and treat them properly
+
+10/12/07:
+ - Change the usage of opNodes serving as IDs (i.e. of opCode IDREF):
+   These should use the type opNodeIDREF rather than opNode and put
+   the reference to the model_comp that is referred to in the ->ref
+   field (and therefore leave the order of arguments unchanged)
+ - Add an additional field 'opNode *recourse'(?) to opNodeIDREF which
+   for stochastic blbocks holds the expression that indicates how many
+   stages up the model entity is referred to. 
+
+
+
