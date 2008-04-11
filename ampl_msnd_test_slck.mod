@@ -20,7 +20,7 @@ param from{COMM};
 param to{COMM};
 param amount{COMM};
 
-var sparecap{ARCS} >=0;
+var sparecap{(i,j) in ARCS} >=0;
 
 #the basic MCNF block is repeated for every (missing) arc 
 block MCNF{(i1,i2) in ARCS}:
