@@ -1,9 +1,13 @@
 /** 
 \mainpage Structure Modelling Language for OOPS 
 
+This is the doxygen documentation for the \ref language "Structured Modelling Language (SML)"
+Interface to OOPS.
+
 \section Introduction
 
-SML is a structured modelling extension to AMPL, designed to act as a
+
+\ref language "SML" is a structured modelling extension to AMPL, designed to act as a
 preprocessor to AMPL. The driver performs the following tasks:
 - read an SML input file,
 - analyse the intended problem/matrix structure,
@@ -42,21 +46,18 @@ is -lg2c for g77 and -lgfortran for gfortran)
 
 \section Usage
 
-In order to process an SML file say
+In order to process an SML file say (either of)
 
 \code
 sml < name-of-smlfile
+sml name-of-smlfile
+sml name-of-smlfile name-of-datafile
 \endcode
 
-\bug Currently the ampl scriptfile is not processed automatically. In
-order to process a model one needs to say 
-- sml < name-of-smlfile (which probably results in an error)
-- ampl script.scr
-- sml < name-of-smlfile (which does the rest of the processing)
-
-\bug Also currently it is assumed that the *.dat file is named
-"global.dat"
-
+\bug The name-of-datafile is passed on to the datafile reader
+(data.ypp), but this part is not working yet. The third version is
+therefore only useful to debug the datafile reader. In the first two
+cases it is assumed that the data file is called "global.dat"
 
 \section Internals
 
@@ -88,6 +89,10 @@ other lines into set/parameter/variable/constraint/objective/submodel
 declarations - which are stored in a model_comp object - and attaches
 them to the appropriate (current) model.
 
+\ref stochmodel "Stochastic Programming models" defined by sblock
+commands are treated specially. They will be read into a StochModel
+object.
+
 Every declaration is further divided into a name, indexing and
 attribute (body) section. These are attached to the appropriate
 model_comp object. The indexing and attribute expressions are
@@ -114,6 +119,80 @@ representing a node of the model tree), consisting of model_comp
 objects (each representing on AMPL declaration). These in turn consist
 of several opNode trees representing the indexing and attribute(body)
 section of the declaration
+*/
+
+/**
+\page stochmodel Processing of Stochastic Programming blocks (sblocks)
+
+An sblock definition is read in as a normal block definition (just
+that it creates a StochModel object rather than an AmplModel object).
+The difference is that StochModel carries information about the
+parameters of the sblock (STAGES, NODES, PROBABILITY, ANCENSTOR).
+
+The components of a StochModel are StochModelComp objects (rather than
+model_comp objects). The difference here is that a STochModelComp
+carries information about which stages this component belongs to and
+if a component is "deterministic" (i.e. there is only one copy of it
+per stage, not one copy per node)
+
+After reading is complete (i.e. when the "end sblock" line
+is read) the StochModel object is translated into a chain of
+AmplModel objects.  This is done by StochModel::expandToFlatModel
+
+\section Expansion to flat model tree 
+
+Expansion works in two passes. In the first pass the chain of
+AmplModel objects is build (whose components are still StochModelComp
+objects) In the second pass the StochModelComp objects are translated
+to model_comp objects (that is references to StochModelComp objects
+are resolved to references to model_comp objects and special
+stochastic programming expressions such as Exp, node, stage are
+translated).
+
+The two passes are necessary since model components can refer to other
+components up or down the tree. Hence the re-resolving of references
+from StochModelComp to model_comp can only be done once the AmplModel
+tree is complete.
+
+In detail the steps in the expansion procedure are as follows
+
+PASS 1:
+ - Expand the STAGES set for the StochModel (StochModel::expandStages)
+   and for all its components (StochModel::expandStagesOfComp) 
+   This is done by setting up an ampl script that is processed by ampl and
+   whose output is read in again
+ - Create an AmplModel for each element in STAGES. Add a clone of all
+   StochModelComp object that should be included in this stage to the model.
+   Also add a model_comp for the next stage down and its indexing expression
+   to the AmplModel. The indexing
+   expression is of the form
+   \code
+     set indS0 :={this_nd in NODES:A[this_nd]=="root"};
+     block S1{ix0 in indS0}
+     ...
+       set indS1 :={this_nd in NODES:A[this_nd]==ix0};
+       block S2{ix1 in indS1}
+   \endcode
+   Here indS0 is a new model_comp that is added to the AmplModel before the
+   model_comp representing the subblock of the next stage.
+
+PASS2:
+  - StochModel::_transcribeComponents: recursively call 
+    StochModelComp::transcribeToModelComp for all components of all AmplModels
+    within the chain.
+    StochModelComp::transcribeToModelComp will
+    - create a deep copy of the StochModelComp
+    - find all IDREF nodes in dependecy and resolve them w.r.t  AmplModel chain
+      (also resolving 'ancestor' references)
+    - find all STAGE/NODE nodes and translate them
+    - find all EXP expressions and translate them
+      (EXP constraints are moved up to the correct level in the AmplModel chain
+       Actually they are queued to be moved later to not mess up the recursion)
+  - AmplModel::applyChanges
+     Apply queued moves of model components (originating from Exp constraints)
+  - Finally the dependency lists model_comp::dependencies are rebuilt 
+    (root->reassignDependencies)
+
 */
 
 /**
@@ -286,5 +365,32 @@ the class NlFile. This is mainly because the main amplsolver include
 file "asl.h" defines many global variables, some of which clash with
 C++ keywords (e.g. list). This way the use of these keywords only
 needs to be avoided in NlFile.cpp
+
+*/
+
+
+/**
+\page language The Structured Modelling Language (SML)
+
+@bug variables that are defined over higher dimensional indexing sets
+*must* have a dummy variable in their definition,i.e.
+\code
+  set NODES; 
+  set ARCS within NODES cross NODES;
+  var sparecap{(i,j) in ARCS};
+\endcode
+This is because SML needs to create a sum over all instances of the
+variables (at least for the dummy objective). Without the dummy
+variable (i,j) SML has no way of knowing that the set ARCS is
+2-dimensional. This should be fixed once SML understands data files.
+
+@bug In an sblock all entities *must* have different names, even if
+they are defined in different stages, i.e.
+\code
+  subject to CashBalance stages (TIME diff {first(TIME)}): ...
+  subject to CashBalance1 stages ({first(TIME)}):...
+\endcode
+This can probably remedied by encoding the stages information in the
+internally used global name somehow.
 
 */
