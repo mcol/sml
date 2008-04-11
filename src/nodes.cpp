@@ -5,10 +5,14 @@
 #include <iostream>
 #include "nodes.h"
 #include "ampl.tab.hpp"
-#include "ampl.h"
+#include "ampl.h"       // for findKeywordinTree
+#include "AmplModel.h"
+#include "model_comp.h" // for WITHARG
 
 int opNode::use_global_names=0;
 AmplModel *opNode::default_model =NULL;
+string opNode::node = "";
+string opNode::stage = "";
 
 char *strcat2(char *s1, char *s2);
 char *print_stropstr(opNode *node, char *buffer);
@@ -42,7 +46,7 @@ opNode *newTertOp(int opCode, void *val1, void *val2, void *val3) {
    opNode *newOp;
 
    printf("creating tertiary op: %d\n",opCode);
-   newOp = (opNode *) malloc(sizeof(opNode));
+   newOp = new opNode();
    newOp->opCode = opCode;
    newOp->values = (void **) malloc(3*sizeof(void *));
    newOp->values[0] = (void *) val1;
@@ -56,7 +60,7 @@ opNode *newBinOp(int opCode, void *lval, void *rval) {
    opNode *newOp;
 
    printf("creating binary op: %d\n",opCode);
-   newOp = (opNode *) malloc(sizeof(opNode));
+   newOp = new opNode();
    newOp->opCode = opCode;
    newOp->values = (void **) malloc(2*sizeof(void *));
    newOp->values[0] = (void *) lval;
@@ -70,7 +74,7 @@ opNode *newUnaryOp(int opCode, void *val) {
    opNode *newOp;
    
    printf("creating unary op: %d\n",opCode);
-   newOp = (opNode *) malloc(sizeof(opNode));
+   newOp = new opNode();
    newOp->opCode = opCode;
    newOp->values = (void **) malloc(1*sizeof(void *));
    newOp->values[0] = (void *) val;
@@ -78,6 +82,19 @@ opNode *newUnaryOp(int opCode, void *val) {
 
    return newOp;
 }
+
+//opNodeID *newUnaryOpID(void *val) {
+//   opNodeID *newOp;
+//   
+//   printf("creating unary opID:\n");
+//   newOp = new opNodeID();
+//   newOp->opCode = ID;
+//   newOp->values = (void **) malloc(1*sizeof(void *));
+//   newOp->values[0] = (void *) val;
+//   newOp->nval = 1;
+//
+//   return newOp;
+//}
 
 opNode *newTerm(int opCode){
   /* a terminal can be:
@@ -159,7 +176,48 @@ addItemToListNew(opNode *list, opNode *newitem)
   return list;
 }
 
+/* --------------------------------------------------------------------------
+addItemToListOrCreate
+-------------------------------------------------------------------------- */
+/** A 'List' is an opNode of opCode COMMA or ' ' with a variable number
+ *  of arguments. 
+ *  This function takes (a possibly existing) list and adds an item to it
+ *  Both the list and the item can be NULL:
+ *  - if the item is NULL then the old list is simply returned.
+ *  - if the list is NULL then a list with opCode 'oc' is created from the
+ *    single item that is passed
+ */
 
+opNode *
+addItemToListOrCreate(int oc, opNode *list, opNode *newitem)
+{
+  if (list==NULL){
+    if (newitem==NULL){
+      return NULL;
+    }else{
+      return newUnaryOp(oc, newitem);
+    }
+  }else{
+    assert(oc==list->opCode);
+    if (newitem==NULL) return list;
+    
+    /* extend the size of the node by one */
+    void **newvalues = (void **)calloc(list->nval+1, sizeof(void *));
+    int i;
+
+    for (i=0;i<list->nval;i++){
+      newvalues[i] = list->values[i];
+    }
+    newvalues[list->nval] = newitem;
+    list->nval++;
+    free(list->values);
+    list->values = newvalues;
+    return list;
+  }
+}
+
+
+#if 0
 /* --------------------------------------------------------------------------
 addItemToList
 -------------------------------------------------------------------------- */
@@ -200,6 +258,7 @@ addItemToList(opNode *list, opNode *newitem)
   //printf("In addItemToList: %s\n",print_opNodesymb(list));
   return list;
 }
+#endif
 
 //retType *
 //newRetType(opNode *node, opNode *indexing, AmplModel *context)
@@ -260,44 +319,56 @@ opNode::print()
 	exit(1);
       }
       return buffer;
-
+      break;
       /* these are lots of simple binary operators */
+    case NODE:
+      return strdup(opNode::node.c_str());
+      break;
+    case STAGE:
+      return strdup(opNode::stage.c_str());
+      break;
     case ID:
       /* in this case the values[0] is simply a pointer to a name */
       buffer = strdup((const char*)node->values[0]);
       return buffer;
-
+      break;
     case IDREF:
+      if (nval<0) {
+	// as yet unset IDREF
+	return strdup("IDREF");
+      }
       if (use_global_names){
-	buffer = getGlobalName((model_comp*)node->values[0], node, default_model, WITHARG);
+	buffer = getGlobalNameNew(((opNodeIDREF*)node)->ref, node, default_model, WITHARG);
 	return buffer;
       }else{
       /* this is the new ID processor */
-	thisc = (model_comp*)node->values[0];
-      buffer = strdup(thisc->id);
-      /* in this case the values[0] is simply a pointer to a name */
-      //buffer = node->values[0];
-      if (node->nval==0) return buffer;
-      buffer2 = strdup("[");
-      buffer = strcat2(buffer, strcat2(buffer2, print_opNode((opNode*)node->values[1])));
-      for(i=1;i<node->nval;i++){
-	buffer2 = strdup(",");
-	buffer = strcat2(buffer, strcat2(buffer2, print_opNode((opNode*)node->values[i+1])));
-      }
-      buffer2 = strdup("]");
-      buffer = strcat2(buffer, buffer2);
-      return buffer;
+	thisc = ((opNodeIDREF*)node)->ref;
+	buffer = strdup(thisc->id);
+	if (node->nval==0) return buffer;
+	buffer2 = strdup("[");
+	buffer = strcat2(buffer, strcat2(buffer2, print_opNode((opNode*)node->values[0])));
+	for(i=1;i<node->nval;i++){
+	  buffer2 = strdup(",");
+	  buffer = strcat2(buffer, strcat2(buffer2, print_opNode((opNode*)node->values[i])));
+	}
+	buffer2 = strdup("]");
+	buffer = strcat2(buffer, buffer2);
+	return buffer;
       }
       break;
 
     case IDREFM:
-      /* this is the new ID processor (for submodels) */
-      thism = (AmplModel*)node->values[0];
-      buffer = strdup(thism->name);
-      /* in this case the values[0] is simply a pointer to a name */
-      //buffer = node->values[0];
-      return buffer;
-
+      {
+	/* this is the new ID processor (for submodels) */
+	opNodeIDREF *onir = dynamic_cast<opNodeIDREF*>(node);
+	// ??? is this correct
+	thisc = (model_comp*)onir->ref;
+	buffer = strdup(thisc->id);
+	//thism = (AmplModel*)onir->ref;
+	//buffer = strdup(thism->name);
+	return buffer;
+      }
+      break;
     case ' ':
       buffer = strdup(" ");
       return print_stropstr(node, buffer);
@@ -306,7 +377,7 @@ opNode::print()
       buffer = strdup(".");
       return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
 		     print_opNode((opNode*)node->values[1]));
-
+      
     case COMMA:
       /* a comma can have any number of arguments */
       if (node->nval==1){
@@ -386,7 +457,25 @@ opNode::print()
       buffer = strdup("min ");
       return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
 		     print_opNode((opNode*)node->values[1]));
-
+      break;
+    case EXPECTATION:
+      buffer = strdup("Exp(");
+      buffer2 = strdup(")");
+      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
+		     buffer2);
+      break;
+    case LAST:
+      buffer = strdup("last(");
+      buffer2 = strdup(")");
+      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
+		     buffer2);
+      break;
+    case FIRST:
+      buffer = strdup("first(");
+      buffer2 = strdup(")");
+      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
+		     buffer2);
+      break;
       // -------------------------functions f(..) --------------------------
     case ORD:
       buffer = strdup("ord");
@@ -395,7 +484,13 @@ opNode::print()
       // -------------------------terminals --------------------------
     case ORDERED:
       return strdup(" ordered");
-
+      break;
+    case SYMBOLIC:
+      return strdup(" symbolic");
+      break;
+    case DETERMINISTIC:
+      return strdup(" deterministic");
+      break;
       /* these are lots of simple unary operators */
     case WITHIN:
       buffer = strdup("within ");
@@ -430,7 +525,17 @@ opNode::print()
 		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
       }
       break;
-
+    case DEFINED:
+      buffer = strdup(":=");
+      if (node->nval==1){
+	return strcat2(buffer, print_opNode((opNode*)node->values[0]));
+      }else{
+	printf("':=' used as binary operator?\n");
+	exit(1);
+	//	return strcat2(print_opNode((opNode*)node->values[0]), 
+	//		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
+      }
+      break;
     case COLON:
       buffer = strdup(":");
       if (node->nval==1){
@@ -497,10 +602,17 @@ char *strcat2(char *s1, char *s2){
   return ret;
 }
 
+void 
+opNode::dump()
+{
+  printf("%s\n",print_opNodesymb(this));
+}
+
 char *
 print_opNodesymb(opNode *node)
 {
   char *buffer;
+  int i;
 
   if (node==NULL){
     buffer = strdup("NULL");
@@ -510,53 +622,105 @@ print_opNodesymb(opNode *node)
     buffer = strdup("(ID T)");
     return buffer;
   }
-  if (node->opCode==IDREF){
-    buffer = strdup("(IDREF T)");
+  if (node->opCode==INT_VAL){
+    char buffer3[20];
+    assert(node->nval==1);
+    sprintf(buffer3, "T:%d",(int*)node->values[0]);
+    buffer = strdup(buffer3);
     return buffer;
   }
-  if (node->nval==0){
-    buffer = strdup("T");
-    return buffer;
-  } else if (node->nval==1){
-    int len = 20;
-    char *s0 = print_opNodesymb((opNode*)node->values[0]);
-    len += strlen(s0);
-    buffer = (char*)malloc(len);
-    sprintf(buffer, "(%d %s)",node->opCode, s0);
-    free(s0);
-    return buffer;
-  } else if (node->nval==2){
-    int len = 20;
-    char *s0 = print_opNodesymb((opNode*)node->values[0]);
-    char *s1 = print_opNodesymb((opNode*)node->values[1]);
-    len += strlen(s0);
-    len += strlen(s1);
-    buffer = (char*)malloc(len);
-    sprintf(buffer, "(%d %s %s)",node->opCode, s0, s1);
-    free(s0);
-    free(s1);
-    return buffer;
-  } else if (node->nval==3){
-    int len = 20;
-    char *s0 = print_opNodesymb((opNode*)node->values[0]);
-    char *s1 = print_opNodesymb((opNode*)node->values[1]);
-    char *s2 = print_opNodesymb((opNode*)node->values[2]);
-    len += strlen(s0);
-    len += strlen(s1);
-    len += strlen(s2);
-    buffer = (char*)malloc(len);
-    sprintf(buffer, "(%d, %s, %s, %s)",node->opCode, s0, s1, s2);
-    free(s0);
-    free(s1);
-    free(s2);
-    return buffer;
-  } else {
-    buffer = (char*)malloc(20);
-    sprintf(buffer, "(nval = %d)",node->nval);
+  if (node->opCode==FLOAT_VAL){
+    char buffer3[20];
+    assert(node->nval==1);
+    sprintf(buffer3, "T:%f",(double*)node->values[0]);
+    buffer = strdup(buffer3);
     return buffer;
   }
 
+  // start new version
+  // print node symbol
+  int retsize=0;
+  char *symb;
+  switch (node->opCode)
+  {
+  case IDREF:{
+    opNodeIDREF *onir= dynamic_cast<opNodeIDREF*>(node);
+    if (onir==NULL) {
+      printf("Some IDREF node still not opNodeIDREF\n");exit(1);}
+    model_comp *mc = onir->ref;
+    char buffer3[40]; 
+    sprintf(buffer3, "IDREF(%p:%s(%p))",node, mc->id, mc);
+    //return strdup(buffer3);
+    symb = strdup(buffer3);
+    break;}
+  case ASSIGN: symb = strdup("ASSIGN"); break;
+  case IN:     symb = strdup("IN"); break;
+  case SUM:    symb = strdup("SUM"); break;
+  case LBRACE: symb = strdup("LBR{"); break;
+  case LBRACKET:symb = strdup("LBR("); break;
+  case COMMA:  symb = strdup("COMMA"); break;
+  case COLON:  symb = strdup("COLON"); break;
+  case '+':    symb = strdup("\"+\""); break;
+  case '*':    symb = strdup("\"*\""); break;
+  default:
+    symb = (char*)malloc(7*sizeof(char));
+    sprintf(symb, "\"%d\"",node->opCode);
+  }
+  retsize +=strlen(symb)+3; // allow space for \0 and ()
+  char **arg = (char**)calloc(node->nval, sizeof(char*));
+  for(i=0;i<node->nval;i++){
+    arg[i] = print_opNodesymb((opNode*)node->values[i]);
+    retsize += strlen(arg[i])+2;
+  }
+  
+  buffer = (char*)calloc(retsize, sizeof(char));
+  strcpy(buffer, symb);
+  strcat(buffer, "(");
+  for(i=0;i<node->nval;i++){
+    strcat(buffer, arg[i]);
+    if (i<node->nval-1) strcat(buffer, ",");
+  }
+  strcat(buffer, ")");
+  return buffer;
+	 
+  //  if (node->nval==0){
+  //    buffer = strdup("T");
+  //    return buffer;
+  //  } else if (node->nval==1){
+  //    int len = 20;
+  //    char *s0 = print_opNodesymb((opNode*)node->values[0]);
+  //    len += strlen(s0);
+  //    buffer = (char*)malloc(len*sizeof(char));
+  //    sprintf(buffer, "(%d %s)",node->opCode, s0);
+//    free(s0);
+//    return buffer;
+//  } else if (node->nval==2){
+//    int len = 20;
+//    char *s0 = print_opNodesymb((opNode*)node->values[0]);
+//    char *s1 = print_opNodesymb((opNode*)node->values[1]);
+//    len += strlen(s0);
+//    len += strlen(s1);
+//    buffer = (char*)malloc(len*sizeof(char));
+//    sprintf(buffer, "(%d %s %s)",node->opCode, s0, s1);
+//    return buffer;
+//  } else if (node->nval==3){
+//    int len = 20;
+//    char *s0 = print_opNodesymb((opNode*)node->values[0]);
+//    char *s1 = print_opNodesymb((opNode*)node->values[1]);
+//    char *s2 = print_opNodesymb((opNode*)node->values[2]);
+//    len += strlen(s0);
+//    len += strlen(s1);
+//    len += strlen(s2);
+//    buffer = (char*)malloc(len*sizeof(char));
+  //   sprintf(buffer, "(%d, %s, %s, %s)",node->opCode, s0, s1, s2);
+  //    return buffer;
+  //  } else {
+  //    buffer = (char*)malloc(20*sizeof(char));
+  //   sprintf(buffer, "(nval = %d)",node->nval);
+  //    return buffer;
+  //  }
 
+	 
 }
 /* ==========================================================================
 opNode Methods to follow
@@ -571,6 +735,46 @@ opNode::opNode()
 }
 
 
+/* --------------------------------------------------------------------------
+opNode *opNode::deep_copy()
+---------------------------------------------------------------------------- */
+opNode *
+opNode::deep_copy()
+{
+  opNode *newn = new opNode();
+
+  if (opCode==IDREF || opCode==IDREFM){
+    printf("IDREF opNodes need to be cloned differently\n");
+    exit(1);
+  }
+  newn->opCode = opCode;
+  newn->nval = nval;
+  newn->values = (void **)calloc(nval, sizeof(void *));
+
+  /* Values are copied depending on the type of the opNode */
+  /* ID/IDREF/INT_VAL/FLOAT_VAL/IDREFM are treated differently */
+  if (opCode==ID){
+    assert(nval==1);
+    newn->values[0] = strdup((char *)values[0]);
+    return newn;
+  }
+  if (opCode==INT_VAL){
+    assert(nval==1);
+    newn->values[0] = (int*)calloc(1, sizeof(int));
+    *((int*)(newn->values[0])) = *(int*)(values[0]);
+    return newn;
+  }
+  if (opCode==FLOAT_VAL){
+    assert(nval==1);
+    newn->values[0] = (double*)calloc(1, sizeof(double));
+    *((double*)(newn->values[0])) = *(double*)(values[0]);
+    return newn;
+  }
+  
+  for(int i=0;i<nval;i++)
+    newn->values[i] = ((opNode*)values[i])->deep_copy();
+  return newn;
+}
 /* --------------------------------------------------------------------------
 opNode *opNode::clone()
 ---------------------------------------------------------------------------- */
@@ -655,13 +859,61 @@ opNode::findIDREF(list<model_comp*> *lmc)
   if (opCode==IDREF){
     //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
     //				NULL, NULL, NOARG));
-    lmc->push_back((model_comp*)this->values[0]);
-  }else if (opCode==ID||opCode==INT_VAL||opCode==260) {
+    lmc->push_back(((opNodeIDREF*)this)->ref);
+  }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
     return;
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
 	((opNode*)values[i])->findIDREF(lmc);
+      }
+    }
+  }
+}
+/* --------------------------------------------------------------------------
+opNode::findIDREF(list<opNode *> *lnd)
+---------------------------------------------------------------------------- */
+/* find the list of all the IDREF nodes at or below the current node */
+void
+opNode::findIDREF(list<opNode*> *lnd)
+{
+  int i;
+
+  if (opCode==IDREF){
+    //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
+    //				NULL, NULL, NOARG));
+    lnd->push_back(this);
+  }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
+    // if terminal then return
+    return;
+  }else{
+    for(i=0;i<nval;i++){
+      if (values[i]){
+	((opNode*)values[i])->findIDREF(lnd);
+      }
+    }
+  }
+}
+/* --------------------------------------------------------------------------
+opNode::findOpCode(int oc, list<opNode *> *lnd)
+---------------------------------------------------------------------------- */
+/* find the list of all nodes with opCode==oc at or below the current node */
+void
+opNode::findOpCode(int oc, list<opNode*> *lnd)
+{
+  int i;
+
+  if (opCode==oc){
+    //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
+    //				NULL, NULL, NOARG));
+    lnd->push_back(this);
+  }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
+    // if terminal then return
+    return;
+  }else{
+    for(i=0;i<nval;i++){
+      if (values[i]){
+	((opNode*)values[i])->findOpCode(oc, lnd);
       }
     }
   }
@@ -676,6 +928,7 @@ opNode *opNode::getIndexingSet()
   opNode *set;
   opNode *dummyVar;
 
+  if (ix==NULL) return NULL;
   /* remove outside braces from indexing expression */
   if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
   /* assumes that the next level is the 'IN' keyword (if present) */
@@ -689,6 +942,51 @@ opNode *opNode::getIndexingSet()
   return set;
 
 }
+
+/* --------------------------------------------------------------------------
+opNode::getArgumentList()
+---------------------------------------------------------------------------- */
+/** This is for an opNode of type IDREF (and should eventually be moved
+ *  to opNodeIDREF:getArgumentList()):
+ *  returns a comma separated list of the arguments (the bit in [..] brackets)
+ *
+ */
+
+string
+opNode::getArgumentList()
+{
+  opNodeIDREF *on;
+  string arglist = "";
+  if (opCode!=IDREF){
+    printf("Can only call getArgumentList for opNodes of type IDREF\n");
+    exit(1);
+  }
+
+  // see if this is actually an IDREF node
+  on = dynamic_cast<opNodeIDREF*>(this);
+  if (on==NULL){
+    printf("WARNING: This is an IDREF opNode not of type opNodeIDREF\n");
+    if (nval>0){
+      arglist += ((opNode*)values[1])->print();
+      for(int i=1;i<nval;i++){
+	arglist += ",";
+	arglist += ((opNode*)values[1+i])->print();
+      }
+    }
+  }else{
+    if (nval>0){
+      arglist += ((opNode*)values[0])->print();
+      for(int i=1;i<nval;i++){
+	arglist += ",";
+	arglist += ((opNode*)values[i])->print();
+      }
+    }
+  }
+  return arglist;
+}
+
+
+//void opNode::foo(){}
 
 /* ==========================================================================
 opNodeix Methods to follow
@@ -786,6 +1084,7 @@ void opNodeIx::splitExpression()
   if (opCode!=LBRACE){
     printf("Error in splitExpression: Indexing Expression must start with {\n");
     printf("     %s",print_opNode(this));
+    exit(1);
   }
   
   tmp = (opNode*)this->values[0];
@@ -815,7 +1114,7 @@ void opNodeIx::splitExpression()
     }
   }else{
     ncomp = 1;
-    this->sets = (opNode**)calloc(11, sizeof(opNode*));
+    this->sets = (opNode**)calloc(1, sizeof(opNode*));
     this->dummyVarExpr = (opNode**)calloc(1, sizeof(opNode*));
     tmp2 = findKeywordinTree((opNode*)tmp, IN);
     if (tmp2){
@@ -833,14 +1132,14 @@ void opNodeIx::splitExpression()
 /*----------------------------------------------------------------------------
 opNodeIx::hasDummyVar
 ---------------------------------------------------------------------------- */
-/* Sees if the indexing Expression given by opNodeIx defines the 
-   dummy variable given by name 
-
-
-  A general indexing expression can be of the form
-
-    {(i,j) in ARCS, k in SET: i>k} 
-*/
+/** Sees if the indexing Expression given by opNodeIx defines the 
+ *  dummy variable given by name 
+ *
+ *  @param name The name of the dummy variable to look for
+ *  @return The ("ID") opNode representing the dummy Variable (if found) or
+ *          NULL (if not found)
+ *
+ */
 
 opNode *opNodeIx::hasDummyVar(char *name)
 {
@@ -880,11 +1179,85 @@ opNode *opNodeIx::hasDummyVar(char *name)
 
 
 }
+/*----------------------------------------------------------------------------
+opNodeIx::deep_copy
+---------------------------------------------------------------------------- */
+/** Makes a recursive copy of this node that uses all new data structures
+ *  opNodeIDREF nodes will also be duplicated, however they will point
+ *  to the original model_comp's (rather than duplicates of them)
+ */
+
+opNodeIx *
+opNodeIx::deep_copy()
+{
+  opNodeIx *onix = new opNodeIx();
+  
+  onix->opCode = opCode;
+  onix->nval = nval;
+  onix->values = (void **)calloc(nval, sizeof(void *));
+  for(int i=0;i<nval;i++)
+    onix->values[i] = ((opNode*)values[i])->deep_copy();
+  
+  // deep_copy is a virtual function, so qualifier->deep_copy is not defined
+  // when qualifier==NULL
+  if (qualifier) onix->qualifier = qualifier->deep_copy();
+    
+  onix->ncomp = ncomp;
+  onix->sets = (opNode**)calloc(ncomp, sizeof(opNode*));
+  onix->dummyVarExpr = (opNode**)calloc(ncomp, sizeof(opNode*));
+  
+  for(int i=0;i<ncomp;i++){
+    onix->sets[i] = sets[i]->deep_copy();
+    if (dummyVarExpr[i]) onix->dummyVarExpr[i] = dummyVarExpr[i]->deep_copy();
+  }
+  return onix;
+}
+
 
 /* ===========================================================================
 opNodeIDREF methods
 ============================================================================ */
+/* --------------------------------------------------------------------------
+opNodeIDREF::opNodeIDREF(model_comp *r)
+---------------------------------------------------------------------------- */
+opNodeIDREF::opNodeIDREF(): 
+  opNode(),
+  stochparent(0),
+  ref(NULL)
+{}
 
+/* --------------------------------------------------------------------------
+opNodeIDREF::opNodeIDREF(model_comp *r)
+---------------------------------------------------------------------------- */
+opNodeIDREF::opNodeIDREF(model_comp *r): opNode()
+{
+  ref = r;
+  stochparent = 0;
+  opCode = IDREF;
+  nval = 0; // this is correct if there is no subscripting expression
+}
+
+/* --------------------------------------------------------------------------
+opNodeIDREF *opNodeIDREF::deep_copy()
+---------------------------------------------------------------------------- */
+opNodeIDREF*
+opNodeIDREF::deep_copy()
+{
+  opNodeIDREF *newn = new opNodeIDREF();
+
+  newn->opCode = opCode;
+  newn->nval = nval;
+  newn->values = (void **)calloc(nval, sizeof(void *));
+  for(int i=0;i<nval;i++)
+    newn->values[i] = ((opNode*)values[i])->deep_copy();
+
+  // this is a model_comp that needs to be cloned as well
+  //newn->ref = ref->clone();
+  newn->ref = ref;
+  newn->stochparent = stochparent;
+
+  return newn;
+}
 /* --------------------------------------------------------------------------
 opNodeIDREF *opNodeIDREF::clone()
 ---------------------------------------------------------------------------- */
@@ -899,7 +1272,9 @@ opNodeIDREF::clone()
   for(int i=0;i<nval;i++)
     newn->values[i] = values[i];
 
-  newn->ref = ref->clone();
+  newn->ref = ref;
+  //  newn->ref = ref->clone();
+  newn->stochparent = stochparent;
 
   return newn;
 }
