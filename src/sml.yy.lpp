@@ -22,7 +22,7 @@ ID       [a-zA-Z][a-zA-Z0-9_]*
 %%
 
    /* Tokens with values */
-{DIGIT}+ {
+-?{DIGIT}+ {
             long *dummy = (long *)malloc(sizeof(long));
             *dummy = strtol(yytext, NULL, 10);
             yylval.ival = dummy;
@@ -31,7 +31,7 @@ ID       [a-zA-Z][a-zA-Z0-9_]*
                      "\n\"%s\"\n", yylineno, yytext);
             myreturn(INT_VAL);
          }
-{DIGIT}+("."{DIGIT}*)?([eE]{DIGIT}+)?  {
+-?{DIGIT}+("."{DIGIT}*)?([eE]{DIGIT}+)?  {
             double *dummy = (double *)malloc(sizeof(double));
             *dummy = strtod(yytext, NULL);
             yylval.fval = dummy;
@@ -60,13 +60,15 @@ to_come        myreturn(TO_COME);
 net_in         myreturn(NET_IN);
 net_out        myreturn(NET_OUT);
 dimen(sion)?   myreturn(DIMEN);
+using          myreturn(USING);
 
-node           myreturn(NODE);
 ordered        myreturn(ORDERED);
 circular       myreturn(CIRCULAR);
 reversed       myreturn(REVERSED);
 symbolic       myreturn(SYMBOLIC);
 arc            myreturn(ARC);
+deterministic  myreturn(DETERMINISTIC);
+stochastic     myreturn(STOCHASTIC);
 
 random         myreturn(RANDOM);
 public         myreturn(PUBLIC);
@@ -98,6 +100,7 @@ update         myreturn(UPDATE);
 write          myreturn(WRITE);
 shell          myreturn(SHELL);
 block|BLOCK    myreturn(BLOCK);
+sblock         myreturn(SBLOCK);
 model|MODEL    {
                  BEGIN(accept_model_type);
                  myreturn(MODEL);
@@ -130,6 +133,10 @@ exists         myreturn(EXISTS);
 forall         myreturn(FORALL);
 not            myreturn(NOT);
 within         myreturn(WITHIN);
+stages         myreturn(STAGES);
+STAGES         myreturn(STAGES);
+stage          myreturn(STAGE);
+node           myreturn(NODE);
 
    /* looping */
 while          myreturn(WHILE);
@@ -205,6 +212,7 @@ suffix                  myreturn(SUFFIX);
 
   /* special stuff */
 
+Exp         myreturn(EXPECTATION);
 TimeStage   myreturn(TIMESTAGE);
 
    /* Else it mut be an identifyer */
