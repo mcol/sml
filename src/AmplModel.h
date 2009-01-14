@@ -136,7 +136,10 @@ class AmplModel{
   void check();    //< checks instance for consistency
 
   /** recursive detailed debugging output */
-  void dump();
+  void dump(char *filename);
+
+  /** recursive detailed debugging output */
+  void dump(FILE *fout);
 
   static void applyChanges(); //< apply the model changes stored in Q
 };

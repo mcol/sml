@@ -14,9 +14,11 @@ list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
 
 extern void modified_write(FILE *fout, model_comp *comp);
-
 //extern int n_addIndex;
 //extern add_index *l_addIndex[];
+
+// Utility function
+bool is_int(const char *tok); // 'const' here means that tok is not modified
 
 void
 addCompToModel(AmplModel *model, model_comp *comp)
@@ -277,18 +279,26 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
 	  for(char*str=token; ;str=NULL){
 	    char *tok = strtok(str, ",");
 	    if (tok==NULL) break;
-	    globname += "'"+string(tok)+"',";
+	    if (is_int(tok)){
+	      globname += string(tok)+",";
+	    }else{
+	      globname += "'"+string(tok)+"',";
+	    }
 	  }
 	  globname.replace(globname.size()-1,1,"");// delete last element
 	  token--;
 	  free(token);
 	}else{
-	  globname += "'"+(*p)+"'";
+	  if (is_int((*p).c_str())){
+	    globname += (*p);
+	  }else{
+	    globname += "'"+(*p)+"'";
+	  }
 	}
 	//printf("->%s",(*p).c_str());
       }
       //printf("\n");
-      cout << globname+'\n';
+      //cout << globname+'\n';
       em->localVarDef.push_back(globname);
 
     }
@@ -458,6 +468,7 @@ AmplModel::print()
   printf("AM: Nb objectives: %d\n", n_submodels);
   printf("AM: Entities declared:\n");
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    printf("AM:   ");
     (*p)->printBrief();
   }
 
@@ -473,39 +484,50 @@ AmplModel::print()
   }
 }
 /* ---------------------------------------------------------------------------
-AmplModel::dump()
+AmplModel::dump(char *filename)
 ---------------------------------------------------------------------------- */
 void 
-AmplModel::dump()
+AmplModel::dump(char *filename)
+{
+  FILE *fout = fopen(filename, "w");
+  dump(fout);
+  fclose(fout);
+}
+
+/* ---------------------------------------------------------------------------
+AmplModel::dump(FILE *fout)
+---------------------------------------------------------------------------- */
+void 
+AmplModel::dump(FILE *fout)
 {
 
-  printf("DUMP: ----------------------------------------------------------\n");
-  printf("DP: This is AmplModel (%p): %s\n",this, name);
-  printf("DP: global name: %s\n",global_name.c_str());
-  printf("DP: level: %d\n",level);
-  printf("DP: parent: %s\n",(parent)?parent->name:"NULL");
-  printf("DP: indexing: %s\n",(ix)?ix->print():"NULL");
-  ix->dump();
-  printf("DP: Nb submodels  : %d\n", n_submodels);
-  printf("DP: Nb sets       : %d\n", n_sets);
-  printf("DP: Nb parameters : %d\n", n_params);
-  printf("DP: Nb objectives : %d\n", n_objs);
-  printf("DP: Nb variables  : %d\n", n_vars);
-  printf("DP: Nb constraints: %d\n", n_cons);
-  printf("DP: Nb objectives: %d\n", n_submodels);
-  printf("DP: List components:\n");
+  fprintf(fout, "DUMP: ----------------------------------------------------------\n");
+  fprintf(fout, "DP: This is AmplModel (%p): %s\n",this, name);
+  fprintf(fout, "DP: global name: %s\n",global_name.c_str());
+  fprintf(fout, "DP: level: %d\n",level);
+  fprintf(fout, "DP: parent: %s\n",(parent)?parent->name:"NULL");
+  fprintf(fout, "DP: indexing: %s\n",(ix)?ix->print():"NULL");
+  ix->dump(fout);
+  fprintf(fout, "DP: Nb submodels  : %d\n", n_submodels);
+  fprintf(fout, "DP: Nb sets       : %d\n", n_sets);
+  fprintf(fout, "DP: Nb parameters : %d\n", n_params);
+  fprintf(fout, "DP: Nb objectives : %d\n", n_objs);
+  fprintf(fout, "DP: Nb variables  : %d\n", n_vars);
+  fprintf(fout, "DP: Nb constraints: %d\n", n_cons);
+  fprintf(fout, "DP: Nb objectives: %d\n", n_submodels);
+  fprintf(fout, "DP: List components:\n");
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
-    (*p)->dump();
+    (*p)->dump(fout);
   }
 
   if (n_submodels>0)
-    printf("DP: now list the submodels:\n");
+    fprintf(fout, "DP: now list the submodels:\n");
   
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     model_comp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
-      am->dump();
+      am->dump(fout);
     }
   }
 
@@ -657,18 +679,20 @@ AmplModel::addDummyObjective()
 
   // we have now build a list of opNodes representing the components:
   // build the attribute opNode as a sum of them all
-  if (list_on_sum.size()==1){
-    attr = list_on_sum[0];
-  }else{
-    attr = newBinOp('+', list_on_sum[0],list_on_sum[1]);
-    for(i=2;i<list_on_sum.size();i++){
-      attr = newBinOp('+', attr, list_on_sum[i]);
+  if (list_on_sum.size()>0){
+    if (list_on_sum.size()==1){
+      attr = list_on_sum[0];
+    }else{
+      attr = newBinOp('+', list_on_sum[0],list_on_sum[1]);
+      for(i=2;i<list_on_sum.size();i++){
+	attr = newBinOp('+', attr, list_on_sum[i]);
+      }
     }
+    
+    newobj = new model_comp(strdup("dummy"), TMIN, NULL, attr);
+    addCompToModel(this, newobj);
   }
-  
-  newobj = new model_comp(strdup("dummy"), TMIN, NULL, attr);
-  addCompToModel(this, newobj);
-  
+
   // and recursively do this for all AmplModels below this one
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     comp = *p;
@@ -819,4 +843,25 @@ AmplModel::reassignDependencies()
     }
   }
 
+}
+
+
+/* ---------------------------------------------------------------------------
+bool is_int(char *tok)
+---------------------------------------------------------------------------- */
+/** Utility function that checks is a cstring represents a natural number
+ *  (i.e [0-9]*) or not
+ */
+bool 
+is_int(const char *tok){
+  bool ret = true;
+  int pos = 0;
+
+  if (tok[0]==0) return false;
+  while(tok[pos]!=0){
+    if (tok[pos]<'0' || tok[pos]>'9') return false;
+    pos++;
+  }
+
+  return true;
 }
