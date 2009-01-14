@@ -1,0 +1,4 @@
+
+
+CompDescr::printToString(){
+
