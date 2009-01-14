@@ -1,8 +1,11 @@
 #include "ampl.h"
+#include "GlobalVariables.h"
 #include "StochModel.h"
 #include "StochModelComp.h"
 #include "ampl.tab.hpp"
 #include <typeinfo>
+
+static bool logSM = false;
 
 /* ---------------------------------------------------------------------------
 StochModel::StochModel()
@@ -64,7 +67,7 @@ StochModel::expandStages()
   
   stageset->findIDREF(&dep);
   for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
-    printf("dep: %s\n",(*q)->id);
+    if (logSM) printf("dep: %s\n",(*q)->id);
     (*q)->tagDependencies();
   }
   /* Also tag all global set and parameter definitions */
@@ -90,7 +93,7 @@ StochModel::expandStages()
   out = fopen("tmp.scr","w");
   fprintf(out, "reset;\n");
   fprintf(out, "model tmp.mod;\n");
-  fprintf(out, "data global.dat;\n");
+  fprintf(out, "data ../%s;\n",GlobalVariables::datafilename);
   fprintf(out, "display settemp > (\"tmp.out\");\n");
   
   fclose(out);
@@ -108,7 +111,7 @@ StochModel::expandStages()
   }
   fgets(buffer, 500, out);
   fclose(out);
-  printf("Set %s members: %s\n",print_opNode(stageset),buffer);
+  if (logSM) printf("Set %s members: %s\n",print_opNode(stageset),buffer);
 
   // parse the set members
   stagenames = new vector<string>;
@@ -119,7 +122,7 @@ StochModel::expandStages()
 
     p2 = strtok(p, " ;");
     while(p2!=NULL){
-      printf("Member: %s\n",p2);
+      if (logSM) printf("Member: %s\n",p2);
       stagenames->push_back(p2);
       p2 = strtok(NULL, " ;\n");
     }
@@ -161,7 +164,7 @@ StochModel::expandStagesOfComp()
     if (smc->stageset){
       smc->stageset->findIDREF(&dep);
       for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
-	printf("dep: %s\n",(*q)->id);
+	if (logSM) printf("dep: %s\n",(*q)->id);
 	(*q)->tagDependencies();
       }
     }
@@ -197,7 +200,7 @@ StochModel::expandStagesOfComp()
   out = fopen("tmp.scr","w");
   fprintf(out, "reset;\n");
   fprintf(out, "model tmp.mod;\n");
-  fprintf(out, "data global.dat;\n");
+  fprintf(out, "data ../%s;\n",GlobalVariables::datafilename);
   cnt=0;
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
@@ -239,7 +242,7 @@ StochModel::expandStagesOfComp()
 	
 	p2 = strtok(p, " ;");
 	while(p2!=NULL){
-	  printf("Member: %s\n",p2);
+	  if (logSM) printf("Member: %s\n",p2);
 	  smc->stagenames->push_back(p2);
 	  p2 = strtok(NULL, " ;\n");
 	}
@@ -293,7 +296,7 @@ StochModel::expandToFlatModel()
   int stgcnt;
 
   printf("----------------------------------------------------------------\n");
-  printf("         expandToFlatModel: \n");
+  printf(" StochModel::expandToFlatModel: \n");
   printf("----------------------------------------------------------------\n");
   
   /* expand the stages set for all the StochModelComp entities in this model */
@@ -411,9 +414,30 @@ StochModel::expandToFlatModel()
       
       // start with the "i in NODES" bit
       opNode *on1, *on2, *on_iinN, *onai, *on3;
+      StochModelComp *smctmp;
       // NODES is a reference to the NODES set that is part of the 
       // smodel description
-      
+
+      if (stgcnt==0){
+	/* add this for the zeroth (root) stage to identify the name of
+	   the root node */
+	// set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
+	// on_iinn: this_nd in NODES
+	on_iinN = newBinOp(IN, newUnaryOp(ID, strdup("this_nd")), 
+			  nodeset->clone());
+	// onai: A[this_nd]  
+	onai= newBinOp(LSBRACKET, anc->clone(), 
+		       newUnaryOp(COMMA, newUnaryOp(ID, strdup("this_nd"))));
+	// on2: A[this_nd]=="null"
+	on2 =  newBinOp(EQ, onai, newUnaryOp(ID, strdup("\"null\"")));
+	// on1: :={this_nd in NODES:Parent[this_nd] == "null"};
+	on1 = newUnaryOp(DEFINED, 
+			 newUnaryOp(LBRACE, newBinOp(COLON, on_iinN, on2)));
+	// and add this to the model
+	smctmp = new StochModelComp("rootset", TSET, NULL, on1);
+	smctmp->stochmodel = this;
+	addCompToModel(am, smctmp);
+      }
       /* EITHER we can set this up as an ID node with name NODES and do a
 	 search for it by calling find_var_ref_in_context
 	 BUT: find_var_ref_in_context needs the context set up and that
@@ -427,7 +451,7 @@ StochModel::expandToFlatModel()
       on2 = newUnaryOp(ID, strdup("this_nd"));
       /** @bug 'this_nd' is a reserved variables now */
       on_iinN = newBinOp(IN, on2, on1);
-      printf("Test first part of expression: %s\n",on_iinN->print());
+      //printf("Test first part of expression: %s\n",on_iinN->print());
       // set up the 'A[i] in indS0' part now
 
 
@@ -440,7 +464,7 @@ StochModel::expandToFlatModel()
       // this is A[i]
       onai= newBinOp(LSBRACKET, on1, on2);
       // this is the A[i] in indSO
-      printf("Test second part of expression: %s\n",onai->print());
+      //printf("Test second part of expression: %s\n",onai->print());
 
       /* this is a reference to indS0 which is the indexing set of the
 	 model below (or root if there is none below)
@@ -450,13 +474,26 @@ StochModel::expandToFlatModel()
 	char buffer[5];
 	sprintf(buffer, "ix%d",stgcnt-1);
 	on3 = newUnaryOp(ID, strdup(buffer));
+	on2 = newBinOp(EQ, onai, on3);
       }else{
-	on3 = newUnaryOp(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
+	/* No, the first indexing set is not over the nodes that have "root"
+	   as parent (this would require the root node to be always named 
+	   "root"), but rather "root" is the set of nodes (should be only one) 
+	   that have "null/none" as parent. The first indexing set is the nodes
+	   that have this node as parent:
+	   
+	   set rootset := {this_nd in NODES:Parent[this_nd] = "null"};
+	   set alm0_ind0 := {this_nd in NODES: Parent[this_nd] in rootset};
+	*/
+
+	//on3 = newUnaryOp(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
+	//on3 = newUnaryOp(ID, strdup("rootset"));
+	on3 = new opNodeIDREF(smctmp);
+	on2 = newBinOp(IN, onai, on3);
       }
-      on2 = newBinOp(EQ, onai, on3);
       // problem: Since indset[stgct-1] is not set up it, the expression 
       // cannot be printed here
-      printf("Test third part of expression: %s\n",on2->print());
+      //printf("Test third part of expression: %s\n",on2->print());
 
       // and build everything
       on1 = newBinOp(COLON, on_iinN, on2);
@@ -464,7 +501,7 @@ StochModel::expandToFlatModel()
       on3 = newUnaryOp(LBRACE, on1);
       // and the :=
       on1 = newUnaryOp(DEFINED, on3);
-      printf("Test all of expression: %s\n",on1->print());
+      //printf("Test all of expression: %s\n",on1->print());
       
       // so we've got an opNode to '{i in NODES:A[i] in indS0}'
       
@@ -487,7 +524,7 @@ StochModel::expandToFlatModel()
 	on1 = new opNodeIDREF(indset[stgcnt]); //indset
 	on_iinN = newBinOp(IN, newUnaryOp(ID, strdup(buffer)), on1); // i in N
 	on2 = newUnaryOp(LBRACE, on_iinN);    // {i in N}
-	printf("Indexing Expression: %s\n",on2->print());
+	//printf("Indexing Expression: %s\n",on2->print());
 
 	model_comp *newmc = new model_comp(model_above->name, TMODEL, 
 					   new opNodeIx(on2), NULL);
@@ -510,9 +547,12 @@ StochModel::expandToFlatModel()
   am->ix = node->indexing;
 
   printf(" -----------------------------------------------------------\n");
-  printf(" Finished Pass 1: printing FlatModel tree:\n");
+  printf(" StochModel::expandToFlatModel: Finished Pass 1: ");
+  if (GlobalVariables::prtLvl>1)
+    printf("printing FlatModel tree:");
+  printf("\n");
   printf(" -----------------------------------------------------------\n");
-  am->print();
+  if (GlobalVariables::prtLvl>1) am->print();
 
   /* =========================== PASS 2 ================================== */
      
@@ -526,10 +566,15 @@ StochModel::expandToFlatModel()
   am->reassignDependencies();
 
   printf(" -----------------------------------------------------------\n");
-  printf(" Finished converting StochModel: printing FlatModel tree:\n");
+  printf(" StochModel::expandToFlatModel: Finished converting:");
+  if (GlobalVariables::prtLvl>1)
+    printf(" printing FlatModel tree:");
+  printf("\n");
   printf(" -----------------------------------------------------------\n");
-  am->print();
-  printf(" -----------------------------------------------------------\n");
+  if (GlobalVariables::prtLvl>1){
+    am->print();
+    printf(" -----------------------------------------------------------\n");
+  }
   return am;
 }
 
@@ -556,7 +601,16 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
   model_comp *mc, *prev;
   list<char*>* dv;
   // need to set stage and node for the current model
-  opNode::stage = "\""+stagenames->at(level)+"\"";
+  
+  /* What should we do here: I think use quotation marks if the set of stages
+     is symbolic. otherwise don't use quotation marks */
+
+  if (is_symbolic_stages){
+    opNode::stage = "\""+stagenames->at(level)+"\"";
+  } else {
+    opNode::stage = stagenames->at(level);
+  }
+
   if (level==0){
     opNode::node = "\"root\"";
   }else{

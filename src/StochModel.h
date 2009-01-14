@@ -29,9 +29,10 @@
  */
 class StochModel: public AmplModel{
  public:
-  
+  // FIXME: stage should be replaced by a Set (decribing the elements)
   opNode *stageset;  //!< The set of STAGES
   vector <string> *stagenames; //!< explicit set of STAGES 
+  bool is_symbolic_stages; //!< if stage names are symbolic or numeric
   opNode *nodeset;   //!< The set of NODES 
   opNode *anc;       //!< The parameter array of ancestors
   opNode *prob;      //!< The parameter array of probabilities
