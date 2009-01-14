@@ -4,10 +4,14 @@
 #include <assert.h>
 #include "backend.h"
 #include "ampl.h"
+#include "GlobalVariables.h"
 #include "nodes.h"
 #include "ampl.tab.hpp"
 #include "sml-oops.h"
 //#include <list>
+
+static bool prt_modwrite = false;
+//produces: "Modified write (wealth), level=2, l_addIndex=2"
 
 void print_model(AmplModel *model);
 void process_model(AmplModel *model);
@@ -66,7 +70,8 @@ void do_stuff(AmplModel *model)
 {
   model->addDummyObjective();
   //print_model(model);
-  model->dump();
+  model->dump("logModel.dat");
+  //exit(1);
   process_model(model);
 }
 
@@ -201,12 +206,14 @@ process_model(AmplModel *model) /* should be called with model==root */
   /* model_list[0-(n_models-1)] is now a list of all (sub)models defined
      in the ampl file */
 
-  printf("These are the models on the list:\n");
+  //printf("These are the models on the list:\n");
   for(i=0;i<n_models;i++){
     AmplModel *thism = model_list[i];
     printf("%d: %s (level=%d)\n",i, thism->name, thism->level);
   }
   
+  printf("----------- generate submodel files --------------\n");
+
   /* 2) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output all submodel files */
   /* and */
   /* 3) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate the script file */
@@ -243,7 +250,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     /* ==================== write the script file ===================== */
 
     fprintf(fscript, "\nreset;\noption auxfiles rc;\noption presolve 0;\n");
-    fprintf(fscript, "model %s;\ndata %s;\n",buffer, "global.dat");
+    fprintf(fscript, "model %s;\ndata ../%s;\n",buffer, GlobalVariables::datafilename);
     /* FIXME: need to know the name of the global data file 
            this should be an argument to the parser that is passed
            through to the backend                                           */
@@ -425,7 +432,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 	  }
 	}
 	sprintf(p1, "&\".crd\"");
-	printf("name of file is: %s\n",buffer);
+	//printf("name of file is: %s\n",buffer);
 
 	// Need to write something like
  	//print card(indexing expression) > exact_model_name.&1.&2.txt
@@ -519,12 +526,15 @@ process_model(AmplModel *model) /* should be called with model==root */
 
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
 
+  printf("call AMPL to process script file: ");
+
   {
     // call ampl to process script and analyse the output
 
     FILE *ain = NULL;
     char buffer[256];
     int n_nocsobj=0; // number of model with "No constraints or objectives."
+    int n_novar=0; // number of model with "No variables declared."
     int n_other=0; // other ampl error
 
     ain = popen("ampl script.scr 2>&1", "r"); // "2>&1" sends stderr to stdout
@@ -535,27 +545,34 @@ process_model(AmplModel *model) /* should be called with model==root */
 	printf("%s",buffer);
 	if (strncmp(buffer, "No constraint",13)==0){
 	  n_nocsobj++;
+	} else if (strncmp(buffer, "No variables",12)==0){
+	  n_novar++;
 	}else{
 	  n_other++;
 	}
       }
     }
     if (n_nocsobj+n_other>0){
-      printf("AMPL: ampl returned output\n");
+      printf("\nAMPL: ampl returned output\n");
       printf("AMPL: Model without constraints and objectives: %d\n",n_nocsobj);
+      printf("AMPL: Model without variables                 : %d\n",n_novar);
       printf("AMPL: Other errors                            : %d\n",n_other);
       if (n_other>0){
 	exit(1);
       }
     }
   }
+  printf("done\n");
 
   /* 4) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> build algebra tree */
   
-  model->print();
-
+  //model->print();
+  
+  printf("------------- Generate ExpandedModel tree ------------ \n");
   ExpandedModel *em = new ExpandedModel(model);
   em->print();
+  printf("=============================================================== \n");
+  printf("----------------- Call OOPS generator ---------------- \n");
 
   SML_OOPS_driver(em);
   
@@ -656,10 +673,11 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
   //n_addIndex = 0; // clear addIndex stack
   l_addIndex.clear();
 
-  printf("================================================================\n");
-  printf("     ampl model for part: %s\n",submodel->name);
-  printf("================================================================\n");
-  
+  if (GlobalVariables::prtLvl>1){
+    printf("==============================================================\n");
+    printf("     ampl model for part: %s\n",submodel->name);
+    printf("==============================================================\n");
+  }
 
   /* need list of models at different levels from here up to root */
   {
@@ -674,12 +692,14 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
       listam[level] = tmp;
     }
   }
-  printf("-> this model is on level %d\n", level);
-  printf("   Levels from top are: \n");
-  for(i=0;i<=level;i++){
-    printf("%d: %s\n",i, listam[i]->name);
+  if (GlobalVariables::prtLvl>1){
+    printf("-> this model is on level %d\n", level);
+    printf("   Levels from top are: \n");
+    for(i=0;i<=level;i++){
+      printf("%d: %s\n",i, listam[i]->name);
+    }
   }
-  
+
   /* mark all model components that are needed by the current model */
   //model_comp::untagAll();
   model_comp::untagAll(AmplModel::root);
@@ -690,10 +710,12 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
       p!=submodel->comps.end();p++){
     (*p)->tagDependencies();
   }
-  printf("processing %s\n", submodel->name);
-  printf("-------> tagged now\n");
-  //model_comp::writeAllTagged();
-  model_comp::writeAllTagged(AmplModel::root);
+  if (GlobalVariables::prtLvl>1){
+    printf("processing %s\n", submodel->name);
+    printf("-------> tagged now\n");
+    //model_comp::writeAllTagged();
+    model_comp::writeAllTagged(AmplModel::root);
+  }
 
   /* now start reporting the modified model recursively */
   
@@ -1082,8 +1104,9 @@ modified_write(FILE *fout, model_comp *comp)
     level++;
     model = model->parent;
   }
-  printf("Modified write (%s), level=%d, l_addIndex=%d\n",
-	 comp->id, level, l_addIndex.size());
+  if (prt_modwrite)
+    printf("Modified write (%s), level=%d, l_addIndex=%d\n",
+	   comp->id, level, l_addIndex.size());
 
   if (comp->type!=TMODEL){
     int first=1;
