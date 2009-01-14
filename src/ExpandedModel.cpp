@@ -1,4 +1,5 @@
 #include "ExpandedModel.h"
+#include "GlobalVariables.h"
 #include "AmplsolverCalls.h"
 #include <list>
 #include <string>
@@ -55,8 +56,9 @@ void
 ExpandedModel::setLocalVarInfo()
 {
 
-  printf("setLocalVarInfo(): %s\n",model_file.c_str());
-  // FIXME: pretty unelegant to have to dp n*m comparisons
+  if (GlobalVariables::prtLvl>=2)
+    printf("setLocalVarInfo(): %s\n",model_file.c_str());
+  // FIXME: pretty unelegant to have to do n*m comparisons
 
   list<string> colfilelist;
   list<int> listColIx;
@@ -81,8 +83,9 @@ ExpandedModel::setLocalVarInfo()
     colfilelist.push_back(line);
   }
   
-  printf("Read %d lines from file %s.col\n",colfilelist.size(),
-	 model_file.c_str());
+  if (GlobalVariables::prtLvl>=2)
+    printf("Read %d lines from file %s.col\n",colfilelist.size(),
+	   model_file.c_str());
 
   // -------------- compare this list against the given VarDefs
   
@@ -96,7 +99,8 @@ ExpandedModel::setLocalVarInfo()
     for(q=colfilelist.begin(),cnt=0;q!=colfilelist.end();q++,cnt++){
       string cand(*q, 0, len);
       if (cand==(*p)) {
-	printf("Match of %s and %s\n",cand.c_str(), (*p).c_str());
+	if (GlobalVariables::prtLvl>=3)
+	  printf("Match of %s and %s\n",cand.c_str(), (*p).c_str());
 	listColIx.push_back(cnt);
 	listOfVarNames.push_back(*q);
       }
@@ -110,7 +114,7 @@ ExpandedModel::setLocalVarInfo()
   //  listColIx.sort();
   //  listColIx.unique();
   
-  printf("Found %d variables\n",listColIx.size());
+  //printf("Found %d variables\n",listColIx.size());
   
   nLocalVars = listColIx.size();
   listOfVars = (int*)calloc(nLocalVars, sizeof(int));
@@ -122,7 +126,11 @@ ExpandedModel::setLocalVarInfo()
   // open *.nl file to get number of constraints
   
   nLocalCons = nlfile->getNoConstraints();
-  printf("Found %d constraints\n",nLocalCons);
+  //printf("Found %d constraints\n",nLocalCons);
+
+  if (GlobalVariables::prtLvl>=1)
+    printf("setLocalVarInfo(): %s (%dx%d)\n",model_file.c_str(),
+	   nLocalCons,nLocalVars);
 
 }
 
