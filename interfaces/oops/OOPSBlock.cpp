@@ -1,4 +1,5 @@
 #include "OOPSBlock.h"
+#include "GlobalVariables.h"
 #include <iostream>
 #include <fstream>
 
@@ -16,8 +17,15 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
    */
   
 
+
   list<string> colfilelist;
   list<int> listColIx;
+
+  if (GlobalVariables::prtLvl>=2){
+    printf("-------------------------OOPS Block---------------------------\n");
+    printf("Generate OOPSBlock: col: %s/ row: %s\n",
+	   colmod->model_file.c_str(), rowmod->model_file.c_str());
+  }
 
   this->em = rowmod;
   this->nlfile = rowmod->nlfile;
@@ -45,9 +53,10 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
     getline(fin, line);
   }
   
-  printf("Read %d lines from file %s.col\n",colfilelist.size(),
-	 rowmod->model_file.c_str());
-
+  if (GlobalVariables::prtLvl>=2){
+    printf("Read %d lines from file %s.col\n",colfilelist.size(),
+	   rowmod->model_file.c_str());
+  }
 
   // -------------- compare this listOfVarNames against this list
   int i=0;
@@ -66,23 +75,31 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
     i++;
   }
 
-  printf("-------------------------OOPS Block-----------------------------\n");
-  printf("Row model: %s\n",rowmod->model_file.c_str());
-  printf("Col model: %s\n",colmod->model_file.c_str());
-  printf("Nb_row = %d\n",ncon);
-  printf("The NlFile declares these variables:\n"); 
-  int cnt=0;
-  for(list<string>::iterator p=colfilelist.begin();p!=colfilelist.end();p++){
-    printf("%2d: %s\n",cnt, (*p).c_str());
-    cnt++;
-  }
+  //printf("Row model: %s\n",rowmod->model_file.c_str());
+  //printf("Col model: %s\n",colmod->model_file.c_str());
+  //printf("Nb_row = %d\n",ncon);
 
-  printf("The column block defines %d variables:\n",nvar);
-  cnt =0;
-  for(list<string>::iterator p=colmod->listOfVarNames.begin();
-      p!=colmod->listOfVarNames.end();p++){
-    printf(" at %2d:  %s\n",lvar[cnt], (*p).c_str());
-    cnt++;
+  if (GlobalVariables::prtLvl>=3){
+    printf("The NlFile declares these variables:\n"); 
+    int cnt=0;
+    for(list<string>::iterator p=colfilelist.begin();p!=colfilelist.end();p++){
+      printf("%2d: %s\n",cnt, (*p).c_str());
+      cnt++;
+    }
+
+    printf("The column block defines %d variables:\n",nvar);
+    cnt =0;
+    for(list<string>::iterator p=colmod->listOfVarNames.begin();
+	p!=colmod->listOfVarNames.end();p++){
+      printf(" at %2d:  %s\n",lvar[cnt], (*p).c_str());
+      cnt++;
+    }
+  }
+ 
+  if (GlobalVariables::prtLvl>=1){
+    printf("OOPS Block: %s(rw)/%s(cl): %dx%d\n",
+	   rowmod->model_file.c_str(), colmod->model_file.c_str(),
+	   ncon, nvar);
   }
   
 }
