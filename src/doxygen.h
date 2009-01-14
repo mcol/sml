@@ -1,5 +1,5 @@
 /** 
-\mainpage Structure Modelling Language for OOPS 
+\mainpage Structured Modelling Language for OOPS 
 
 This is the doxygen documentation for the \ref language "Structured Modelling Language (SML)"
 Interface to OOPS.
@@ -46,18 +46,15 @@ is -lg2c for g77 and -lgfortran for gfortran)
 
 \section Usage
 
-In order to process an SML file say (either of)
+In order to process an SML file say 
 
 \code
-sml < name-of-smlfile
-sml name-of-smlfile
 sml name-of-smlfile name-of-datafile
 \endcode
 
-\bug The name-of-datafile is passed on to the datafile reader
-(data.ypp), but this part is not working yet. The third version is
-therefore only useful to debug the datafile reader. In the first two
-cases it is assumed that the data file is called "global.dat"
+\section interface Solver Interface
+
+to be written...
 
 \section Internals
 
@@ -119,6 +116,8 @@ representing a node of the model tree), consisting of model_comp
 objects (each representing on AMPL declaration). These in turn consist
 of several opNode trees representing the indexing and attribute(body)
 section of the declaration
+
+\note Also need to describe the data file parser and its classes
 */
 
 /**
@@ -398,6 +397,15 @@ command. The above piece of code actually defines a variable Net_Flow:
  var Net_Flow{k in COMMIDITIES, ARCS} >=0;
 \endcode
 
+Blocks can also be defined with the alternative syntax
+\code
+ set COMMODITIES;
+ block Net{k in COMMODITIES}:{
+    var Flow{ARCS} >=0;
+    ...
+ }
+\endcode
+
 \subsection Scoping 
 
 From within the block all model components that were defined in the
@@ -416,17 +424,28 @@ same level) or their child blocks cannot be used.
 
 A stochastic programming block can be defined as
 \code
- sblock alm using (STAGES, NODES, ANCESTORS, PROBS):
+ block alm stochastic using (STAGES, NODES, PARENTS, PROBS):
+   ...
+ end block;
+\endcode
+or short
+\code
+ sblock alm using (STAGES, NODES, PARENTS, PROBS):
    ...
  end sblock;
 \endcode
 
 Here 'alm' is the name of the block, 'STAGES' and 'NODES' are sets of
-stages and nodes respectively, 'ANCESTORS{NODES}, PROBS{NODES}' are
-parameter arrays indexed over the set NODES that give the ancestor
+stages and nodes respectively, 'PARENTS{NODES}, PROBS{NODES}' are
+parameter arrays indexed over the set NODES that give the parent
 node and the conditional probability of a given node respectively.
-The ancestors arrays must imply the same number of stages as are given
+The parent of the root node must be set to the string "null".
+The PARENTS array must imply the same number of stages as are given
 in the STAGES set.
+
+@note PARENT is a (symbolic) parameter indexed over the set NODES that 
+gives for every node in NODES the name of its parent node. For the root node 
+it is required that PARENT[root] = "null"
 
 There are a variety of specifiers that can be applied to model
 components declared within an sblock:
@@ -445,8 +464,14 @@ components declared within an sblock:
         ...
     end stage
   \endcode
-  @bug this second way is not implemented yet
-
+- also with the alternative syntax:
+  \code
+    set first := STAGES diff {first(STAGES)};
+    stage first:{
+      subject to Inventory{i in ASSETS}:
+        ...
+    }
+  \endcode
 <li> All model components declared in an sblbock are by default
      indexed over the NODES set. Some parameters or variables only have one
      value for every stage not for every node within the stage. These can
@@ -460,7 +485,7 @@ components declared within an sblock:
 <li> It is possible to explicitely refer to the node or stage of a component (for example to refer to parameters declared outside the sblock):
 \code
  param Liability{STAGES}; //an alternative deterministic parameter
- sblock alm using (STAGES, NODES, ANCESTORS, PROBS):
+ sblock alm using (STAGES, NODES, PARENT, PROBS):
    subject to CashBalance:
       sum{i in ASSETS} xs[i] =  Liability[stage] + sum{i in ASSETS} xb[i];
    ...
@@ -471,6 +496,7 @@ components declared within an sblock:
  sblock, whereas the keyword 'stage' in the constraint is replaced by
  the stage of the constraint.
 
+ 
  @bug Rather than implementing this as keywords 'node'/'stage' this
  should be done by declaring dummy variables for the NODES, STAGES
  set:
@@ -481,6 +507,10 @@ components declared within an sblock:
  \endcode
 
 </ul>
+
+\section exp Expectation Constraints
+
+Add something on how to write Expectation type constraints
 
 \section problems Known Problems
 
