@@ -1,12 +1,16 @@
 OOPSHOME = /home/agr/oops/oops_cvs
 AMPLSOLVER = /home/agr/struct_model/amplsolver
 YACC = bison
+YACCFLAGS = -d
+#YACCFLAGS += -t -v
 LEX = flex
+LEXFLAGS = 
+#LEXFLAGS += -d
 CFLAGS = -g 
-CXXFLAGS = -I$(AMPLSOLVER) -I$(OOPSHOME)/include -g
+CXXFLAGS = -I$(AMPLSOLVER) -I$(OOPSHOME)/include -gstabs
 #COMPILE.cpp = g++ -g -c
-CC = g++ -g
-LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -lmetis -lgfortran
+CC = g++ 
+LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -lmetis -lgfortran -lefence
 
 # for parallel uncomment this
 #CXXFLAGS += -DWITH_MPI -DMPI_PATH="\"mpi.h\"" 
@@ -14,8 +18,8 @@ LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -lmeti
 
 OBJECT := ampl.yy.o ampl.tab.cpp symtab.o nodes.o backend.o AmplModel.o \
           model_comp.o ExpandedModel.o AmplsolverCalls.o sml-oops.o \
-	  OOPSBlock.o StochModel.o StochModelComp.o data.tab.o data.yy.o
-
+	  OOPSBlock.o StochModel.o StochModelComp.o data.tab.o data.yy.o \
+          Set.o CompDescrParam.o SetElement.o
 all: sml
 
 
@@ -24,16 +28,16 @@ sml: $(OBJECT)
 
 
 ampl.yy.cpp: ampl.l ampl.tab.h
-	$(LEX) -d -o$@ $<
+	$(LEX) $(LEXFLAGS) -o$@ $<
 
 data.yy.cpp: data.l data.tab.h
-	$(LEX) -Pdata -d -o$@ $<
+	$(LEX) -Pdata $(LEXFLAGS) -o$@ $<
 
 ampl.tab.cpp ampl.tab.h: ampl.ypp
-	$(YACC) -d -v -t $<
+	$(YACC) $(YACCFLAGS) $<
 
 data.tab.cpp data.tab.h: data.ypp
-	$(YACC) -pdata -d -v -t $<
+	$(YACC) -pdata $(YACCFLAGS) $<
 
 clean:
 	-rm -rf *.tab.cpp
