@@ -1,14 +1,9 @@
-*.row
-*.nl
-*.col
-root*
+tmp
 latex
 html
 *.tab.*
-script.scr
 sml
 *.yy.cpp
 *.output
-tmp*
-mat.m
+*.log
 out
