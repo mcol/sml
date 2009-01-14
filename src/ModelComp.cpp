@@ -1,5 +1,9 @@
 #include "model_comp.h"
+#include "Set.h"
 #include "backend.h"
+#include "GlobalVariables.h" //for GlobalVariables class
+
+static bool prtAnaDep = false;
 
 int model_comp::tt_count=0;  // initialise static class member
 
@@ -65,7 +69,8 @@ model_comp::model_comp(char *id, compType type,
   this->attributes = attrib;
 
   this->count = model_comp::tt_count++;
-  printf("Defining model component (%4d): %s\n",this->count, id);
+  if (GlobalVariables::prtLvl>0) 
+    printf("Defining model component (%4d): %s\n",this->count, id);
 
   setUpDependencies();
 
@@ -117,8 +122,10 @@ model_comp::setUpDependencies()
 {
   dependencies.clear();
   /* now set up the dependency list for this component */
-  printf(" Analyse dependencies for %s\n",id);
-  printf("  dependencies in indexing: \n");
+  if (prtAnaDep){
+    printf("Analyse dependencies for %s\n",id);
+    printf(" dependencies in indexing: \n");
+  }
   if (indexing) {
     // get list of IDREF nodes in 'indexing'
     list<model_comp*> lmc;
@@ -135,7 +142,8 @@ model_comp::setUpDependencies()
   }
   if (attributes){
     char *tmp = attributes->print();
-    printf("  dependencies in attributes: %s\n", attributes->print());
+    if (prtAnaDep)
+      printf(" dependencies in attributes: %s\n", attributes->print());
     free(tmp);
     //attrib->findIDREF();
     list<model_comp*> lmc;
@@ -152,10 +160,12 @@ model_comp::setUpDependencies()
 	dependencies.push_back(*p);
     }
   }
-  printf("--------------------------------\n");
-  for( list<model_comp*>::iterator p=dependencies.begin(); 
-       p!=dependencies.end(); ++p)
-    printf("%s\n",(*p)->id);
+  if (prtAnaDep){
+    for( list<model_comp*>::iterator p=dependencies.begin(); 
+	 p!=dependencies.end(); ++p)
+      printf("  %s\n",(*p)->id);
+    printf("--------------------------------\n");
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -210,9 +220,9 @@ model_comp::setTo(char *id, compType type,
   this->attributes = attrib;
 
   /* now set up the dependency list for the component */
-  printf("Defining model component (%4d): %s\n",tt_count, id);
+  //printf("Defining model component (%4d): %s\n",tt_count, id);
   this->count = tt_count++;
-  printf("  dependencies in indexing: \n");
+  if (prtAnaDep) printf(" dependencies in indexing: \n");
   if (indexing) {
     list<model_comp*> lmc;
     indexing->findIDREF(&lmc);
@@ -227,7 +237,8 @@ model_comp::setTo(char *id, compType type,
     }
   }
   if (attrib){
-    printf("  dependencies in attributes: %s\n", attrib->print());
+    if (prtAnaDep) 
+      printf(" dependencies in attributes: %s\n", attrib->print());
     //attrib->findIDREF();
     list<model_comp*> lmc;
     attrib->findIDREF(&lmc);
@@ -243,11 +254,13 @@ model_comp::setTo(char *id, compType type,
 	dependencies.push_back(*p);
     }
   }
-  printf("--------------------------------\n");
-  for( list<model_comp*>::iterator p=dependencies.begin(); 
-       p!=dependencies.end(); ++p)
-    printf("%s\n",(*p)->id);
-  //return newmc;
+  if (prtAnaDep){
+    for( list<model_comp*>::iterator p=dependencies.begin(); 
+	 p!=dependencies.end(); ++p)
+      printf("  %s\n",(*p)->id);
+    //return newmc;
+    printf("--------------------------------\n");
+  }
 
   global_list.push_back(this);
 }
@@ -436,7 +449,7 @@ model_comp::getSetMembership()
   out = fopen("tmp.scr","w");
   fprintf(out, "reset;\n");
   fprintf(out, "model tmp.mod;\n");
-  fprintf(out, "data global.dat;\n");
+  fprintf(out, "data ../%s;\n",GlobalVariables::datafilename);
   fprintf(out, "display %s > (\"tmp.out\");\n",id);
   
   fclose(out);
@@ -468,7 +481,7 @@ model_comp::print()
   tmp = print_opNode(indexing);
   printf("  indexing: %s\n", tmp);
   free(tmp);
-  if (indexing) indexing->printDiagnostic();
+  if (indexing) indexing->printDiagnostic(stdout);
   //printf("  next: %s\n",(next==NULL)?"NULL":next->id);
   //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
   printf("  dependencies: %d:\n",dependencies.size());
@@ -482,32 +495,35 @@ model_comp::print()
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::dump()
+model_comp::dump(FILE *fout)
 ---------------------------------------------------------------------------- */
 /** Print a detailed diagnostic description of this model component
  *  with the values of all its fields                                        */
 void
-model_comp::dump()
+model_comp::dump(FILE *fout)
 {
-  printf("MCDP  ------------------------------------------------------------\n");
-  printf("MCDP model_comp: %s (%p)\n",id,this);
-  printf("MCDP  type: %s\n",nameTypes[type]);
+  fprintf(fout, "MCDP  ------------------------------------------------------------\n");
+  fprintf(fout, "MCDP model_comp: %s (%p)\n",id,this);
+  fprintf(fout, "MCDP  type: %s\n",nameTypes[type]);
   //printf("   (ismin: %d)\n",ismin);
-  printf("MCDP  attributes: %s\n",print_opNode(attributes));
-  if (attributes) attributes->dump();
-  printf("MCDP  indexing: %s\n", print_opNode(indexing));
-  if (indexing) indexing->printDiagnostic();
-  if (indexing) indexing->dump();
+  fprintf(fout, "MCDP  attributes: %s\n",print_opNode(attributes));
+  if (attributes) attributes->dump(fout);
+  fprintf(fout, "MCDP  indexing: %s\n", print_opNode(indexing));
+  if (indexing) indexing->printDiagnostic(fout);
+  if (indexing) indexing->dump(fout);
   //printf("  next: %s\n",(next==NULL)?"NULL":next->id);
   //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
-  printf("MCDP  dependencies: %d:\n",dependencies.size());
-  printf("      ");
+  fprintf(fout, "MCDP  dependencies: %d:\n",dependencies.size());
+  fprintf(fout, "      ");
   for(list<model_comp*>::iterator p = dependencies.begin();
       p!=dependencies.end();p++)
-    printf("%s::%s ",(*p)->model->name, (*p)->id);
-  printf("\nMCDP  model: %s\n",model->name);
-  printf("MCDP  count: %d\n",count);
-  printf("MCDP  tag: %s\n",tag?"true":"false");
+    fprintf(fout, "%s::%s ",(*p)->model->name, (*p)->id);
+  fprintf(fout, "\nMCDP  model: %s\n",model->name);
+  fprintf(fout, "MCDP  count: %d\n",count);
+  fprintf(fout, "MCDP  tag: %s\n",tag?"true":"false");
+  if (value) {
+    fprintf(fout, "MCDP  value: %s\n",(value->printToString()).c_str());
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -547,7 +563,7 @@ model_comp::deep_copy()
   model_comp *newm = new model_comp();
 
   newm->type = type;
-  newm->id = id;
+  newm->id = strdup(id);
   //newm->ismin = ismin;
   if (attributes) newm->attributes = attributes->deep_copy();
   if (indexing) newm->indexing = indexing->deep_copy();
@@ -1189,7 +1205,8 @@ model_comp::reassignDependencies()
       if (strcmp((*q)->id, mc->id)==0){
 	found = true;
 	if ((*q)!=mc){
-	  printf("Model comp %s referenced in %s is reassigned\n",mc->id,
+	  if (GlobalVariables::prtLvl>1)
+	    printf("Model comp %s referenced in %s is reassigned\n",mc->id,
 		 this->id);
 	  found = true;
 	  onidr->ref = (*q);

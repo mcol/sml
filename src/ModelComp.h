@@ -9,6 +9,7 @@ typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 #include <string.h>
 #include <list>
 #include "nodes.h"
+#include "CompDescr.h"
 #include "ampl.h"
 
 
@@ -39,7 +40,7 @@ static char *compTypes[7] = {"var","subject to","param",
  * It usually represents one line of AMPL/SML which is a definition of a
  * variable/parameter/set/constraint/objective/block.
  * A model component is broken down into the following parts:
- * - <TYPE> <name><indexing>_opt <attributes>_opt
+ * - \<TYPE\> \<name\>\<indexing\>_opt \<attributes\>_opt
  */
 class model_comp{
  public:
@@ -77,6 +78,10 @@ class model_comp{
    *  (i.e. everything listed in the dependencies list).                 */
   bool tag;            //!< true if part of the current 'needed' set
 
+  /** for sets and parameters this points to an object that gives the
+   *  values and further specific information (Set for sets)
+   */
+  CompDescr *value;   //!< value (for sets and parameters)
   static list<model_comp*> global_list; //!< global list of all defined comps
   static int tt_count;    //!< number of model_comps defined
   // ------------------------- METHODS ----------------------------------
@@ -89,7 +94,7 @@ class model_comp{
 
   /** set up list of dependencies for this component */
   void setUpDependencies();
-  void dump();   //!< detailed debugging output
+  void dump(FILE *fout);   //!< detailed debugging output
   void print();   //!< prints elements of the class
   void printBrief();   //!< prints one liner
   void tagDependencies();  //!< tag this components and all its dependencies
@@ -129,6 +134,16 @@ class model_comp{
 
   virtual void foo();
 
+};
+
+/** @class ModelCompSet
+ *  @brief The class describes a model component of type set 
+ * 
+ *  The class describes properties of a model component particular to sets
+ */
+class ModelCompSet: public model_comp {
+ public:
+  bool is_symbolic; //!< indicates whether or not this set is symbolic
 };
 
 char *
