@@ -64,7 +64,11 @@ class opNode {
 
   char *print();              // recursive printing of expression
 
-  void dump(); //!< diagnostic printing
+  /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
+      the value of this node as a c_string */
+  char *getValue();  //!< Returns value of ID, INT_VAL and FLOAT_VAL node
+
+  void dump(FILE *fout); //!< diagnostic printing
 
   char *printDummyVar();      // node is a dummy var -> remove (..) 
 
@@ -83,6 +87,15 @@ class opNode {
   /** find all nodes of opCode oc below current node */
   void findOpCode(int oc, list<opNode*> *lnd);
 
+  /** find model_comp (if it exitst) refered to by this opNode:
+   *  If the expression given by this opNode is an immediate reference to
+   *  a model_comp then return that. Otherwise return NULL
+   */
+  model_comp *findModelComp();
+  
+  //! returns the 'double' represented by this node (if of type INT/FLOAT_VAL)
+  double getFloatVal();
+  
   /** creates a deep_copy of the nodes: opNodes pointed to are recreated 
    *  as well. 
    *  Non-opNode objects pointed to are not recreated, here just pointers
@@ -111,7 +124,8 @@ class opNodeIx : public opNode {
  public:
   opNode *qualifier;    //!< the stuff to the right of ':' (if present)
   int ncomp;            //!< number of 'dummy IN set'-type expressions
-  opNode **sets;        //!< list of the sets
+  opNode **sets;        //!< list of the set expressions
+  model_comp **sets_mc;  //!< list of model_comp for the indexing sets
   opNode **dummyVarExpr;//!< list of the dummyVarExpressions
   // private:            
   int done_split; //!< indicates that extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
@@ -130,8 +144,8 @@ class opNodeIx : public opNode {
   
   //! copies node and all its subnodes into new datastructures 
   opNodeIx *deep_copy();    
-  
-  void printDiagnostic();   //!< diagnostic print of class variables
+
+  void printDiagnostic(FILE *fout);   //!< diagnostic print of class variables
 };
 
 
@@ -227,8 +241,9 @@ opNode *newUnaryOp(int opCode, void *val);
 void freeOpNode(opNode *target);
 //indexNode *newIndexNode(opNode *node);
 //opNode *addItemToList(opNode *list, opNode *newitem);
-opNode *addItemToListNew(opNode *list, opNode *newitem);
+opNode *addItemToListNew(opNode *list, void *newitem);
 opNode *addItemToListOrCreate(int oc, opNode *list, opNode *newitem);
+opNode *addItemToListBeg(void *newitem, opNode *list);
 //retType *newRetType(opNode *node, opNode *indexing, 
 //		    struct AmplModel_st *context);
 char *print_opNode(opNode *node);
