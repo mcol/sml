@@ -1,17 +1,25 @@
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
 #include <cassert>
+#include "GlobalVariables.h"
 #include "ExpandedModel.h"
 #include "AmplsolverCalls.h"
 #include "OOPSBlock.h"
 //#include "asl_pfgh.h"
 extern "C" {
 #include "oops/oops.h"
+#include "oops/WriteMps.h"
 #include "oops/OopsInterface.h"
 //#include "oops/MatrixSparseSimple.h"
 #include "oops/CallBack.h"
 }
 //#define asl cur_ASL
+
+// C++ static variables defined in an *. file need to be declared here as well
+#ifdef __cplusplus
+FILE *printout;
+double tt_start, tt_end;
+#endif
 
 /** Wrapper round the Algebras A and Q. Return value for generateSML() */
 typedef struct SMLReturn_st {
@@ -86,6 +94,13 @@ SML_OOPS_driver(ExpandedModel *root)
     fclose(mout);
   }
 
+  {
+    FILE *mps_file;
+    mps_file = fopen("test.mps","w");
+    Write_MpsFile(mps_file, AlgAug, vb,vc, vu, NULL, 1, NULL, NULL);
+    fclose(mps_file);
+  }
+
   Vector *vx, *vy, *vz;
   primal_dual_pb *Prob;
   hopdm_prt_type *Prt = NewHopdmPrt(3);
@@ -152,8 +167,11 @@ createA(ExpandedModel *A)
 	     A->nLocalCons);
       exit(1);
     }
-    printf("Create leaf node: %s\n",(A->model_file+":"+A->model_file).c_str());
-    printf("    %d x %d\n",A->nLocalCons, A->nLocalVars);
+    if (GlobalVariables::prtLvl>=1){
+      printf("SMLOOPS: Create leaf node: %s (%dx%d)\n",
+	     (A->model_file+":"+A->model_file).c_str(),
+	     A->nLocalCons, A->nLocalVars);
+    }
     Alg = NewAlgebraSparse(A->nLocalCons, A->nLocalVars, 
 			   (A->model_file+":"+A->model_file).c_str(),
 			   (CallBackFunction)SMLCallBack, obl);
