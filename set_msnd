@@ -1,4 +1,0 @@
-#!/bin/bash
-rm global.dat
-ln -s ampl_msnd_test_slck.dat global.dat
-
