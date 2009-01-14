@@ -10,6 +10,8 @@
 #include "ampl.tab.hpp"
 unsigned long hash_function(char *str);
 
+static bool logSymtab = false;
+
 void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
 {
   char *nametype;
@@ -91,7 +93,7 @@ void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
 	 this_symbol->type = ST_OBJ; 
          break;
    }
-   printf("defined %s of type %s\n", id, nametype);
+   if (logSymtab) printf("SYMTAB: defined %s of type %s\n", id, nametype);
 }
 
 /* ----------------------------------------------------------------------------
