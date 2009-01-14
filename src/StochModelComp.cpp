@@ -2,6 +2,8 @@
 #include "StochModel.h"
 #include "ampl.tab.hpp"
 
+static bool prtSM = false;
+
 StochModelComp::StochModelComp():
   model_comp()
 {}
@@ -61,7 +63,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
     printf("SMC.transcribeToModelComp: this->stochmodel not set\n");
     exit(1);
   }
-  //printf("Call transcribe for %s level %d\n",id, level);
+  if (prtSM) printf("Call transcribe for %s level %d\n",id, level);
 
   // ---------- (1) make deep_copy of StochModelComp ------------------------
 
@@ -331,6 +333,11 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	//print();
 	//exit(1);
 	// actually queues this to be moved up
+	char *id2 = (char *)calloc(strlen(newmc->id)+5, sizeof(char));
+	strcpy(id2, newmc->id);
+	sprintf(id2+strlen(newmc->id), "_up%d",level);
+	free(newmc->id);
+	newmc->id = id2;
 	newmc->moveUp(level);
 	
       }
