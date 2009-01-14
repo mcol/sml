@@ -11,8 +11,11 @@
 //  YYSTYPE yylval;
 %}
 
+/* these here are just macro definitions: ID/DIGIT can be used in the rest
+   of this *.l file as shortcuts. These lines don't do any matching */
+ID       -?[a-zA-Z0-9_][a-zA-Z0-9_.]*
 DIGIT    [0-9]
-ID       [a-zA-Z][a-zA-Z0-9_]*
+
 
 %s accept_model_type
 
@@ -23,28 +26,34 @@ ID       [a-zA-Z][a-zA-Z0-9_]*
 %%
 
    /* Tokens with values */
--?{DIGIT}+ {
-            long *dummy = (long *)malloc(sizeof(long));
-            *dummy = strtol(yytext, NULL, 10);
-            datalval.ival = dummy;
-            if(errno == ERANGE)
-               fprintf(stderr, "Value overflow on line %i with token:" \
-                     "\n\"%s\"\n", yylineno, yytext);
-            myreturn(INT_VAL);
-         }
--?{DIGIT}+("."{DIGIT}*)?([eE]{DIGIT}+)?  {
-            double *dummy = (double *)malloc(sizeof(double));
-            *dummy = strtod(yytext, NULL);
-            datalval.fval = dummy;
-            if(errno == ERANGE)
-               fprintf(stderr, "Value overflow on line %i with token:" \
-                     "\n\"%s\"\n", yylineno, yytext);
-            myreturn(FLOAT_VAL);
-         }
 
-   /* Another type of value */
-inf                  myreturn(INFINITY);
+   /* remove '//' and move to first column to re-activate */
+   //-?{DIGIT}+ {
+   //              long *dummy = (long *)malloc(sizeof(long));
+   //              *dummy = strtol(yytext, NULL, 10);
+   //              datalval.ival = dummy;
+   //              if(errno == ERANGE)
+   //                 fprintf(stderr, "Value overflow on line %i with token:" \
+   //                       "\n\"%s\"\n", yylineno, yytext);
+   //             myreturn(INT_VAL);
+   //           }
+   //-?{DIGIT}+("."{DIGIT}*)?([eE]{DIGIT}+)?  {
+   //              double *dummy = (double *)malloc(sizeof(double));
+   //              *dummy = strtod(yytext, NULL);
+   //              datalval.fval = dummy;
+   //              if(errno == ERANGE)
+   //                 fprintf(stderr, "Value overflow on line %i with token:" \
+   //                       "\n\"%s\"\n", yylineno, yytext);
+   //              myreturn(FLOAT_VAL);
+   //           }
 
+
+   /* This here defines a character string */
+'([^']|'')+'|\"([^\"]|\"\")+\"  {
+            datalval.string = strndup(yytext+1, strlen(yytext)-2);
+            printf("Read string >%s<>%s<\n",yytext, datalval.string);
+            myreturn(CHARACTER_STRING);
+}
    /* comments */
 #[^\n]*             //printf("\n-->%s\n",yytext); /* nothing */
   /* whitespace */
