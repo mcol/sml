@@ -1,3 +1,282 @@
+07/01/09:
+ - In ExpandedModel::setLocalVarInfo for model root_alm0_1_1:
+    root_alm0_1_1.col list vars as "alm0_1_risk[1,..."
+    EM: This is ExpandedModel: root_alm0_1_1 
+                   reports them as "alm0_1_risk['1',..."
+
+
+22/12/08:
+ - This seems to be working. However matrix generated for alm_xi.mod/dat 
+   is wrong. Next thing is to
+   + tidy up the debugging printing
+   + expand sets internally rather than ask AMPL to do it
+   + Change handling of expectation constraints? (-> 19/12/08)
+   + Move towards internal processing of whole model 
+     - How should the communication for nonlinear models work? How do
+       we decide which gradient/hessian nonzeros sit in which block? How can
+       we get them to be generated? How can we break a complicated expression
+       into terms, each of which may well create a different nonzero
+       (and may need to be generated independent of other terms?)
+  
+
+19/12/08:
+ - Expectation constraints: 
+   + After talking to Marco a while back we agreed that expectation 
+     constraints should be posed at the level where the expectation is
+     taken. This probably needs a "child" keyword or something similar
+   + The stochastic dominance constraint in alm_xi.mod:
+
+     stage(1..T):{
+       subject to StochasticDominance2{l in BENCHMARK}:
+         Exp(risk[l]) = Bench2nd[l] - slack2[l,stage];
+     }
+
+     would become
+     
+     stage {0}:{
+       subject to StochDom{t in TIME, l in BENCHMARK}:
+         Exp(child(t).risk[l]) = Bench2nd[l] - slack2[l, t];
+     }
+
+   + Possibly use a different keyword "Expectation", to implement this
+     and remove the old implementation once this one is working.
+ - Need to work out why the stage keyword in slack2[l,stage] in
+   alm_xi.mod is replaced by "1", "2" and not just 1, 2.
+
+ 
+15/12/08(2):
+ - Parsing of data file seems to be working
+ - FIXME: backend.cpp:247, global.dat should be changed (maybe other 
+          locations as well)
+ - To carry on
+   + processing of set membership? Where should this be done?
+
+15/12/08:
+ - saved in ver151208 the version that attempts to read in values as
+   INT_VAL/FLOAT_VAL/ID. Change it back however to just reading in 
+   everything as ID
+
+12/12/08: 
+
+ - The trouble with having objects (values) in parameter descriptions
+   as INT_VAL/FLOAT_VAL/ID is the inconsistency of using these as set
+   members: when reading in a parameter dclaration this is a mixed list
+   of set members (ie position specifiers) and values. While the values
+   should be read in as INT_VAL/FLOAT_VAL/ID, the set members should be
+   read in as ID (or lists of IDs).
+   + Set members in question could be converted back to ID, if they
+     have been read as INT_VAL/FLOAT_VAL, but this looses information
+     => cannot distinguish set members "1" and "001", or "3.1"/"03.10"
+   + The alternative is to read everything in a ID and convert to
+     FLOAT_VAL when needed. No doubt this was intended at some point
+
+11/12/08: 
+
+ - There is a question of whether objects (values) in
+   parameter descriptions should be represented just by ID (i.e. string)
+   or by INT_VAL/FLOAT_VAL/ID
+   + data.l has been changed so that it matches INT_VAL first, then 
+     FLOAT_VAL and ID only if the other two don't match
+   + I guess set members should probably always be ID (so that we can
+     match easily, whereas the actual values for parameters should be 
+     INT_VAL/FLOAT_VAL. Unless the parameter is declared symbolic in
+     which case INT_VAL/FLOAT_VAL/ID are all acceptable, but should be
+     converted to ID.
+   => do the necessary changes.
+
+
+07/09/08:
+ - Couldn't find method SetElement::toCharA
+   when trying to run it on alm_xi.mod/dat this happens when printing
+   out the value of parameter Return
+ - 
+
+25/08/08:
+ - Carry on in CompdescrParam.cpp:165
+20/08/08:
+ - Write value_table_list processing in CompParamDescr.cpp:114
+
+19/08/08:
+ - Check that parameters are indeed read in correctly:
+   + should CompDescParam::toString, print key/value pairs, or just
+     the  parameter values in order. 
+     Currently just prints values in order, the keys are part of the 
+     indexing sets, would need to look up their value from the set
+   + Two dimensional parameters (i.e. Return) are not correctly
+     understood at the moment (no value is assigned to Return). 
+     I guess the syntax for this is understood but no action
+     associated with it.
+ - Need to start on the processing of derived sets/parameters.
+   Should replace one of the set-evaluation routines (that currently
+   writes out a temporary model file) and replace it with code that tries
+   to evaluate the set expression recirsively
+ - Could also try to write out partial data files (only using data
+   needed to resolve dependencies for subproblem models).
+   + would need a dependency list for data file (can data statements
+     depend on other data statements?, I think not)
+   + would need to be able to write selected data statements to file
+
+15/08/08: 
+ - looks like sets(Set) and parameters(CompDescrParam) are
+   now initialised correctly. Could start to do something with it
+   + process something like set TIME := 0..T
+   + process something like UNION/DIFF, ...
+   + process something like {i in ASSETS: i<3}
+   (to get membership of derived sets)
+   + do the same for calculated parameters
+ - i.e. we need to be able to parse the attribute section of a
+   Set/Param
+ - Do we need specialised opNodes, depending on what they  represent?
+   + Sets: {}, UNION, DIFF
+   + condition: ==, <=, etc
+   + scalars,
+   + ...
+
+
+13/08/08:
+ - I think Set::findPos does not find the correct element because
+   comparison is done based on pointers rather than elements. Should
+   provide a comparison routine
+
+06/08/08:
+ - In opNodeIx the indexing sets are opNode* to the expression
+   defining the indexing set. We need to assume that these are simple
+   expressions (so that we can get a model_comp from it), or
+   we need to be able to define "dummy"-model components for
+   expressions that are used as indexing sets
+   + In CompDescrParam.cpp:44 we try to get the ->values (i.e. entries)
+     of a set. ->values is a component of model_comp, whereas we only
+     have access to the opNode at that point.	
+
+	
+21/07/08:
+ - The reading of the parameter should work. Issues:
+   + Does not work if one of the sets indexing the parameter is
+     multidimensional
+   + Is value/symvalue initialised? Is the initialisation statement 
+     correct C++? Looks ok!
+   + How to convert the char* of objects/value in the paramspec to string?
+
+17/07/08:
+ - Continue at bottom of CompDescrParam: 
+    analyse the given value list and place the values in the correct 
+    position of the values array 
+    + need a routine that works out the correct position given a
+      (multidiemnsional) key.
+    + This routine would ask all indexing sets for the position of
+      this element within the set
+
+13/07/08:
+ - Writing the constructor in CompDescrParam that deals with the first
+   of the param definition syntaxes. 
+   + Need to return the tree of expression correctly. Probably should
+     invent some meaningful tokens: How to express 
+     - paramtemplate_opt value_list?     
+     - paramtemplate_opt value_table_list?
+     should we have tokens for value_list, value_table_list?
+     Is param_template_opt just an argument to these lists? or a
+     different token? Probably a different token.
+     Is it eneough just to define these tokens in datal (without them
+     being used there)?
+
+11/07/08(2):
+ - Just started CompDescrParam.h
+   + Parallel to Set.h, probably should be a subclass of CompDescr
+ - If a param is declared (in model file? in data file?) should
+   identify the indexing sets (if any) and set up the 
+   -> indices, ->nix, ->n, ->values, ->is_symbolic entries in
+      CompDescrParam
+
+ - actual values can be looked up from a vector of set entries, by
+   breaking the vector down into its subcomponents, asking each set
+   about the correct positions (implement sets as (hash?)map rather than
+   vector and then working out the position in the values array
+ 
+
+
+
+11/07/08:
+ - Processing the data file: 
+   + This is currently identifying sets and setting their values.
+     - "object"'s i the data file are *only* strings (with or without
+        quotation marks)
+     - Some sets are defined as ":= 0..T", where T is a parameter.
+       => need to be able to process parameters and to process
+          implicit set definitions as above.
+       => should probably have a marker that says that a set
+          definition is given.
+ - I guess the next thing to do is to process the parameter file
+   Numeric parameters are read in as strings and then converted to
+   numbers? Need some routine that checks that they are indeed in a
+   number format (this is fairly easy) if the parameter is not of 
+   "symbolic" type
+	  
+
+16/06/08
+ - Debugging Xi's stochastic dominance model:
+   + Currently the STAGES set must be symbolic!
+     - difficult to fix. The best way to proceed seems to be to write
+       the code that understands data files and can process set
+       declarations and modifications. A Set class would then know if
+       the set is symbolic or not.
+   + To understand set definitions:
+     - make the setelement into "object" (this is what AMPL calls them)
+       objects can be numeric (INT_VAL or FLOAT_VAL) or strings.
+       strings are anything that cannot be interpreted as numbers? if
+       they could be interpreted as numbers (or contain spaces) they
+       need to be enclosed in quotation marks)
+     - unclear how to store setelements. The current building of
+       expression tree (might be/is) the wrong thing.
+	
+ 
+
+   + support the "node in NODES" notation rather than prescribing what
+     dummy variable to use
+
+
+12/06/08
+ - Debugging Xi's stochastic dominance model:
+   + The StochasticDominance2 constraint is an expectation constraint
+     and is therefore moved to "root_alm0" from both stages below
+     -> it now appears twice in root_alm0!
+     => need a modification of name when a constraint is moved up, to
+        avoid these clashes.
+
+11/06/08 (2)
+ - Debugging Xi's stochastic dominance model:
+   + add support for the ancestor(1).xh[i] notation. Look at the
+         ANCESTOR LBRACKET INT_VAL RBRACKET DOT iditem {
+     branch and copy in the statements from the branch above
+
+11/06/08
+ - Debugging Xi's stochastic dominance model:
+   +  in the stage declaration: I'm not sure if "{1..T}" is a valid
+      set declaration. I would guess it is either "(1..T)" or just "1..T"
+      I would think that "{..}" declares a set constituting of a list
+      of elements. 
+      => Check the AMPL grammar
+
+27/04/08
+  - processing of simple para definition 
+    for now just simply scan the rhs. Rhs can be:
+     - single value (for scalar parameters)
+     - list of element/value pairs (for 1d arrays)
+     - list of tables of the form 
+       ": col col := row val val row val val ...
+       (for 2d arrays)
+     - tables involving templates
+       [*,col,*] : col col := ...as above...
+  - when we can a value_list (i.e. of the worm 
+       label label value value value ...
+    we need to know beforehand (and we do know) how many labels/values
+    to expect in one block 
+    + either by the dimension of the set to be defined
+    + or by the template given
+    => value list should just be a list (of string). This can be
+       changed into the appropriate hash-list by the template or 
+       param processing routine.
+
+
 10/04/08:
   - looking at ampl_msnd...mod:
     for some reason the IDREFM processor in nodes.cpp:360 thinks that
