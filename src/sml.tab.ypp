@@ -1682,7 +1682,7 @@ createSubdirTmpIfNotExist(void)
   }
   if (!fl_exists){
     int err;
-    err = mkdir("tmp", S_IRUSR|S_IWUSR);
+    err = mkdir("tmp", S_IRWXU);
     if (err){
       printf("Failed to create temporary directory 'tmp/'\n");
       printf("Cannot continue\n");
