@@ -55,6 +55,7 @@ model_comp::model_comp(char *id, compType type,
 		       opNode *indexing, opNode *attrib)
 {
   //model_comp *newmc = (model_comp*)calloc(1,sizeof(model_comp));
+  value = NULL;
   this->tag = false;
   this->id = strdup(id);
   this->type = type;
@@ -184,6 +185,7 @@ model_comp::model_comp()
   other = NULL;
   count = -1;
   tag = false;
+  value = NULL;
 }
 /* --------------------------------------------------------------------------
 model_comp::setTo()
