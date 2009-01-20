@@ -1,0 +1,10 @@
+On initial checkout do the following:
+ln -s todo.txt ChangeLog
+ln -s todo.txt News
+autoreconf
+automake --add-missing
+autoreconf
+
+Compilation:
+./configure
+make
