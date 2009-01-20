@@ -547,6 +547,12 @@ process_model(AmplModel *model) /* should be called with model==root */
 	  n_nocsobj++;
 	} else if (strncmp(buffer, "No variables",12)==0){
 	  n_novar++;
+   } else if (strncmp(buffer, "ILOG AMPL",9)==0){
+      // Do nothing, version and liscence string
+      // eg ILOG AMPL 10.000, licensed to "university-edinburgh".
+   } else if (strncmp(buffer, "AMPL Version",12)==0){
+      // Do nothing version string
+      // eg AMPL Version 20051214 (Linux 2.6.9-5.ELsmp)
 	}else{
 	  n_other++;
 	}
