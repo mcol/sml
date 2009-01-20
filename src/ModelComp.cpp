@@ -455,7 +455,14 @@ model_comp::getSetMembership()
   fprintf(out, "display %s > (\"tmp.out\");\n",id);
   
   fclose(out);
-  system("/root/bin/ampl tmp.scr");
+  if(strlen(GlobalVariables::amplcommand)+9>500) {
+     // Avoid buffer overflow
+     fprintf(stderr, "buffer too short to accomodate amplcommand length.\n");
+     exit(1);
+  }
+  strcpy(buffer, GlobalVariables::amplcommand);
+  strcat(buffer, " tmp.scr");
+  system(buffer);
   out = fopen("tmp.out","r");
   fgets(buffer, 500, out);
   fclose(out);

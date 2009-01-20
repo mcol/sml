@@ -98,7 +98,15 @@ StochModel::expandStages()
   
   fclose(out);
   {
-    int errc = system("/root/bin/ampl tmp.scr");
+    if(strlen(GlobalVariables::amplcommand)+9>500) {
+       // Avoid buffer overflow
+       fprintf(stderr, "buffer too short to accomodate amplcommand length.\n");
+       exit(1);
+    }
+    strcpy(buffer, GlobalVariables::amplcommand);
+    strcat(buffer, " tmp.scr");
+    printf("Executing `%s`\n", buffer);
+    int errc = system(buffer);
     if (errc!=0){
       printf("ERROR: Call to AMPL returns errc=%d\n",errc);
       exit(1);
@@ -211,7 +219,15 @@ StochModel::expandStagesOfComp()
   }
   fclose(out);
   {
-    int errc = system("/root/bin/ampl tmp.scr");
+    if(strlen(GlobalVariables::amplcommand)+9>500) {
+       // Avoid buffer overflow
+       fprintf(stderr, "buffer too short to accomodate amplcommand length.\n");
+       exit(1);
+    }
+    strcpy(buffer, GlobalVariables::amplcommand);
+    strcat(buffer, " tmp.scr");
+    printf("Executing `%s`\n", buffer);
+    int errc = system(buffer);
     if (errc!=0){
       printf("ERROR: Call to AMPL returns errc=%d\n",errc);
       exit(1);

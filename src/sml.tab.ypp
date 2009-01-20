@@ -21,6 +21,7 @@
    /* global variables */
    char *GlobalVariables::modelfilename = NULL;
    char *GlobalVariables::datafilename = NULL;
+   char *GlobalVariables::amplcommand = "/usr/local/ilog/ampl10/ampl";
 
    bool GlobalVariables::logParseModel = false;
    int GlobalVariables::prtLvl = 1;
