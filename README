@@ -1,6 +1,6 @@
 On initial checkout do the following:
 ln -s todo.txt ChangeLog
-ln -s todo.txt News
+ln -s todo.txt NEWS
 autoreconf
 automake --add-missing
 autoreconf
