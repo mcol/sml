@@ -4,10 +4,10 @@
 #include <assert.h>
 #include <iostream>
 #include "nodes.h"
-#include "ampl.tab.hpp"
-#include "ampl.h"       // for findKeywordinTree
+#include "ampl.tab.h"
+#include "ampl.h"   // for findKeywordinTree
 #include "AmplModel.h"
-#include "model_comp.h" // for WITHARG
+#include "model_comp.h"    // for WITHARG
 
 static bool logCreate = false;
 

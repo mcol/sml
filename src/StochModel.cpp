@@ -2,7 +2,7 @@
 #include "GlobalVariables.h"
 #include "StochModel.h"
 #include "StochModelComp.h"
-#include "ampl.tab.hpp"
+#include "ampl.tab.h"
 #include <typeinfo>
 
 static bool logSM = false;

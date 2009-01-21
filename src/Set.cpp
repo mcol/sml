@@ -2,7 +2,7 @@
 #include <map>
 #include <string>
 #include <assert.h>
-#include "data.tab.hpp"
+#include "data.tab.h"
 #include "misc.h"
 
 /* ---------------------------------------------------------------------------

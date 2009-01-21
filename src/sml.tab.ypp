@@ -710,7 +710,7 @@ expr: value
     | expr ELLIPSE expr { $$ = newBinOp(ELLIPSE, $1, $3); }
     | expr LOGICAL_OR expr { $$ = newBinOp(LOGICAL_OR, $1, $3); }
     | expr LOGICAL_AND expr { $$ = newBinOp(LOGICAL_AND, $1, $3); }
-    | '!' expr { $$ = newUnaryOp('!', $2) };
+    | '!' expr { $$ = newUnaryOp('!', $2); }
     | reduction_op indexing {add_indexing($2);} expr { 
       /* reduction operator: do we need to keep track of the ID of the
 	 dummy variable(s)? */

@@ -2,7 +2,7 @@
 %option noyywrap
 %{
    #include "nodes.h"
-   #include "data.tab.hpp"
+   #include "data.tab.h"
    /*#include "parser.h"*/
    #include <errno.h>
    #include <string.h>

@@ -7,7 +7,7 @@
 //#include "ampl.h"
 #include "AmplModel.h"
 
-#include "ampl.tab.hpp"
+#include "ampl.tab.h"
 unsigned long hash_function(char *str);
 
 static bool logSymtab = false;

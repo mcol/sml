@@ -3,7 +3,7 @@
 #include "model_comp.h"
 #include "nodes.h"
 #include <assert.h>
-#include "data.tab.hpp"
+#include "data.tab.h"
 #include "misc.h"
 
 
