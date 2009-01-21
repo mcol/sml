@@ -32,60 +32,7 @@ char *print_stropstr(opNode *node, char *buffer);
 
 */
 
-
-
-/* ----------------------------------------------------------------------------
- newBinOp
----------------------------------------------------------------------------- */
-/* Binary Operator is everything that takes two argument.
-   these are the classical binary: *, +, -, /, but also
-   sum/max/min (first op=index, second op=expression)
-*/   
-
-
-
-opNode *newTertOp(int opCode, void *val1, void *val2, void *val3) {
-   opNode *newOp;
-
-   if (logCreate) printf("creating tertiary op: %d\n",opCode);
-   newOp = new opNode();
-   newOp->opCode = opCode;
-   newOp->values = (void **) malloc(3*sizeof(void *));
-   newOp->values[0] = (void *) val1;
-   newOp->values[1] = (void *) val2;
-   newOp->values[2] = (void *) val3;
-   newOp->nval = 3;
-
-   return newOp;
-}
-opNode *newBinOp(int opCode, void *lval, void *rval) {
-   opNode *newOp;
-
-   if (logCreate) printf("creating binary op: %d\n",opCode);
-   newOp = new opNode();
-   newOp->opCode = opCode;
-   newOp->values = (void **) malloc(2*sizeof(void *));
-   newOp->values[0] = (void *) lval;
-   newOp->values[1] = (void *) rval;
-   newOp->nval = 2;
-
-   return newOp;
-}
-
-opNode *newUnaryOp(int opCode, void *val) {
-   opNode *newOp;
-   
-   if (logCreate) printf("creating unary op: %d\n",opCode);
-   newOp = new opNode();
-   newOp->opCode = opCode;
-   newOp->values = (void **) malloc(1*sizeof(void *));
-   newOp->values[0] = (void *) val;
-   newOp->nval = 1;
-
-   return newOp;
-}
-
-//opNodeID *newUnaryOpID(void *val) {
+//opNodeID *new opNodeID(void *val) {
 //   opNodeID *newOp;
 //   
 //   printf("creating unary opID:\n");
@@ -216,7 +163,7 @@ addItemToListOrCreate(int oc, opNode *list, opNode *newitem)
     if (newitem==NULL){
       return NULL;
     }else{
-      return newUnaryOp(oc, newitem);
+      return new opNode(oc, newitem);
     }
   }else{
     assert(oc==list->opCode);
@@ -724,6 +671,25 @@ opNode::opNode()
   opCode = -1;
   nval = -1;
   values = NULL;
+}
+
+opNode::opNode (int code, void *val1, void *val2, void* val3)
+{
+   opCode = code;
+
+   nval = 0;
+   if(val1) nval++;
+   if(val2) nval++;
+   if(val3) nval++;
+
+   values = NULL;
+   if(nval) values = (void **) malloc(nval*sizeof(void *));
+
+   if(val1) values[0] = (void *) val1;
+   if(val2) values[1] = (void *) val2;
+   if(val3) values[2] = (void *) val3;
+
+   if (logCreate) printf("created %d-ary op: %d\n", nval, opCode);
 }
 
 

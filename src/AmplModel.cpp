@@ -635,13 +635,13 @@ AmplModel::addDummyObjective()
 	opNode *commasepon;
 	for(i=0;i<ix->ncomp;i++){
 	  if (ix->dummyVarExpr[i]){
-	    opNode *newon = newBinOp(IN, ix->dummyVarExpr[i], ix->sets[i]);
+	    opNode *newon = new opNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
 	    commaseplist.push_back(newon);
 	  }else{
 	    // need to make up a dummy variable
 	    char buffer[20];
 	    sprintf(buffer, "dum%d", i);
-	    opNode *newon = newBinOp(IN, newUnaryOp(ID, strdup(buffer)), 
+	    opNode *newon = new opNode(IN, new opNode(ID, strdup(buffer)), 
 				     ix->sets[i]);
 	    commaseplist.push_back(newon);
 	  }
@@ -668,8 +668,8 @@ AmplModel::addDummyObjective()
 	  onref->values[i] = ondum;
 	}
 	// make the sum part
-	commasepon = newUnaryOp(LBRACE, commasepon);
-	list_on_sum.push_back(newBinOp(SUM, commasepon, onref));
+	commasepon = new opNode(LBRACE, commasepon);
+	list_on_sum.push_back(new opNode(SUM, commasepon, onref));
 
       }else{ // no indexing expression, simply add this node
 	list_on_sum.push_back(new opNodeIDREF(comp));
@@ -683,9 +683,9 @@ AmplModel::addDummyObjective()
     if (list_on_sum.size()==1){
       attr = list_on_sum[0];
     }else{
-      attr = newBinOp('+', list_on_sum[0],list_on_sum[1]);
+      attr = new opNode('+', list_on_sum[0],list_on_sum[1]);
       for(i=2;i<list_on_sum.size();i++){
-	attr = newBinOp('+', attr, list_on_sum[i]);
+	attr = new opNode('+', attr, list_on_sum[i]);
       }
     }
     

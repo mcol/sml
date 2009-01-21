@@ -237,8 +237,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
 	  oncp->nval = 1;
 	  oncp->values = (void**)calloc(1, sizeof(void*));
-	  oncp->values[0] = newUnaryOp(ID, strdup(dv->front()));
-	  opNode *onmult = newBinOp('*', oncp, up);
+	  oncp->values[0] = new opNode(ID, strdup(dv->front()));
+	  opNode *onmult = new opNode('*', oncp, up);
 	  up = onmult;
 	}
 	// up/onmult is now a pointer into the expression, this should
@@ -263,7 +263,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
 	opNode *up = (opNode*)((*p)->values[0]);
 	// put brackets around this
-	up = newUnaryOp(LBRACKET, up);
+	up = new opNode(LBRACKET, up);
 	for (int i=level;i>0;i--){
 	  
 	  // find the dummy variable expression
@@ -282,8 +282,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
 	  oncp->nval = 1;
 	  oncp->values = (void**)calloc(1, sizeof(void*));
-	  oncp->values[0] = newUnaryOp(ID, strdup(dv->front()));
-	  opNode *onmult = newBinOp('*', oncp, up);
+	  oncp->values[0] = new opNode(ID, strdup(dv->front()));
+	  opNode *onmult = new opNode('*', oncp, up);
 	  up = onmult;
 
 	  // put together the sum expression 
@@ -316,12 +316,12 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  cnt++;
 	}
 	// and put braces around it
-	cslon = newUnaryOp(LBRACE, cslon);
+	cslon = new opNode(LBRACE, cslon);
 	
 
 	// now build the sum
 	//printf("This is the sum: %s\n",cslon->print());
-	cslon = newBinOp(SUM, cslon, up);
+	cslon = new opNode(SUM, cslon, up);
 	//printf("This is the sum: %s\n",cslon->print());
 
 	(*p)->values[0] = cslon;

@@ -887,7 +887,7 @@ write_ampl_for_submodel_(FILE *fout, int thislevel, int sublevel,
 	    newmc->id = strdup((setmc->id+string("_SUB")).c_str());
 	    
 	    // and build "within indset" as attribute tree
-	    newmc->attributes = newUnaryOp(WITHIN, setn);
+	    newmc->attributes = new opNode(WITHIN, setn);
 	    //newmc->model = comp->model;
 	    newmc->model = setmc->model;
 	    modified_write(fout, newmc);

@@ -439,16 +439,16 @@ StochModel::expandToFlatModel()
 	   the root node */
 	// set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
 	// on_iinn: this_nd in NODES
-	on_iinN = newBinOp(IN, newUnaryOp(ID, strdup("this_nd")), 
+	on_iinN = new opNode(IN, new opNode(ID, strdup("this_nd")), 
 			  nodeset->clone());
 	// onai: A[this_nd]  
-	onai= newBinOp(LSBRACKET, anc->clone(), 
-		       newUnaryOp(COMMA, newUnaryOp(ID, strdup("this_nd"))));
+	onai= new opNode(LSBRACKET, anc->clone(), 
+		       new opNode(COMMA, new opNode(ID, strdup("this_nd"))));
 	// on2: A[this_nd]=="null"
-	on2 =  newBinOp(EQ, onai, newUnaryOp(ID, strdup("\"null\"")));
+	on2 =  new opNode(EQ, onai, new opNode(ID, strdup("\"null\"")));
 	// on1: :={this_nd in NODES:Parent[this_nd] == "null"};
-	on1 = newUnaryOp(DEFINED, 
-			 newUnaryOp(LBRACE, newBinOp(COLON, on_iinN, on2)));
+	on1 = new opNode(DEFINED, 
+			 new opNode(LBRACE, new opNode(COLON, on_iinN, on2)));
 	// and add this to the model
 	smctmp = new StochModelComp("rootset", TSET, NULL, on1);
 	smctmp->stochmodel = this;
@@ -464,9 +464,9 @@ StochModel::expandToFlatModel()
       
       on1 = nodeset->clone(); // does this work?
       // this is going to be the dummy variable i (just an ID node?)
-      on2 = newUnaryOp(ID, strdup("this_nd"));
+      on2 = new opNode(ID, strdup("this_nd"));
       /** @bug 'this_nd' is a reserved variables now */
-      on_iinN = newBinOp(IN, on2, on1);
+      on_iinN = new opNode(IN, on2, on1);
       //printf("Test first part of expression: %s\n",on_iinN->print());
       // set up the 'A[i] in indS0' part now
 
@@ -476,9 +476,9 @@ StochModel::expandToFlatModel()
       on1 = anc->clone();
       // this is the comma separated list
       /* I think that  dummy variable is just left as a ID */
-      on2 = newUnaryOp(COMMA, newUnaryOp(ID, strdup("this_nd")));
+      on2 = new opNode(COMMA, new opNode(ID, strdup("this_nd")));
       // this is A[i]
-      onai= newBinOp(LSBRACKET, on1, on2);
+      onai= new opNode(LSBRACKET, on1, on2);
       // this is the A[i] in indSO
       //printf("Test second part of expression: %s\n",onai->print());
 
@@ -489,8 +489,8 @@ StochModel::expandToFlatModel()
 	//on3 = new opNodeIDREF(indset[stgcnt-1]);
 	char buffer[5];
 	sprintf(buffer, "ix%d",stgcnt-1);
-	on3 = newUnaryOp(ID, strdup(buffer));
-	on2 = newBinOp(EQ, onai, on3);
+	on3 = new opNode(ID, strdup(buffer));
+	on2 = new opNode(EQ, onai, on3);
       }else{
 	/* No, the first indexing set is not over the nodes that have "root"
 	   as parent (this would require the root node to be always named 
@@ -502,21 +502,21 @@ StochModel::expandToFlatModel()
 	   set alm0_ind0 := {this_nd in NODES: Parent[this_nd] in rootset};
 	*/
 
-	//on3 = newUnaryOp(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
-	//on3 = newUnaryOp(ID, strdup("rootset"));
+	//on3 = new opNode(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
+	//on3 = new opNode(ID, strdup("rootset"));
 	on3 = new opNodeIDREF(smctmp);
-	on2 = newBinOp(IN, onai, on3);
+	on2 = new opNode(IN, onai, on3);
       }
       // problem: Since indset[stgct-1] is not set up it, the expression 
       // cannot be printed here
       //printf("Test third part of expression: %s\n",on2->print());
 
       // and build everything
-      on1 = newBinOp(COLON, on_iinN, on2);
+      on1 = new opNode(COLON, on_iinN, on2);
       // and add curly brackets to it
-      on3 = newUnaryOp(LBRACE, on1);
+      on3 = new opNode(LBRACE, on1);
       // and the :=
-      on1 = newUnaryOp(DEFINED, on3);
+      on1 = new opNode(DEFINED, on3);
       //printf("Test all of expression: %s\n",on1->print());
       
       // so we've got an opNode to '{i in NODES:A[i] in indS0}'
@@ -536,10 +536,10 @@ StochModel::expandToFlatModel()
 
 	// add a submodel component that points to the model above 
 	// need to create an indexing expression for the model above
-	//on1 = newUnaryOp(ID, strdup(buf)); //indset
+	//on1 = new opNode(ID, strdup(buf)); //indset
 	on1 = new opNodeIDREF(indset[stgcnt]); //indset
-	on_iinN = newBinOp(IN, newUnaryOp(ID, strdup(buffer)), on1); // i in N
-	on2 = newUnaryOp(LBRACE, on_iinN);    // {i in N}
+	on_iinN = new opNode(IN, new opNode(ID, strdup(buffer)), on1); // i in N
+	on2 = new opNode(LBRACE, on_iinN);    // {i in N}
 	//printf("Indexing Expression: %s\n",on2->print());
 
 	model_comp *newmc = new model_comp(model_above->name, TMODEL, 
