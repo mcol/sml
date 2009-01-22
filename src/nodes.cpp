@@ -63,10 +63,7 @@ opNode *newTerm(int opCode){
    return newRel;
    }*/
 
-opNode *newInd(){
-}
-
-void freeOpNode(opNode *target) {
+/*void freeOpNode(opNode *target) {
    if(target == NULL) {
       fprintf(stderr, "Attepted to free a NULL opNode\n");
       return;
@@ -92,7 +89,7 @@ void freeOpNode(opNode *target) {
    }
    if(target->values != NULL) free(target->values);
    free(target);
-}
+}*/
 
 /* --------------------------------------------------------------------------
 newIndexNode

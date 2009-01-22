@@ -84,19 +84,19 @@ data_statements: /* empty */
  */
 
 object: ID {
-          $$ = newUnaryOp(ID,$1);
+          $$ = new opNode(ID,$1);
 	  if (logParse) printf("Found 'object' of type ID: %p:%s\n", $$, $1);
         }
       | CHARACTER_STRING {
-	  $$ = newUnaryOp(ID, $1);
+	  $$ = new opNode(ID, $1);
 	  if (logParse) printf("Found 'object' of type ID: %p:%s\n", $$, $1);
         }
       | INT_VAL {
-	  $$ = newUnaryOp(INT_VAL,$1);
+	  $$ = new opNode(INT_VAL,$1);
 	  if (logParse) printf("Found 'object' of type INT_VAL: %p:%d\n", $$, *$1);
         }
       | FLOAT_VAL {
-          $$ = newUnaryOp(FLOAT_VAL,$1);
+          $$ = new opNode(FLOAT_VAL,$1);
 	  if (logParse) printf("Found 'object' of type FLOAT_VAL: %p:%f\n", $$, *$1);
         }
       ;
@@ -117,7 +117,7 @@ data_setdef: SET ID DEFINED setelements {
 		opNode *ref;
 		// try to find the correct set definition 
 		// unclear what context to use: global at the moment
-		ref = find_var_ref_in_context(root, newUnaryOp(ID,$2));
+		ref = find_var_ref_in_context(root, new opNode(ID,$2));
 		if (ref==NULL){
 		  printf("Data given for set %s which has not been declared!\n",
 			 $2);
@@ -159,7 +159,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
 		// try to find the correct param definition 
 		// unclear what context to use: global at the moment
 		opNode *ref;
-                ref = find_var_ref_in_context(root, newUnaryOp(ID,$2));
+                ref = find_var_ref_in_context(root, new opNode(ID,$2));
 		if (ref==NULL){
 		  printf("Data given for set %s which has not been declared!\n",
 			 $2);
@@ -184,7 +184,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
 		// try to find the correct param definition 
 		// unclear what context to use: global at the moment
 		opNode *ref;
-                ref = find_var_ref_in_context(root, newUnaryOp(ID,$2));
+                ref = find_var_ref_in_context(root, new opNode(ID,$2));
 		if (ref==NULL){
 		  printf("Data given for param %s which has not been declared!\n",
 			 $2);
@@ -194,7 +194,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
 		// reference has been found
 		opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
 		// wrap the value_table_list in a single item paramspec_list
-		opNode *on = newUnaryOp(TOKPARAMSPECLIST, $4);
+		opNode *on = new opNode(TOKPARAMSPECLIST, $4);
                 CompDescrParam* param = new CompDescrParam(onidref->ref, on); 
 		model_comp *mc = onidref->ref;
 		mc->value = param;
@@ -222,8 +222,8 @@ data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_li
 param_name_list: param_name
                | param_name_list param_name
                ;
-param_name: ID {newUnaryOp(ID,$1);}
-set_name: ID {newUnaryOp(ID,$1);}
+param_name: ID {new opNode(ID,$1);}
+set_name: ID {new opNode(ID,$1);}
 
 //value_item_list: value_item
 //               | value_item_list value_item
@@ -241,12 +241,12 @@ set_name: ID {newUnaryOp(ID,$1);}
 value_list: /* empty */ {$$=NULL;}
           | value_list value {
 	      if ($1==NULL){
-		$$ = newUnaryOp(' ',$2);
+		$$ = new opNode(' ',$2);
 	      }else{
 		if ($1->opCode==' '){
 		  $$ = addItemToListNew($1, $2);
 		}else{
-		  $$ = newBinOp(' ', $1, $2);
+		  $$ = new opNode(' ', $1, $2);
 		}
 	      }
 	    }
@@ -260,12 +260,12 @@ paramspec_list: /* empty */ {$$=NULL;}
               | paramspec_list paramspec {
 	          opNode *on1 = $1;
 		  if ($1==NULL){
-		    $$ = newUnaryOp(TOKPARAMSPECLIST, $2);
+		    $$ = new opNode(TOKPARAMSPECLIST, $2);
 		  }else{
 		    if ($1->opCode==TOKPARAMSPECLIST){
 		      $$ = addItemToListNew($1, $2);
 		    }else{	
-		      $$ = newBinOp(TOKPARAMSPECLIST, $1, $2);
+		      $$ = new opNode(TOKPARAMSPECLIST, $1, $2);
 		    }
 		  }
 	        }
@@ -276,12 +276,12 @@ paramspec: param_template_opt value value_list {
               opNode *vl;
 	      //printf("Executing value_list branch of paramspec\n");
 	      if ($3==NULL){
-		vl = newUnaryOp(' ', $2);
+		vl = new opNode(' ', $2);
 	      }else{
 		vl = addItemToListBeg($2, $3);
 	      }
 	      if ($1!=NULL){
-		$$ = newBinOp(TOKPARAMTEMPLATE, $1, vl);
+		$$ = new opNode(TOKPARAMTEMPLATE, $1, vl);
 	      }else{
 		$$ = vl;
 	      }
@@ -293,7 +293,7 @@ paramspec: param_template_opt value value_list {
          ;
 
 value_table_list: value_table {
-                    $$ = newUnaryOp(TOKVALUETABLELIST, $1);
+                    $$ = new opNode(TOKVALUETABLELIST, $1);
                   }
                 | value_table_list value_table {
 		    $$ = addItemToListNew($1, $2);
@@ -319,7 +319,7 @@ value_table: TR COLON col_label_list DEFINED value_list
 			cll->nval+1);
 		 exit(1);
 	       }
-	       $$ = newBinOp(TOKVALUETABLE, $2, $4);
+	       $$ = new opNode(TOKVALUETABLE, $2, $4);
              }
            ;
 
@@ -329,7 +329,7 @@ value_table: TR COLON col_label_list DEFINED value_list
 
 col_label_list: col_label {
                   assert($1);
-                  $$ = newUnaryOp(' ', $1);
+                  $$ = new opNode(' ', $1);
                 }
               | col_label_list col_label {
 		  assert($1 && $1->opCode==' ');
@@ -353,17 +353,17 @@ value_table_row: row_label entry_list
 // an entry is an actual parameter value 
 
 entry_list: entry {
-	      $$ = newUnaryOp(' ',$1);}
+	      $$ = new opNode(' ',$1);}
           | entry_list entry{
 	      $$ = addItemToListNew($1, $2);}
           ;
 
 entry: number {$$=$1;}
      | string {$$=$1;}
-     | DOT {$$=newUnaryOp(DOT, NULL);}
+     | DOT {$$=new opNode(DOT, NULL);}
      ;
  
-string: ID {newUnaryOp(ID,$1);}
+string: ID {new opNode(ID,$1);}
 
 row_label: object
 
@@ -420,13 +420,13 @@ value: object {
 number: INT_VAL {
   /* not entirly sure what is returned here as $1 */
   // Aparently a pointer to long int
-          $$=newUnaryOp(INT_VAL, $1);
+          $$=new opNode(INT_VAL, $1);
        }
      | FLOAT_VAL { 
-         $$=newUnaryOp(FLOAT_VAL, $1);
+         $$=new opNode(FLOAT_VAL, $1);
        }
 //     | identifier { 
-//          $$=newUnaryOp(0, $1);
+//          $$=new opNode(0, $1);
 //       }
      | INFINITY { 
           $$ = (opNode *) malloc(sizeof(opNode));

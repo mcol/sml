@@ -55,8 +55,7 @@ class opNode {
   // ------------------------ methods -----------------------------------
   // Constructors
   opNode();
-
-  opNode(int oc, int nv); //< given opCode and number of arguments
+  opNode(int opCode, void *val1=NULL, void *val2=NULL, void *val3=NULL);
 
   /** for nodes that are indexing expressions, get the set that is indexed over
    * FIXME: move this to opNodeIx, also indexing expressions are more compl. */
@@ -233,12 +232,9 @@ typedef struct _indexNode {
   struct _indexNode *next; //!< next item on the linked list
 } indexNode;
 
-opNode *newTertOp(int opCode, void *val1, void *val2, void *val3);
-opNode *newBinOp(int opCode, void *lval, void *rval);
-opNode *newUnaryOp(int opCode, void *val);
 //opNodeID *newUnaryOpID(void *val);
 //relNode *newRel(int opCode, opNode *lval, opNode *rval);
-void freeOpNode(opNode *target);
+//void freeOpNode(opNode *target);
 //indexNode *newIndexNode(opNode *node);
 //opNode *addItemToList(opNode *list, opNode *newitem);
 opNode *addItemToListNew(opNode *list, void *newitem);

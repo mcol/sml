@@ -132,7 +132,7 @@ optionlist: /*empty */ {$$=NULL;}
           ;
 
 commasepoptions: identifier {
-	            $$ = newUnaryOp(COMMA, $1);}
+	            $$ = new opNode(COMMA, $1);}
                | commasepoptions COMMA identifier{
 		 $$ = addItemToListNew($1, $3);
                   }
@@ -198,7 +198,7 @@ stochblock: sblockbegin statements sblockend
           ;
     
 /* FIXME: optionlist is of form '(ID COMMA ID ...)'
-	  need to call newUnaryOp and addToListItem functions in the 
+	  need to call new opNode and addToListItem functions in the 
 	  processing of optionlist and its children */
 stochblockbegin: STOCHASTIC BLOCK ID indexing_opt USING optionlist COLON {
                     add_indexing($4);
@@ -291,12 +291,12 @@ relop: LE {$$=LE;}
 //     | GT expr
 //     ;
 
-equation: expr ASSIGN expr { $$ = newBinOp(ASSIGN, $1, $3); }
-        | expr LT expr { $$ = newBinOp(LT, $1, $3); }
-        | expr LE expr { $$ = newBinOp(LE, $1, $3); }
-        | expr GT expr { $$ = newBinOp(GT, $1, $3); }
-        | expr GE expr { $$ = newBinOp(GE, $1, $3); }
-        | expr EQ expr { $$ = newBinOp(EQ, $1, $3); }
+equation: expr ASSIGN expr { $$ = new opNode(ASSIGN, $1, $3); }
+        | expr LT expr { $$ = new opNode(LT, $1, $3); }
+        | expr LE expr { $$ = new opNode(LE, $1, $3); }
+        | expr GT expr { $$ = new opNode(GT, $1, $3); }
+        | expr GE expr { $$ = new opNode(GE, $1, $3); }
+        | expr EQ expr { $$ = new opNode(EQ, $1, $3); }
         ;
 
 cnstr: MAXIMIZE ID indexing_opt {if ($3) add_indexing($3);} stochattr_opt COLON expr {
@@ -342,11 +342,11 @@ indexing_opt: /* empty */ {$$=NULL;}
             ;
 
 indexing: LBRACE setexpr_list COLON lexpr RBRACE {
-	   opNode *tmp = newUnaryOp(LBRACE, newBinOp(COLON, $2, $4));
+	   opNode *tmp = new opNode(LBRACE, new opNode(COLON, $2, $4));
            $$ = new opNodeIx(tmp);
           }
         | LBRACE setexpr_list RBRACE {
-	    opNodeIx *tmp = new opNodeIx(newUnaryOp(LBRACE, $2));
+	    opNodeIx *tmp = new opNodeIx(new opNode(LBRACE, $2));
 	    $$=tmp;
           }
         ;
@@ -363,26 +363,26 @@ setexpr_list: setexpr_item
                 if ($1->opCode==COMMA){
 		  $$ = addItemToListNew($1, $3);
 		}else{
-		  $$ = newBinOp(COMMA, $1, $3);
+		  $$ = new opNode(COMMA, $1, $3);
 		}
               }
             ;
 
 setexpr_item : setexpression
              | dummy_member IN setexpression{
-               $$ = newBinOp(IN, $1,$3);}
+               $$ = new opNode(IN, $1,$3);}
              ;
 
-dummy_member : ID {$$=newUnaryOp(ID, $1);}
+dummy_member : ID {$$=new opNode(ID, $1);}
              | LBRACKET ID COMMA ID RBRACKET {
-	        opNode *tmp = newUnaryOp(LBRACKET, 
-   	          newBinOp(COMMA, newUnaryOp(ID,$2), newUnaryOp(ID,$4)));
+	        opNode *tmp = new opNode(LBRACKET, 
+   	          new opNode(COMMA, new opNode(ID,$2), new opNode(ID,$4)));
 	       $$ = tmp;}
              ;
 
 lexpr: expr
      | LBRACKET lexpr RBRACKET {
-	$$ = newUnaryOp(LBRACKET, $2); }
+	$$ = new opNode(LBRACKET, $2); }
      | equation
      ;
 
@@ -429,12 +429,12 @@ setattributes: setattribute {$$=$1;}
 		   $$ = $1;
 		 }else{
 		   if ($1==NULL){
-		     $$ = newUnaryOp(' ', $2);
+		     $$ = new opNode(' ', $2);
 		   }else{
 	             if ($1->opCode==' '){
 		       $$ = addItemToListNew($1, $2);
 		     }else{
-		       $$ = newBinOp(' ', $1, $2);
+		       $$ = new opNode(' ', $1, $2);
 		     }
 		   }
 		 }
@@ -442,14 +442,14 @@ setattributes: setattribute {$$=$1;}
              ;
 
 setattribute: DIMEN INT_VAL {
-                 $$ = newUnaryOp(DIMEN, newUnaryOp(INT_VAL, $2));}
+                 $$ = new opNode(DIMEN, new opNode(INT_VAL, $2));}
             | WITHIN setexpression {
-                 $$ = newUnaryOp(WITHIN, $2);}
+                 $$ = new opNode(WITHIN, $2);}
             | DEFINED setexpression {
-                 $$ = newUnaryOp(DEFINED, $2);}
+                 $$ = new opNode(DEFINED, $2);}
             | DEFAULT setexpression {
-                 $$ = newUnaryOp(DEFAULT, $2);}
-            | ORDERED { $$ = newUnaryOp(ORDERED, NULL);}
+                 $$ = new opNode(DEFAULT, $2);}
+            | ORDERED { $$ = new opNode(ORDERED);}
             ;
 
 paramattributes_opt : /* empty */ { $$ = NULL;}
@@ -458,13 +458,13 @@ paramattributes_opt : /* empty */ { $$ = NULL;}
 
 paramattributes: paramattribute {
                  if ($1==NULL) {$$ = NULL;}
-		   else{$$ = newUnaryOp(COMMA, $1);}}
+		   else{$$ = new opNode(COMMA, $1);}}
                | paramattributes COMMA paramattribute {
 		 if ($3==NULL){
 		   $$ = $1;
 		 }else{
 		   if ($1==NULL){
-		     $$ = newUnaryOp(COMMA, $3);
+		     $$ = new opNode(COMMA, $3);
 		   }else{
 		     $$ = addItemToListNew($1, $3);
 		   }
@@ -472,13 +472,13 @@ paramattributes: paramattribute {
 	       }
 	       ;
 
-paramattribute: BINARY {$$ = newUnaryOp(BINARY, NULL);}
-              | INTEGER {$$ = newUnaryOp(INTEGER, NULL);}
-              | SYMBOLIC {$$ = newUnaryOp(SYMBOLIC, NULL);}
-              | relop expr  {$$ = newUnaryOp($1, $2);}
-              | IN setexpression {$$ = newUnaryOp(IN, $2);}
-              | ASSIGN expr {$$ = newUnaryOp(ASSIGN, $2);}
-              | DEFAULT expr {$$ = newUnaryOp(DEFAULT, $2);}
+paramattribute: BINARY {$$ = new opNode(BINARY);}
+              | INTEGER {$$ = new opNode(INTEGER);}
+              | SYMBOLIC {$$ = new opNode(SYMBOLIC);}
+              | relop expr  {$$ = new opNode($1, $2);}
+              | IN setexpression {$$ = new opNode(IN, $2);}
+              | ASSIGN expr {$$ = new opNode(ASSIGN, $2);}
+              | DEFAULT expr {$$ = new opNode(DEFAULT, $2);}
               ;
 
 stochattr_opt: /* empty */ {$$ = NULL;}
@@ -516,33 +516,33 @@ varattributes: varattribute {
 
 
 /* FIXME: what to do about the ID in the last rule ? */
-varattribute: BINARY {$$ = newUnaryOp(BINARY, NULL);}
-            | INTEGER {$$ = newUnaryOp(INTEGER, NULL);}
-            | SYMBOLIC {$$ = newUnaryOp(SYMBOLIC, NULL);}
-            | LE expr {$$ = newUnaryOp(LE, $2);}
-            | GE expr {$$ = newUnaryOp(GE, $2);}
-            | DEFINED expr {$$ = newUnaryOp(DEFINED, $2);}
-            | ASSIGN expr {$$ = newUnaryOp(ASSIGN, $2);}
-            | DEFAULT expr {$$ = newUnaryOp(DEFAULT, $2);}
+varattribute: BINARY {$$ = new opNode(BINARY);}
+            | INTEGER {$$ = new opNode(INTEGER);}
+            | SYMBOLIC {$$ = new opNode(SYMBOLIC);}
+            | LE expr {$$ = new opNode(LE, $2);}
+            | GE expr {$$ = new opNode(GE, $2);}
+            | DEFINED expr {$$ = new opNode(DEFINED, $2);}
+            | ASSIGN expr {$$ = new opNode(ASSIGN, $2);}
+            | DEFAULT expr {$$ = new opNode(DEFAULT, $2);}
 	      //| COEFF indexing_opt constraint expr
 	      //| COVER indexing_opt constraint expr
 	      //| OBJ indexing_opt objective expr
-            | IN setexpression {$$ = newUnaryOp(IN, $2);}
-            | SUFFIX ID expr {$$ = newUnaryOp(SUFFIX, $3);}
+            | IN setexpression {$$ = new opNode(IN, $2);}
+            | SUFFIX ID expr {$$ = new opNode(SUFFIX, $3);}
             ;
 
 /* this is anything that evaluates to a set */
-setexpression: LBRACE expr_list RBRACE  {$$ = newUnaryOp(LBRACE, $2);}
+setexpression: LBRACE expr_list RBRACE  {$$ = new opNode(LBRACE, $2);}
              | identifier    /* already defined identifier */ 
 //             | indexing
              | setexpression CROSS setexpression {
-	       $$ = newBinOp(CROSS, $1, $3);}
+	       $$ = new opNode(CROSS, $1, $3);}
              | setexpression DIFF setexpression {
-	       $$ = newBinOp(DIFF, $1, $3);}
+	       $$ = new opNode(DIFF, $1, $3);}
              | LBRACKET setexpression RBRACKET {
                $$ = $2;}
              | expr DOTDOT expr {
-	       $$ = newBinOp(DOTDOT, $1, $3);
+	       $$ = new opNode(DOTDOT, $1, $3);
 	       }
              ;
 
@@ -634,10 +634,10 @@ identifier: iditem {
 
 
 iditem: ID {                               /* simple identifier */
-          $$=newUnaryOp(ID, $1);}
+          $$=new opNode(ID, $1);}
       | ID LSBRACKET expr_list RSBRACKET { /* subscripted id'fier */
 	  if (GlobalVariables::logParseModel) printf("%s\n", print_opNodesymb($3));
-	  $$ = newBinOp(LSBRACKET, newUnaryOp(ID,$1), $3);
+	  $$ = new opNode(LSBRACKET, new opNode(ID,$1), $3);
 	  //printf("%s\n", print_opNodesymb($$));
         }
       | ID LBRACKET INT_VAL SEMICOLON expr_list RBRACKET {
@@ -646,8 +646,8 @@ iditem: ID {                               /* simple identifier */
           // two arguments, where the second argument is the ancestor
 	  // $3 is (long int*) => change its sign
 	  *$3 = -(*$3);
-	  opNode *nd = newBinOp(ID, $1, $3);
-	  $$ = newBinOp(LSBRACKET, nd, $5);
+	  opNode *nd = new opNode(ID, $1, $3);
+	  $$ = new opNode(LSBRACKET, nd, $5);
         }      
       | ANCESTOR LBRACKET INT_VAL RBRACKET DOT iditem {
           // the same as above, just different syntax "ancestor(1).xh[i]"
@@ -672,8 +672,8 @@ iditem: ID {                               /* simple identifier */
 
 expr_list: expr {
   //              indexNode *ixn = newIndexNode($1); 
-  //             $$ = newBinOp(COMMA, ixn, ixn); /* set up a list */
-               $$ = newUnaryOp(COMMA, $1);
+  //             $$ = new opNode(COMMA, ixn, ixn); /* set up a list */
+               $$ = new opNode(COMMA, $1);
            }
          | expr_list COMMA expr {      /* add item to list */
 	   /* epxr_list could be a simple node or a comma separated list (CSL)
@@ -691,44 +691,44 @@ expr_list: expr {
 	     /* start new CSL */
 	     //printf("Start new CSL\n");
 	     ////indexNode *ixn = newIndexNode($1); 
-	     ////opNode *tmp = newBinOp(COMMA, ixn, ixn); /* set up a list */
+	     ////opNode *tmp = new opNode(COMMA, ixn, ixn); /* set up a list */
 	     ////tmp->nval = 1;
 	     ////$$ = addItemToList(tmp, $3);
-	     //$$ = newBinOp(COMMA, $1, $3);
+	     //$$ = new opNode(COMMA, $1, $3);
 	     //}
 	 }
          ;
 
 expr: value
-    | LBRACKET expr_list RBRACKET {$$ = newUnaryOp(LBRACKET, $2);}
-    | expr '+' expr { $$ = newBinOp('+', $1, $3); }
-    | expr '-' expr { $$ = newBinOp('-', $1, $3); }
-    | '-' expr { $$ = newUnaryOp('-', $2); }
-    | expr '*' expr { $$ = newBinOp('*', $1, $3); }
-    | expr '/' expr { $$ = newBinOp('/', $1, $3); }
-    | expr POWER expr { $$ = newBinOp(POWER, $1, $3); }
-    | expr ELLIPSE expr { $$ = newBinOp(ELLIPSE, $1, $3); }
-    | expr LOGICAL_OR expr { $$ = newBinOp(LOGICAL_OR, $1, $3); }
-    | expr LOGICAL_AND expr { $$ = newBinOp(LOGICAL_AND, $1, $3); }
-    | '!' expr { $$ = newUnaryOp('!', $2); }
+    | LBRACKET expr_list RBRACKET {$$ = new opNode(LBRACKET, $2);}
+    | expr '+' expr { $$ = new opNode('+', $1, $3); }
+    | expr '-' expr { $$ = new opNode('-', $1, $3); }
+    | '-' expr { $$ = new opNode('-', $2); }
+    | expr '*' expr { $$ = new opNode('*', $1, $3); }
+    | expr '/' expr { $$ = new opNode('/', $1, $3); }
+    | expr POWER expr { $$ = new opNode(POWER, $1, $3); }
+    | expr ELLIPSE expr { $$ = new opNode(ELLIPSE, $1, $3); }
+    | expr LOGICAL_OR expr { $$ = new opNode(LOGICAL_OR, $1, $3); }
+    | expr LOGICAL_AND expr { $$ = new opNode(LOGICAL_AND, $1, $3); }
+    | '!' expr { $$ = new opNode('!', $2); }
     | reduction_op indexing {add_indexing($2);} expr { 
       /* reduction operator: do we need to keep track of the ID of the
 	 dummy variable(s)? */
-      $$ = newBinOp((int)$1, $2, $4);
+      $$ = new opNode((int)$1, $2, $4);
       rem_indexing($2);}
     | IF lexpr THEN expr {
-	$$ = newBinOp(IF, $2, $4);}
+	$$ = new opNode(IF, $2, $4);}
     | IF lexpr THEN expr ELSE expr {
-	$$ = newTertOp(IF, $2, $4, $6);}
+	$$ = new opNode(IF, $2, $4, $6);}
     | FIRST LBRACKET setexpression RBRACKET {
-        $$ = newUnaryOp(FIRST, $3);}
+        $$ = new opNode(FIRST, $3);}
     | LAST LBRACKET setexpression RBRACKET {
-        $$ = newUnaryOp(LAST, $3);}
+        $$ = new opNode(LAST, $3);}
     | EXPECTATION LBRACKET expr_list RBRACKET { 
-      //$$ = newUnaryOp(EXPECTATION, newUnaryOp(LBRACKET, $3));}
-      $$ = newUnaryOp(EXPECTATION, $3);}
+      //$$ = new opNode(EXPECTATION, new opNode(LBRACKET, $3));}
+      $$ = new opNode(EXPECTATION, $3);}
     | func LBRACKET expr_list RBRACKET { /* function definition */
-         $$ = newUnaryOp($1, newUnaryOp(LBRACKET, $3));}
+         $$ = new opNode($1, new opNode(LBRACKET, $3));}
     ;
 
 func : ORD {$$=ORD;}
@@ -744,7 +744,7 @@ reduction_op: SUM {$$=SUM;}
 value: INT_VAL {
   /* not entirly sure what is returned here as $1 */
   // Aparently a pointer to long int
-          $$=newUnaryOp(INT_VAL, $1);
+          $$=new opNode(INT_VAL, $1);
 	  //$$ = (opNode *) malloc(sizeof(opNode));
 	  //$$->opCode = INT_VAL;
 	  //$$->values = (void **) malloc(1*sizeof(void *));
@@ -752,7 +752,7 @@ value: INT_VAL {
 	  //*((int *) $$->values[0]) = $1;
        }
      | FLOAT_VAL { 
-         $$=newUnaryOp(FLOAT_VAL, $1);
+         $$=new opNode(FLOAT_VAL, $1);
        //$$ = (opNode *) malloc(sizeof(opNode));
        //$$->opCode = FLOAT_VAL;
        //$$->values = (void **) malloc(1*sizeof(void *));
@@ -760,7 +760,7 @@ value: INT_VAL {
        //*((double *) $$->values[0]) = $1;
        }
      | identifier { 
-          $$=newUnaryOp(0, $1);
+          $$=new opNode(0, $1);
        //$$ = (opNode *) malloc(sizeof(opNode));
        //  $$->opCode = ID;
        //  $$->values = (void **) malloc(1*sizeof(void *));
@@ -772,14 +772,10 @@ value: INT_VAL {
           $$->values = NULL;
        }
      | STAGE { 
-          $$ = new opNode();
-	  $$->opCode = STAGE;
-	  $$->nval = 0;
+          $$ = new opNode(STAGE);
        }
      | NODE { 
-          $$ = new opNode();
-	  $$->opCode = NODE;
-	  $$->nval = 0;
+          $$ = new opNode(NODE);
        }
      ;
 
