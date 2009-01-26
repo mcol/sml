@@ -1,6 +1,7 @@
 #ifndef NODES_H
 #define NODES_H
 
+#include <iostream>
 #include <list>
 class model_comp;
 using namespace std;
@@ -61,18 +62,18 @@ class opNode {
    * FIXME: move this to opNodeIx, also indexing expressions are more compl. */
   opNode *getIndexingSet();
 
-  char *print();              // recursive printing of expression
+  string print();              // recursive printing of expression
 
   /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
       the value of this node as a c_string */
   char *getValue();  //!< Returns value of ID, INT_VAL and FLOAT_VAL node
 
-  void dump(FILE *fout); //!< diagnostic printing
+  void dump(ostream &fout); //!< diagnostic printing
 
-  char *printDummyVar();      // node is a dummy var -> remove (..) 
+  string printDummyVar();      // node is a dummy var -> remove (..) 
 
   /** return comma separated list of arguments for IDREF nodes */
-  string getArgumentList();  //< return comma separated list of arguments 
+  string getArgumentList() const;  //< return comma separated list of arguments 
 
   /** find all IDREF's below current node and print to screen */
   void findIDREF();           
@@ -94,6 +95,50 @@ class opNode {
   
   //! returns the 'double' represented by this node (if of type INT/FLOAT_VAL)
   double getFloatVal();
+
+  opNode &merge(const opNode &src);
+
+  int nchild() const { return nval; }
+
+  class Iterator {
+     private:
+      void **ptr;
+
+     public:
+      Iterator(void **p) { ptr=p; }
+      ~Iterator() {}
+
+      Iterator& operator=(const Iterator &other) {
+         ptr = other.ptr;
+         return (*this);
+      }
+      bool operator==(const Iterator &other) {
+         return (other.ptr == ptr);
+      }
+      bool operator!=(const Iterator &other) {
+         return (other.ptr != ptr);
+      }
+      Iterator& operator++() {
+         ptr++;
+         return(*this);
+      }
+      Iterator operator++(int) {
+         Iterator tmp = *this;
+         ++(*this);
+         return tmp;
+      }
+
+      void* operator*() const {
+         return *ptr;
+      }
+
+      void** operator&() const {
+         return ptr;
+      }
+  };
+
+  Iterator begin() const { return Iterator(values); }
+  Iterator end() const { return Iterator(values+nval); }
   
   /** creates a deep_copy of the nodes: opNodes pointed to are recreated 
    *  as well. 
@@ -136,7 +181,7 @@ class opNodeIx : public opNode {
   opNode *hasDummyVar(char *name); 
 
   //! returns list of all dummy variables defined by this index'g expression 
-  list<char *>* getListDummyVars(); 
+  list<opNode *>* getListDummyVars(); 
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
@@ -144,7 +189,7 @@ class opNodeIx : public opNode {
   //! copies node and all its subnodes into new datastructures 
   opNodeIx *deep_copy();    
 
-  void printDiagnostic(FILE *fout);   //!< diagnostic print of class variables
+  void printDiagnostic(ostream &fout);   //!< diagnostic print of class variables
 };
 
 
@@ -242,7 +287,11 @@ opNode *addItemToListOrCreate(int oc, opNode *list, opNode *newitem);
 opNode *addItemToListBeg(void *newitem, opNode *list);
 //retType *newRetType(opNode *node, opNode *indexing, 
 //		    struct AmplModel_st *context);
-char *print_opNode(opNode *node);
 char *print_opNodesymb(opNode *node);
+
+ostream& operator<<(ostream& s, const opNode &node);
+ostream& operator<<(ostream& s, const opNode *node);
+ostream& operator<<(ostream& s, const opNodeIDREF &node);
+ostream& operator<<(ostream& s, const opNodeIDREF *node);
 
 #endif

@@ -1,5 +1,6 @@
-OOPSHOME = /home/agr/oops/oops_cvs
-AMPLSOLVER = /home/agr/struct_model/amplsolver
+OOPSHOME = /home/s0455378/src/oops
+AMPLSOLVER = /home/s0455378/src/ampl/solvers/sys.i686.Linux
+METIS_DIR = /home/s0455378/src/metis-4.0
 YACC = bison
 YACCFLAGS = -d
 #YACCFLAGS += -t -v
@@ -7,10 +8,10 @@ LEX = flex
 LEXFLAGS = 
 #LEXFLAGS += -d
 CFLAGS = -g 
-CXXFLAGS = -I$(AMPLSOLVER) -I$(OOPSHOME)/include -gstabs
+CXXFLAGS = -I$(AMPLSOLVER)  -I$(OOPSHOME)/include -gstabs
 #COMPILE.cpp = g++ -g -c
 CC = g++ 
-LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -lmetis -lgfortran -lefence
+LDFLAGS += -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack -L$(METIS_DIR) -lmetis -lgfortran# -lefence
 
 # for parallel uncomment this
 #CXXFLAGS += -DWITH_MPI -DMPI_PATH="\"mpi.h\"" 

@@ -222,7 +222,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  
 	  // find the dummy variable expression
 	  opNodeIx *cnix = thisam->node->indexing;
-	  list<char*>* dv = cnix->getListDummyVars();
+	  list<opNode *>* dv = cnix->getListDummyVars();
 	  //dv->front() is a string giving name of dummy var
 	  thisam = thisam->parent;
 	
@@ -237,7 +237,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
 	  oncp->nval = 1;
 	  oncp->values = (void**)calloc(1, sizeof(void*));
-	  oncp->values[0] = new opNode(ID, strdup(dv->front()));
+	  oncp->values[0] = new opNode(ID, strdup((dv->front())->print().c_str()));
 	  opNode *onmult = new opNode('*', oncp, up);
 	  up = onmult;
 	}
@@ -268,7 +268,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  
 	  // find the dummy variable expression
 	  opNodeIx *cnix = thisam->node->indexing;
-	  list<char*>* dv = cnix->getListDummyVars();
+	  list<opNode *>* dv = cnix->getListDummyVars();
 	  //dv->front() is a string giving name of dummy var
 	
 	  // thissm->prob is an ID opNode giving path probabilities
@@ -282,7 +282,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 	  opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
 	  oncp->nval = 1;
 	  oncp->values = (void**)calloc(1, sizeof(void*));
-	  oncp->values[0] = new opNode(ID, strdup(dv->front()));
+	  oncp->values[0] = new opNode(ID, strdup(dv->front()->print().c_str()));
 	  opNode *onmult = new opNode('*', oncp, up);
 	  up = onmult;
 

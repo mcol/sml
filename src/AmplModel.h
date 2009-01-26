@@ -115,7 +115,7 @@ class AmplModel{
                                 //
   /** recursively write all out all tagged model components in this model and 
    * submodels to file          */
-  void writeTaggedComponents(FILE *fout);  
+  void writeTaggedComponents(ostream &fout);  
                                 
   /** Recursively creates an ExpandedModel tree from the flat AmplModel */
   ExpandedModel* createExpandedModel(string smodelname, string sinstanceStub);
@@ -139,7 +139,7 @@ class AmplModel{
   void dump(char *filename);
 
   /** recursive detailed debugging output */
-  void dump(FILE *fout);
+  void dump(ostream &fout);
 
   static void applyChanges(); //< apply the model changes stored in Q
 };

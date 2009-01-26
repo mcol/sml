@@ -4,6 +4,7 @@
 #include "StochModelComp.h"
 #include "ampl.tab.h"
 #include <typeinfo>
+#include <fstream>
 
 static bool logSM = false;
 
@@ -26,7 +27,7 @@ StochModel::StochModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
 StochModel::StochModel(opNode *onStages, opNode *onNodes, opNode *onAncs, 
-		       opNode *onProb, AmplModel *prnt) :
+                       opNode *onProb, AmplModel *prnt) :
   AmplModel(),
   nodeset(onNodes), 
   stageset(onStages),
@@ -56,11 +57,8 @@ StochModel::expandStages()
 void
 StochModel::expandStages()
 {
-  FILE *out;
   char buffer[500];
   list <model_comp*> dep;
-
-  out = fopen("tmp.mod","w");
 
   /* analyze all dependencies of this expression */
   model_comp::untagAll();
@@ -85,41 +83,43 @@ StochModel::expandStages()
     
   }
 
-  
+  ofstream out("tmp.mod");
   model_comp::modifiedWriteAllTagged(out);
-  fprintf(out, "set settemp = %s;\n",print_opNode(stageset));
-  fclose(out);
+  out << "set settemp = " << stageset << ";\n";
+  out.close();
   
-  out = fopen("tmp.scr","w");
-  fprintf(out, "reset;\n");
-  fprintf(out, "model tmp.mod;\n");
-  fprintf(out, "data ../%s;\n",GlobalVariables::datafilename);
-  fprintf(out, "display settemp > (\"tmp.out\");\n");
+  out.open("tmp.scr");
+  out << "reset;\n";
+  out << "model tmp.mod;\n";
+  out << "data ../" << GlobalVariables::datafilename << ";\n";
+  out << "display settemp > (\"tmp.out\");\n";
+  out.close();
   
-  fclose(out);
   {
     if(strlen(GlobalVariables::amplcommand)+9>500) {
        // Avoid buffer overflow
-       fprintf(stderr, "buffer too short to accomodate amplcommand length.\n");
+       cerr << "buffer too short to accomodate amplcommand length.\n";
        exit(1);
     }
     strcpy(buffer, GlobalVariables::amplcommand);
     strcat(buffer, " tmp.scr");
-    printf("Executing `%s`\n", buffer);
+    cout << "Executing `" << buffer << "`\n";
     int errc = system(buffer);
     if (errc!=0){
-      printf("ERROR: Call to AMPL returns errc=%d\n",errc);
+      cerr << "ERROR: Call to AMPL returns errc=" << errc << "\n";
       exit(1);
     }
   }
-  out = fopen("tmp.out","r");
-  if (out==NULL){
-    printf("ERROR: File 'tmp.out' produced by AMPL does not exist. AMPL processing failed?\n");
+
+  ifstream in("tmp.out");
+  if (!in){
+    cerr << "ERROR: File 'tmp.out' produced by AMPL does not exist. "
+       "AMPL processing failed?\n";
     exit(1);
   }
-  fgets(buffer, 500, out);
-  fclose(out);
-  if (logSM) printf("Set %s members: %s\n",print_opNode(stageset),buffer);
+  in.getline(buffer, 500);
+  in.close();
+  if (logSM) cout <<"Set " << stageset << " members: " << buffer << "\n";
 
   // parse the set members
   stagenames = new vector<string>;
@@ -158,7 +158,6 @@ StochModel::expandStagesOfComp()
 void
 StochModel::expandStagesOfComp()
 {
-  FILE *out;
   char buffer[500];
   list <model_comp*> dep;
   StochModelComp *smc;
@@ -172,8 +171,8 @@ StochModel::expandStagesOfComp()
     if (smc->stageset){
       smc->stageset->findIDREF(&dep);
       for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
-	if (logSM) printf("dep: %s\n",(*q)->id);
-	(*q)->tagDependencies();
+        if (logSM) printf("dep: %s\n",(*q)->id);
+        (*q)->tagDependencies();
       }
     }
   }
@@ -193,35 +192,36 @@ StochModel::expandStagesOfComp()
   }
 
   
-  out = fopen("tmp.mod","w");
+  ofstream out("tmp.mod");
   model_comp::modifiedWriteAllTagged(out);
   cnt=0;
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
-      fprintf(out, "set settemp%d = %s;\n",cnt,print_opNode(smc->stageset));
+      out << "set settemp" << cnt << " = " << smc->stageset <<
+         ";\n";
       cnt++;
     }
   }
-  fclose(out);
+  out.close();
   
-  out = fopen("tmp.scr","w");
-  fprintf(out, "reset;\n");
-  fprintf(out, "model tmp.mod;\n");
-  fprintf(out, "data ../%s;\n",GlobalVariables::datafilename);
+  out.open("tmp.scr");
+  out << "reset;\n";
+  out << "model tmp.mod;\n";
+  out << "data ../" << GlobalVariables::datafilename << ";\n";
   cnt=0;
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
-      fprintf(out, "display settemp%d > (\"tmp%d.out\");\n",cnt,cnt);
+      out << "display settemp" << cnt << " > (\"tmp" << cnt << ".out\");\n";
       cnt++;
     }
   }
-  fclose(out);
+  out.close();
   {
     if(strlen(GlobalVariables::amplcommand)+9>500) {
        // Avoid buffer overflow
-       fprintf(stderr, "buffer too short to accomodate amplcommand length.\n");
+       cerr << "buffer too short to accomodate amplcommand length.\n";
        exit(1);
     }
     strcpy(buffer, GlobalVariables::amplcommand);
@@ -240,28 +240,29 @@ StochModel::expandStagesOfComp()
     if (smc->stageset){
       char buf[20];
       sprintf(buf, "tmp%d.out",cnt);
-      out = fopen(buf,"r");
-      if (out==NULL){
-	printf("ERROR: File '%s' produces by AMPL does not exist. AMPL processing failed?\n",buf);
-	exit(1);
+      ifstream in(buf);
+      if (!in){
+             cerr << "ERROR: File '" << buf << "' produces by AMPL does not exist. "
+           "AMPL processing failed?\n";
+        exit(1);
       }
-      fgets(buffer, 500, out);
-      fclose(out);
-      printf("Set %s members: %s\n",print_opNode(smc->stageset),buffer);
+      in.getline(buffer, 500);
+      in.close();
+      cout << "Set " << smc->stageset << " members: " << buffer << "\n";
 
       // parse the set members
       smc->stagenames = new vector<string>;
       {
-	char *p, *p2;
-	p = strstr(buffer, ":=");
-	p+=2;
-	
-	p2 = strtok(p, " ;");
-	while(p2!=NULL){
-	  if (logSM) printf("Member: %s\n",p2);
-	  smc->stagenames->push_back(p2);
-	  p2 = strtok(NULL, " ;\n");
-	}
+        char *p, *p2;
+        p = strstr(buffer, ":=");
+        p+=2;
+        
+        p2 = strtok(p, " ;");
+        while(p2!=NULL){
+          if (logSM) printf("Member: %s\n",p2);
+          smc->stagenames->push_back(p2);
+          p2 = strtok(NULL, " ;\n");
+        }
       }
       cnt++;
     }
@@ -356,53 +357,53 @@ StochModel::expandToFlatModel()
       StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
 
       /** @bug Submodel components within sblock's is not supported yet
-	  This is not implemented when creating a nested AmplModel tree
-	  out of the StochModel. 
+          This is not implemented when creating a nested AmplModel tree
+          out of the StochModel. 
        */
       if (smc->type==TMODEL){
-	printf("Not quite sure what to do for submodels within Stochastic Blocks\n");
-	exit(1);
+        printf("Not quite sure what to do for submodels within Stochastic Blocks\n");
+        exit(1);
       }
 
       bool inc;
       // check if this component should be included in the current stage
       
       if (smc->stageset){
-	inc = false;
-	for(vector<string>::iterator p=(smc->stagenames)->begin();
-	    p!=smc->stagenames->end();p++){
-	  if (*st==*p) {
-	    inc = true;
-	    break;
-	  }
-	}
+        inc = false;
+        for(vector<string>::iterator p=(smc->stagenames)->begin();
+            p!=smc->stagenames->end();p++){
+          if (*st==*p) {
+            inc = true;
+            break;
+          }
+        }
       }else{
-	inc = true;
+        inc = true;
       }
       
       // if this component should be included in the current stage
       if (inc){
-	/* I presume this is all that is needed? */
-	/** @bug: NO! need to translate all references to model_comp (IDREF) 
-	 * that will currently refer to model_comps of the StochModel
-	 * into model_comps of the appropriate FlatModel on the FlatModel tree.
-	 * This might be modified by any (-1;...) expressions that refer
-	 * to parents in the FlatModel tree
-	 * I guess also need to do something with the Exp(...) expression
-	 */
+        /* I presume this is all that is needed? */
+        /** @bug: NO! need to translate all references to model_comp (IDREF) 
+         * that will currently refer to model_comps of the StochModel
+         * into model_comps of the appropriate FlatModel on the FlatModel tree.
+         * This might be modified by any (-1;...) expressions that refer
+         * to parents in the FlatModel tree
+         * I guess also need to do something with the Exp(...) expression
+         */
 
-	/* In the first pass we just copy the original reference */
+        /* In the first pass we just copy the original reference */
 
 
-	// need to clone so that pointers to ->model, ->next are setup 
-	// correctly
-	comp = (model_comp*)smc->clone();
-	//comp = smc->transcribeToModelComp(am);
-	
-	addCompToModel(am, comp);
-	// this will change comp->model. If the original pointer to StochModel
-	// needs to be retained, that should be stored in a stochmodel
-	// entry in StochModelComp?
+        // need to clone so that pointers to ->model, ->next are setup 
+        // correctly
+        comp = (model_comp*)smc->clone();
+        //comp = smc->transcribeToModelComp(am);
+        
+        addCompToModel(am, comp);
+        // this will change comp->model. If the original pointer to StochModel
+        // needs to be retained, that should be stored in a stochmodel
+        // entry in StochModelComp?
       }
 
     } // end loop over model components
@@ -425,7 +426,7 @@ StochModel::expandToFlatModel()
     */
     
       /* so this is a set definition model_comp with an opNode tree 
-	 dscribing the indexing set
+         dscribing the indexing set
        */
       
       // start with the "i in NODES" bit
@@ -435,32 +436,32 @@ StochModel::expandToFlatModel()
       // smodel description
 
       if (stgcnt==0){
-	/* add this for the zeroth (root) stage to identify the name of
-	   the root node */
-	// set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
-	// on_iinn: this_nd in NODES
-	on_iinN = new opNode(IN, new opNode(ID, strdup("this_nd")), 
-			  nodeset->clone());
-	// onai: A[this_nd]  
-	onai= new opNode(LSBRACKET, anc->clone(), 
-		       new opNode(COMMA, new opNode(ID, strdup("this_nd"))));
-	// on2: A[this_nd]=="null"
-	on2 =  new opNode(EQ, onai, new opNode(ID, strdup("\"null\"")));
-	// on1: :={this_nd in NODES:Parent[this_nd] == "null"};
-	on1 = new opNode(DEFINED, 
-			 new opNode(LBRACE, new opNode(COLON, on_iinN, on2)));
-	// and add this to the model
-	smctmp = new StochModelComp("rootset", TSET, NULL, on1);
-	smctmp->stochmodel = this;
-	addCompToModel(am, smctmp);
+        /* add this for the zeroth (root) stage to identify the name of
+           the root node */
+        // set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
+        // on_iinn: this_nd in NODES
+        on_iinN = new opNode(IN, new opNode(ID, strdup("this_nd")), 
+                          nodeset->clone());
+        // onai: A[this_nd]  
+        onai= new opNode(LSBRACKET, anc->clone(), 
+                       new opNode(COMMA, new opNode(ID, strdup("this_nd"))));
+        // on2: A[this_nd]=="null"
+        on2 =  new opNode(EQ, onai, new opNode(ID, strdup("\"null\"")));
+        // on1: :={this_nd in NODES:Parent[this_nd] == "null"};
+        on1 = new opNode(DEFINED, 
+                         new opNode(LBRACE, new opNode(COLON, on_iinN, on2)));
+        // and add this to the model
+        smctmp = new StochModelComp("rootset", TSET, NULL, on1);
+        smctmp->stochmodel = this;
+        addCompToModel(am, smctmp);
       }
       /* EITHER we can set this up as an ID node with name NODES and do a
-	 search for it by calling find_var_ref_in_context
-	 BUT: find_var_ref_in_context needs the context set up and that
-	 wont be the case?
-	 OR directly set up the IDREF node (for this we have to know where
-	 the definition statement of this model components (NODES) is
-	 to be found */
+         search for it by calling find_var_ref_in_context
+         BUT: find_var_ref_in_context needs the context set up and that
+         wont be the case?
+         OR directly set up the IDREF node (for this we have to know where
+         the definition statement of this model components (NODES) is
+         to be found */
       
       on1 = nodeset->clone(); // does this work?
       // this is going to be the dummy variable i (just an ID node?)
@@ -483,29 +484,29 @@ StochModel::expandToFlatModel()
       //printf("Test second part of expression: %s\n",onai->print());
 
       /* this is a reference to indS0 which is the indexing set of the
-	 model below (or root if there is none below)
-	 Trouble is that the model below has not been set up yet... */
+         model below (or root if there is none below)
+         Trouble is that the model below has not been set up yet... */
       if (stgcnt>0){
-	//on3 = new opNodeIDREF(indset[stgcnt-1]);
-	char buffer[5];
-	sprintf(buffer, "ix%d",stgcnt-1);
-	on3 = new opNode(ID, strdup(buffer));
-	on2 = new opNode(EQ, onai, on3);
+        //on3 = new opNodeIDREF(indset[stgcnt-1]);
+        char buffer[5];
+        sprintf(buffer, "ix%d",stgcnt-1);
+        on3 = new opNode(ID, strdup(buffer));
+        on2 = new opNode(EQ, onai, on3);
       }else{
-	/* No, the first indexing set is not over the nodes that have "root"
-	   as parent (this would require the root node to be always named 
-	   "root"), but rather "root" is the set of nodes (should be only one) 
-	   that have "null/none" as parent. The first indexing set is the nodes
-	   that have this node as parent:
-	   
-	   set rootset := {this_nd in NODES:Parent[this_nd] = "null"};
-	   set alm0_ind0 := {this_nd in NODES: Parent[this_nd] in rootset};
-	*/
+        /* No, the first indexing set is not over the nodes that have "root"
+           as parent (this would require the root node to be always named 
+           "root"), but rather "root" is the set of nodes (should be only one) 
+           that have "null/none" as parent. The first indexing set is the nodes
+           that have this node as parent:
+           
+           set rootset := {this_nd in NODES:Parent[this_nd] = "null"};
+           set alm0_ind0 := {this_nd in NODES: Parent[this_nd] in rootset};
+        */
 
-	//on3 = new opNode(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
-	//on3 = new opNode(ID, strdup("rootset"));
-	on3 = new opNodeIDREF(smctmp);
-	on2 = new opNode(IN, onai, on3);
+        //on3 = new opNode(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
+        //on3 = new opNode(ID, strdup("rootset"));
+        on3 = new opNodeIDREF(smctmp);
+        on2 = new opNode(IN, onai, on3);
       }
       // problem: Since indset[stgct-1] is not set up it, the expression 
       // cannot be printed here
@@ -530,26 +531,26 @@ StochModel::expandToFlatModel()
 
 
       if (model_above){
-	// create a dummy variable
-	char buffer[10];
-	sprintf(buffer, "ix%d",stgcnt);
+        // create a dummy variable
+        char buffer[10];
+        sprintf(buffer, "ix%d",stgcnt);
 
-	// add a submodel component that points to the model above 
-	// need to create an indexing expression for the model above
-	//on1 = new opNode(ID, strdup(buf)); //indset
-	on1 = new opNodeIDREF(indset[stgcnt]); //indset
-	on_iinN = new opNode(IN, new opNode(ID, strdup(buffer)), on1); // i in N
-	on2 = new opNode(LBRACE, on_iinN);    // {i in N}
-	//printf("Indexing Expression: %s\n",on2->print());
+        // add a submodel component that points to the model above 
+        // need to create an indexing expression for the model above
+        //on1 = new opNode(ID, strdup(buf)); //indset
+        on1 = new opNodeIDREF(indset[stgcnt]); //indset
+        on_iinN = new opNode(IN, new opNode(ID, strdup(buffer)), on1); // i in N
+        on2 = new opNode(LBRACE, on_iinN);    // {i in N}
+        //printf("Indexing Expression: %s\n",on2->print());
 
-	model_comp *newmc = new model_comp(model_above->name, TMODEL, 
-					   new opNodeIx(on2), NULL);
-	//model_comp *newmc = new model_comp(strdup(((*st)++).c_str()), TMODEL, 
-	//				   new opNodeIx(on2), NULL);
-	newmc->other = model_above;
-	addCompToModel(am, newmc);
-	model_above->node = newmc;
-	model_above->ix = newmc->indexing;
+        model_comp *newmc = new model_comp(model_above->name, TMODEL, 
+                                           new opNodeIx(on2), NULL);
+        //model_comp *newmc = new model_comp(strdup(((*st)++).c_str()), TMODEL, 
+        //                                   new opNodeIx(on2), NULL);
+        newmc->other = model_above;
+        addCompToModel(am, newmc);
+        model_above->node = newmc;
+        model_above->ix = newmc->indexing;
       }
       
       model_above = am;
@@ -615,7 +616,7 @@ void
 StochModel::_transcribeComponents(AmplModel *current, int level)
 {
   model_comp *mc, *prev;
-  list<char*>* dv;
+  list<opNode*>* dv;
   // need to set stage and node for the current model
   
   /* What should we do here: I think use quotation marks if the set of stages
@@ -632,7 +633,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
   }else{
     opNodeIx *cnix = current->node->indexing;
     dv = cnix->getListDummyVars();
-    opNode::node = (dv->front());
+    opNode::node = (dv->front())->print();
   }
 
   //list<model_comp*> newcomps(current->comps.size());
@@ -646,19 +647,19 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
       newcomps.push_back(mc);
     }else{
       /* The component in question is just a pointer to the original
-	 StochModelComp: need to resolve this with respect to the current 
-	 setting */
+         StochModelComp: need to resolve this with respect to the current 
+         setting */
       StochModelComp *smc;
       model_comp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
-	mcnew = smc->transcribeToModelComp(current, level);
-	newcomps.push_back(mcnew);
+        mcnew = smc->transcribeToModelComp(current, level);
+        newcomps.push_back(mcnew);
       }else{
-	// This is not a StochModelComp: this should be an indexing set 
-	// definition for a submodel. 
-	printf("StochModel::_transcribeComponents: unwritten branch executed\n");
-	exit(1);
+        // This is not a StochModelComp: this should be an indexing set 
+        // definition for a submodel. 
+        printf("StochModel::_transcribeComponents: unwritten branch executed\n");
+        exit(1);
       }
     }
   }
@@ -686,31 +687,31 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
     if (mc->type==TMODEL){
       _transcribeComponents((AmplModel*)mc->other, level+1);
       if (mc!=current->first){
-	prev->next = mc;
+        prev->next = mc;
       }
       prev = mc;
     }else{
       /* The component in question is just a pointer to the original
-	 StochModelComp: need to resolve this with respect to the current 
-	 setting */
+         StochModelComp: need to resolve this with respect to the current 
+         setting */
       StochModelComp *smc;
       model_comp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
-	mcnew = smc->transcribeToModelComp(current, level);
+        mcnew = smc->transcribeToModelComp(current, level);
       
-	// and place this on the model, instead of mc
-	if (mc==current->first) {
-	  current->first = mcnew;
-	}else{
-	  prev->next = mcnew;
-	}
-	prev = mcnew;
-	mcnew->next = NULL;
+        // and place this on the model, instead of mc
+        if (mc==current->first) {
+          current->first = mcnew;
+        }else{
+          prev->next = mcnew;
+        }
+        prev = mcnew;
+        mcnew->next = NULL;
       }else{
-	// This is not a StochModelComp: this should be an indexing set 
-	// definition for a submodel. 
-	
+        // This is not a StochModelComp: this should be an indexing set 
+        // definition for a submodel. 
+        
       }
     }
   }

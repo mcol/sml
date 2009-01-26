@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <iostream>
+#include <fstream>
 #include "backend.h"
 #include "ampl.h"
 #include "GlobalVariables.h"
@@ -18,9 +20,9 @@ void process_model(AmplModel *model);
 void add_to_index_stack(opNode *ix);
 void rem_from_index_stack();
 
-void write_ampl_for_submodel(FILE *fout, AmplModel *root, 
-			     AmplModel *submodel);
-void write_columnfile_for_submodel(FILE *fout, AmplModel *submodel);
+void write_ampl_for_submodel(ostream &fout, AmplModel *root, 
+           AmplModel *submodel);
+void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 
 /* this struct stores an indexing expression in an easy to modify form:
    the add_index below will be rendered as
@@ -77,13 +79,9 @@ void do_stuff(AmplModel *model)
 
 static void
 print_entry(const model_comp *entry) {
-  char *tmp1 = print_opNode(entry->indexing);
-  char *tmp2 = print_opNode(entry->attributes);
-  printf("    %s\n", entry->id);
-  printf("       %s\n", tmp1);
-  printf("       %s\n", tmp2);
-  free(tmp1);
-  free(tmp2);
+  cout << "    " << entry->id << "\n";
+  cout << "       " << *(entry->indexing) << "\n";
+  cout << "       " << *(entry->attributes) << "\n";
 }
 
 void
@@ -92,9 +90,10 @@ print_model(AmplModel *model)
   model_comp *entry;
   AmplModel *submod;
   opNode::use_global_names=0;
-  printf("-------------------------- backend::print_model --------------------------\n");
-  printf("Model: %s\n",model->name);
-  printf("n_sets: %d\n",model->n_sets);
+  cout << "-------------------------- backend::print_model ----------------"
+     "----------\n";
+  cout << "Model: " << model->name << "\n";
+  cout << "n_sets: " << model->n_sets << "\n";
   for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     if (entry->type==TSET){
@@ -102,7 +101,7 @@ print_model(AmplModel *model)
     }
     //entry = entry->next;
   }
-  printf("n_cons: %d\n",model->n_cons);
+  cout << "n_cons: " << model->n_cons << "\n";
   for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //  entry = model->first;
@@ -112,7 +111,7 @@ print_model(AmplModel *model)
     }
     //entry = entry->next;
   }
-  printf("n_vars: %d\n",model->n_vars);
+  cout << "n_vars: " << model->n_vars << "\n";
   for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //entry = model->first;
@@ -122,7 +121,7 @@ print_model(AmplModel *model)
     }
     //entry = entry->next;
   }
-  printf("n_params: %d\n",model->n_params);
+  cout << "n_params: " << model->n_params << "\n";
   for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     // entry = model->first;
@@ -133,35 +132,36 @@ print_model(AmplModel *model)
     //entry = entry->next;
   }
 
-  printf("n_obj: %d\n",model->n_objs);
+  cout << "n_obj: "<< model->n_objs;
   for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //  entry = model->first;
     //while(entry!=NULL){
     if (entry->type==TMIN||entry->type==TMAX){
-      printf("    %s\n",entry->id);
-      printf("       %s\n",print_opNode(entry->indexing));
-      printf("       %s\n",print_opNode(entry->attributes));
+      cout << "    " << entry->id << "\n";
+      cout << "       " << entry->indexing << "\n";
+      cout << "       " << entry->attributes << "\n";
     }
     //entry = entry->next;
   }
   
-  printf("submodels: %d\n",model->n_submodels);
+  cout << "submodels: " << model->n_submodels << "\n";
   for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //entry = model->first;
     //while(entry!=NULL){
     if (entry->type==TMODEL){
-      printf("    %s\n",entry->id);
-      printf("       %s\n",print_opNode(entry->indexing));
-      printf("       %s\n",print_opNode(entry->attributes));
+      cout << "    " << entry->id << "\n";
+      cout << "       " << entry->indexing << "\n";
+      cout << "       " << entry->attributes << "\n";
       submod = (AmplModel*)entry->other;
       print_model(submod);
     }
     //entry = entry->next;
   }
   
-  printf("---END-------------------- backend::print_model --------------------------\n");
+  cout << "---END-------------------- backend::print_model -------------"
+     "-------------\n";
 
 }
 
@@ -188,17 +188,15 @@ process_model(AmplModel *model) /* should be called with model==root */
 {
   int i, j, k, n_models, n;
   AmplModel **model_list;
-  FILE *fout;
-  FILE *fscript;
   char buffer[200];   /* this is the name of the model file */
   
-  printf("-------------- start of process_model ----------------------\n");
+  cout << "-------------- start of process_model ----------------------\n";
 
   /* 1) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate list of all models */
 
   /* recursively count all the models defined in the model tree */
   n_models = count_models_(model);
-  printf("Found %d models\n",n_models);
+  cout << "Found " << n_models << " models\n";
   model_list = (AmplModel**)calloc(n_models, sizeof(AmplModel*));
   n_models=0;
   model->level=0; /* root is on level 0, fill_model_list also sets levels */
@@ -209,15 +207,15 @@ process_model(AmplModel *model) /* should be called with model==root */
   //printf("These are the models on the list:\n");
   for(i=0;i<n_models;i++){
     AmplModel *thism = model_list[i];
-    printf("%d: %s (level=%d)\n",i, thism->name, thism->level);
+    cout << i << ": " << thism->name << " (level=" << thism->level << ")\n";
   }
   
-  printf("----------- generate submodel files --------------\n");
+  cout << "----------- generate submodel files --------------\n";
 
   /* 2) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output all submodel files */
   /* and */
   /* 3) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate the script file */
-  fscript = fopen("script.scr","w");
+  ofstream fscript("script.scr");
   
   /* loop over every single model defined */
   for(i=0;i<n_models;i++){
@@ -238,10 +236,10 @@ process_model(AmplModel *model) /* should be called with model==root */
       tmp_model = this_model;
       sprintf(buffer, "%s", tmp_model->name);
       while (tmp_model->parent){
-	tmp_model = tmp_model->parent;
-	bufcopy = strdup(buffer);
-	sprintf(buffer, "%s_%s",tmp_model->name, bufcopy);
-	free(bufcopy);
+        tmp_model = tmp_model->parent;
+        bufcopy = strdup(buffer);
+        sprintf(buffer, "%s_%s",tmp_model->name, bufcopy);
+        free(bufcopy);
       }
     }
     strcat(buffer, ".mod");
@@ -249,8 +247,9 @@ process_model(AmplModel *model) /* should be called with model==root */
 
     /* ==================== write the script file ===================== */
 
-    fprintf(fscript, "\nreset;\noption auxfiles rc;\noption presolve 0;\n");
-    fprintf(fscript, "model %s;\ndata ../%s;\n",buffer, GlobalVariables::datafilename);
+    fscript << "\nreset;\noption auxfiles rc;\noption presolve 0;\n";
+    fscript << "model " << buffer << ";\ndata ../" <<
+       GlobalVariables::datafilename << ";\n";
     /* FIXME: need to know the name of the global data file 
            this should be an argument to the parser that is passed
            through to the backend                                           */
@@ -260,7 +259,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     model submod.mod;
     data allthedata.dat;
     
-    for {i in ARCS}{	
+    for {i in ARCS}{  
       let ARCS_SUB := {i};
 
       print card(COMM) > "nameofsub" &i&".crd"
@@ -281,8 +280,8 @@ process_model(AmplModel *model) /* should be called with model==root */
       AmplModel *tmp_model = this_model;
       anc_list[tmp_model->level] = tmp_model;
       while(tmp_model->parent){
-	tmp_model = tmp_model->parent;
-	anc_list[tmp_model->level] = tmp_model;
+        tmp_model = tmp_model->parent;
+        anc_list[tmp_model->level] = tmp_model;
       }
     }
 
@@ -305,27 +304,27 @@ process_model(AmplModel *model) /* should be called with model==root */
       opNode::default_model = tmp_model; 
       
       /* Need to analyse the indexing expression to get the set that is
-	 indexed over 
-	 (I guess this should be done by an "indexing" object) */
+        indexed over 
+        (I guess this should be done by an "indexing" object) */
       
       /* remove outside braces from indexing expression */
       list <add_index*>* li = new list<add_index*>();
       if (ix){
-	add_index *ai = (add_index*)calloc(1, sizeof(add_index));
-	li->push_back(ai);
-	if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
-	/* assumes that the next level is the 'IN' keyword (if present) */
-	if (ix->opCode==IN){
-	  dummyVar = (opNode*)ix->values[0];
-	  set = (opNode*)ix->values[1];
-	}else{
-	  dummyVar = NULL;
-	  set = ix;
-	}
-	ai->dummyVar = dummyVar;
-	ai->set = set;
+        add_index *ai = (add_index*)calloc(1, sizeof(add_index));
+        li->push_back(ai);
+        if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
+        /* assumes that the next level is the 'IN' keyword (if present) */
+        if (ix->opCode==IN){
+          dummyVar = (opNode*)ix->values[0];
+          set = (opNode*)ix->values[1];
+        }else{
+          dummyVar = NULL;
+          set = ix;
+        }
+        ai->dummyVar = dummyVar;
+        ai->set = set;
       }else{
-	set = NULL;
+        set = NULL;
       }
 
       // FIXME: how to deal with multidimensional dummy variables?
@@ -333,39 +332,38 @@ process_model(AmplModel *model) /* should be called with model==root */
       //        => for now simply use the original dummy variable
       //        => REQUIRE a dummy variable in block indexing
       if (!dummyVar){
-	printf("Indexing expressions for block's need dummy variables!\n");
-	printf("   %s",(node->indexing)->print());
-	exit(1);
+        cerr << "Indexing expressions for block's need dummy variables!\n";
+        cerr << "   " << node->indexing;
+        exit(1);
       }
       //for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
       //fprintf(fscript, "for {i%d in %s }{\n", k, print_opNode(set));
       //for(j=1;j<=k;j++) fprintf(fscript,"  ");
       //fprintf(fscript, "let %s_SUB := {i%d};\n", print_opNode(set), k);
       if (set){
-	opNodeIDREF *set_ref = dynamic_cast<opNodeIDREF*>(set);
-	if (set_ref==NULL){
-	  printf("ERROR: set reference must be opNodeIDREF\n");
-	  exit(1);
-	}
-	for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
-	char *tmp1 = dummyVar->print();
-	char *tmp2 = print_opNode(set);
-	fprintf(fscript, "for {%s in %s }\n", tmp1, tmp2);
-	free(tmp1);free(tmp2);
-	for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
-	fprintf(fscript,"{\n");
-	// the "reset data" command is needed to avoid the invalid subscript
-	// error
-	for(j=1;j<=k;j++) fprintf(fscript,"  ");
-	fprintf(fscript, "reset data %s_SUB;\n", getGlobalName(set_ref->ref, set, opNode::default_model, NOARG));
-	for(j=1;j<=k;j++) fprintf(fscript,"  ");
-	fprintf(fscript, "let %s_SUB%s := {%s};\n", 
-	      getGlobalName(set_ref->ref, set, opNode::default_model, NOARG),
-	      getGlobalName(set_ref->ref, set, opNode::default_model, ONLYARG),
-	      dummyVar->print());
+        opNodeIDREF *set_ref = dynamic_cast<opNodeIDREF*>(set);
+        if (set_ref==NULL){
+          cerr << "ERROR: set reference must be opNodeIDREF\n";
+          exit(1);
+        }
+        for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+        fscript << "for {" << dummyVar << " in " << set << " }\n";
+        for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+        fscript << "{\n";
+        // the "reset data" command is needed to avoid the invalid subscript
+        // error
+        for(j=1;j<=k;j++) fscript << "  ";
+        fscript << "reset data " << getGlobalName(set_ref->ref, set,
+            opNode::default_model, NOARG) << "_SUB;\n";
+        for(j=1;j<=k;j++) fscript << "  ";
+        fscript << "let " << 
+          getGlobalName(set_ref->ref, set, opNode::default_model, NOARG) <<
+          "_SUB" <<
+          getGlobalName(set_ref->ref, set, opNode::default_model, ONLYARG) <<
+          " := {" << dummyVar << "};\n";
       }else{
-	for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
-	fprintf(fscript,"{\n");
+        for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+        fscript << "{\n";
       }
       l_addIndex.push_back(li);
     }
@@ -374,143 +372,140 @@ process_model(AmplModel *model) /* should be called with model==root */
        bit below and add it here. 
        Unclear what that really needs to do:
         - Write out all indexing sets? Just their cardinality? 
-	Or the whoroole set? Whole set might be nice so that we can refer
-	  to submodels to their "proper" AMPL-name. 
-	- These indexing sets might need to be subscripted as well:
-	  COMM might be different for each incarnation of root_MCNF
+          Or the whoroole set? Whole set might be nice so that we can refer
+          to submodels to their "proper" AMPL-name. 
+        - These indexing sets might need to be subscripted as well:
+          COMM might be different for each incarnation of root_MCNF
         - Should take the chance and get AMPL to write out all the information
-	  we need here
+          we need here
     */
 
     /* If the current model (i) has children, then write out the size
        of its childrens indexing epression to disk */
     if (this_model->n_submodels>0){
       for(list<model_comp*>::iterator p = this_model->comps.begin();
-	  p!=this_model->comps.end();p++){
-	model_comp *mc = *p;
-	if (mc->type==TMODEL){
-	  /* found a submodel */
-	  AmplModel *submodel = (AmplModel*)mc->other;
-	  opNode *ix = mc->indexing;
-	  opNode *set;
-	  
-	  set = ix->getIndexingSet(); // set is NULL if ix is NULL
-	
-	// the name of the *.crd file is the global name of the submodel
-	// with all the current values of loop variables up to
-	// this level attached
-	
-	// so buffer here should be name of current model
-	int len = strlen(buffer);
-	int os;
-	char *p = buffer+len;
-	char *p1;
-	os = sprintf(p, "_%s", submodel->name);
-	p1 = p+os;
-	// for all levels from root up to here add the value of 
-	// indexing variables
-	
+          p!=this_model->comps.end();p++){
+        if ((*p)->type!=TMODEL) continue;
 
-	os = sprintf(p1, "\"");
-	p1 += os;
-	for(k=1;k<=this_model->level;k++){
-	  // get all the indexing variables and add them together (joined by &)
-	  opNodeIx *ixn = (anc_list[k]->node)->indexing;
-	  if (ixn){
-	    list<char *>* dvl = ixn->getListDummyVars();
-	    char buffer2[50], *p=buffer2; // hides the global p
-	    int os2;
-	    for(list<char *>::iterator q=dvl->begin();q!=dvl->end();q++){
-	      os2 = sprintf(p, "%s&",*q);
-	      p+=os2;
-	    }
-	    p--;p[0]=0; // delete the last '&'
-	    
-	    
-	    os = sprintf(p1, "&\"_\"&%s", buffer2);
-	    p1+=os;
-	  }
-	}
-	sprintf(p1, "&\".crd\"");
-	//printf("name of file is: %s\n",buffer);
+        model_comp *mc = *p;
 
-	// Need to write something like
- 	//print card(indexing expression) > exact_model_name.&1.&2.txt
-	// or whatever it takes to get ampl to produce filenames
-	// of the form stub_1.2.crd
-	// where 1, 2 are  the values of the iteration indices in the 
-	// scriptfile
-	if (set){
-	  for(j=1;j<=this_model->level;j++) fprintf(fscript,"  "); 
-	  char *tmp = print_opNode(set);
-	  fprintf(fscript, "print card(%s) > (\"%s);\n", tmp, buffer);
-	  sprintf(p1, "&\".set\"");
-	  for(j=1;j<=this_model->level;j++) fprintf(fscript,"  "); 
-	  fprintf(fscript, "display %s > (\"%s);\n", tmp, buffer);
-	  free(tmp);
-	}else{
-	  fprintf(fscript, "print \"0\" > (\"%s);\n", buffer);
-	}
+        /* found a submodel */
+        AmplModel *submodel = (AmplModel*)mc->other;
+        opNode *ix = mc->indexing;
+        opNode *set;
+    
+        set = ix->getIndexingSet(); // set is NULL if ix is NULL
+  
+        // the name of the *.crd file is the global name of the submodel
+        // with all the current values of loop variables up to
+        // this level attached
+        
+        // so buffer here should be name of current model
+        int len = strlen(buffer);
+        int os;
+        char *p = buffer+len;
+        char *p1;
+        os = sprintf(p, "_%s", submodel->name);
+        p1 = p+os;
+        // for all levels from root up to here add the value of 
+        // indexing variables
+        
 
-	*p=0; //delete the extension again	       
-	}
+        os = sprintf(p1, "\"");
+        p1 += os;
+        for(k=1;k<=this_model->level;k++){
+          // get all the indexing variables and add them together (joined by &)
+          opNodeIx *ixn = (anc_list[k]->node)->indexing;
+          if (ixn){
+            list<opNode *>* dvl = ixn->getListDummyVars();
+            char buffer2[50], *p=buffer2; // hides the global p
+            int os2;
+            for(list<opNode *>::iterator q=dvl->begin();q!=dvl->end();q++){
+              os2 = sprintf(p, "%s&",(*q)->print().c_str());
+              p+=os2;
+            }
+            p--;p[0]=0; // delete the last '&'
+            
+            os = sprintf(p1, "&\"_\"&%s", buffer2);
+            p1+=os;
+          }
+        }
+        sprintf(p1, "&\".crd\"");
+        //printf("name of file is: %s\n",buffer);
+
+        // Need to write something like
+        //  print card(indexing expression) > exact_model_name.&1.&2.txt
+        // or whatever it takes to get ampl to produce filenames
+        // of the form stub_1.2.crd
+        // where 1, 2 are  the values of the iteration indices in the 
+        // scriptfile
+        if (set){
+          for(j=1;j<=this_model->level;j++) fscript << "  "; 
+          fscript << "print card(" << set << ") > (\"" << buffer << ");\n";
+          sprintf(p1, "&\".set\"");
+          for(j=1;j<=this_model->level;j++) fscript << "  "; 
+          fscript << "display " << set << " > (\"" << buffer << ");\n";
+        }else{
+          fscript << "print \"0\" > (\"" << buffer << ");\n";
+        }
+
+        *p=0; //delete the extension again         
       }
     }
     
 
     /* write the main part of the submodel generation part in the scripts */
-    for(j=1;j<k;j++) fprintf(fscript,"  ");fprintf(fscript, "fix all;\n");
-    for(j=1;j<k;j++) fprintf(fscript,"  ");fprintf(fscript, "unfix all;\n");
+    for(j=1;j<k;j++) fscript << "  "; fscript << "fix all;\n";
+    for(j=1;j<k;j++) fscript << "  "; fscript << "unfix all;\n";
     
     /* take the .mod suffix away from buffer */
     //n = strlen(buffer);buffer[n-4] = 0;
-    for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
-    fprintf(fscript, "write (\"b%s\"",buffer);
+    for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+    fscript << "write (\"b" << buffer << "\"";
     for(k=1;k<=this_model->level;k++) {
       // get all the indexing variables and add them together (joined by &)
       opNodeIx *ixn = (anc_list[k]->node)->indexing;
       if (ixn){
-	list<char *>* dvl = ixn->getListDummyVars();
-	char buffer2[50], *p=buffer2; // assume that this hides the global p
-	int os2;
-	for(list<char *>::iterator q=dvl->begin();q!=dvl->end();q++){
-	  os2 = sprintf(p, "%s&",*q);
-	  p+=os2;
-	}
-	p--;p[0]=0; // delete the last '&'
-	
-	fprintf(fscript, "&\"_\"&%s",buffer2);
+        list<opNode *>* dvl = ixn->getListDummyVars();
+        char buffer2[50], *p=buffer2; // assume that this hides the global p
+        int os2;
+        for(list<opNode *>::iterator q=dvl->begin();q!=dvl->end();q++){
+          os2 = sprintf(p, "%s&",(*q)->print().c_str());
+          p+=os2;
+        }
+        p--;p[0]=0; // delete the last '&'
+  
+        fscript << "&\"_\"&" << buffer2;
       }
     }
-    fprintf(fscript, ");\n");
+    fscript << ");\n";
     
     /* and close all the brackets (prettyprinting) */
     for(k=this_model->level;k>0;k--){
-      for(j=1;j<k;j++) fprintf(fscript,"  ");
-      fprintf(fscript, "}\n");
+      for(j=1;j<k;j++) fscript << "  ";
+      fscript << "}\n";
       //rem_from_index_stack();
       l_addIndex.pop_back();
-
     }
     
     /* write the submodel file */
     //n = strlen(buffer);buffer[n-4] = 0;
     strcat(buffer, ".mod");
-    fout = fopen(buffer, "w");
-    printf("Write to model file: %s\n", buffer);
+    ofstream fout(buffer);
+    cout << "Write to model file: " << buffer << "\n";
     write_ampl_for_submodel(fout, model_list[n_models-1], model_list[i]);
-    fclose(fout);
+    fout.close();
 
     /* FIXME: this looks redundant */
     /* and also write the column file for this submodel */
     n = strlen(buffer);buffer[n-4] = 0;strcat(buffer, ".acl");
-    fout = fopen(buffer, "w");
+    fout.open(buffer);
     write_columnfile_for_submodel(fout, model_list[i]);
-    fclose(fout);
+    fout.close();
     free(anc_list);
   }
 
-  fclose(fscript);
+  fscript.close();
 
   /* FIXME: while we are at it, the AMPL scripts should write out the
      cardinality of the involved indexing sets and write these
@@ -526,7 +521,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
 
-  printf("call AMPL to process script file: ");
+  cout << "call AMPL to process script file: ";
 
   {
     // call ampl to process script and analyse the output
@@ -542,43 +537,44 @@ process_model(AmplModel *model) /* should be called with model==root */
       char *p;
       p = fgets(buffer, 256, ain);
       if (p){
-	printf("%s",buffer);
-	if (strncmp(buffer, "No constraint",13)==0){
-	  n_nocsobj++;
-	} else if (strncmp(buffer, "No variables",12)==0){
-	  n_novar++;
-   } else if (strncmp(buffer, "ILOG AMPL",9)==0){
-      // Do nothing, version and liscence string
-      // eg ILOG AMPL 10.000, licensed to "university-edinburgh".
-   } else if (strncmp(buffer, "AMPL Version",12)==0){
-      // Do nothing version string
-      // eg AMPL Version 20051214 (Linux 2.6.9-5.ELsmp)
-	}else{
-	  n_other++;
-	}
+        cout << buffer;
+        if (strncmp(buffer, "No constraint",13)==0){
+          n_nocsobj++;
+        } else if (strncmp(buffer, "No variables",12)==0){
+          n_novar++;
+        } else if (strncmp(buffer, "ILOG AMPL",9)==0){
+          // Do nothing, version and liscence string
+          // eg ILOG AMPL 10.000, licensed to "university-edinburgh".
+        } else if (strncmp(buffer, "AMPL Version",12)==0){
+          // Do nothing version string
+          // eg AMPL Version 20051214 (Linux 2.6.9-5.ELsmp)
+        }else{
+          n_other++;
+        }
       }
     }
     if (n_nocsobj+n_other>0){
       printf("\nAMPL: ampl returned output\n");
-      printf("AMPL: Model without constraints and objectives: %d\n",n_nocsobj);
-      printf("AMPL: Model without variables                 : %d\n",n_novar);
-      printf("AMPL: Other errors                            : %d\n",n_other);
-      if (n_other>0){
-	exit(1);
-      }
+      cout << "AMPL: Model without constraints and objectives: " <<
+        n_nocsobj << "\n";
+      cout << "AMPL: Model without variables                 : " <<
+        n_novar << "\n";
+      cout << "AMPL: Other errors                            : " <<
+        n_other << "\n";
+      if (n_other>0) exit(1);
     }
   }
-  printf("done\n");
+  cout << "done\n";
 
   /* 4) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> build algebra tree */
   
   //model->print();
   
-  printf("------------- Generate ExpandedModel tree ------------ \n");
+  cout << "------------- Generate ExpandedModel tree ------------ \n";
   ExpandedModel *em = new ExpandedModel(model);
   em->print();
-  printf("=============================================================== \n");
-  printf("----------------- Call OOPS generator ---------------- \n");
+  cout << "=============================================================== \n";
+  cout << "----------------- Call OOPS generator ---------------- \n";
 
   SML_OOPS_driver(em);
   
@@ -590,10 +586,10 @@ int count_models_(AmplModel *model)
   model_comp* comp;
   if (model->n_submodels>0){
     for(list<model_comp*>::iterator p = model->comps.begin();
-	p!=model->comps.end();p++){
+  p!=model->comps.end();p++){
       comp = *p;
       if (comp->type==TMODEL)
-	count += count_models_((AmplModel*)comp->other);
+  count += count_models_((AmplModel*)comp->other);
     }
   }
   count += 1; /* also count this model */
@@ -637,7 +633,7 @@ fill_model_list_(AmplModel *model, AmplModel **listam, int *pos)
     for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
       comp = *p;
       if (comp->type==TMODEL)
-	fill_model_list_((AmplModel*)comp->other, listam, pos);
+  fill_model_list_((AmplModel*)comp->other, listam, pos);
     }
   }
   
@@ -655,7 +651,7 @@ write_ampl_for_submodel
     - The declaration of the current subblock:
       - indexing 'i in ARCS' changed to 'i in ARCS_SUB'
         this indexing is added as an extra (first) paremeter to all
-	entities declared within this block
+        entities declared within this block
     - all names of var/subject to/param/set entities declared within a block
       are changed to a global name by pre-pending the name of the block to
       the entity name (to avoid local/global naming problems)
@@ -664,15 +660,15 @@ write_ampl_for_submodel
       var/set/param declarations are copied, constraints not
 
 */
-void write_ampl_for_submodel_(FILE *fount, int thislevel, int sublevel, 
-			      AmplModel **list, AmplModel *submodel);
-void modified_write(FILE *fout, model_comp *comp);
+void write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel, 
+            AmplModel **list, AmplModel *submodel);
+void modified_write(ostream &fout, model_comp *comp);
 
 void
-write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
+write_ampl_for_submodel(ostream &fout, AmplModel *root, AmplModel *submodel)
 {
   AmplModel *listam[5];  /* assume models are not nested further than
-			   5 levels */
+         5 levels */
   int i, level;
   
   opNode::use_global_names = 1;
@@ -680,9 +676,9 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
   l_addIndex.clear();
 
   if (GlobalVariables::prtLvl>1){
-    printf("==============================================================\n");
-    printf("     ampl model for part: %s\n",submodel->name);
-    printf("==============================================================\n");
+    cout << "==============================================================\n";
+    cout << "     ampl model for part: " << submodel->name << "\n";
+    cout << "==============================================================\n";
   }
 
   /* need list of models at different levels from here up to root */
@@ -699,10 +695,10 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
     }
   }
   if (GlobalVariables::prtLvl>1){
-    printf("-> this model is on level %d\n", level);
-    printf("   Levels from top are: \n");
+    cout << "-> this model is on level " <<  level << "\n";
+    cout << "   Levels from top are: \n";
     for(i=0;i<=level;i++){
-      printf("%d: %s\n",i, listam[i]->name);
+      cout << i << ": " << listam[i]->name << "\n";
     }
   }
 
@@ -717,8 +713,8 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
     (*p)->tagDependencies();
   }
   if (GlobalVariables::prtLvl>1){
-    printf("processing %s\n", submodel->name);
-    printf("-------> tagged now\n");
+    cout << "processing " <<  submodel->name << "\n";
+    cout << "-------> tagged now\n";
     //model_comp::writeAllTagged();
     model_comp::writeAllTagged(AmplModel::root);
   }
@@ -747,17 +743,13 @@ write_ampl_for_submodel(FILE *fout, AmplModel *root, AmplModel *submodel)
    keeping in mind that the extension might be wanted later
  
   */
-
-  
-
-
 } 
 
 
 /* ---------------------------------------------------------------------------
 write_ampl_for_submodel_
 --------------------------------------------------------------------------- */
-/* This routine does part fo the work in writing out an AMPL submodel file
+/* This routine does part of the work in writing out an AMPL submodel file
    for the model given by 'submodel'.
    It is passed the list of ancestors of submodel (in 'list') and works
    down this list recursively. For an ancestor of the current model
@@ -788,8 +780,8 @@ write_ampl_for_submodel_
 
 */
 void
-write_ampl_for_submodel_(FILE *fout, int thislevel, int sublevel, 
-			 AmplModel **listam, AmplModel *submodel)
+write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel, 
+       AmplModel **listam, AmplModel *submodel)
 {
   AmplModel *thism = listam[thislevel];
   int i, j;
@@ -797,7 +789,7 @@ write_ampl_for_submodel_(FILE *fout, int thislevel, int sublevel,
   
   opNode::default_model = thism;
   // loop through all entities in this model 
-  fprintf(fout, "\n# start of model %s\n\n",thism->global_name.c_str());
+  fout << "\n# start of model " << thism->global_name << "\n\n";
   for(list<model_comp*>::iterator p = thism->comps.begin();
       p!=thism->comps.end();p++){
     comp = *p;
@@ -807,158 +799,156 @@ write_ampl_for_submodel_(FILE *fout, int thislevel, int sublevel,
       // write out *all* components of current model and everything except
       // objectives and constraints in submodels
       if (comp->type==TVAR || comp->type==TSET || comp->type==TPARAM 
-	  || thism==submodel){
-	//opNode::default_model = comp->model;
-	modified_write(fout, comp);
+          || thism==submodel){
+        //opNode::default_model = comp->model;
+        modified_write(fout, comp);
       }
     }else{ // if (comp->type!=TMODEL)
       /* this is a model declaration */
       /* check that it needs to be followed */
       if (thism!=submodel && listam[thislevel-1]==comp->other){
-	opNode *ix;
-	list <add_index*>* li = new list<add_index*>();
-	/* ok, looks like this needs to be followed */
-	/* add the indexing expression */
-	
-	// initialise the new entry in l_addIndex stack if not already done
-	ix = comp->indexing;
-	// l.addIndex.push_back(li);
-	if (ix){
-	  add_index *ai = (add_index*)calloc(1, sizeof(add_index));
-	  //if (l_addIndex[n_addIndex]==NULL){
-	  //  l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
-	  //}
-	  // add new entry on the addIndex stack
-	  //list<add_index*> li = l_addIndex.last();
-	  li->push_back(ai);
-	  
-	  // and place the indexing expression of this BLOCK onto the stack
-	  // the stack stores the dummy variable and the SET separately, 
-	  // so take them to bits here
-	  if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0]; // rem {..}
-	  if (ix->opCode==IN){
-	    //l_addIndex[n_addIndex]->dummyVar = (opNode*)ix->values[0];
-	    //l_addIndex[n_addIndex]->set = (opNode*)ix->values[1];
-	    ai->dummyVar = (opNode*)ix->values[0];
-	    ai->set = (opNode*)ix->values[1];
-	  }else{ // no dummy variable, just a set
-	    //l_addIndex[n_addIndex]->dummyVar = NULL;
-	    //l_addIndex[n_addIndex]->set = ix;
-	    ai->dummyVar = NULL;
-	    ai->set = ix;
-	  }
-	  
-	  /* okay we have placed the set description on the stack
-	     but really this should be modified:
-	     'i in ARCS' should read 'i in ARCS_SUB'
-	     
-	     ought to 'write set ARCS_SUB within ARCS'; as well
-	  */
-	  
-	  
-	  /* 14/03/08: what we are trying to do is to create a model_comp
-	     that represents the expression
-	     set indset_SUB within indset;   
-	     and print this with modified_write. Then it should be
-	     automatically indexed over all subproblem indexing sets:
-	     set indset_SUB{ix0 in indset0_SUB} within indset[ix0];
-	     
-	     
-	     The model_comp is of type SET, with no indexing expression
-	  */
-	  {
-	    model_comp *newmc = new model_comp();
-	    opNode *setn = ai->set;
-	    
-	    newmc->type = TSET;
-	    
-	    // set name of the model_comp
-	    if (setn->opCode!=IDREF){
-	      printf("At the moment can index blocks only with simple sets\n");
-	      printf("Indexing expression is %s\n",setn->print());
-	      exit(1);
-	    }
-	    opNodeIDREF *setnref = dynamic_cast<opNodeIDREF*>(setn);
-	    if (setnref==NULL){
-	      printf("IDREF node should be of type opNodeIDREF\n");
-	      exit(1);
-	    }
-	    model_comp *setmc = setnref->ref;
-	    newmc->id = strdup((setmc->id+string("_SUB")).c_str());
-	    
-	    // and build "within indset" as attribute tree
-	    newmc->attributes = new opNode(WITHIN, setn);
-	    //newmc->model = comp->model;
-	    newmc->model = setmc->model;
-	    modified_write(fout, newmc);
+        opNode *ix;
+        list <add_index*>* li = new list<add_index*>();
+        /* ok, looks like this needs to be followed */
+        /* add the indexing expression */
+  
+        // initialise the new entry in l_addIndex stack if not already done
+        ix = comp->indexing;
+        // l.addIndex.push_back(li);
+        if (ix){
+          add_index *ai = (add_index*)calloc(1, sizeof(add_index));
+          //if (l_addIndex[n_addIndex]==NULL){
+          //  l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
+          //}
+          // add new entry on the addIndex stack
+          //list<add_index*> li = l_addIndex.last();
+          li->push_back(ai);
+          
+          // and place the indexing expression of this BLOCK onto the stack
+          // the stack stores the dummy variable and the SET separately, 
+          // so take them to bits here
+          if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0]; // rem {..}
+          if (ix->opCode==IN){
+            //l_addIndex[n_addIndex]->dummyVar = (opNode*)ix->values[0];
+            //l_addIndex[n_addIndex]->set = (opNode*)ix->values[1];
+            ai->dummyVar = (opNode*)ix->values[0];
+            ai->set = (opNode*)ix->values[1];
+          }else{ // no dummy variable, just a set
+            //l_addIndex[n_addIndex]->dummyVar = NULL;
+            //l_addIndex[n_addIndex]->set = ix;
+            ai->dummyVar = NULL;
+            ai->set = ix;
+          }
+          
+          /* okay we have placed the set description on the stack
+             but really this should be modified:
+             'i in ARCS' should read 'i in ARCS_SUB'
+             
+             ought to 'write set ARCS_SUB within ARCS'; as well
+          */
+          
+          
+          /* 14/03/08: what we are trying to do is to create a model_comp
+             that represents the expression
+             set indset_SUB within indset;   
+             and print this with modified_write. Then it should be
+             automatically indexed over all subproblem indexing sets:
+             set indset_SUB{ix0 in indset0_SUB} within indset[ix0];
+             
+             
+             The model_comp is of type SET, with no indexing expression
+          */
+          {
+            model_comp *newmc = new model_comp();
+            opNode *setn = ai->set;
+            
+            newmc->type = TSET;
+            
+            // set name of the model_comp
+            if (setn->opCode!=IDREF){
+              cerr << "At the moment can index blocks only with simple sets\n";
+              cerr << "Indexing expression is " << setn->print() << "\n";
+              exit(1);
+            }
+            opNodeIDREF *setnref = dynamic_cast<opNodeIDREF*>(setn);
+            if (setnref==NULL){
+              cerr << "IDREF node should be of type opNodeIDREF\n";
+              exit(1);
+            }
+            model_comp *setmc = setnref->ref;
+            newmc->id = strdup((setmc->id+string("_SUB")).c_str());
+            
+            // and build "within indset" as attribute tree
+            newmc->attributes = new opNode(WITHIN, setn);
+            //newmc->model = comp->model;
+            newmc->model = setmc->model;
+            modified_write(fout, newmc);
+          }
+          
+          if (true)
+          {
+            //opNode *setn = l_addIndex[n_addIndex]->set;
+            opNode *setn = ai->set;
+            opNodeIDREF *newn = new opNodeIDREF();
+            model_comp *tmp;
+            char *newname; 
+            //fprintf(fout, "set %s_SUB within %s;\n", 
+            //      print_opNode(setn), print_opNode(setn));
+            /* and now modify the set declaration */
+            if (setn->opCode!=IDREF){
+              cerr << "At the moment can index blocks only with simple sets\n";
+              cerr << "Indexing expression is " << setn->print() << "\n";
+              exit(1);
+            }
+            // FIXME: rewrite this code by
+            //  - using the opNodeIDREF subclass
+            //  - using the opNodeIDREF::clone() method
+            /* newn is the new node, first copy the old one */
+            newn->opCode = IDREF;
+            newn->nval = setn->nval;
+            newn->values = (void **)calloc(setn->nval+1, sizeof(void *));
+            for(j=0;j<setn->nval;j++) newn->values[j] = setn->values[j];
+            // clone the model_comp that is referred to
+            newn->ref = (model_comp *)calloc(1,sizeof(model_comp));
+            memcpy(newn->ref, ((opNodeIDREF*)setn)->ref, sizeof(model_comp));
+            // ???but associate this with the current model
+            //newn->ref->model = thism;
 
-	    
-	  }
-	  
-	  if (1)
-	  {
-	    //opNode *setn = l_addIndex[n_addIndex]->set;
-	    opNode *setn = ai->set;
-	    opNodeIDREF *newn = new opNodeIDREF();
-	    model_comp *tmp;
-	    char *newname; 
-	    //fprintf(fout, "set %s_SUB within %s;\n", 
-	    //	    print_opNode(setn), print_opNode(setn));
-	    /* and now modify the set declaration */
-	    if (setn->opCode!=IDREF){
-	      printf("At the moment can index blocks only with simple sets\n");
-	      printf("Indexing expression is %s\n",setn->print());
-	      exit(1);
-	    }
-	    // FIXME: rewrite this code by
-	    //  - using the opNodeIDREF subclass
-	    //  - using the opNodeIDREF::clone() method
-	    /* newn is the new node, first copy the old one */
-	    newn->opCode = IDREF;
-	    newn->nval = setn->nval;
-	    newn->values = (void **)calloc(setn->nval+1, sizeof(void *));
-	    for(j=0;j<setn->nval;j++) newn->values[j] = setn->values[j];
-	    // clone the model_comp that is referred to
-	    newn->ref = (model_comp *)calloc(1,sizeof(model_comp));
-	    memcpy(newn->ref, ((opNodeIDREF*)setn)->ref, sizeof(model_comp));
-	    // ???but associate this with the current model
-	    //newn->ref->model = thism;
-
-	    /* and finally set the new name (add _SUB) to the name */
-	    tmp = newn->ref;
-	    newname = (char *)calloc(strlen(tmp->id)+5, sizeof(char));
-	    strcpy(newname, tmp->id);
-	    strcat(newname, "_SUB");
-	    tmp->id = newname;
-	    /* and put this on the stack */
-	    //l_addIndex[n_addIndex]->set = newn;
-	    ai->set = newn;
-	  }	     
-	  //n_addIndex++;
-	}
-	l_addIndex.push_back(li);
-	write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, 
-				 submodel);
-	opNode::default_model = thism;
-	//if (ix) n_addIndex--;
-	l_addIndex.pop_back();
+            /* and finally set the new name (add _SUB) to the name */
+            tmp = newn->ref;
+            newname = (char *)calloc(strlen(tmp->id)+5, sizeof(char));
+            strcpy(newname, tmp->id);
+            strcat(newname, "_SUB");
+            tmp->id = newname;
+            /* and put this on the stack */
+            //l_addIndex[n_addIndex]->set = newn;
+            ai->set = newn;
+          }       
+          //n_addIndex++;
+        }
+        l_addIndex.push_back(li);
+        write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, 
+               submodel);
+        opNode::default_model = thism;
+        //if (ix) n_addIndex--;
+        l_addIndex.pop_back();
       } /* end of (model on the current list branch) */
       else if (thislevel==0) {
-	// we are in the current model and are 
-	// processing a definition of a child block of the current block
-	// => write out everything that is tagged
-	AmplModel *childm = (AmplModel *)comp->other;
-	
-	//printf("\n\n-----------------------------------------------\n");
-	//printf("  current model: %s\n",submodel->name);
-	//printf("  these are the components needed from children:\n");
-	childm->writeTaggedComponents(fout);
-	opNode::default_model = thism;
-	//printf("-----------------------------------------------\n\n");
-	
-	// For normal model components we simply call modified_write
-	// on these components
-	// => what does modified_write depend on?
+        // we are in the current model and are 
+        // processing a definition of a child block of the current block
+        // => write out everything that is tagged
+        AmplModel *childm = (AmplModel *)comp->other;
+        
+        //printf("\n\n-----------------------------------------------\n");
+        //printf("  current model: %s\n",submodel->name);
+        //printf("  these are the components needed from children:\n");
+        childm->writeTaggedComponents(fout);
+        opNode::default_model = thism;
+        //printf("-----------------------------------------------\n\n");
+        
+        // For normal model components we simply call modified_write
+        // on these components
+        // => what does modified_write depend on?
       }
       
     } /* end else (end of the TMODEL branch) */
@@ -982,7 +972,7 @@ write_columnfile_for_submodel
 */
 
 void
-write_columnfile_for_submodel(FILE *fout, AmplModel *submodel)
+write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
 {
   model_comp *comp;
   int i;
@@ -992,17 +982,15 @@ write_columnfile_for_submodel(FILE *fout, AmplModel *submodel)
     comp = *p;
     if (comp->type==TVAR){
       /* print global name here: 
-	 either just prefix all model names up to here by a loop, or
-	 use the global name printing routine used elsewhere (but I
-	 think that also puts indexing expressions on it               */
+         either just prefix all model names up to here by a loop, or
+         use the global name printing routine used elsewhere (but I
+         think that also puts indexing expressions on it               */
 
       /* the NOARG version of getGlobalName should do the trick */
-      fprintf(fout, "%s\n", getGlobalName(comp, NULL, NULL, NOARG));
+      fout << getGlobalName(comp, NULL, NULL, NOARG) << "\n";
     }
     //comp = comp->next;
   }
-
-
 }
 
 /* --------------------------------------------------------------------------
@@ -1094,10 +1082,9 @@ modified_write
  *
  */
 void
-modified_write(FILE *fout, model_comp *comp)
+modified_write(ostream &fout, model_comp *comp)
 {
   int i;
-  char *tmp;
   opNode *ixsn;
   int c_addIndex;
 
@@ -1111,13 +1098,13 @@ modified_write(FILE *fout, model_comp *comp)
     model = model->parent;
   }
   if (prt_modwrite)
-    printf("Modified write (%s), level=%d, l_addIndex=%d\n",
-	   comp->id, level, l_addIndex.size());
+    cout << "Modified write (" << comp->id << "), level=" << level << 
+      ", l_addIndex=" << l_addIndex.size() << "\n";
 
   if (comp->type!=TMODEL){
     int first=1;
     /* start statement */
-    fprintf(fout, "%s ",compTypes[comp->type]);
+    fout << compTypes[comp->type] << " ";
     
     // find number of indexing expressions on stack
     c_addIndex = 0;
@@ -1130,52 +1117,44 @@ modified_write(FILE *fout, model_comp *comp)
       //}
     }
     /* write name and indexing expression */
-    fprintf(fout, "%s ",getGlobalName(comp, NULL, NULL, NOARG));
+    fout << getGlobalName(comp, NULL, NULL, NOARG) << " ";
     //if (n_addIndex>0 || comp->indexing)
     if (c_addIndex>0 || comp->indexing)
-      fprintf(fout, "{");
+      fout << "{";
     /* write out the additional indexes */
     //for(i=0;i<l_addIndex.size();i++){
     for(i=0;i<level;i++){
       list <add_index*>* li = l_addIndex.at(i);
       for(list<add_index*>::iterator p=li->begin();p!=li->end();p++){
-	add_index *ix = *p;
-	//    for(i=0;i<n_addIndex;i++){
-	//  add_index *ix = l_addIndex[i];
-	if (first){first = 0;}else{fprintf(fout, ",");}
-	if (ix->dummyVar){
-	  tmp = print_opNode(ix->dummyVar);
-	  fprintf(fout, "%s in ",tmp);
-	  free(tmp);
-	}
-	ixsn = ix->set;
-	if (ixsn->opCode==LBRACE) ixsn=(opNode*)ixsn->values[0]; 
-	tmp = print_opNode(ixsn);
-	fprintf(fout, "%s",tmp);
-	free(tmp);
+        add_index *ix = *p;
+        // for(i=0;i<n_addIndex;i++){
+        // add_index *ix = l_addIndex[i];
+        if (first) {first = 0;} else {fout << ",";}
+        if (ix->dummyVar){
+          fout << ix->dummyVar << " in ";
+        }
+        ixsn = ix->set;
+        if (ixsn->opCode==LBRACE) ixsn=(opNode*)*ixsn->begin(); 
+        fout << ixsn;
       }
     }
     /* write out the index of this component */
     if (comp->indexing) {
-      if (first){first = 0;}else{fprintf(fout, ",");}
+      if (first) {first = 0;} else {fout << ",";}
       ixsn = comp->indexing;
       if (ixsn->opCode==LBRACE) ixsn=(opNode*)ixsn->values[0]; 
-      tmp = print_opNode(ixsn);
-      fprintf(fout, "%s", tmp);
-      free(tmp);
+      fout << ixsn;
     }
     //if (n_addIndex>0 || comp->indexing)
     if (c_addIndex>0 || comp->indexing)
-      fprintf(fout, "}");
+      fout << "}";
     
     /* write out special syntax for a particular statement type */
     if (comp->type==TCON||comp->type==TMIN||comp->type==TMAX) 
-      fprintf(fout, ":");
+      fout << ":";
     
     /* write out the rest of the expression */
-    tmp = (comp->attributes)->print();
-    fprintf(fout, "%s;\n", tmp);
-    free(tmp);
+    fout << comp->attributes << ";\n";
     //fprintf(fout, "%s;\n",print_opNode(comp->attributes));
     //fprintf(fout, "%s;\n", print_opNodesymb(comp->attributes));
   }

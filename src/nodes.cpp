@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <iostream>
+#include <sstream>
 #include "nodes.h"
 #include "ampl.tab.h"
 #include "ampl.h"   // for findKeywordinTree
@@ -16,8 +17,6 @@ AmplModel *opNode::default_model =NULL;
 string opNode::node = "";
 string opNode::stage = "";
 
-char *strcat2(char *s1, char *s2);
-char *print_stropstr(opNode *node, char *buffer);
 /* ==========================================================================
  opNode
 =========================================================================== */
@@ -245,336 +244,255 @@ opNode::print()
 
 */
 
-char *print_opNode(opNode *node){return (node==NULL)?strdup(""):node->print();}
+ostream&
+operator<<(ostream&s, const opNode *node) {
+   if(node == NULL) return s;
+   return s << *node;
+}
 
-char*
-opNode::print()
-{
+ostream&
+operator<<(ostream&s, const opNode &node) {
   model_comp *thisc;
   AmplModel *thism;
-  char *buffer;
-  char *buffer2;
-  int i;
-  opNode *node = this;
-  if (node==NULL){
-    buffer = strdup("");
-    return buffer;
-  }
+  const opNodeIDREF *onidref;
+  static int level=0;
 
-  switch (node->opCode)
+  if(&node == NULL) return s;
+
+  opNode::Iterator i = node.begin();
+  /*if(s!=cout) {
+     for(int j=0; j<level; ++j) cout << " ";
+     if(level!=0) cout << "-";
+     level++;
+     cout << "here " << node.opCode << "(" << node << ")\n";
+  }*/
+
+  switch (node.opCode)
     {
-    case 0:
-      return print_opNode((opNode*)node->values[0]);
-
+    case 0:          s << *(opNode*) *i;                 break;
       /* these are terminals */
-    case INT_VAL:
-      buffer = (char *)malloc(10);
-      i = sprintf(buffer, "%d", *((int *)(node->values[0])));
-      if (i>10) {
-	printf("integer constant too long: %d",*(int *)(node->values[0]));
-	exit(1);
-      }
-      return buffer;
-
-    case FLOAT_VAL:
-      buffer = (char *)malloc(15);
-      i = sprintf(buffer, "%f", *(double *)(node->values[0]));
-      if (i>15) {
-	printf("float constant too long: %f",*(double *)(node->values[0]));
-	exit(1);
-      }
-      return buffer;
-      break;
+    case INT_VAL:    s << *((int *)(*i));                break;
+    case FLOAT_VAL:  s << *((double *)(*i));             break;
       /* these are lots of simple binary operators */
-    case NODE:
-      return strdup(opNode::node.c_str());
+    case NODE:       s << opNode::node;                  break;
+    case STAGE:      s << opNode::stage;                 break;
+    case ID:         s << (const char*)*i;               break;
+    case ' ':        
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << ' ' << *(opNode*)*i;
       break;
-    case STAGE:
-      return strdup(opNode::stage.c_str());
-      break;
-    case ID:
-      /* in this case the values[0] is simply a pointer to a name */
-      buffer = strdup((const char*)node->values[0]);
-      return buffer;
-      break;
-    case IDREF:
-      if (nval<0) {
-	// as yet unset IDREF
-	return strdup("IDREF");
-      }
-      if (use_global_names){
-	buffer = getGlobalNameNew(((opNodeIDREF*)node)->ref, node, default_model, WITHARG);
-	return buffer;
-      }else{
-      /* this is the new ID processor */
-	thisc = ((opNodeIDREF*)node)->ref;
-	buffer = strdup(thisc->id);
-	if (node->nval==0) return buffer;
-	buffer2 = strdup("[");
-	buffer = strcat2(buffer, strcat2(buffer2, print_opNode((opNode*)node->values[0])));
-	for(i=1;i<node->nval;i++){
-	  buffer2 = strdup(",");
-	  buffer = strcat2(buffer, strcat2(buffer2, print_opNode((opNode*)node->values[i])));
-	}
-	buffer2 = strdup("]");
-	buffer = strcat2(buffer, buffer2);
-	return buffer;
-      }
-      break;
-
-    case IDREFM:
-      {
-	/* this is the new ID processor (for submodels) */
-	opNodeIDREF *onir = dynamic_cast<opNodeIDREF*>(node);
-	// ??? is this correct
-	thisc = (model_comp*)onir->ref;
-	buffer = strdup(thisc->id);
-	//thism = (AmplModel*)onir->ref;
-	//buffer = strdup(thism->name);
-	return buffer;
-      }
-      break;
-    case ' ':
-      buffer = strdup(" ");
-      return print_stropstr(node, buffer);
-
     case DOT:
-      buffer = strdup(".");
-      return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-		     print_opNode((opNode*)node->values[1]));
-      
+      s << *(opNode*)*i << ".";
+      s << *(opNode*)*(++i);
+      break;
     case COMMA:
-      /* a comma can have any number of arguments */
-      if (node->nval==1){
-	return print_opNode((opNode*)node->values[0]);
+      s << *(opNode*)*i;
+      for(++i;i!=node.end();++i) {
+         s << "," << (*(opNode*)*i);
       }
-      buffer = strdup(",");
-      buffer2 = strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-			print_opNode((opNode*)node->values[1]));
-      for(i=2;i<node->nval;i++){
-	buffer2 =  strcat2(strcat2(buffer2, buffer), print_opNode((opNode*)node->values[i]));
-      }
-      return buffer2;
-
+      break;
     case IN:
-      buffer = strdup(" in ");
-      return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-		     print_opNode((opNode*)node->values[1]));
-
+      s << *(opNode*)*i << " in ";
+      s << *(opNode*)*(++i);
+      break;
     case GE:
-      buffer = strdup(">=");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << ">=" <<  *(opNode*)*i;
+      break;
     case GT:
-      buffer = strdup(">");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << ">" <<  *(opNode*)*i;
+      break;
     case LE:
-      buffer = strdup("<=");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << "<=" <<  *(opNode*)*i;
+      break;
     case LT:
-      buffer = strdup("<");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << "<" <<  *(opNode*)*i;
+      break;
     case EQ:
-      buffer = strdup("==");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << "==" <<  *(opNode*)*i;
+      break;
     case DIFF:
-      buffer = strdup(" diff ");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << " diff " <<  *(opNode*)*i;
+      break;
     case CROSS:
-      buffer = strdup(" cross ");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << " cross " <<  *(opNode*)*i;
+      break;
     case DOTDOT:
-      buffer = strdup(" .. ");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << " .. " <<  *(opNode*)*i;
+      break;
     case '+':
-      buffer = strdup("+");
-      return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-		     print_opNode((opNode*)node->values[1]));
-
+      s << *(opNode*)*i;
+      s << "+" << *(opNode*)*(++i);
+      break;
     case '-':
-      buffer = strdup("-");
-      return print_stropstr(node, buffer);
-
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << "-" <<  *(opNode*)*i;
+      break;
     case '*':
-      buffer = strdup("*");
-      return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-		     print_opNode((opNode*)node->values[1]));
-
+      s << *(opNode*)*i << "*";
+      s << *(opNode*)*(++i);
+      break;
     case '/':
-      buffer = strdup("/");
-      return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-		     print_opNode((opNode*)node->values[1]));
-
+      s << *(opNode*)*i << "/";
+      s << *(opNode*)*(++i);
+      break;
     case SUM:
-      buffer = strdup("sum ");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
-		     print_opNode((opNode*)node->values[1]));
-
+      s << "sum " << *(opNode*)*i;
+      s << *(opNode*)*(++i);
+      break;
     case MAX:
-      buffer = strdup("max ");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
-		     print_opNode((opNode*)node->values[1]));
-
+      s << "max " << *(opNode*)*i;
+      s << *(opNode*)*(++i);
+      break;
     case MIN:
-      buffer = strdup("min ");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
-		     print_opNode((opNode*)node->values[1]));
+      s << "min " << *(opNode*)*i;
+      s << *(opNode*)*(++i);
       break;
     case EXPECTATION:
-      buffer = strdup("Exp(");
-      buffer2 = strdup(")");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
-		     buffer2);
+      s << "Exp( " << *(opNode*)*i << ")";
       break;
     case LAST:
-      buffer = strdup("last(");
-      buffer2 = strdup(")");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
-		     buffer2);
+      s << "last( " << *(opNode*)*i << ")";
       break;
     case FIRST:
-      buffer = strdup("first(");
-      buffer2 = strdup(")");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),
-		     buffer2);
+      s << "first( " << *(opNode*)*i << ")";
       break;
       // -------------------------functions f(..) --------------------------
     case ORD:
-      buffer = strdup("ord");
-      return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-
+      s << "ord" << *(opNode*)*i;
+      break;
       // -------------------------terminals --------------------------
-    case ORDERED:
-      return strdup(" ordered");
-      break;
-    case SYMBOLIC:
-      return strdup(" symbolic");
-      break;
-    case DETERMINISTIC:
-      return strdup(" deterministic");
-      break;
+    case ORDERED:    s << " ordered";                    break;
+    case SYMBOLIC:   s << " symbolic";                   break;
+    case DETERMINISTIC: s << " deterministic";           break;
       /* these are lots of simple unary operators */
     case WITHIN:
-      buffer = strdup("within ");
-      return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-
+      s << "within " << *(opNode*)*i;
+      break;
     case LSBRACKET:
-      buffer = strdup("[");
-      buffer2 = strdup("]");
-      if (node->nval==1){
-	return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),buffer2);
-      }else{
-	return strcat2(print_opNode((opNode*)node->values[0]), 
-		       strcat2(strcat2(buffer, print_opNode((opNode*)node->values[1])),buffer2));
+      if (node.nval==1){
+         s << "[" << *(opNode*)*i << "]";
+      } else {
+         s << *(opNode*)*i << "[";
+         s << *(opNode*)*(++i) << "]";
       }
-
+      break;
     case LBRACE:
-      buffer = strdup("{");
-      buffer2 = strdup("}");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),buffer2);
-
+      s << "{" << *(opNode*)*i << "}";
+      break;
     case LBRACKET:
-      buffer = strdup("(");
-      buffer2 = strdup(")");
-      return strcat2(strcat2(buffer, print_opNode((opNode*)node->values[0])),buffer2);
-
+      s << "(" << *(opNode*)*i << ")";
+      break;
     case ASSIGN:
-      buffer = strdup("=");
-      if (node->nval==1){
-	return strcat2(buffer, print_opNode((opNode*)node->values[0]));
+      if (node.nval==1){
+         s << "=" << *(opNode*)*i;
       }else{
-	return strcat2(print_opNode((opNode*)node->values[0]), 
-		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
+         s << *(opNode*)*i;
+         s << "=" << *(opNode*)*(++i);
       }
       break;
     case DEFINED:
-      buffer = strdup(":=");
-      if (node->nval==1){
-	return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-      }else{
-	printf("':=' used as binary operator?\n");
-	exit(1);
-	//	return strcat2(print_opNode((opNode*)node->values[0]), 
-	//		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
+      if(node.nval!=1) {
+         cerr << "':=' used as binary operator?\n";
+         exit(1);
       }
+      s << ":=" << *(opNode*)*i;
       break;
     case COLON:
-      buffer = strdup(":");
-      if (node->nval==1){
-	return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-      }else{
-	return strcat2(print_opNode((opNode*)node->values[0]), 
-		       strcat2(buffer, print_opNode((opNode*)node->values[1])));
-      }
+      if(node.nval>1) s << *(opNode*)*(i++);
+      s << ":" <<  *(opNode*)*i;
       break;
-
     case IF:
-      if (node->nval==2){
-	char *tmp1 = print_opNode((opNode*)node->values[0]);
-	char *tmp2 = print_opNode((opNode*)node->values[1]);
-	int len = strlen(tmp1)+strlen(tmp2)+3+6+1;
-	char *ret = (char*)malloc(len);
-	sprintf(ret, "if %s then %s",tmp1, tmp2);
-	free(tmp1);
-	free(tmp2);
-	return ret;
-      }else{
-	// has three arguments 
-	char *tmp1 = print_opNode((opNode*)node->values[0]);
-	char *tmp2 = print_opNode((opNode*)node->values[1]);
-	char *tmp3 = print_opNode((opNode*)node->values[2]);
-	int len = strlen(tmp1)+strlen(tmp2)+strlen(tmp3)+3+6+6+1;
-	char *ret = (char*)malloc(len);
-	sprintf(ret, "if %s then %s else %s",tmp1, tmp2, tmp3);
-	free(tmp1);
-	free(tmp2);
-	free(tmp3);
-	return ret;
+      s << "if " << *(opNode*)*i;
+      s << " then " << *(opNode*)*(++i);
+      if(node.nval==3) s << " else " << *(opNode*)*(++i);
+      break;
+    case IDREF:
+    case IDREFM:
+      if(onidref = dynamic_cast<const opNodeIDREF*>(&node)) {
+         s << *onidref;
+      } else {
+         cerr << "Cast of node to opNodeIDREF failed!\n";
+         exit(1);
       }
       break;
     default: 
-      printf("Unknown opcode %i\n",node->opCode);
-      printf("->nval = %d\n",node->nval);
-      for (i=0;i<node->nval;i++){
-	printf("val[%d]=%s\n",i,print_opNode((opNode*)node->values[i]));
+      cerr << "Unknown opcode " << node.opCode << "\n";
+      cerr << ".nval = " << node.nval << "\n";
+      for(; i!=node.end(); ++i) {
+         cerr << "val[" << *(opNode*) *i << "]\n";
       }
       exit(1);
     }
+  if(s!=cout) level--;
+  return s;
 }
 
-char *
-print_stropstr(opNode *node, char *buffer){
-  if (node->nval==2){
-    return strcat2(strcat2(print_opNode((opNode*)node->values[0]), buffer),
-		   print_opNode((opNode*)node->values[1]));
-  }else{
-    return strcat2(buffer, print_opNode((opNode*)node->values[0]));
-  }
+ostream&
+operator<<(ostream& s, const opNodeIDREF *node) {
+   if(node==NULL) return s;
+   return s<< *node;
 }
 
-/* this is a strcat function that allocates space for the return string
-   while freeing space of the other two strings */
-char *strcat2(char *s1, char *s2){
-  char *ret;
-  ret = (char *)malloc(strlen(s1)+strlen(s2)+1);
-  
-  sprintf(ret,"%s%s",s1,s2);
-  free(s1);
-  free(s2);
-  return ret;
+ostream&
+operator<<(ostream& s, const opNodeIDREF &node) {
+   model_comp *thisc;
+
+   switch(node.opCode) {
+   case IDREF:
+      if (node.nval<0) {
+	      // as yet unset IDREF
+         s << "IDREF";
+      } else if (opNode::use_global_names) {
+	      s << getGlobalNameNew(node.ref, &node, node.default_model,
+            WITHARG);
+      } else {
+         /* this is the new ID processor */
+	      thisc = node.ref;
+         if(node.nval==0) {
+            s << thisc->id;
+         } else {
+            opNode::Iterator i=node.begin();
+            s << thisc->id << "[" << *(opNode*)*i;
+            for(++i; i!=node.end(); ++i){
+               s << "," << *(opNode*)*i;
+            }
+            s << "]";
+         }
+      }
+      break;
+   case IDREFM:
+      /* this is the new ID processor (for submodels) */
+      // ??? is this correct
+      thisc = (model_comp*)node.ref;
+      s << thisc->id;
+      break;
+   default:
+      s << (opNode) node;
+   }
+
+   return s;
+}
+
+string
+opNode::print()
+{
+   ostringstream ost;
+   ost << (*this);
+   return ost.str();
 }
 
 void 
-opNode::dump(FILE *fout)
+opNode::dump(ostream &fout)
 {
-  fprintf(fout, "%s\n",print_opNodesymb(this));
+  fout << print_opNodesymb(this) << "\n";
 }
 
 char *
@@ -806,7 +724,7 @@ char *opNode::printDummyVar()
 /* Assumes that the current opNode is the dummy variable in an indexing 
    expression: that is it, is either ID or LBRACKET (COMMA (ID1 .. IDn)) */
 
-char *
+string
 opNode::printDummyVar()
 {
   if (opCode==ID){
@@ -815,15 +733,15 @@ opNode::printDummyVar()
     opNode *list;
     // this must be LBRACKET
     if (opCode!=LBRACKET){
-      cout << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
-      cout << "current opCode is "+opCode;
+      cerr << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
+      cerr << "current opCode is "+opCode;
       exit(1);
     }
     list = (opNode*)values[0];
     if (list->opCode==ID) return list->print();
     if (list->opCode!=COMMA){
-      cout << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
-      cout << "current opCode is "+list->opCode;
+      cerr << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
+      cerr << "current opCode is "+list->opCode;
       exit(1);
     }
     return list->print();
@@ -981,36 +899,55 @@ opNode::getArgumentList()
  */
 
 string
-opNode::getArgumentList()
+opNode::getArgumentList() const
 {
-  opNodeIDREF *on;
-  string arglist = "";
-  if (opCode!=IDREF){
-    printf("Can only call getArgumentList for opNodes of type IDREF\n");
-    exit(1);
-  }
+   const opNodeIDREF *on;
+   string arglist = "";
+   if (opCode!=IDREF){
+      printf("Can only call getArgumentList for opNodes of type IDREF\n");
+      exit(1);
+   }
 
-  // see if this is actually an IDREF node
-  on = dynamic_cast<opNodeIDREF*>(this);
-  if (on==NULL){
-    printf("WARNING: This is an IDREF opNode not of type opNodeIDREF\n");
-    if (nval>0){
-      arglist += ((opNode*)values[1])->print();
-      for(int i=1;i<nval;i++){
-	arglist += ",";
-	arglist += ((opNode*)values[1+i])->print();
+   // see if this is actually an IDREF node
+   on = dynamic_cast<const opNodeIDREF*>(this);
+   if (on==NULL){
+      printf("WARNING: This is an IDREF opNode not of type opNodeIDREF\n");
+      if (nval>0){
+         arglist += ((opNode*)values[1])->print();
+         for(int i=1;i<nval;i++){
+	         arglist += ",";
+	         arglist += ((opNode*)values[1+i])->print();
+         }
       }
-    }
-  }else{
-    if (nval>0){
-      arglist += ((opNode*)values[0])->print();
-      for(int i=1;i<nval;i++){
-	arglist += ",";
-	arglist += ((opNode*)values[i])->print();
+   }else{
+      if (nval>0){
+         opNode::Iterator i = begin();
+         arglist += ((opNode*)*i)->print();
+         for(++i;i!=end();++i){
+            arglist += ",";
+	         arglist += ((opNode*)*i)->print();
+         }
       }
-    }
   }
   return arglist;
+}
+
+
+/** Merges the values list of src into that of this object.
+ *
+ * The items from src are prepended to this object's values
+ */
+opNode &opNode::merge(const opNode &src) {
+   void **newvalues = (void **)calloc(src.nval+nval,sizeof(void *));
+
+   void **ptr = newvalues;
+   for(int i=0;i<src.nval;i++)
+      *(ptr++) = src.values[i];
+   for(int i=0;i<nval;i++)
+      *(ptr++) = values[i];
+   nval += src.nval;
+   free(values);
+   values = newvalues;
 }
 
 
@@ -1048,48 +985,45 @@ opNodeIx::opNodeIx(opNode *on)
 opNodeIx::printDiagnostic
 -----------------------------------------------------------------------------*/
 void
-opNodeIx::printDiagnostic(FILE *fout)
+opNodeIx::printDiagnostic(ostream &fout)
 {
   if (!done_split) splitExpression();
-  fprintf(fout, "qualifier: %s\n",(qualifier==NULL)?"NULL":qualifier->print());
-  fprintf(fout, "number of indexing expressions: %d\n",ncomp);
+  fout << "qualifier: " << qualifier << "\n";
+  fout << "number of indexing expressions: " << ncomp << "\n";
   for(int i=0;i<ncomp;i++){
-    fprintf(fout, "%d: dummyVar: %s\n",i,(dummyVarExpr[i]==NULL)?"NULL":dummyVarExpr[i]->print());
-    fprintf(fout, "%d: set     : %s\n",i,(sets[i]==NULL)?"NULL":sets[i]->print());
+    fout << i << ": dummyVar: " << dummyVarExpr[i] << "\n";
+    fout << i << ": set     : " << sets[i] << "\n";
   }
-  
 }
 
 /* ---------------------------------------------------------------------------
 opNodeIx::getListDummyVars
 -----------------------------------------------------------------------------*/
-list<char *>*
+list<opNode *>*
 opNodeIx::getListDummyVars()
 {
-  list<char *>* l = new list<char *>;
+  list<opNode *>* l = new list<opNode *>;
   
   for(int i=0;i<ncomp;i++){
     opNode *dv = dummyVarExpr[i];
     // a dummy var expression is either ID/IDREF or (ID1,...IDn)
     if (dv->opCode==ID||dv->opCode==IDREF){
-      l->push_back(dv->print());
+      l->push_back(dv);
     }else if(dv->opCode==LBRACKET){
-      dv = (opNode*)dv->values[0];
+      dv = (opNode*)*(dv->begin());
       if (dv->opCode!=COMMA){
-	printf("A dummy variable expression is either ID or (ID1,...ID2)\n");
-	printf("Given expression: %s\n",dv->print());
-	exit(1);
+	     cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
+	     cerr << "Given expression: " << dv << "\n";
+	     exit(1);
       }
-      for(int j=0;j<dv->nval;j++){
-	opNode *dn = (opNode*)dv->values[j];
-	l->push_back(dn->print());
+      for(opNode::Iterator j=dv->begin(); j!=dv->end(); ++j){
+	     l->push_back((opNode*)*j);
       }
     }else{
-      printf("A dummy variable expression is either ID or (ID1,...ID2)\n");
-      printf("Given expression: %s\n",dv->print());
+      cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
+      cerr << "Given expression: " << dv << "\n";
       exit(1);
     }
-
   }
   return l;
 }
@@ -1112,8 +1046,8 @@ void opNodeIx::splitExpression()
   done_split=1;
 
   if (opCode!=LBRACE){
-    printf("Error in splitExpression: Indexing Expression must start with {\n");
-    printf("     %s",print_opNode(this));
+    cerr << "Error in splitExpression: Indexing Expression must start with {\n";
+    cerr << "     " << this;
     exit(1);
   }
   
@@ -1193,37 +1127,33 @@ opNode *opNodeIx::hasDummyVar(char *name)
   opNode *ret = NULL;
   opNode *tmp;
 
-
   for(i=0;i<ncomp;i++){
     tmp = dummyVarExpr[i];
-    if (tmp){ // i.e. this expression has a dummy var (and not just a set)
-      // this is either ID or (ID,   ,ID)
-      if (tmp->opCode==ID){
-	if (logCreate) printf("Found dummy variable: %s\n",tmp->values[0]);
-	  if (strcmp(name, (const char*)tmp->values[0])==0)
-	    ret = (opNode*)tmp;
-      }else{
-	/* This is a multidimensional dummy variable: */
-	assert(tmp->opCode==LBRACKET);
-	tmp = (opNode*)tmp->values[0];
-	// and this should be a comma separated list
-	assert(tmp->opCode==COMMA);
-	for(j=0;j<tmp->nval;j++){
-	  // items on the list should be ID
-	  opNode *tmp2;
-	  tmp2 = (opNode*)tmp->values[j];
-	  assert(tmp2->opCode==ID);
-	  if (logCreate) printf("Found dummy variable: %s\n",tmp2->values[0]);
-	  if (strcmp(name, (const char*)tmp2->values[0])==0)
-	    ret = (opNode*)tmp2;
-	}
+    if (!tmp) continue; // no dummy var, just a set.
+
+    // this is either ID or (ID,   ,ID)
+    if (tmp->opCode==ID){
+      if (logCreate) printf("Found dummy variable: %s\n",tmp->values[0]);
+      if (strcmp(name, (const char*)tmp->values[0])==0)
+        ret = (opNode*)tmp;
+    }else{
+      /* This is a multidimensional dummy variable: */
+      assert(tmp->opCode==LBRACKET);
+      tmp = (opNode*)tmp->values[0];
+      // and this should be a comma separated list
+      assert(tmp->opCode==COMMA);
+      for(j=0;j<tmp->nval;j++){
+        // items on the list should be ID
+        opNode *tmp2;
+        tmp2 = (opNode*)tmp->values[j];
+        assert(tmp2->opCode==ID);
+        if (logCreate) printf("Found dummy variable: %s\n",tmp2->values[0]);
+        if (strcmp(name, (const char*)tmp2->values[0])==0)
+          ret = (opNode*)tmp2;
       }
     }
   }
   return ret;
-
-
-
 }
 /*----------------------------------------------------------------------------
 opNodeIx::deep_copy

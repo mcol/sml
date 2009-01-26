@@ -1,3 +1,5 @@
+#include <iostream>
+#include <fstream>
 #include "model_comp.h"
 #include "Set.h"
 #include "backend.h"
@@ -7,7 +9,7 @@ static bool prtAnaDep = false;
 
 int model_comp::tt_count=0;  // initialise static class member
 
-extern void modified_write(FILE *fout, model_comp *comp);
+extern void modified_write(ostream &fout, model_comp *comp);
 
 /* This should be an IDREF (or IDREFM) node that needs to be converted
    into its global name 
@@ -52,7 +54,7 @@ model_comp::model_comp(char* is, compType type, opNode *ix, opNode *attr)
  *                     IDs should have been replaced by IDREFs 
  */
 model_comp::model_comp(char *id, compType type, 
-		       opNode *indexing, opNode *attrib)
+                       opNode *indexing, opNode *attrib)
 {
   //model_comp *newmc = (model_comp*)calloc(1,sizeof(model_comp));
   value = NULL;
@@ -84,10 +86,10 @@ model_comp::model_comp(char *id, compType type,
   //      // see if element already on dep list
   //      bool found=false;
   //      for (list<model_comp*>::iterator q=dependencies.begin();
-  //	   q!=dependencies.end();q++)
-  //	if (*p==*q) found = true;
+  //           q!=dependencies.end();q++)
+  //        if (*p==*q) found = true;
   //      if (!found)
-  //	dependencies.push_back(*p);
+  //        dependencies.push_back(*p);
   //    }
   //  }
   //  if (attrib){
@@ -101,10 +103,10 @@ model_comp::model_comp(char *id, compType type,
   //      // see if element already on dep list
   //      bool found=false;
   //      for (list<model_comp*>::iterator q=dependencies.begin();
-  //	   q!=dependencies.end();q++)
-  //	if (*p==*q) found = true;
+  //           q!=dependencies.end();q++)
+  //        if (*p==*q) found = true;
   //     if (!found)
-  //	dependencies.push_back(*p);
+  //        dependencies.push_back(*p);
   //    }
   //  }
   //  printf("--------------------------------\n");
@@ -135,17 +137,15 @@ model_comp::setUpDependencies()
       // see if element already on dep list
       bool found=false;
       for (list<model_comp*>::iterator q=dependencies.begin();
-	   q!=dependencies.end();q++)
-	if (*p==*q) found = true;
+           q!=dependencies.end();q++)
+        if (*p==*q) found = true;
       if (!found)
-	dependencies.push_back(*p);
+        dependencies.push_back(*p);
     }
   }
   if (attributes){
-    char *tmp = attributes->print();
     if (prtAnaDep)
-      printf(" dependencies in attributes: %s\n", attributes->print());
-    free(tmp);
+       cout << " dependencies in attributes: " << *attributes << "\n";
     //attrib->findIDREF();
     list<model_comp*> lmc;
     attributes->findIDREF(&lmc);
@@ -155,15 +155,15 @@ model_comp::setUpDependencies()
       // see if element already on dep list
       bool found=false;
       for (list<model_comp*>::iterator q=dependencies.begin();
-	   q!=dependencies.end();q++)
-	if (*p==*q) found = true;
+           q!=dependencies.end();q++)
+        if (*p==*q) found = true;
       if (!found)
-	dependencies.push_back(*p);
+        dependencies.push_back(*p);
     }
   }
   if (prtAnaDep){
     for( list<model_comp*>::iterator p=dependencies.begin(); 
-	 p!=dependencies.end(); ++p)
+         p!=dependencies.end(); ++p)
       printf("  %s\n",(*p)->id);
     printf("--------------------------------\n");
   }
@@ -204,7 +204,7 @@ model_comp::setTo()
 
 void
 model_comp::setTo(char *id, compType type, 
-		       opNodeIx *indexing, opNode *attrib)
+                       opNodeIx *indexing, opNode *attrib)
 {
   static int tt_count=0;
   //model_comp *newmc = (model_comp*)calloc(1,sizeof(model_comp));
@@ -232,15 +232,15 @@ model_comp::setTo(char *id, compType type,
       // see if element already on dep list
       bool found=false;
       for (list<model_comp*>::iterator q=dependencies.begin();
-	   q!=dependencies.end();q++)
-	if (*p==*q) found = true;
+           q!=dependencies.end();q++)
+        if (*p==*q) found = true;
       if (!found)
-	dependencies.push_back(*p);
+        dependencies.push_back(*p);
     }
   }
   if (attrib){
     if (prtAnaDep) 
-      printf(" dependencies in attributes: %s\n", attrib->print());
+      printf(" dependencies in attributes: %s\n", attrib->print().c_str());
     //attrib->findIDREF();
     list<model_comp*> lmc;
     attrib->findIDREF(&lmc);
@@ -250,15 +250,15 @@ model_comp::setTo(char *id, compType type,
       // see if element already on dep list
       bool found=false;
       for (list<model_comp*>::iterator q=dependencies.begin();
-	   q!=dependencies.end();q++)
-	if (*p==*q) found = true;
+           q!=dependencies.end();q++)
+        if (*p==*q) found = true;
       if (!found)
-	dependencies.push_back(*p);
+        dependencies.push_back(*p);
     }
   }
   if (prtAnaDep){
     for( list<model_comp*>::iterator p=dependencies.begin(); 
-	 p!=dependencies.end(); ++p)
+         p!=dependencies.end(); ++p)
       printf("  %s\n",(*p)->id);
     //return newmc;
     printf("--------------------------------\n");
@@ -343,32 +343,32 @@ model_comp::writeAllTagged()
 /** Write out a list of all model components that have the tag set:
  Just write a list of names */
 void 
-model_comp::writeAllTagged(FILE *fout)
+model_comp::writeAllTagged(ostream &fout)
 {
   // iterate through the global list
   for (list<model_comp*>::iterator p=global_list.begin();p!=global_list.end();
        p++){
     if ((*p)->tag) {
-      fprintf(fout, "%s\n",(*p)->id);
+      fout << (*p)->id << "\n";
     }
   }
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::writeAllTagged(FILE *fout, AmplModel *start)
+model_comp::writeAllTagged(ostream &fout, AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively write out a list of all model components that have the tag set 
  *  @param start The AmplModel where to start the recursion
  *  @param fout File where to write to
  */
 void 
-model_comp::writeAllTagged(FILE *fout, AmplModel *start)
+model_comp::writeAllTagged(ostream &fout, AmplModel *start)
 {
   // iterate through the global list
   for (list<model_comp*>::iterator p=start->comps.begin();
        p!=start->comps.end();p++){
     if ((*p)->tag) {
-      fprintf(fout, "%s\n",(*p)->id);
+      fout << (*p)->id << "\n";
     }
     if ((*p)->type==TMODEL){
       model_comp::writeAllTagged(fout, (AmplModel*)(*p)->other);
@@ -387,7 +387,7 @@ model_comp::modifiedWriteAllTagged()
   model it is called 
 */
 void 
-model_comp::modifiedWriteAllTagged(FILE *fout)
+model_comp::modifiedWriteAllTagged(ostream &fout)
 {
   // iterate through the global list
   for (list<model_comp*>::iterator p=global_list.begin();p!=global_list.end();
@@ -399,7 +399,7 @@ model_comp::modifiedWriteAllTagged(FILE *fout)
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::modifiedWriteAllTagged(FILE *fout, AmplModel *start)
+model_comp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively write out a list of all model components that have the tag set:
  * write every component how it would appear in the global model file 
@@ -412,7 +412,7 @@ model_comp::modifiedWriteAllTagged(FILE *fout, AmplModel *start)
  */
 
 void 
-model_comp::modifiedWriteAllTagged(FILE *fout, AmplModel *start)
+model_comp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
 {
   // iterate through the global list
   for (list<model_comp*>::iterator p=start->comps.begin();
@@ -433,7 +433,6 @@ model_comp::getSetMembership()
 list <string>
 model_comp::getSetMembership()
 {
-  FILE *out;
   char buffer[500];
 
   if (type!=TSET){
@@ -441,32 +440,34 @@ model_comp::getSetMembership()
     exit(1);
   }
   
-  out = fopen("tmp.mod","w");
+  ofstream out("tmp.mod");
 
   model_comp::untagAll();
   tagDependencies();
   model_comp::writeAllTagged(out);
-  fclose(out);
+  out.close();
   
-  out = fopen("tmp.scr","w");
-  fprintf(out, "reset;\n");
-  fprintf(out, "model tmp.mod;\n");
-  fprintf(out, "data ../%s;\n",GlobalVariables::datafilename);
-  fprintf(out, "display %s > (\"tmp.out\");\n",id);
+  out.open("tmp.scr");
+  out << "reset;\n";
+  out << "model tmp.mod;\n";
+  out << "data ../" << GlobalVariables::datafilename << ";\n";
+  out << "display " << id << " > (\"tmp.out\");\n";
+  out.close();
   
-  fclose(out);
   if(strlen(GlobalVariables::amplcommand)+9>500) {
      // Avoid buffer overflow
-     fprintf(stderr, "buffer too short to accomodate amplcommand length.\n");
+     cerr << "buffer too short to accomodate amplcommand length.\n";
      exit(1);
   }
   strcpy(buffer, GlobalVariables::amplcommand);
   strcat(buffer, " tmp.scr");
   system(buffer);
-  out = fopen("tmp.out","r");
-  fgets(buffer, 500, out);
-  fclose(out);
-  printf("Set %s members: %s\n",id,buffer);
+
+  ifstream in("tmp.out");
+  string setmem;
+  in >> setmem;
+  in.close();
+  cout << "Set " << id << " members: " << setmem << "\n";
   exit(1);
 
 }
@@ -480,58 +481,55 @@ void
 model_comp::print()
 {
   char *tmp;
-  printf("------------------------------------------------------------\n");
-  printf("model_comp: %s\n",id);
-  printf("  type: %s\n",nameTypes[type]);
+  cout << "------------------------------------------------------------\n";
+  cout << "model_comp: " << id << "\n";
+  cout << "  type: " << nameTypes[type] << "\n";
   //printf("   (ismin: %d)\n",ismin);
-  tmp = print_opNode(attributes);
-  printf("  attributes: %s\n",tmp);
-  free(tmp);
-  tmp = print_opNode(indexing);
-  printf("  indexing: %s\n", tmp);
-  free(tmp);
-  if (indexing) indexing->printDiagnostic(stdout);
+  cout << "  attributes: " << *attributes << "\n";
+  cout << "  indexing: " << *indexing << "\n";
+  if (indexing) indexing->printDiagnostic(cout);
   //printf("  next: %s\n",(next==NULL)?"NULL":next->id);
   //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
-  printf("  dependencies: %d:\n",dependencies.size());
-  printf("      ");
+  cout << "  dependencies: " << dependencies.size() << ":\n";
+  cout << "      ";
   for(list<model_comp*>::iterator p = dependencies.begin();
       p!=dependencies.end();p++)
-    printf("%s::%s ",(*p)->model->name, (*p)->id);
-  printf("  model: %s\n",model->name);
-  printf("  count: %d\n",count);
-  printf("  tag: %s\n",tag?"true":"false");
+    cout << (*p)->model->name << "::" << (*p)->id << " ";
+  cout << "  model: " << model->name<< "\n";
+  cout << "  count: " << count << "\n";
+  cout << "  tag: " << tag << "\n";
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::dump(FILE *fout)
+model_comp::dump(ostream &fout)
 ---------------------------------------------------------------------------- */
 /** Print a detailed diagnostic description of this model component
  *  with the values of all its fields                                        */
 void
-model_comp::dump(FILE *fout)
+model_comp::dump(ostream &fout)
 {
-  fprintf(fout, "MCDP  ------------------------------------------------------------\n");
-  fprintf(fout, "MCDP model_comp: %s (%p)\n",id,this);
-  fprintf(fout, "MCDP  type: %s\n",nameTypes[type]);
+  fout << "MCDP  --------------------------------------------------------"
+     "----\n";
+  fout << "MCDP model_comp: " << id << " ("<< (void *) this << ")\n";
+  fout << "MCDP  type: " << nameTypes[type] << "\n";
   //printf("   (ismin: %d)\n",ismin);
-  fprintf(fout, "MCDP  attributes: %s\n",print_opNode(attributes));
+  fout << "MCDP  attributes: " << attributes << "\n";
   if (attributes) attributes->dump(fout);
-  fprintf(fout, "MCDP  indexing: %s\n", print_opNode(indexing));
+  fout << "MCDP  indexing: " << indexing << "\n";
   if (indexing) indexing->printDiagnostic(fout);
   if (indexing) indexing->dump(fout);
   //printf("  next: %s\n",(next==NULL)?"NULL":next->id);
   //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
-  fprintf(fout, "MCDP  dependencies: %d:\n",dependencies.size());
-  fprintf(fout, "      ");
+  fout << "MCDP  dependencies: " << dependencies.size() << ":\n";
+  fout << "      ";
   for(list<model_comp*>::iterator p = dependencies.begin();
       p!=dependencies.end();p++)
-    fprintf(fout, "%s::%s ",(*p)->model->name, (*p)->id);
-  fprintf(fout, "\nMCDP  model: %s\n",model->name);
-  fprintf(fout, "MCDP  count: %d\n",count);
-  fprintf(fout, "MCDP  tag: %s\n",tag?"true":"false");
+    fout << (*p)->model->name << "::" << (*p)->id << " ";
+  fout << "\nMCDP  model: " << model->name << "\n";
+  fout << "MCDP  count: " << count << "\n";
+  fout << "MCDP  tag: " << tag << "\n";
   if (value) {
-    fprintf(fout, "MCDP  value: %s\n",(value->printToString()).c_str());
+    fout << "MCDP  value: " << value->printToString() << "\n";
   }
 }
 
@@ -659,8 +657,8 @@ getGlobalName
  */
 
 char *
-getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model, 
-	      int witharg)
+getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model, 
+              int witharg)
 {
   //model_comp *node = opn->values[0];  /* this is the model_component */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
@@ -685,8 +683,8 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
       free(tmpc);
       
       if (tmp->parent==NULL) {
-	printf("has no parent >%s<\n",tmp->name);
-	exit(1);
+        printf("has no parent >%s<\n",tmp->name);
+        exit(1);
       }
       tmp = tmp->parent;
     }
@@ -695,22 +693,22 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
   if (witharg==NOARG) return strdup(namebuffer);
   /* FIXME: still need to add the argument list, every level down from root
             should have put a indexing expression on the l_addIndex list
-	    use the dummyVar parts from this
-	    then add the indexing that comes with this node 
+            use the dummyVar parts from this
+            then add the indexing that comes with this node 
 
       The argument list is still a bit tricky. 
       - We are currently in model 'current_model' 
         (this is the block in the original ampl file that we are
         currently processing.  That is in the original ampl-file all
-	references to objects are given with respect to this model)
+        references to objects are given with respect to this model)
       - the object whose name we are currently printing lives in model
         'model_of_comp'
       => we need to go down to the first common ancestor of these two models.
          all indices from there down (in direction of the leaves) are 
-	 included with the model-component, all indices from there
-	 up (in direction of root) need to be taken of the 
-	 addIndex stack. Not quite clear where to start taking 
-	 bits of the addIndex stack, probably go all the way down to root and 
+         included with the model-component, all indices from there
+         up (in direction of root) need to be taken of the 
+         addIndex stack. Not quite clear where to start taking 
+         bits of the addIndex stack, probably go all the way down to root and 
          then back up
   */
 
@@ -758,30 +756,28 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
        => go up the path and add dummy varables to arglist */
     for(i=0;i<clvl;i++){
       /* FIXME: here the dv cannot be printed by opNode.print() if it is 
-	 a list like (i,j)! */
+         a list like (i,j)! */
       list <add_index *> *li = l_addIndex.at(i);
       for(list<add_index*>::iterator p = li->begin();p!=li->end();p++){
-	if (n_index==0){
-	  //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-	  opNode *dv = (*p)->dummyVar;
-	  if (dv) {
-	    char *tmp1 = dv->printDummyVar();
-	    sprintf(arglistbuffer, "%s", tmp1);
-	    free(tmp1);
-	    //printf("add dummy variable: %s\n",print_opNode(dv));
-	    n_index++;
-	  }
-	}else{
-	  /* need to put subscript before the current list */
-	  //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-	  opNode *dv = (*p)->dummyVar;
-	  if (dv){
-	    strcat(arglistbuffer,",");
-	    strcat(arglistbuffer,dv->printDummyVar());
-	    //printf("add dummy variable: %s\n",print_opNode(dv));
-	    n_index++;
-	  }
-	}
+        if (n_index==0){
+          //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+          opNode *dv = (*p)->dummyVar;
+          if (dv) {
+            sprintf(arglistbuffer, "%s", dv->printDummyVar().c_str());
+            //printf("add dummy variable: %s\n",print_opNode(dv));
+            n_index++;
+          }
+        }else{
+          /* need to put subscript before the current list */
+          //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+          opNode *dv = (*p)->dummyVar;
+          if (dv){
+            strcat(arglistbuffer,",");
+            strcat(arglistbuffer,dv->printDummyVar().c_str());
+            //printf("add dummy variable: %s\n",print_opNode(dv));
+            n_index++;
+          }
+        }
       }
     }
   }
@@ -806,20 +802,20 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
       sprintf(arglistbuffer, "%s", (opn->getArgumentList()).c_str());
     }else{
       if (opn->nval==0){
-	// arglistbuffer stays as it is
+        // arglistbuffer stays as it is
       }else{
-	char *tmpc = strdup(arglistbuffer);
-	sprintf(arglistbuffer, "%s,%s", tmpc, (opn->getArgumentList()).c_str());
+        char *tmpc = strdup(arglistbuffer);
+        sprintf(arglistbuffer, "%s,%s", tmpc, (opn->getArgumentList()).c_str());
       }
     }
     //for(i=0;i<opn->nval;i++){
     //  if (n_index==0){
     //sprintf(arglistbuffer, "%s", print_opNode((opNode*)opn->values[i+1]));
-    //	n_index++;
+    //        n_index++;
     //  }else{
-    //	char *tmpc = strdup(arglistbuffer);
-    //	sprintf(arglistbuffer, "%s,%s",tmpc, print_opNode((opNode*)opn->values[i+1]));
-    //	free(tmpc);
+    //        char *tmpc = strdup(arglistbuffer);
+    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_opNode((opNode*)opn->values[i+1]));
+    //        free(tmpc);
     //n_index++;
     //}
     //}
@@ -855,7 +851,7 @@ getGlobalName(model_comp *node, opNode *opn, AmplModel *current_model,
 
 /* ---------------------------------------------------------------------------
 getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model, 
-	      int witharg)
+              int witharg)
 ---------------------------------------------------------------------------- */
 /** New version of getGlobalName that does *not* use the addIndex stack
  *  but creates the modified argument list by looking at the indexing
@@ -893,8 +889,8 @@ getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model,
  */
 
 char *
-getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model, 
-	      int witharg)
+getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model, 
+              int witharg)
 {
   //model_comp *node = opn->values[0];  /* this is the model_component */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
@@ -919,8 +915,8 @@ getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model,
       free(tmpc);
       
       if (tmp->parent==NULL) {
-	printf("has no parent >%s<\n",tmp->name);
-	exit(1);
+        printf("has no parent >%s<\n",tmp->name);
+        exit(1);
       }
       tmp = tmp->parent;
     }
@@ -929,22 +925,22 @@ getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model,
   if (witharg==NOARG) return strdup(namebuffer);
   /* FIXME: still need to add the argument list, every level down from root
             should have put a indexing expression on the l_addIndex list
-	    use the dummyVar parts from this
-	    then add the indexing that comes with this node 
+            use the dummyVar parts from this
+            then add the indexing that comes with this node 
 
       The argument list is still a bit tricky. 
       - We are currently in model 'current_model' 
         (this is the block in the original ampl file that we are
         currently processing.  That is in the original ampl-file all
-	references to objects are given with respect to this model)
+        references to objects are given with respect to this model)
       - the object whose name we are currently printing lives in model
         'model_of_comp'
       => we need to go down to the first common ancestor of these two models.
          all indices from there down (in direction of the leaves) are 
-	 included with the model-component, all indices from there
-	 up (in direction of root) need to be taken of the 
-	 addIndex stack. Not quite clear where to start taking 
-	 bits of the addIndex stack, probably go all the way down to root and 
+         included with the model-component, all indices from there
+         up (in direction of root) need to be taken of the 
+         addIndex stack. Not quite clear where to start taking 
+         bits of the addIndex stack, probably go all the way down to root and 
          then back up
   */
 
@@ -992,34 +988,32 @@ getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model,
        => go up the path and add dummy varables to arglist */
     for(i=1;i<=clvl;i++){ //start from 1: 0 is the root which has no indexing
       /* FIXME: here the dv cannot be printed by opNode.print() if it is 
-	 a list like (i,j)! */
+         a list like (i,j)! */
       model_comp *node_model = path1[n_path1-1-i]->node;
       opNodeIx *indexing_model = node_model->indexing;
       
       if (indexing_model){
-	for(int p=0;p<indexing_model->ncomp;p++){
-	  if (n_index==0){
-	    //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-	    opNode *dv = indexing_model->dummyVarExpr[p];
-	    if (dv) {
-	      char *tmp1 = dv->printDummyVar();
-	      sprintf(arglistbuffer, "%s", tmp1);
-	      free(tmp1);
-	      //printf("add dummy variable: %s\n",print_opNode(dv));
-	      n_index++;
-	    }
-	  }else{
-	    /* need to put subscript before the current list */
-	    //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-	    opNode *dv = indexing_model->dummyVarExpr[p];
-	    if (dv){
-	      strcat(arglistbuffer,",");
-	      strcat(arglistbuffer,dv->printDummyVar());
-	      //printf("add dummy variable: %s\n",print_opNode(dv));
-	      n_index++;
-	    }
-	  }
-	}
+        for(int p=0;p<indexing_model->ncomp;p++){
+          if (n_index==0){
+            //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+            opNode *dv = indexing_model->dummyVarExpr[p];
+            if (dv) {
+              sprintf(arglistbuffer, "%s", dv->printDummyVar().c_str());
+              //printf("add dummy variable: %s\n",print_opNode(dv));
+              n_index++;
+            }
+          }else{
+            /* need to put subscript before the current list */
+            //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+            opNode *dv = indexing_model->dummyVarExpr[p];
+            if (dv){
+              strcat(arglistbuffer,",");
+              strcat(arglistbuffer,dv->printDummyVar().c_str());
+              //printf("add dummy variable: %s\n",print_opNode(dv));
+              n_index++;
+            }
+          }
+        }
       }
     }
   }
@@ -1044,20 +1038,20 @@ getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model,
       sprintf(arglistbuffer, "%s", (opn->getArgumentList()).c_str());
     }else{
       if (opn->nval==0){
-	// arglistbuffer stays as it is
+        // arglistbuffer stays as it is
       }else{
-	char *tmpc = strdup(arglistbuffer);
-	sprintf(arglistbuffer, "%s,%s", tmpc, (opn->getArgumentList()).c_str());
+        char *tmpc = strdup(arglistbuffer);
+        sprintf(arglistbuffer, "%s,%s", tmpc, (opn->getArgumentList()).c_str());
       }
     }
     //for(i=0;i<opn->nval;i++){
     //  if (n_index==0){
     //sprintf(arglistbuffer, "%s", print_opNode((opNode*)opn->values[i+1]));
-    //	n_index++;
+    //        n_index++;
     //  }else{
-    //	char *tmpc = strdup(arglistbuffer);
-    //	sprintf(arglistbuffer, "%s,%s",tmpc, print_opNode((opNode*)opn->values[i+1]));
-    //	free(tmpc);
+    //        char *tmpc = strdup(arglistbuffer);
+    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_opNode((opNode*)opn->values[i+1]));
+    //        free(tmpc);
     //n_index++;
     //}
     //}
@@ -1107,8 +1101,8 @@ model_comp::moveUp(int level){
      following to have correct global indexing:
        - all IDREFs to model_comp's in models below the new model 
          (current.parent(level)) need to have the block indexing expressions
-	 between their own model and current.parent(level) added
-	 to their local indexing
+         between their own model and current.parent(level) added
+         to their local indexing
   */
 
   // get list of models from current model to root
@@ -1136,8 +1130,8 @@ model_comp::moveUp(int level){
     bool found = false;
     for(posm=0;posm<level;posm++){
       if (mlist[posm]==model){
-	found = true;
-	break;
+        found = true;
+        break;
       }
     }
     if (found){
@@ -1150,13 +1144,13 @@ model_comp::moveUp(int level){
       void **newval = (void**)calloc(onidr->nval+shift, sizeof(void*));
       for(i=0;i<onidr->nval;i++) newval[i+shift] = onidr->values[i];
       for(i=0;i<shift;i++){
-	opNodeIx *mix = mlist[level-1-i]->ix;
-	if (mix->ncomp!=1){
-	  printf("model_comp::moveUp() does not support intermediate models with !=1 dummy Var\n");
-	  exit(1);
-	}
-	newval[i] = mix->dummyVarExpr[0];
-	/* indexing dummy var of mlist[level-1-i]*/
+        opNodeIx *mix = mlist[level-1-i]->ix;
+        if (mix->ncomp!=1){
+          printf("model_comp::moveUp() does not support intermediate models with !=1 dummy Var\n");
+          exit(1);
+        }
+        newval[i] = mix->dummyVarExpr[0];
+        /* indexing dummy var of mlist[level-1-i]*/
       }
       onidr->nval+=shift;
       free(onidr->values);
@@ -1210,22 +1204,22 @@ model_comp::reassignDependencies()
     //check that this model_comp belongs to this model
     bool found = false;
     for(list<model_comp*>::iterator q = model->comps.begin();
-	q!=model->comps.end();q++){
+        q!=model->comps.end();q++){
       if (strcmp((*q)->id, mc->id)==0){
-	found = true;
-	if ((*q)!=mc){
-	  if (GlobalVariables::prtLvl>1)
-	    printf("Model comp %s referenced in %s is reassigned\n",mc->id,
-		 this->id);
-	  found = true;
-	  onidr->ref = (*q);
-	}
-	newdep.push_back(*q);
+        found = true;
+        if ((*q)!=mc){
+          if (GlobalVariables::prtLvl>1)
+            printf("Model comp %s referenced in %s is reassigned\n",mc->id,
+                 this->id);
+          found = true;
+          onidr->ref = (*q);
+        }
+        newdep.push_back(*q);
       }
     }
     if (!found){
       printf("Model comp %s referenced in %s is not found\n",mc->id,
-	     this->id);
+             this->id);
       exit(1);
     }
   }

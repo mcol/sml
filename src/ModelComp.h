@@ -94,7 +94,7 @@ class model_comp{
 
   /** set up list of dependencies for this component */
   void setUpDependencies();
-  void dump(FILE *fout);   //!< detailed debugging output
+  void dump(ostream &fout);   //!< detailed debugging output
   void print();   //!< prints elements of the class
   void printBrief();   //!< prints one liner
   void tagDependencies();  //!< tag this components and all its dependencies
@@ -117,16 +117,16 @@ class model_comp{
   static void writeAllTagged(AmplModel *start);
 
   /** write name of all tagged components to file: using global_list */
-  static void writeAllTagged(FILE *fout); 
+  static void writeAllTagged(ostream &fout); 
 
   /** recursively write name of all tagged components to file */
-  static void writeAllTagged(FILE *fout, AmplModel *start); 
+  static void writeAllTagged(ostream &fout, AmplModel *start); 
 
   /** write definition of all tagged components to file, using global_list */
-  static void modifiedWriteAllTagged(FILE *fout); 
+  static void modifiedWriteAllTagged(ostream &fout); 
 
   /** recursively write definition of all tagged components to file */
-  static void modifiedWriteAllTagged(FILE *fout, AmplModel *start); 
+  static void modifiedWriteAllTagged(ostream &fout, AmplModel *start); 
 
   void moveUp(int level);  //< move this model comp up in the model tree 
   virtual model_comp *clone();     //< duplicate the object: shallow copy
@@ -147,9 +147,9 @@ class ModelCompSet: public model_comp {
 };
 
 char *
-getGlobalName(model_comp *node, opNode *opn, 
+getGlobalName(model_comp *node, const opNode *opn, 
 	      AmplModel *current_model, int witharg);
 char *
-getGlobalNameNew(model_comp *node, opNode *opn, 
+getGlobalNameNew(model_comp *node, const opNode *opn, 
 	      AmplModel *current_model, int witharg);
 #endif

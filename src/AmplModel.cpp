@@ -13,7 +13,7 @@
 list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
 
-extern void modified_write(FILE *fout, model_comp *comp);
+extern void modified_write(ostream &fout, model_comp *comp);
 //extern int n_addIndex;
 //extern add_index *l_addIndex[];
 
@@ -84,7 +84,7 @@ AmplModel::setGlobalNameRecursive()
 /* ---------------------------------------------------------------------------
 AmplModel::writeTaggedComponents()
 ---------------------------------------------------------------------------- */
-void AmplModel::writeTaggedComponents(){writeTaggedComponents(stdout);}
+void AmplModel::writeTaggedComponents(){writeTaggedComponents(cout);}
 
 /**
  *  Write all tagged model components in this model and submodels to a file.
@@ -94,7 +94,7 @@ void AmplModel::writeTaggedComponents(){writeTaggedComponents(stdout);}
  *         will be directed to the standard output.
  */
 void
-AmplModel::writeTaggedComponents(FILE *fout)
+AmplModel::writeTaggedComponents(ostream &fout)
 {
   
   opNode::default_model = this;
@@ -104,13 +104,13 @@ AmplModel::writeTaggedComponents(FILE *fout)
   if (ix){
 
     if (!ix->done_split) {
-      printf("All opNodeIx should have the expression split done!\n");
+      cerr << "All opNodeIx should have the expression split done!\n";
       exit(1);
     }
     
     if (ix->ncomp>1){
-      printf("More than 1 indexing expression is not supported yet\n");
-      printf("Expression: %s\n",ix->print());
+      cerr << "More than 1 indexing expression is not supported yet\n";
+      cerr << "Expression: " << ix->print() << "\n";
       exit(1);
     }
     // FIXME: need to check for number of expressions and place them all
@@ -447,15 +447,13 @@ AmplModel::print
 void 
 AmplModel::print()
 {
-  char *tmp;
   printf("AM: ------------------------------------------------------------\n");
   printf("AM: This is AmplModel: %s\n",name);
   printf("AM: global name: %s\n",global_name.c_str());
   printf("AM: level: %d\n",level);
   printf("AM: parent: %s\n",(parent)?parent->name:"NULL");
-  if (ix){ tmp = ix->print();
-    printf("AM: indexing: %s\n", tmp);
-    free( tmp);
+  if (ix){ 
+    printf("AM: indexing: %s\n", ix->print().c_str());
   }else{
     printf("AM: indexing: NULL\n");
   }
@@ -489,39 +487,38 @@ AmplModel::dump(char *filename)
 void 
 AmplModel::dump(char *filename)
 {
-  FILE *fout = fopen(filename, "w");
+  ofstream fout(filename);
   dump(fout);
-  fclose(fout);
 }
 
 /* ---------------------------------------------------------------------------
-AmplModel::dump(FILE *fout)
+AmplModel::dump(ostream &fout)
 ---------------------------------------------------------------------------- */
 void 
-AmplModel::dump(FILE *fout)
+AmplModel::dump(ostream &fout)
 {
 
-  fprintf(fout, "DUMP: ----------------------------------------------------------\n");
-  fprintf(fout, "DP: This is AmplModel (%p): %s\n",this, name);
-  fprintf(fout, "DP: global name: %s\n",global_name.c_str());
-  fprintf(fout, "DP: level: %d\n",level);
-  fprintf(fout, "DP: parent: %s\n",(parent)?parent->name:"NULL");
-  fprintf(fout, "DP: indexing: %s\n",(ix)?ix->print():"NULL");
+  fout << "DUMP: ----------------------------------------------------------\n";
+  fout << "DP: This is AmplModel (" << (void *) this << "): " << name << "\n";
+  fout << "DP: global name: " << global_name << "\n";
+  fout << "DP: level: " << level << "\n";
+  fout << "DP: parent: " << (parent?parent->name:"NULL") << "\n";
+  fout << "DP: indexing: " << ix << "\n";
   ix->dump(fout);
-  fprintf(fout, "DP: Nb submodels  : %d\n", n_submodels);
-  fprintf(fout, "DP: Nb sets       : %d\n", n_sets);
-  fprintf(fout, "DP: Nb parameters : %d\n", n_params);
-  fprintf(fout, "DP: Nb objectives : %d\n", n_objs);
-  fprintf(fout, "DP: Nb variables  : %d\n", n_vars);
-  fprintf(fout, "DP: Nb constraints: %d\n", n_cons);
-  fprintf(fout, "DP: Nb objectives: %d\n", n_submodels);
-  fprintf(fout, "DP: List components:\n");
+  fout << "DP: Nb submodels  : " <<  n_submodels << "\n";
+  fout << "DP: Nb sets       : " <<  n_sets << "\n";
+  fout << "DP: Nb parameters : " <<  n_params << "\n";
+  fout << "DP: Nb objectives : " <<  n_objs << "\n";
+  fout << "DP: Nb variables  : " <<  n_vars << "\n";
+  fout << "DP: Nb constraints: " <<  n_cons << "\n";
+  fout << "DP: Nb objectives: " <<  n_submodels << "\n";
+  fout << "DP: List components:";
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     (*p)->dump(fout);
   }
 
   if (n_submodels>0)
-    fprintf(fout, "DP: now list the submodels:\n");
+    fout << "DP: now list the submodels:\n";
   
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     model_comp *mc = *p;
@@ -530,9 +527,6 @@ AmplModel::dump(FILE *fout)
       am->dump(fout);
     }
   }
-
-
-
 }
 
 /* ---------------------------------------------------------------------------
