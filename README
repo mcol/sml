@@ -5,6 +5,9 @@ autoreconf
 automake --add-missing
 autoreconf
 
+Set values correctly at top of src/Makefile.am for OOPSHOME etc.
+Set name of ampl executable at top of ampl.tab.ypp.
+
 Compilation:
 ./configure
 make
