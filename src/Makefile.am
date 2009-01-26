@@ -23,6 +23,9 @@ sml_SOURCES = ampl.tab.ypp ampl.yy.lpp symtab.cpp nodes.cpp backend.cpp \
 sml_LDADD 	= -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack \
 				  -L$(METIS_DIR) -lmetis -lgfortran -lfl -ldl #-lefence
 
+# Force these to get built first
+BUILT_SOURCES = ampl.tab.h data.tab.h
+
 ########################################################################
 # YACC and LEX:
 # The proper automake way is confusing and annoying, lets do it our way.
