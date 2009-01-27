@@ -480,7 +480,6 @@ model_comp::print()
 void
 model_comp::print()
 {
-  char *tmp;
   cout << "------------------------------------------------------------\n";
   cout << "model_comp: " << id << "\n";
   cout << "  type: " << nameTypes[type] << "\n";

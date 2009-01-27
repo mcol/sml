@@ -14,11 +14,11 @@ StochModel::StochModel()
 /** Constructor */
 StochModel::StochModel() :
   AmplModel(),
-  nodeset(NULL), 
   stageset(NULL),
+  stagenames(NULL),
+  nodeset(NULL), 
   anc(NULL),
-  prob(NULL),
-  stagenames(NULL)
+  prob(NULL)
 {
 }
 
@@ -29,11 +29,11 @@ StochModel::StochModel()
 StochModel::StochModel(opNode *onStages, opNode *onNodes, opNode *onAncs, 
                        opNode *onProb, AmplModel *prnt) :
   AmplModel(),
-  nodeset(onNodes), 
   stageset(onStages),
+  stagenames(NULL),
+  nodeset(onNodes), 
   anc(onAncs),
-  prob(onProb),
-  stagenames(NULL)
+  prob(onProb)
 {
   /* Do this later? -> parent not set up yet*/
   /* No: do this here, should set up a nested list of normal AMPL models */
@@ -160,7 +160,6 @@ StochModel::expandStagesOfComp()
 {
   char buffer[500];
   list <model_comp*> dep;
-  StochModelComp *smc;
   int cnt;
 
   /* analyze all dependencies of this expression */
@@ -326,7 +325,7 @@ StochModel::expandToFlatModel()
   // we need to have the pointers to the submodel indexing sets all set
   // up from the beginning, so that they can be referred to
   indset = (StochModelComp**)calloc(stagenames->size(),sizeof(StochModelComp*));
-  for(int i=0;i<stagenames->size();i++) {
+  for(unsigned int i=0;i<stagenames->size();i++) {
     indset[i] = new StochModelComp();
     // give it a dummy name just so that debugging routines work
     // @bug this introduces a memory leak
@@ -349,7 +348,6 @@ StochModel::expandToFlatModel()
       am->name = strdup((*st).c_str());
     }
 
-    StochModelComp *smc;
     model_comp *comp;
 
     // loop over all components of the StochModel 
@@ -615,7 +613,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 void
 StochModel::_transcribeComponents(AmplModel *current, int level)
 {
-  model_comp *mc, *prev;
+  model_comp *mc;
   list<opNode*>* dv;
   // need to set stage and node for the current model
   

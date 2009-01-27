@@ -44,13 +44,6 @@ string opNode::stage = "";
 //   return newOp;
 //}
 
-opNode *newTerm(int opCode){
-  /* a terminal can be:
-     - a value (INT_VAL/FLOAT_VAL/INFINITY)
-     - an identifier */
-    
-}
-
 /*relNode *newRel(int relCode, opNode *lval, opNode *rval) {
    relNode *newRel;
 
@@ -252,8 +245,6 @@ operator<<(ostream&s, const opNode *node) {
 
 ostream&
 operator<<(ostream&s, const opNode &node) {
-  model_comp *thisc;
-  AmplModel *thism;
   const opNodeIDREF *onidref;
   static int level=0;
 
@@ -416,12 +407,11 @@ operator<<(ostream&s, const opNode &node) {
       break;
     case IDREF:
     case IDREFM:
-      if(onidref = dynamic_cast<const opNodeIDREF*>(&node)) {
-         s << *onidref;
-      } else {
+      if(!(onidref = dynamic_cast<const opNodeIDREF*>(&node))) {
          cerr << "Cast of node to opNodeIDREF failed!\n";
          exit(1);
       }
+      s << *onidref;
       break;
     default: 
       cerr << "Unknown opcode " << node.opCode << "\n";
@@ -512,14 +502,14 @@ print_opNodesymb(opNode *node)
   if (node->opCode==INT_VAL){
     char buffer3[20];
     assert(node->nval==1);
-    sprintf(buffer3, "T:%d",(int*)node->values[0]);
+    sprintf(buffer3, "T:%d",*(int*)node->values[0]);
     buffer = strdup(buffer3);
     return buffer;
   }
   if (node->opCode==FLOAT_VAL){
     char buffer3[20];
     assert(node->nval==1);
-    sprintf(buffer3, "T:%f",(double*)node->values[0]);
+    sprintf(buffer3, "T:%f",*(double*)node->values[0]);
     buffer = strdup(buffer3);
     return buffer;
   }
@@ -534,7 +524,9 @@ print_opNodesymb(opNode *node)
   case IDREF:{
     opNodeIDREF *onir= dynamic_cast<opNodeIDREF*>(node);
     if (onir==NULL) {
-      printf("Some IDREF node still not opNodeIDREF\n");exit(1);}
+      cerr << "Some IDREF node still not opNodeIDREF\n";
+      exit(1);
+    }
     model_comp *mc = onir->ref;
     char buffer3[40]; 
     sprintf(buffer3, "IDREF(%p:%s(%p))",node, mc->id, mc);
@@ -604,7 +596,7 @@ opNode::opNode (int code, void *val1, void *val2, void* val3)
    if(val2) values[1] = (void *) val2;
    if(val3) values[2] = (void *) val3;
 
-   if (logCreate) printf("created %d-ary op: %d\n", nval, opCode);
+   if (logCreate) cout << "created " << nval << "-ary op: " << opCode << "\n";
 }
 
 
@@ -617,7 +609,7 @@ opNode::deep_copy()
   opNode *newn = new opNode();
 
   if (opCode==IDREF || opCode==IDREFM){
-    printf("IDREF opNodes need to be cloned differently\n");
+    cerr << "IDREF opNodes need to be cloned differently\n";
     exit(1);
   }
   newn->opCode = opCode;
@@ -658,7 +650,7 @@ opNode::clone()
   opNode *newn = new opNode();
 
   if (opCode==IDREF){
-    printf("IDREF opNodes need to be cloned differently\n");
+    cerr << "IDREF opNodes need to be cloned differently\n";
     exit(1);
   }
   newn->opCode = opCode;
@@ -679,7 +671,7 @@ double
 opNode::getFloatVal()
 {
   if (opCode!=INT_VAL && opCode!=FLOAT_VAL && opCode!=ID){
-    printf("Attempting to call getFloatVal for an opNode not of type INT_VAL/FLOAT_VAL/ID\n");
+    cerr << "Attempting to call getFloatVal for an opNode not of type INT_VAL/FLOAT_VAL/ID\n";
     exit(1);
   }
   if (opCode==INT_VAL){
@@ -701,7 +693,7 @@ opNode::getValue()
 {
   char buffer[20]; 
   if (opCode!=INT_VAL && opCode!=FLOAT_VAL && opCode!=ID){
-    printf("Attempting to call getValue for an opNode not of type ID/INT_VAL/FLOAT_VAL\n");
+    cerr << "Attempting to call getValue for an opNode not of type ID/INT_VAL/FLOAT_VAL\n";
     exit(1);
   }
   if (opCode==ID){
@@ -710,11 +702,13 @@ opNode::getValue()
     sprintf(buffer, "%i",*(int*)values[0]);
     return strdup(buffer);
   }else {
-    sprintf(buffer, "%f",*(int*)values[0]);
-    printf("Calling getValue() for a FLOAT_VAL node: %s.\n",buffer);
-    printf("If this is an attempt to use a float as a set element it might cause problems\n");
+    //sprintf(buffer, "%f",*(int*)values[0]);
+    cerr << "Calling getValue() for a FLOAT_VAL node: " << *((int*)values[0])
+      << ".\n";
+    cerr << "If this is an attempt to use a float as a set element it "
+       "might cause problems\n";
     exit(1);
-    return strdup(buffer);
+    //return strdup(buffer);
   }
   
 }
@@ -758,14 +752,14 @@ opNode::findIDREF()
   int i;
 
   if (opCode==IDREF){
-    printf("%s\n",getGlobalName((model_comp*)this->values[0], 
-				NULL, NULL, NOARG));
+    cout << getGlobalName((model_comp*)this->values[0], NULL, NULL, NOARG) <<
+      "\n";
   }else if (opCode==ID) {
     return;
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
-	((opNode*)values[i])->findIDREF();
+	     ((opNode*)values[i])->findIDREF();
       }
     }
   }
@@ -904,14 +898,14 @@ opNode::getArgumentList() const
    const opNodeIDREF *on;
    string arglist = "";
    if (opCode!=IDREF){
-      printf("Can only call getArgumentList for opNodes of type IDREF\n");
+      cerr << "Can only call getArgumentList for opNodes of type IDREF\n";
       exit(1);
    }
 
    // see if this is actually an IDREF node
    on = dynamic_cast<const opNodeIDREF*>(this);
    if (on==NULL){
-      printf("WARNING: This is an IDREF opNode not of type opNodeIDREF\n");
+      cout << "WARNING: This is an IDREF opNode not of type opNodeIDREF\n";
       if (nval>0){
          arglist += ((opNode*)values[1])->print();
          for(int i=1;i<nval;i++){
@@ -948,6 +942,8 @@ opNode &opNode::merge(const opNode &src) {
    nval += src.nval;
    free(values);
    values = newvalues;
+
+   return (*this);
 }
 
 
@@ -1133,7 +1129,7 @@ opNode *opNodeIx::hasDummyVar(char *name)
 
     // this is either ID or (ID,   ,ID)
     if (tmp->opCode==ID){
-      if (logCreate) printf("Found dummy variable: %s\n",tmp->values[0]);
+      if (logCreate) cout << "Found dummy variable: " << tmp->values[0] << "\n";
       if (strcmp(name, (const char*)tmp->values[0])==0)
         ret = (opNode*)tmp;
     }else{
@@ -1147,7 +1143,8 @@ opNode *opNodeIx::hasDummyVar(char *name)
         opNode *tmp2;
         tmp2 = (opNode*)tmp->values[j];
         assert(tmp2->opCode==ID);
-        if (logCreate) printf("Found dummy variable: %s\n",tmp2->values[0]);
+        if (logCreate)
+           cout << "Found dummy variable: " << tmp2->values[0] << "\n";
         if (strcmp(name, (const char*)tmp2->values[0])==0)
           ret = (opNode*)tmp2;
       }
@@ -1198,8 +1195,8 @@ opNodeIDREF::opNodeIDREF(model_comp *r)
 ---------------------------------------------------------------------------- */
 opNodeIDREF::opNodeIDREF(): 
   opNode(),
-  stochparent(0),
-  ref(NULL)
+  ref(NULL),
+  stochparent(0)
 {}
 
 /* --------------------------------------------------------------------------
