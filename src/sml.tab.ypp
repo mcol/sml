@@ -75,7 +75,7 @@
 %type <opPtr> setexpression identifier iditem setexpr_item dummy_member
 %type <opPtr> commasepoptions optionlist
 %type <opPtrIx> indexing indexing_opt
-%type <optype> relop reduction_op func
+%type <optype> relop reduction_op func ubsetop bsetop
 
 %token <string> ID 
 %token <ival> INT_VAL
@@ -566,20 +566,41 @@ varattribute:  BINARY {$$ = new opNode(BINARY);}
 /* this is anything that evaluates to a set */
 setexpression: LBRACE expr_list RBRACE  {$$ = new ListSet($2);}
              | identifier    /* already defined identifier */ 
-//             | indexing
-             | setexpression CROSS setexpression {
-                  $$ = new CompositeSet(CROSS, $1, $3);
+             | setexpression bsetop setexpression {
+                  $$ = new CompositeSet($2, $1, $3);
                }
-             | setexpression DIFF setexpression {
-                  $$ = new CompositeSet(DIFF, $1, $3);
+             | setexpression ubsetop setexpression {
+                  $$ = new CompositeSet($2, $1, $3);
                }
-             | LBRACKET setexpression RBRACKET {
-                  $$ = $2;
+             | ubsetop indexing setexpression {
+                  cerr << "FIXME: ubsetop indexing setexpression\n";
+                  exit(2);
                }
              | expr DOTDOT expr {
                   $$ = new SimpleSet($1, $3);
                }
+             | SETOF indexing identifier {
+                  cerr << "FIXME: SETOF\n";
+                  exit(2);
+               }
+             //FIXME: | if lexpr then sexpr else sexpr
+             | LBRACKET setexpression RBRACKET {
+                  $$ = $2;
+               }
+             //FIXME: | interval
+             //FIXME: | infinite-set
+             //FIXME: | indexing
              ;
+
+bsetop:  DIFF     { $$ = DIFF; }
+      |  SYMDIFF  { $$ = SYMDIFF; }
+      |  CROSS    { $$ = CROSS; }
+      ;
+
+ubsetop: UNION    { $$ = UNION; }
+      |  INTER    { $$ = INTER; }
+      ;
+      
 
 /* Identifier is any quotation of a predefined object:
     RoutComm[j].Flow[k-3*j, k]#
