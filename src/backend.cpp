@@ -312,11 +312,12 @@ process_model(AmplModel *model) /* should be called with model==root */
       if (ix){
         add_index *ai = (add_index*)calloc(1, sizeof(add_index));
         li->push_back(ai);
-        if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
+        if (ix->opCode==LBRACE) ix = (opNode*)*(ix->begin());
         /* assumes that the next level is the 'IN' keyword (if present) */
         if (ix->opCode==IN){
-          dummyVar = (opNode*)ix->values[0];
-          set = (opNode*)ix->values[1];
+          opNode::Iterator ixi = ix->begin();
+          dummyVar = (opNode*)*ixi;
+          set = (opNode*)*(++ixi);
         }else{
           dummyVar = NULL;
           set = ix;
@@ -827,12 +828,13 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           // and place the indexing expression of this BLOCK onto the stack
           // the stack stores the dummy variable and the SET separately, 
           // so take them to bits here
-          if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0]; // rem {..}
+          if (ix->opCode==LBRACE) ix = (opNode*)*(ix->begin()); // rem {..}
           if (ix->opCode==IN){
             //l_addIndex[n_addIndex]->dummyVar = (opNode*)ix->values[0];
             //l_addIndex[n_addIndex]->set = (opNode*)ix->values[1];
-            ai->dummyVar = (opNode*)ix->values[0];
-            ai->set = (opNode*)ix->values[1];
+             opNode::Iterator ixi = ix->begin();
+            ai->dummyVar = (opNode*)*ixi;
+            ai->set = (opNode*)*(++ixi);
           }else{ // no dummy variable, just a set
             //l_addIndex[n_addIndex]->dummyVar = NULL;
             //l_addIndex[n_addIndex]->set = ix;
@@ -1014,13 +1016,14 @@ add_to_index_stack(opNode *ix){
   //    l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
   //  }
   //  /* remove outside braces from indexing expression */
-  if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
+  if (ix->opCode==LBRACE) ix = (opNode*)*(ix->begin());
   /* assumes that the next level is the 'IN' keyword (if present) */
   if (ix->opCode==IN){
     //    l_addIndex[n_addIndex]->dummyVar = (opNode*)ix->values[0];
     //    l_addIndex[n_addIndex]->set = (opNode*)ix->values[1];
-    ai->dummyVar = (opNode*)ix->values[0];
-    ai->set = (opNode*)ix->values[1];
+    opNode::Iterator ixi = ix->begin();
+    ai->dummyVar = (opNode*)*ixi;
+    ai->set = (opNode*)*(++ixi);
   }else{
     ai->dummyVar = NULL;
     ai->set = ix;
@@ -1142,7 +1145,7 @@ modified_write(ostream &fout, model_comp *comp)
     if (comp->indexing) {
       if (first) {first = 0;} else {fout << ",";}
       ixsn = comp->indexing;
-      if (ixsn->opCode==LBRACE) ixsn=(opNode*)ixsn->values[0]; 
+      if (ixsn->opCode==LBRACE) ixsn=(opNode*)*(ixsn->begin()); 
       fout << ixsn;
     }
     //if (n_addIndex>0 || comp->indexing)

@@ -408,8 +408,10 @@ setdef:  SET ID indexing_opt {
          } stochattr_opt setattributes_opt {
             defineSymbol(SET, $2, $3, current_model); 
             add_set_to_model($2, $3, $6);
-            if (GlobalVariables::logParseModel) printf("$6 = \n",($6)->print());
-            if (GlobalVariables::logParseModel) printf("$5 = \n",($5)->print());
+            if (GlobalVariables::logParseModel) 
+               cout << "$6 = " << $6 << "\n";
+            if (GlobalVariables::logParseModel)
+               cout << "$5 = " << $5 << "\n";
             if ($3) rem_indexing($3);
             //$$=$2; 
          }
@@ -789,9 +791,7 @@ value:   INT_VAL {
             // $$->values[0] = (void *) $1;
          }
      |   INFINITY { 
-            $$ = (opNode *) malloc(sizeof(opNode));
-            $$->opCode = INFINITY;
-            $$->values = NULL;
+            $$ = new opNode(INFINITY);
          }
      |   STAGE { 
             $$ = new opNode(STAGE);
@@ -1194,10 +1194,10 @@ makeListOfDependencies(opNode *indx, opNode *attrib)
    tmpnode = findKeywordinTree(indx, IN);
   
    /* okay: count number of dummy variables */
-   ndummy = countKeywordinTree((opNode*)tmpnode->values[0], ID);
+   ndummy = countKeywordinTree((opNode*)*(tmpnode->begin()), ID);
    ldummy = (char **)calloc(ndummy, sizeof(char*));
    /* and make a list of dummy variables */
-   findIDinTreeAndAddToList((opNode*)tmpnode->values[0], ldummy, &nlist);
+   findIDinTreeAndAddToList((opNode*)*(tmpnode->begin()), ldummy, &nlist);
 
    /* and make a list of all variables */
    findIDinTreeAndAddToList(indx, ldummy, &nlist);
@@ -1353,15 +1353,16 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
   
    // split the expression 'ref' into an id part and an argument list
    if (GlobalVariables::logParseModel)
-      printf("find_var_ref_in_context: %s\n",ref->print());
+      cout << "find_var_ref_in_context: " << ref << "\n";
 
    if (ref->opCode==ID){
       idNode = ref;
       argNode = NULL;
    }else{
       assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
-      idNode = (opNode*)ref->values[0];
-      argNode = (opNode*)ref->values[1];
+      opNode::Iterator i = ref->begin();
+      idNode = (opNode*)*i;
+      argNode = (opNode*)*(++i);
       assert(idNode->opCode==ID);
       assert(argNode->opCode==COMMA);
    }
@@ -1375,7 +1376,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
       }
    }
 
-   name = (char*)idNode->values[0];
+   name = (char*)*(idNode->begin());
    if (GlobalVariables::logParseModel) 
       printf("--> search for matches of %s\n",name);
  
@@ -1428,8 +1429,8 @@ find_var_ref_in_context_(AmplModel *context, opNode *ref)
    model_comp *thismc;
    opNode *tmp;
    AmplModel *thism;
-   char *name = (char*)ref->values[0];
-   opNodeIDREF *ret;      
+   char *name = (char*)*(ref->begin());
+   opNodeIDREF *ret;
   
    for(list<model_comp*>::iterator p = context->comps.begin();
          p!=context->comps.end();p++){

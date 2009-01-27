@@ -43,7 +43,7 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
   /* 
      1) Match the parameter with a description in the model file and work
         out the dimension of the parameter (scalar?, vector?, array?) and
-	how many parameter values to expect
+        how many parameter values to expect
      2) Parse the opNode-tree and fill in the corresponding entries of
         this object
   */
@@ -75,14 +75,14 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
     for(int i=0;i<ix->ncomp;i++){
       indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->value);
       if (indices[i]==NULL){
-	printf("Value of parameter %s given, before indexing set: %s is defined\n",
-	       mc->id, (ix->sets_mc[i])->id);
-	/* Of course it is possible to define the membership of the sets at 
-	   the same time as the parameters 
-	   Although a particular syntax needs to be used. Should probably have
-	   a separate routine for that case
-	*/
-	exit(1);
+        printf("Value of parameter %s given, before indexing set: %s is defined\n",
+               mc->id, (ix->sets_mc[i])->id);
+        /* Of course it is possible to define the membership of the sets at 
+           the same time as the parameters 
+           Although a particular syntax needs to be used. Should probably have
+           a separate routine for that case
+        */
+        exit(1);
       }
       n *= indices[i]->size(); // number of parameters is cartesian product of sets 
       nix += indices[i]->dim;
@@ -156,12 +156,13 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
   int nobj = nix;
   for(int i=0;i<desc->nval;i++){
     opNode *templ = NULL;
-    paramspec = (opNode*)desc->values[i];
+    paramspec = (opNode*)*(desc->begin());
 
     // either of which can have a param_template
     if (paramspec->opCode==TOKPARAMTEMPLATE){
-      templ = (opNode*)paramspec->values[0];
-      paramspec = (opNode*)paramspec->values[1];
+      opNode::Iterator psi = paramspec->begin();
+      templ = (opNode*)*psi;
+      paramspec = (opNode*)*(++psi);
     }
 
     // now this can be either a "value list" or a "value table list"
@@ -173,46 +174,46 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
       assert(paramspec->opCode==' ');
       int nval = paramspec->nval/(nobj+1);
       if (paramspec->nval%(nobj+1)!=0){
-	printf("Paramdef requires %d position specifiers.\n",nobj);
-	printf("Length of value list is %d which is not divisible by %d.\n",
-	       paramspec->nval, nobj+1);
-	exit(1);
+        printf("Paramdef requires %d position specifiers.\n",nobj);
+        printf("Length of value list is %d which is not divisible by %d.\n",
+               paramspec->nval, nobj+1);
+        exit(1);
       }
       // loop through all parameter values that are given
       for(int j=0;j<nval;j++){
-	// need to think how these are stored
-	int pos_in_paramspec = j*(nobj+1);
-	
-	// get the "nobj" identifiers
-	int pos_in_array = 0;
-	for(int k=0;k<nobj;k++){
-	  pos_in_array*= indices[k]->size();
-	  opNode *onid = (opNode *)(paramspec->values[pos_in_paramspec+k]);
-	  char *obj = onid->getValue();
-	  // FIXME: if we want to allow multidimensional indexing sets we
-	  //        need to gather indices[k]->dim entries together and 
-	  //        convert them into a string[]. This is then passed to
-	  //        findPos
-	  pos_in_array += indices[k]->findPos(SetElement(1,&obj));
-	}	  
-	opNode *on = (opNode *)paramspec->values[pos_in_paramspec+nobj];
-	assert(on->opCode==ID||on->opCode==INT_VAL||on->opCode==FLOAT_VAL);
-	if (is_symbolic){
-	  if (on->opCode==ID){
-	    symvalues[pos_in_array] = string((char*)on->values[0]);
-	  }else{
-	    symvalues[pos_in_array] = to_string(on->values[0]);
-	  }	    
-	}else{ // not symbolic => numeric
-	  if (on->opCode==ID){
-	    values[pos_in_array] = atof((char*)on->values[0]);
-	  }else if (on->opCode==INT_VAL){
-	    values[pos_in_array] = *(int*)(on->values[0]);
-	  }else{ // FLOAT_VAL
-	    values[pos_in_array] = *(double*)(on->values[0]);
-	  }
-	}
-	nread++;
+        // need to think how these are stored
+        int pos_in_paramspec = j*(nobj+1);
+        
+        // get the "nobj" identifiers
+        int pos_in_array = 0;
+        for(int k=0;k<nobj;k++){
+          pos_in_array*= indices[k]->size();
+          opNode *onid = (opNode *)(paramspec->values[pos_in_paramspec+k]);
+          char *obj = onid->getValue();
+          // FIXME: if we want to allow multidimensional indexing sets we
+          //        need to gather indices[k]->dim entries together and 
+          //        convert them into a string[]. This is then passed to
+          //        findPos
+          pos_in_array += indices[k]->findPos(SetElement(1,&obj));
+        }          
+        opNode *on = (opNode *)paramspec->values[pos_in_paramspec+nobj];
+        assert(on->opCode==ID||on->opCode==INT_VAL||on->opCode==FLOAT_VAL);
+        if (is_symbolic){
+          if (on->opCode==ID){
+            symvalues[pos_in_array] = string((char*)on->values[0]);
+          }else{
+            symvalues[pos_in_array] = to_string(on->values[0]);
+          }            
+        }else{ // not symbolic => numeric
+          if (on->opCode==ID){
+            values[pos_in_array] = atof((char*)on->values[0]);
+          }else if (on->opCode==INT_VAL){
+            values[pos_in_array] = *(int*)(on->values[0]);
+          }else{ // FLOAT_VAL
+            values[pos_in_array] = *(double*)(on->values[0]);
+          }
+        }
+        nread++;
       }// end loop over j
     }
 
@@ -305,14 +306,15 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
   
 
   // loop through all value_table's
-  for(int i=0;i<node->nval;i++){
-    opNode *on_valtab = (opNode*)node->values[i];
+  for(opNode::Iterator i=node->begin(); i!=node->end(); ++i){
+    opNode *on_valtab = (opNode*)*i;
     assert(on_valtab->opCode==TOKVALUETABLE);
     
     // get the dimensions of the value_table_list
     assert(on_valtab->nval==2);
-    opNode *on_collabel = (opNode*)on_valtab->values[0];
-    opNode *on_values = (opNode*)on_valtab->values[1];
+    opNode::Iterator ovti = on_valtab->begin();
+    opNode *on_collabel = (opNode*)*ovti;
+    opNode *on_values = (opNode*)*(++ovti);
     
     int ncol = on_collabel->nval;
     int nval = on_values->nval;
@@ -329,30 +331,31 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
     int *colpos = new int[ncol];
     // process the col_label list first
     
-    for(int j=0;j<ncol;j++){
-      opNode *cl = (opNode*)on_collabel->values[j];
+    int jj=0;
+    for(opNode::Iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
+      opNode *cl = (opNode*)*j;
       assert(cl->opCode==ID || cl->opCode==LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label
       
       // make the label into a SetElement
       if (indices[ixcolset]->dim>1){
-	if (cl->opCode!=LBRACKET){
-	  printf("col_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixcolset]->id);
-	  exit(1);
-	}
-	if (cl->nval!=indices[ixcolset]->dim){
-	  printf("Number of entries in bracketed expression used as col_label (%d)\n",cl->nval);
-	  printf("does not match dimension (%d) of indexing set '%s'\n",
-		 indices[ixcolset]->dim, ix->sets_mc[ixcolset]->id);
-	  exit(1);
-	}
-	cl = (opNode*)cl->values[0];
-	assert(cl->opCode==COMMA);
-	colpos[j] = indices[ixcolset]->findPos(SetElement(1, (char**)cl->values));
+        if (cl->opCode!=LBRACKET){
+          printf("col_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixcolset]->id);
+          exit(1);
+        }
+        if (cl->nval!=indices[ixcolset]->dim){
+          printf("Number of entries in bracketed expression used as col_label (%d)\n",cl->nval);
+          printf("does not match dimension (%d) of indexing set '%s'\n",
+                 indices[ixcolset]->dim, ix->sets_mc[ixcolset]->id);
+          exit(1);
+        }
+        cl = (opNode*)*(cl->begin());
+        assert(cl->opCode==COMMA);
+        colpos[jj] = indices[ixcolset]->findPos(SetElement(1, (char**)cl->values));
       }else{
-	// this is a set of dim 1
-	colpos[j] = indices[ixcolset]->findPos(SetElement(1, (char**)cl->values));
+        // this is a set of dim 1
+        colpos[jj] = indices[ixcolset]->findPos(SetElement(1, (char**)cl->values));
       }
       
     }
@@ -367,38 +370,38 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
       
       // make the label into a SetElement
       if (indices[ixrowset]->dim>1){
-	if (rl->opCode!=LBRACKET){
-	  printf("row_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixrowset]->id);
-	  exit(1);
-	}
-	if (rl->nval!=indices[ixrowset]->dim){
-	  printf("Number of entries in bracketed expression used as row_label (%d)\n",rl->nval);
-	  printf("does not match dimension (%d) of indexing set '%s'\n",
-		 indices[ixrowset]->dim, ix->sets_mc[ixrowset]->id);
-	  exit(1);
-	}
-	rl = (opNode*)rl->values[0];
-	assert(rl->opCode==COMMA);
-	rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (char**)rl->values));
+        if (rl->opCode!=LBRACKET){
+          printf("row_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixrowset]->id);
+          exit(1);
+        }
+        if (rl->nval!=indices[ixrowset]->dim){
+          printf("Number of entries in bracketed expression used as row_label (%d)\n",rl->nval);
+          printf("does not match dimension (%d) of indexing set '%s'\n",
+                 indices[ixrowset]->dim, ix->sets_mc[ixrowset]->id);
+          exit(1);
+        }
+        rl = (opNode*)rl->values[0];
+        assert(rl->opCode==COMMA);
+        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (char**)rl->values));
       }else{
-	// this is a set of dim 1
-	rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (char**)rl->values));
+        // this is a set of dim 1
+        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (char**)rl->values));
       }
     }
     // OK, we now have the lists colpos/rowpos that tell us where the
     // elements go in values/symvalues
     for (int j=0;j<ncol;j++){
       for (int k=0;k<nrow;k++){
-	int poslist = (j+1)+k*(ncol+1);
-	int posparam = colpos[j]+rowpos[k]*indices[ixcolset]->size();
-	opNode *entry = (opNode*)on_values->values[poslist];
-	if (is_symbolic){
-	  assert(entry->opCode==ID);
-	  symvalues[posparam] = string((char *)entry->values[0]);
-	}else{
-	  values[posparam] = entry->getFloatVal();
-	}
-	nread++;
+        int poslist = (j+1)+k*(ncol+1);
+        int posparam = colpos[j]+rowpos[k]*indices[ixcolset]->size();
+        opNode *entry = (opNode*)on_values->values[poslist];
+        if (is_symbolic){
+          assert(entry->opCode==ID);
+          symvalues[posparam] = string((char *)entry->values[0]);
+        }else{
+          values[posparam] = entry->getFloatVal();
+        }
+        nread++;
       }
     }
   }

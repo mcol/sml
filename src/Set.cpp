@@ -26,20 +26,20 @@ Set::Set(opNode *list):
   //this->n = list->nval;
   
   // have a look at the first item to get the dimension of the set
-  item = (opNode *)list->values[0];
+  item = (opNode *)*(list->begin());
   if (item->opCode==ID||item->opCode==INT_VAL||item->opCode==FLOAT_VAL){
     this->dim = 1;
   }else{
     // otherwise this needs to be an element of form (.., .., ..)
     assert(item->opCode==LBRACKET);
-    item = (opNode*)item->values[0];
+    item = (opNode*)*(item->begin());
     assert(item->opCode==COMMA);
     this->dim = item->nval;
   }
   
   // then place all the elements on the set
-  for(int i=0;i<list->nval;i++){
-    item = (opNode*)list->values[i];
+  for(opNode::Iterator i=list->begin(); i!=list->end(); ++i){
+    item = (opNode*) *i;
     // and do some checking that all elements have the same dimension
     //    this->elements.push_back(item);
     if (dim==1) {
@@ -53,23 +53,24 @@ Set::Set(opNode *list):
       //string* array = new string[dim];
       char **array = (char**)calloc(dim, sizeof(char*));
       assert(item->opCode==LBRACKET);
-      item = (opNode*)item->values[0];
+      item = (opNode*)*(item->begin());
       assert(item->opCode==COMMA);
       if (dim==item->nval){
-	for(i=0;i<dim;i++){
-	  opNode *idnd = (opNode*)item->values[i];
-	  assert(idnd->opCode==ID);
-	  array[i] = (char*)idnd->values[i];
-	}
-	add(SetElement(dim, array));
-	//this->elements.push_back(array);
+        int j = 0;
+        for(opNode::Iterator k=item->begin(); k!=item->end(); ++k){
+          opNode *idnd = (opNode*)*k;
+          assert(idnd->opCode==ID);
+          array[j++] = (char*)*(idnd->begin());
+        }
+        add(SetElement(dim, array));
+        //this->elements.push_back(array);
       }else{
-	printf("First element in set has dim=%d later element '%s' has dim=%d\n", dim, ((opNode*)list->values[i])->print(), item->nval);
-	exit(1);
+        cerr << "First element in set has dim=" <<dim << " later element '"
+           << (opNode*)*i << "' has dim=" << item->nval << "\n";
+        exit(1);
       }
     }
   }
-
 }
 
 
@@ -124,7 +125,7 @@ Set::findPos(SetElement el)
     return iter->second;
   }else{
     printf("ERROR: Set.cpp: Trying to find element '%s' in Set %s\n",
-	   el.toCharA(), printToString().c_str());
+           el.toCharA(), printToString().c_str());
     printf("Element %s is not in Set\n",el.toCharA());
     exit(1);
     return -1;

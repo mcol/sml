@@ -429,9 +429,7 @@ number: INT_VAL {
 //          $$=new opNode(0, $1);
 //       }
      | INFINITY { 
-          $$ = (opNode *) malloc(sizeof(opNode));
-          $$->opCode = INFINITY;
-          $$->values = NULL;
+          $$ = new opNode(INFINITY);
        }
      ;
 

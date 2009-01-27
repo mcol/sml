@@ -9,7 +9,7 @@ StochModelComp::StochModelComp():
 {}
 
 StochModelComp::StochModelComp(char *id, compType type, 
-			       opNode *indexing, opNode *attrib):
+                               opNode *indexing, opNode *attrib):
   model_comp(id, type, indexing, attrib)
 {}
 
@@ -47,9 +47,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
      (2)  find all IDREF nodes in the indexing and attribute section
      (2a) resolve all IDREF nodes with respect to the AmplModel tree,
           rather than the StochModel tree
-	  - here xh(-1;i) or xh[i].parent(1) notation is resolved, that 
-	    indicates the IDREF should be resolved with respect to AmplModel 
-	    nodes higher up in the tree
+          - here xh(-1;i) or xh[i].parent(1) notation is resolved, that 
+            indicates the IDREF should be resolved with respect to AmplModel 
+            nodes higher up in the tree
      (3)  find all STAGE and NODE nodes in the attribute section
      (3a) replace them with the values in opNode::stage and opNode::node
      (4)  find all EXP nodes in tbe attribute section
@@ -99,29 +99,29 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
       // (deal with xh(-1;i)/xh[i].parent(i) notation)
       AmplModel *model = current_model;
       for (int lvl=onr->stochparent;lvl>0;lvl--){
-	model = model->parent;
-	if (model==NULL){
-	  printf("Trying to take the %d ancestor in a model that does not have %d ancestors\n",
-		 onr->stochparent, onr->stochparent);
-	  exit(1);
-	}
+        model = model->parent;
+        if (model==NULL){
+          printf("Trying to take the %d ancestor in a model that does not have %d ancestors\n",
+                 onr->stochparent, onr->stochparent);
+          exit(1);
+        }
       }
       
       // search for this entity in the current model
       bool fnd = false;
       for(list<model_comp*>::iterator p = model->comps.begin();
-	  p!=model->comps.end();p++){
-	model_comp *amc=*p;
-	// all we can do is judge by name
-	if (strcmp(mc->id, amc->id)==0){
-	  onr->ref = amc;
-	  fnd = true;
-	  break;
-	}
+          p!=model->comps.end();p++){
+        model_comp *amc=*p;
+        // all we can do is judge by name
+        if (strcmp(mc->id, amc->id)==0){
+          onr->ref = amc;
+          fnd = true;
+          break;
+        }
       }
       if (!fnd){
-	printf("ERROR: no entity named %s found in current model\n",mc->id);
-	exit(1);
+        printf("ERROR: no entity named %s found in current model\n",mc->id);
+        exit(1);
       }
     }
 
@@ -210,136 +210,136 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
     // (*p) is the EXPECTATION node, it should have one child
 
-    opNode *child = (opNode*)((*p)->values[0]);
+    opNode *child = (opNode*)*((*p)->begin());
 
     if (child->opCode!=COMMA||child->nval==1){
       // this is the "one argument" use if Exp within an objective function
       if (type==TMIN || type==TMAX){
-	// set "up" to the argument of Exp(...)
-	// FIXME: need to put brackets around this?
-	opNode *up = (opNode*)((*p)->values[0]);
-	for (int i=level;i>0;i--){
-	  
-	  // find the dummy variable expression
-	  opNodeIx *cnix = thisam->node->indexing;
-	  list<opNode *>* dv = cnix->getListDummyVars();
-	  //dv->front() is a string giving name of dummy var
-	  thisam = thisam->parent;
-	
-	  // thissm->prob is an ID opNode giving path probabilities
-	  
-	  // create the *CP[ix0] term
-	  opNodeIDREF *opn_prob = dynamic_cast<opNodeIDREF*>(thissm->prob);
-	  if (opn_prob==NULL){
-	    printf("Probabilities parameter in sblock nust be given as IDREF\n");
-	    exit(1);
-	  }
-	  opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
-	  oncp->nval = 1;
-	  oncp->values = (void**)calloc(1, sizeof(void*));
-	  oncp->values[0] = new opNode(ID, strdup((dv->front())->print().c_str()));
-	  opNode *onmult = new opNode('*', oncp, up);
-	  up = onmult;
-	}
-	// up/onmult is now a pointer into the expression, this should
-	// replace the EXP node?
-	(*p)->values[0] = up;
-	(*p)->nval = 1;
-	(*p)->opCode = 0;
+        // set "up" to the argument of Exp(...)
+        // FIXME: need to put brackets around this?
+        opNode *up = (opNode*)*((*p)->begin());
+        for (int i=level;i>0;i--){
+          
+          // find the dummy variable expression
+          opNodeIx *cnix = thisam->node->indexing;
+          list<opNode *>* dv = cnix->getListDummyVars();
+          //dv->front() is a string giving name of dummy var
+          thisam = thisam->parent;
+        
+          // thissm->prob is an ID opNode giving path probabilities
+          
+          // create the *CP[ix0] term
+          opNodeIDREF *opn_prob = dynamic_cast<opNodeIDREF*>(thissm->prob);
+          if (opn_prob==NULL){
+            printf("Probabilities parameter in sblock nust be given as IDREF\n");
+            exit(1);
+          }
+          opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
+          oncp->nval = 1;
+          oncp->values = (void**)calloc(1, sizeof(void*));
+          oncp->values[0] = new opNode(ID, strdup((dv->front())->print().c_str()));
+          opNode *onmult = new opNode('*', oncp, up);
+          up = onmult;
+        }
+        // up/onmult is now a pointer into the expression, this should
+        // replace the EXP node?
+        (*p)->values[0] = up;
+        (*p)->nval = 1;
+        (*p)->opCode = 0;
 
       }else{
 
-	// one argument version of Exp used in constraint
-	// => this constraint should be moved to the top level; 
-	//    there it will encompass all nodes that are in the current stage
-	//    this should become
-	//     subject to ExpCons: 
-	//       mu = sum{ix0 in almS0_indS0, ix1 in almS0_S1_indS1[ix0]}
-	//            CP[ix0]*CP[ix1]*(sum{i in ASSETS}xh[ix0, ix1, i])
-	// set "up" to the argument of Exp(...)
-	// FIXME: need to put brackets around this?
-	list<opNode*> listofsum; // expressions in the sum{..}
+        // one argument version of Exp used in constraint
+        // => this constraint should be moved to the top level; 
+        //    there it will encompass all nodes that are in the current stage
+        //    this should become
+        //     subject to ExpCons: 
+        //       mu = sum{ix0 in almS0_indS0, ix1 in almS0_S1_indS1[ix0]}
+        //            CP[ix0]*CP[ix1]*(sum{i in ASSETS}xh[ix0, ix1, i])
+        // set "up" to the argument of Exp(...)
+        // FIXME: need to put brackets around this?
+        list<opNode*> listofsum; // expressions in the sum{..}
 
 
-	opNode *up = (opNode*)((*p)->values[0]);
-	// put brackets around this
-	up = new opNode(LBRACKET, up);
-	for (int i=level;i>0;i--){
-	  
-	  // find the dummy variable expression
-	  opNodeIx *cnix = thisam->node->indexing;
-	  list<opNode *>* dv = cnix->getListDummyVars();
-	  //dv->front() is a string giving name of dummy var
-	
-	  // thissm->prob is an ID opNode giving path probabilities
-	  
-	  // create the *CP[ix0] term
-	  opNodeIDREF *opn_prob = dynamic_cast<opNodeIDREF*>(thissm->prob);
-	  if (opn_prob==NULL){
-	    printf("Probabilities parameter in sblock nust be given as IDREF\n");
-	    exit(1);
-	  }
-	  opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
-	  oncp->nval = 1;
-	  oncp->values = (void**)calloc(1, sizeof(void*));
-	  oncp->values[0] = new opNode(ID, strdup(dv->front()->print().c_str()));
-	  opNode *onmult = new opNode('*', oncp, up);
-	  up = onmult;
+        opNode *up = (opNode*)*((*p)->begin());
+        // put brackets around this
+        up = new opNode(LBRACKET, up);
+        for (int i=level;i>0;i--){
+          
+          // find the dummy variable expression
+          opNodeIx *cnix = thisam->node->indexing;
+          list<opNode *>* dv = cnix->getListDummyVars();
+          //dv->front() is a string giving name of dummy var
+        
+          // thissm->prob is an ID opNode giving path probabilities
+          
+          // create the *CP[ix0] term
+          opNodeIDREF *opn_prob = dynamic_cast<opNodeIDREF*>(thissm->prob);
+          if (opn_prob==NULL){
+            printf("Probabilities parameter in sblock nust be given as IDREF\n");
+            exit(1);
+          }
+          opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
+          oncp->nval = 1;
+          oncp->values = (void**)calloc(1, sizeof(void*));
+          oncp->values[0] = new opNode(ID, strdup(dv->front()->print().c_str()));
+          opNode *onmult = new opNode('*', oncp, up);
+          up = onmult;
 
-	  // put together the sum expression 
-	  // => build the ix0 in almS0_indS0 (which is the indexing expression
-	  //    used for this model)
+          // put together the sum expression 
+          // => build the ix0 in almS0_indS0 (which is the indexing expression
+          //    used for this model)
 
-	  // cnix might contain a '{' => strip it if present
-	  opNode *cnixon = cnix;
-	  if (cnixon->opCode==LBRACE) cnixon = (opNode*)cnixon->values[0];
-	  listofsum.push_front(cnixon->deep_copy());
-	  
-	  thisam = thisam->parent;
-	}
-	// up/onmult is now a pointer into the expression, this should
-	// replace the EXP node?
+          // cnix might contain a '{' => strip it if present
+          opNode *cnixon = cnix;
+          if (cnixon->opCode==LBRACE) cnixon = (opNode*)*(cnixon->begin());
+          listofsum.push_front(cnixon->deep_copy());
+          
+          thisam = thisam->parent;
+        }
+        // up/onmult is now a pointer into the expression, this should
+        // replace the EXP node?
 
-	// create the sum expression: first build comma separated list
-	opNode *cslon = new opNode();
-	cslon->nval = listofsum.size();
-	if (cslon->nval==0){
-	  printf("Expectation indexing expression *must* be present\n");
-	  exit(1);
-	}
-	cslon->values = (void**)calloc(cslon->nval, sizeof(void*));
-	cslon->opCode = COMMA;
-	int cnt=0;
-	for(list<opNode*>::iterator q = listofsum.begin();q!=listofsum.end();
-	    q++){
-	  cslon->values[cnt] = (void*)(*q);
-	  cnt++;
-	}
-	// and put braces around it
-	cslon = new opNode(LBRACE, cslon);
-	
+        // create the sum expression: first build comma separated list
+        opNode *cslon = new opNode();
+        cslon->nval = listofsum.size();
+        if (cslon->nval==0){
+          printf("Expectation indexing expression *must* be present\n");
+          exit(1);
+        }
+        cslon->values = (void**)calloc(cslon->nval, sizeof(void*));
+        cslon->opCode = COMMA;
+        int cnt=0;
+        for(list<opNode*>::iterator q = listofsum.begin();q!=listofsum.end();
+            q++){
+          cslon->values[cnt] = (void*)(*q);
+          cnt++;
+        }
+        // and put braces around it
+        cslon = new opNode(LBRACE, cslon);
+        
 
-	// now build the sum
-	//printf("This is the sum: %s\n",cslon->print());
-	cslon = new opNode(SUM, cslon, up);
-	//printf("This is the sum: %s\n",cslon->print());
+        // now build the sum
+        //printf("This is the sum: %s\n",cslon->print());
+        cslon = new opNode(SUM, cslon, up);
+        //printf("This is the sum: %s\n",cslon->print());
 
-	(*p)->values[0] = cslon;
-	(*p)->nval = 1;
-	(*p)->opCode = 0;
-	
-	//FIXME: need to somehow move this model comp to the root
-	// model of the stoch prog.
-	//print();
-	//exit(1);
-	// actually queues this to be moved up
-	char *id2 = (char *)calloc(strlen(newmc->id)+5, sizeof(char));
-	strcpy(id2, newmc->id);
-	sprintf(id2+strlen(newmc->id), "_up%d",level);
-	free(newmc->id);
-	newmc->id = id2;
-	newmc->moveUp(level);
-	
+        (*p)->values[0] = cslon;
+        (*p)->nval = 1;
+        (*p)->opCode = 0;
+        
+        //FIXME: need to somehow move this model comp to the root
+        // model of the stoch prog.
+        //print();
+        //exit(1);
+        // actually queues this to be moved up
+        char *id2 = (char *)calloc(strlen(newmc->id)+5, sizeof(char));
+        strcpy(id2, newmc->id);
+        sprintf(id2+strlen(newmc->id), "_up%d",level);
+        free(newmc->id);
+        newmc->id = id2;
+        newmc->moveUp(level);
+        
       }
     }
     if (child->opCode==COMMA&&child->nval>1){

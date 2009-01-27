@@ -253,49 +253,49 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
       //    (similar to addIndex, but this time a C++ implementation
       //printf("Stack of path instances is: \n");
       for(list<string>::iterator p = ExpandedModel::pathToNodeStack.begin();
-	  p!=ExpandedModel::pathToNodeStack.end();p++){
-	// separator is '[' for first item, ',' thereafter
-	if (p==ExpandedModel::pathToNodeStack.begin()){
-	  globname += '[';
-	}else{
-	  globname += ',';
-	}
-	// the expression is (N1,N2) or N1 
-	// if a simple expression (no '(') just put it to the end of 
-	// globname quoted
-	// otherwise, need to break this down into tokens
-	// this is conceptually the same as done in breaking down the opNodeIx
-	// indexing nodes for the blocks. However this time it is actual
-	// instances of the dummyVariables rather than the dummy variables 
-	// themselves. The expressions come from AMPL output so they have not
-	// been parsed by the lexer/yacc. Need to do te parsing by hand
-	if ((*p).at(0)=='('){
-	  char *token = strdup((*p).c_str());
-	  // remove first and last character
-	  int len = strlen(token);
-	  assert(token[len-1]==')');
-	  token[len-1]=0;
-	  token++;
-	  for(char*str=token; ;str=NULL){
-	    char *tok = strtok(str, ",");
-	    if (tok==NULL) break;
-	    if (is_int(tok)){
-	      globname += string(tok)+",";
-	    }else{
-	      globname += "'"+string(tok)+"',";
-	    }
-	  }
-	  globname.replace(globname.size()-1,1,"");// delete last element
-	  token--;
-	  free(token);
-	}else{
-	  if (is_int((*p).c_str())){
-	    globname += (*p);
-	  }else{
-	    globname += "'"+(*p)+"'";
-	  }
-	}
-	//printf("->%s",(*p).c_str());
+          p!=ExpandedModel::pathToNodeStack.end();p++){
+        // separator is '[' for first item, ',' thereafter
+        if (p==ExpandedModel::pathToNodeStack.begin()){
+          globname += '[';
+        }else{
+          globname += ',';
+        }
+        // the expression is (N1,N2) or N1 
+        // if a simple expression (no '(') just put it to the end of 
+        // globname quoted
+        // otherwise, need to break this down into tokens
+        // this is conceptually the same as done in breaking down the opNodeIx
+        // indexing nodes for the blocks. However this time it is actual
+        // instances of the dummyVariables rather than the dummy variables 
+        // themselves. The expressions come from AMPL output so they have not
+        // been parsed by the lexer/yacc. Need to do te parsing by hand
+        if ((*p).at(0)=='('){
+          char *token = strdup((*p).c_str());
+          // remove first and last character
+          int len = strlen(token);
+          assert(token[len-1]==')');
+          token[len-1]=0;
+          token++;
+          for(char*str=token; ;str=NULL){
+            char *tok = strtok(str, ",");
+            if (tok==NULL) break;
+            if (is_int(tok)){
+              globname += string(tok)+",";
+            }else{
+              globname += "'"+string(tok)+"',";
+            }
+          }
+          globname.replace(globname.size()-1,1,"");// delete last element
+          token--;
+          free(token);
+        }else{
+          if (is_int((*p).c_str())){
+            globname += (*p);
+          }else{
+            globname += "'"+(*p)+"'";
+          }
+        }
+        //printf("->%s",(*p).c_str());
       }
       //printf("\n");
       //cout << globname+'\n';
@@ -312,51 +312,51 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
       
       string nameSetFile = smodelname+"_"+string(mc->id);
       if (sinstanceStub.length() > 0)
-	nameSetFile += "_" + sinstanceStub;
+        nameSetFile += "_" + sinstanceStub;
       
       // get cardinality of this node in the ExpandedModel
       ifstream fcrd((nameSetFile+".crd").c_str());
       if (!fcrd) {
-	cout << "Cannot open file: "+ nameSetFile+".crd\n";
-	exit(1);
+        cout << "Cannot open file: "+ nameSetFile+".crd\n";
+        exit(1);
       }
 
       fcrd >> card;
 
       // if this node is indeed repeated over an indexing set
       if (card>0){
-	ifstream fset((nameSetFile+".set").c_str());
-	if (!fset) {
-	  cout << "Cannot open file: "+ nameSetFile+".set\n";
-	  exit(1);
-	}
+        ifstream fset((nameSetFile+".set").c_str());
+        if (!fset) {
+          cout << "Cannot open file: "+ nameSetFile+".set\n";
+          exit(1);
+        }
 
-	getline(fset, setElements); // FIXME: can this be more than one line?
+        getline(fset, setElements); // FIXME: can this be more than one line?
 
-	list<string>* li = getListOfInstances(setElements);
+        list<string>* li = getListOfInstances(setElements);
 
-	for(list<string>::iterator p=li->begin();p!=li->end();p++){
-	  string subModelName = smodelname+"_"+string(mc->id);
-	  string subModelInst;
-	  if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
-	  subModelInst += crush((*p).c_str());
-	  cout << subModelName+":"+subModelInst+'\n';
-	  AmplModel *subampl = (AmplModel*)mc->other;
-	  ExpandedModel::pathToNodeStack.push_back(*p);
-	  ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
-	  ExpandedModel::pathToNodeStack.pop_back();
-	  subem->parent = em;
-	  (em->children).push_back(subem);
-	}
+        for(list<string>::iterator p=li->begin();p!=li->end();p++){
+          string subModelName = smodelname+"_"+string(mc->id);
+          string subModelInst;
+          if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
+          subModelInst += crush((*p).c_str());
+          cout << subModelName+":"+subModelInst+'\n';
+          AmplModel *subampl = (AmplModel*)mc->other;
+          ExpandedModel::pathToNodeStack.push_back(*p);
+          ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
+          ExpandedModel::pathToNodeStack.pop_back();
+          subem->parent = em;
+          (em->children).push_back(subem);
+        }
       }else{
-	// if this node is not repeated over an indexing set
-	string subModelName = smodelname+"_"+string(mc->id);
-	string subModelInst;
-	cout << subModelName+":"+sinstanceStub+'\n';
-	AmplModel *subampl = (AmplModel*)mc->other;
-	ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);
-	subem->parent = em;
-	(em->children).push_back(subem);
+        // if this node is not repeated over an indexing set
+        string subModelName = smodelname+"_"+string(mc->id);
+        string subModelInst;
+        cout << subModelName+":"+sinstanceStub+'\n';
+        AmplModel *subampl = (AmplModel*)mc->other;
+        ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);
+        subem->parent = em;
+        (em->children).push_back(subem);
       }
 
     }
@@ -546,7 +546,7 @@ AmplModel::check()
   }
   if (node==NULL && strcmp(name,"root")!=0){
     printf("AmplModel %s is not root but has no model_comp node associated\n",
-	   name);
+           name);
     exit(1);
   }
   
@@ -622,51 +622,50 @@ AmplModel::addDummyObjective()
     if (comp->type==TVAR){
       // if there is no indexing expression, simply add this
       if (comp->indexing){
-	opNodeIx *ix = comp->indexing;
-	// Need to create "sum{dummy in set} var[dummy]":
-	// 1) create "dummy in set"
-	vector<opNode*> commaseplist;
-	opNode *commasepon;
-	for(i=0;i<ix->ncomp;i++){
-	  if (ix->dummyVarExpr[i]){
-	    opNode *newon = new opNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
-	    commaseplist.push_back(newon);
-	  }else{
-	    // need to make up a dummy variable
-	    char buffer[20];
-	    sprintf(buffer, "dum%d", i);
-	    opNode *newon = new opNode(IN, new opNode(ID, strdup(buffer)), 
-				     ix->sets[i]);
-	    commaseplist.push_back(newon);
-	  }
-	} // end for
-	// make the commaseplist
-	if (ix->ncomp==1){
-	  commasepon = commaseplist[0];
-	}else{
-	  commasepon = new opNode();
-	  commasepon->nval = ix->ncomp;
-	  commasepon->opCode = COMMA;
-	  commasepon->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
-	  for(i=0;i<ix->ncomp;i++){
-	    commasepon->values[i] = commaseplist[i];
-	  }
-	}
-	opNodeIDREF *onref = new opNodeIDREF(comp);
-	onref->nval = ix->ncomp;
-	onref->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
-	for(i=0;i<ix->ncomp;i++){
-	  // this is the dummy variable of the i-th indexing expression
-	  opNode *ondum = (opNode*)commaseplist[i]->values[0];
-	  if (ondum->opCode==LBRACKET) ondum=(opNode*)ondum->values[0];
-	  onref->values[i] = ondum;
-	}
-	// make the sum part
-	commasepon = new opNode(LBRACE, commasepon);
-	list_on_sum.push_back(new opNode(SUM, commasepon, onref));
+        opNodeIx *ix = comp->indexing;
+        // Need to create "sum{dummy in set} var[dummy]":
+        // 1) create "dummy in set"
+        vector<opNode*> commaseplist;
+        opNode *commasepon;
+        for(i=0;i<ix->ncomp;i++){
+          if (ix->dummyVarExpr[i]){
+            opNode *newon = new opNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
+            commaseplist.push_back(newon);
+          }else{
+            // need to make up a dummy variable
+            char buffer[20];
+            sprintf(buffer, "dum%d", i);
+            opNode *newon = new opNode(IN, new opNode(ID, strdup(buffer)), 
+                                     ix->sets[i]);
+            commaseplist.push_back(newon);
+          }
+        } // end for
+        // make the commaseplist
+        if (ix->ncomp==1){
+          commasepon = commaseplist[0];
+        }else{
+          commasepon = new opNode(COMMA);
+          commasepon->nval = ix->ncomp;
+          commasepon->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
+          for(i=0;i<ix->ncomp;i++){
+            commasepon->values[i] = commaseplist[i];
+          }
+        }
+        opNodeIDREF *onref = new opNodeIDREF(comp);
+        onref->nval = ix->ncomp;
+        onref->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
+        for(i=0;i<ix->ncomp;i++){
+          // this is the dummy variable of the i-th indexing expression
+          opNode *ondum = (opNode*)*(commaseplist[i]->begin());
+          if (ondum->opCode==LBRACKET) ondum=(opNode*)*(ondum->begin());
+          onref->values[i] = ondum;
+        }
+        // make the sum part
+        commasepon = new opNode(LBRACE, commasepon);
+        list_on_sum.push_back(new opNode(SUM, commasepon, onref));
 
       }else{ // no indexing expression, simply add this node
-	list_on_sum.push_back(new opNodeIDREF(comp));
+        list_on_sum.push_back(new opNodeIDREF(comp));
       } // end if (indexing)
     }
   }
@@ -679,7 +678,7 @@ AmplModel::addDummyObjective()
     }else{
       attr = new opNode('+', list_on_sum[0],list_on_sum[1]);
       for(i=2;i<list_on_sum.size();i++){
-	attr = new opNode('+', attr, list_on_sum[i]);
+        attr = new opNode('+', attr, list_on_sum[i]);
       }
     }
     
@@ -715,7 +714,7 @@ AmplModel::removeComp(model_comp *comp)
   }
   if (!found){
     printf("Attempting to remove component %s from model %s:\n",
-	   comp->id, name);
+           comp->id, name);
     printf("Component is not in model!\n");
     exit(1);
   }
