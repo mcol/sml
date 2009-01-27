@@ -8,7 +8,6 @@
    #include <assert.h>
    #include <sys/stat.h>
    #include <iostream>
-   /*#include "parser.h"*/
    #include "nodes.h"
    #include "ampl.h"
    #include "GlobalVariables.h"
@@ -27,13 +26,11 @@
    bool GlobalVariables::logParseModel = false;
    int GlobalVariables::prtLvl = 1;
 
-   static AmplModel *current_model;   /* this is the model currently active */
+   static AmplModel *current_model;    /* this is the model currently active */
                                        /* this is the GLOBAL context */
-   static AmplModel *local_context;   /* this is the LOCAL context */
-   static int use_local;               /* flag to indicate that local should
-                 be used */
-   static opNodeIx *list_of_indexing[20];   /* list of currently applicable 
-                   indexing expressions */
+   static AmplModel *local_context;    /* this is the LOCAL context */
+   static opNodeIx *list_of_indexing[20];    /* list of currently applicable 
+                                                indexing expressions */
    static int n_indexing;
    /* ---------------- stochastic global variables:------------------------ */
    static bool is_stoch_model;      /* true if inside stochastic model def */
@@ -241,8 +238,8 @@ sblockend:  END SBLOCK SEMICOLON {
 
 stageblock: STAGE setexpression COLON {              
                if (!is_stoch_model) { 
-                  printf("Syntax Error: keyword 'STAGES' can only be used in"
-                     "stochastic blocks\n");
+                  cerr << "Syntax Error: keyword 'STAGES' can only be used in"
+                     "stochastic blocks\n";
                   exit(1);
                }
                stages_glo = $2;
@@ -518,8 +515,8 @@ stochattr_opt: /* empty */ {$$ = NULL;}
              | DETERMINISTIC {
                   // check that this is in a stochastic model
                   if (!is_stoch_model){ 
-                     printf("Syntax Error: keyword 'DETERMINISTIC' can only"
-                        "be used in stochastic blocks\n");
+                     cerr << "Syntax Error: keyword 'DETERMINISTIC' can only"
+                        "be used in stochastic blocks\n";
                      exit(1);
                   }
                   is_deterministic_loc = true;
@@ -528,8 +525,8 @@ stochattr_opt: /* empty */ {$$ = NULL;}
              | STAGES setexpression {
                   // check that this is in a stochastic model
                   if (!is_stoch_model){ 
-                     printf("Syntax Error: keyword 'STAGES' can only be used"
-                        "in stochastic blocks\n");
+                     cerr << "Syntax Error: keyword 'STAGES' can only be used"
+                        "in stochastic blocks\n";
                      exit(1);
                   }
                   $$ = NULL;
@@ -623,9 +620,6 @@ identifier: iditem {
                /* identifier sets the context for the idem */
                /* this only works if the identifier is actually a reference 
                   to a submodel */
-               opNode *onm = $1;
-               void **newvalues;
-               int i;
 
                if ($1->opCode!=IDREFM){
                   cerr << "Attempting to use dot specifier for something "
@@ -641,13 +635,6 @@ identifier: iditem {
                $$ = find_var_ref_in_context(local_context, $3);
 
                /* merge argument lists */
-               // newvalues = (void **)calloc($1->nval+$$->nval+1,sizeof(void *));
-               // for(i=0;i<$1->nval;i++)
-               //    newvalues[i+1] = $1->values[i+1];
-               // for(i=0;i<$$->nval;i++)
-               //    newvalues[$1->nval+i+1] = $$->values[i+1];
-               // newvalues[0] = $$->values[0];
-               // $$->nval += $1->nval;
                $$->merge(*($1));
             }
           ;
@@ -660,7 +647,7 @@ iditem:  ID {                               /* simple identifier */
          }
       |  ID LSBRACKET expr_list RSBRACKET { /* subscripted id'fier */
             if (GlobalVariables::logParseModel) 
-               printf("%s\n", print_opNodesymb($3));
+               cout << print_opNodesymb($3) << "\n";
             $$ = new opNode(LSBRACKET, new opNode(ID,$1), $3);
             //printf("%s\n", print_opNodesymb($$));
          }
@@ -828,7 +815,7 @@ value:   INT_VAL {
 %%
 
 void yyerror(char *s) {
-   fprintf(stderr, "MODEL: %s on line %i\n", s, yylineno);
+   cerr << "MODEL: " << s << " on line " << yylineno << "\n";
    //fprintf(stderr, "%s\n", s);
 }
 
@@ -864,17 +851,17 @@ void analyseOptions(int argc, char **argv){
    }
    // now echo the options
    if (yydebug==1){
-      printf("OPTIONS: debug mode\n");
+      cout << "OPTIONS: debug mode\n";
    }
    if (GlobalVariables::modelfilename){
-      printf("OPTIONS: model file: %s\n",GlobalVariables::modelfilename);
+      cout << "OPTIONS: model file: " << GlobalVariables::modelfilename << "\n";
    }else{
-      printf("OPTIONS: read model from stdout\n");
+      cout << "OPTIONS: read model from stdout\n";
    }
    if (GlobalVariables::datafilename){
-      printf("OPTIONS: data file: %s\n",GlobalVariables::datafilename);
+      cout << "OPTIONS: data file: " << GlobalVariables::datafilename << "\n";
    }else{
-      printf("OPTIONS: read data from 'global.dat'\n");
+      cout << "OPTIONS: read data from 'global.dat'\n";
    }
    return;
 }
@@ -891,7 +878,8 @@ int main(int argc, char **argv) {
    if (GlobalVariables::modelfilename){
       yyin = fopen(GlobalVariables::modelfilename, "r");
       if (yyin==NULL){
-         printf("ERROR: file '%s' not found\n",GlobalVariables::modelfilename);
+         cerr << "ERROR: file '" << GlobalVariables::modelfilename <<
+            "' not found\n";
          exit(1);
       }
    }
@@ -900,9 +888,9 @@ int main(int argc, char **argv) {
    createSubdirTmpIfNotExist();
    errcode = chdir("tmp");
    if (errcode){
-      printf("Could not change working directory to 'tmp/'\n");
-      printf("Cannot continue\n");
-      exit(0);
+      cerr << "Could not change working directory to 'tmp/'\n";
+      cerr << "Cannot continue\n";
+      exit(1);
    }
 
 
@@ -925,16 +913,16 @@ int main(int argc, char **argv) {
 
    errcode = yyparse();
    if (errcode!=0){
-      printf("yyparse returns %d\n",errcode);
+      cerr << "yyparse returns " << errcode << "\n";
       exit(1);
    }
 
    // change working directory back to original for the parsing of data file
    errcode = chdir("..");
    if (errcode){
-      printf("Could not change working directory to '../'\n");
-      printf("Cannot continue\n");
-      exit(0);
+      cerr << "Could not change working directory to '../'\n";
+      cerr << "Cannot continue\n";
+      exit(1);
    }
    
    if (GlobalVariables::datafilename){
@@ -942,8 +930,8 @@ int main(int argc, char **argv) {
       fclose(yyin);
       yyin = fopen(GlobalVariables::datafilename,"r");
       if (yyin==NULL){
-         printf("ERROR: Data file '%s' not found\n",
-            GlobalVariables::datafilename);
+         cerr << "ERROR: Data file '" << GlobalVariables::datafilename <<
+            "' not found\n";
          exit(1);
       }
      
@@ -954,9 +942,9 @@ int main(int argc, char **argv) {
    // change working directory back to tmp/ for processing model
    errcode = chdir("tmp");
    if (errcode){
-      printf("Could not change working directory to 'tmp/'\n");
-      printf("Cannot continue\n");
-      exit(0);
+      cerr << "Could not change working directory to 'tmp/'\n";
+      cerr << "Cannot continue\n";
+      exit(1);
    }
 
    do_stuff(current_model);
@@ -973,7 +961,7 @@ begin_model(char *name, opNode *indexing) {
   symb_entry **sht = (symb_entry**)calloc(N_HASH, sizeof(symb_entry*));
   model_comp *newmc;
   
-  printf("Start Model: %s\n",name);
+  cout << "Start Model: " << name << "\n";
   new_mod->symb_hash_table = sht;
   new_mod->name = strdup(name);
 
@@ -999,13 +987,13 @@ begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
    model_comp *newmc;
   
    if (stochsets->opCode!=COMMA || stochsets->nchild()!=4){
-      printf("Syntax error in Stochastic Block definition: \n");
-      printf(" 'USING' needs 4 parameters \n");
+      cerr << "Syntax error in Stochastic Block definition: \n";
+      cerr << " 'USING' needs 4 parameters \n";
       exit(1);
    }
 
    if (GlobalVariables::logParseModel)
-      printf("Start Stochastic Model: %s\n",name);
+      cout << "Start Stochastic Model: " << name << "\n";
 
    new_mod = new StochModel((opNode*)stochsets->values[0], // stages
       (opNode*)stochsets->values[1], // nodes
@@ -1274,7 +1262,8 @@ findIDinTreeAndAddToList(opNode *node, char  **list, int *nlist)
       /* add the variable name to the list */
       /* should check that the name is not on the list already */
       if (GlobalVariables::logParseModel)
-         printf("Consider to add name %s to list\n",*node->begin());
+         cout << "Consider to add name " << (opNode*)*node->begin() <<
+            " to list\n";
       for(i=0;i<(*nlist);i++){
          if (strcmp((const char*)*(node->begin()), list[i])==0)
          found = true;
@@ -1331,10 +1320,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    */
   
    /* returns: pointer */
-   int i;
-   model_comp *thismc;
    opNode *tmp, *idNode, *argNode;
-   AmplModel *thism;
    opNodeIDREF *ret;
    int stochparent=0;
 
@@ -1378,7 +1364,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
 
    name = (char*)*(idNode->begin());
    if (GlobalVariables::logParseModel) 
-      printf("--> search for matches of %s\n",name);
+      cout << "--> search for matches of " << name << "\n";
  
       // see if this matches a dummy variable
       tmp = find_var_ref_in_indexing(name);
@@ -1399,8 +1385,8 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
          ret->nval = argNode->nval;
          if (ref->opCode==LBRACKET){
             // this is old code to deal with ancestor(1).ID declarations. To go
-            printf("Executing old code to deal with ancestor(1).ID "
-               "declarations\n");
+            cerr << "Executing old code to deal with ancestor(1).ID "
+               "declarations\n";
             exit(1);
 
             // This is a reference indexed by '(..)'. In this case we are in
@@ -1425,10 +1411,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
 opNodeIDREF*
 find_var_ref_in_context_(AmplModel *context, opNode *ref)
 {
-   int i;
    model_comp *thismc;
-   opNode *tmp;
-   AmplModel *thism;
    char *name = (char*)*(ref->begin());
    opNodeIDREF *ret;
   
@@ -1536,9 +1519,8 @@ find_var_ref_in_context_(AmplModel *context, opNode *ref)
 
    /* need also to look through list of local variables */
 
-   printf("Could not find ref %s in context\n",name);
+   cerr << "Could not find ref " << name << " in context\n";
    exit(1);
-
 }
 
 
@@ -1662,7 +1644,7 @@ addStochInfo(StochModelComp *newmc)
    }
    newmc->stochmodel = static_cast<StochModel*>(newmc->model);   
    if (newmc->stochmodel==NULL){
-      printf("addStochInfo: dynamic cast failed!\n");
+      cerr << "addStochInfo: dynamic cast failed!\n";
       exit(1);
    }
    stages_loc = NULL;
@@ -1691,17 +1673,17 @@ createSubdirTmpIfNotExist(void)
    }
 
    if (fl_exists && !fl_is_dir){
-      printf("'tmp/' exists but is no directory!\n");
-      printf("Cannot continue\n");
-      exit(0);
+      cerr << "'tmp/' exists but is no directory!\n";
+      cerr << "Cannot continue\n";
+      exit(1);
    }
    if (!fl_exists){
       int err;
       err = mkdir("tmp", S_IRWXU);
       if (err){
-         printf("Failed to create temporary directory 'tmp/'\n");
-         printf("Cannot continue\n");
-         exit(0);
+         cerr << "Failed to create temporary directory 'tmp/'\n";
+         cerr << "Cannot continue\n";
+         exit(1);
       }
    }
 
