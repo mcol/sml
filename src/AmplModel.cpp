@@ -44,6 +44,23 @@ AmplModel::AmplModel() :
   parent(NULL),
   ix(NULL) {}
 
+AmplModel::AmplModel(const char *orig_name, AmplModel *par)
+{
+   AmplModel();
+
+   name = strdup(orig_name);
+   parent = par;
+
+   setGlobalName();
+}
+
+AmplModel::~AmplModel()
+{
+   // FIXME:
+   //free(name); // Allocated by strdup in constructor and needs freeing
+}
+
+
 
 /* ---------------------------------------------------------------------------
 AmplModel::setGlobalName()

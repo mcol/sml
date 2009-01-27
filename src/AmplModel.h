@@ -102,6 +102,10 @@ class AmplModel{
   // -------------------------- methods ----------------------------------
   /** Constructor */
   AmplModel();
+  AmplModel(const char *orig_name, AmplModel *par=NULL);
+  
+  /** Destructor */
+  ~AmplModel();
 
   /** set global name by concatenating ancestor names */
   void setGlobalName();      
