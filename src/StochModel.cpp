@@ -2,7 +2,7 @@
 #include "GlobalVariables.h"
 #include "StochModel.h"
 #include "StochModelComp.h"
-#include "ampl.tab.h"
+#include "sml.tab.h"
 #include <typeinfo>
 #include <fstream>
 

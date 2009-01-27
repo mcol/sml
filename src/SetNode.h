@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include "nodes.h"
-#include "ampl.tab.h"
+#include "sml.tab.h"
 
 /** @class SetNode
  * This class represents a set in the the syntax tree.

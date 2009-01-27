@@ -15,7 +15,7 @@ AM_CXXFLAGS = -I$(AMPLSOLVER) -I$(OOPSHOME)/include -gstabs
 
 bin_PROGRAMS = sml
 
-sml_SOURCES = ampl.tab.ypp ampl.yy.lpp symtab.cpp nodes.cpp backend.cpp \
+sml_SOURCES = sml.tab.ypp sml.yy.lpp symtab.cpp nodes.cpp backend.cpp \
 				  AmplModel.cpp model_comp.cpp ExpandedModel.cpp \
 				  AmplsolverCalls.cpp sml-oops.cpp OOPSBlock.cpp StochModel.cpp \
 				  StochModelComp.cpp data.tab.ypp data.yy.lpp Set.cpp \
@@ -24,7 +24,7 @@ sml_LDADD 	= -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack \
 				  -L$(METIS_DIR) -lmetis -lgfortran -lfl -ldl #-lefence
 
 # Force these to get built first
-BUILT_SOURCES = ampl.tab.h data.tab.h
+BUILT_SOURCES = sml.tab.h data.tab.h
 
 ########################################################################
 # YACC and LEX:

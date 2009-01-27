@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include "nodes.h"
-#include "ampl.tab.h"
+#include "sml.tab.h"
 #include "ampl.h"   // for findKeywordinTree
 #include "AmplModel.h"
 #include "model_comp.h"    // for WITHARG

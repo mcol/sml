@@ -1,7 +1,7 @@
 %option   yylineno
 %{
    #include "nodes.h"
-   #include "ampl.tab.h"
+   #include "sml.tab.h"
    /*#include "parser.h"*/
    #include <errno.h>
    #include <string.h>

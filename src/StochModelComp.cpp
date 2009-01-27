@@ -1,6 +1,6 @@
 #include "StochModelComp.h"
 #include "StochModel.h"
-#include "ampl.tab.h"
+#include "sml.tab.h"
 
 static bool prtSM = false;
 

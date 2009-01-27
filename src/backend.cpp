@@ -8,7 +8,7 @@
 #include "ampl.h"
 #include "GlobalVariables.h"
 #include "nodes.h"
-#include "ampl.tab.h"
+#include "sml.tab.h"
 #include "sml-oops.h"
 //#include <list>
 

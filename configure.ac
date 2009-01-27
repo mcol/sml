@@ -1,7 +1,7 @@
 AC_INIT([SML],[0.1],[J.Hogg@ed.ac.uk])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR([src/ampl.tab.ypp])
+AC_CONFIG_SRCDIR([src/sml.tab.ypp])
 AM_INIT_AUTOMAKE
 AC_PROG_CXX
 AC_PROG_LEX

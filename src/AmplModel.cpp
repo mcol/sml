@@ -1,5 +1,5 @@
 #include "ampl.h"
-#include "ampl.tab.h"
+#include "sml.tab.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
