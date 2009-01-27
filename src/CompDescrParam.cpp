@@ -12,8 +12,8 @@ CompDescrParam::CompDescrParam()
 ---------------------------------------------------------------------------- */
 CompDescrParam::CompDescrParam():
   nix(-1),
+  indices(NULL),
   n(-1),
-  indices(),
   is_symbolic(false),
   values(NULL),
   symvalues(NULL)
@@ -32,9 +32,9 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc)
  */
 CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
   nix(-1),
+  indices(NULL),
   n(-1),
   nread(-1),
-  indices(),
   is_symbolic(false),
   values(NULL),
   symvalues(NULL)
@@ -51,7 +51,6 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
 
   /* ------------- 1) Work out dimension of parameter --------------------- */
 
-  char *obj;
   opNode *paramspec;
 
   /* First work out the dimension and cardinality of this parameter: 
@@ -141,7 +140,6 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
   }else{
     values = new double[n];
   }
-
 
   // the paramdefinition is a list of PARAMSPEC's
   assert(desc->opCode==TOKPARAMSPECLIST);

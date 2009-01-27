@@ -85,19 +85,23 @@ data_statements: /* empty */
 
 object: ID {
           $$ = new opNode(ID,$1);
-	  if (logParse) printf("Found 'object' of type ID: %p:%s\n", $$, $1);
+          if (logParse) cout << "Found 'object' of type ID: " << (void*)$$ << 
+            ":" << $1 << "\n";
         }
       | CHARACTER_STRING {
-	  $$ = new opNode(ID, $1);
-	  if (logParse) printf("Found 'object' of type ID: %p:%s\n", $$, $1);
+          $$ = new opNode(ID, $1);
+          if (logParse) cout << "Found 'object' of type ID: " << (void*)$$ <<
+            ":" << $1 << "\n";
         }
       | INT_VAL {
-	  $$ = new opNode(INT_VAL,$1);
-	  if (logParse) printf("Found 'object' of type INT_VAL: %p:%d\n", $$, *$1);
+          $$ = new opNode(INT_VAL,$1);
+          if (logParse) cout << "Found 'object' of type INT_VAL: " << (void*)$$
+            << ":" << *$1 << "\n";
         }
       | FLOAT_VAL {
           $$ = new opNode(FLOAT_VAL,$1);
-	  if (logParse) printf("Found 'object' of type FLOAT_VAL: %p:%f\n", $$, *$1);
+          if (logParse) cout << "Found 'object' of type FLOAT_VAL: " <<
+            (void*)$$ << ":" << *$1 << "\n";
         }
       ;
 
@@ -111,42 +115,42 @@ data_statement: data_paramdef SEMICOLON
               ;
 
 data_setdef: SET ID DEFINED setelements {
-	//$2 is the set being defined
-	       //$4 are the set elements given as a ' ' node with list         
+        //$2 is the set being defined
+               //$4 are the set elements given as a ' ' node with list         
                 Set *set = new Set($4); 
-		opNode *ref;
-		// try to find the correct set definition 
-		// unclear what context to use: global at the moment
-		ref = find_var_ref_in_context(root, new opNode(ID,$2));
-		if (ref==NULL){
-		  printf("Data given for set %s which has not been declared!\n",
-			 $2);
-		  exit(1);
-		  
-		}
-		// reference has been found
-		opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
-		model_comp *mc = onidref->ref;
-		mc->value = set;
+                opNode *ref;
+                // try to find the correct set definition 
+                // unclear what context to use: global at the moment
+                ref = find_var_ref_in_context(root, new opNode(ID,$2));
+                if (ref==NULL){
+                  cerr << "Data given for set " << $2 << " which has not been"
+                    "declared!\n",
+                  exit(1);
+                  
+                }
+                // reference has been found
+                opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
+                model_comp *mc = onidref->ref;
+                mc->value = set;
               }
-	      
+              
 
 setelements: /* empty */ {$$=NULL;}
            | setelements object {
-	       //// now a set element should be a string. If something else is
-	       //// specified then convert it
-  	       //opNode *on = $2;
-	       //char buffer[20];
-	       //if ($2->opCode==INT_VAL){
-	       //  sprintf(buffer, "%d",*($2->values[0]));
-	     // $2->opCode = ID;
-	     // $2->values[0] = strdup(buffer);
-	     // }else if ($2->opCode==FLOAT_VAL){
-	     // sprintf(buffer, "%f",*($2->values[0]));
-	     // $2->opCode = ID;
-	     // $2->values[0] = strdup(buffer);
-	     //}else if ($2->opCode
-	       $$ = addItemToListOrCreate(' ', $1, $2);
+               //// now a set element should be a string. If something else is
+               //// specified then convert it
+                 //opNode *on = $2;
+               //char buffer[20];
+               //if ($2->opCode==INT_VAL){
+               //  sprintf(buffer, "%d",*($2->values[0]));
+             // $2->opCode = ID;
+             // $2->values[0] = strdup(buffer);
+             // }else if ($2->opCode==FLOAT_VAL){
+             // sprintf(buffer, "%f",*($2->values[0]));
+             // $2->opCode = ID;
+             // $2->values[0] = strdup(buffer);
+             //}else if ($2->opCode
+               $$ = addItemToListOrCreate(' ', $1, $2);
              }
            ;
 
@@ -156,48 +160,48 @@ setelements: /* empty */ {$$=NULL;}
    same time */
 data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
 
-		// try to find the correct param definition 
-		// unclear what context to use: global at the moment
-		opNode *ref;
+                // try to find the correct param definition 
+                // unclear what context to use: global at the moment
+                opNode *ref;
                 ref = find_var_ref_in_context(root, new opNode(ID,$2));
-		if (ref==NULL){
-		  printf("Data given for set %s which has not been declared!\n",
-			 $2);
-		  exit(1);
-		  
-		}
-		// reference has been found
-		opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
+                if (ref==NULL){
+                  cerr << "Data given for set " << $2 << " which has not been"
+                    "declared!\n";
+                  exit(1);
+                  
+                }
+                // reference has been found
+                opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
                 CompDescrParam* param = new CompDescrParam(onidref->ref, $5); 
-		model_comp *mc = onidref->ref;
-		mc->value = param;
+                model_comp *mc = onidref->ref;
+                mc->value = param;
 
               }
             | PARAM param_name paramdefault_opt value_table_list {
-	      /* This is an alternative (undocumented) form of the 
-		 paramdeclaration without the ':='. 
-		 Seems to just be used in the case where paramspec_list is 
-		 actually a value_table_list.
-		 In that case we would have a ":=:" which can be 
-		 abbreviated to ":"                                        */
+              /* This is an alternative (undocumented) form of the 
+                 paramdeclaration without the ':='. 
+                 Seems to just be used in the case where paramspec_list is 
+                 actually a value_table_list.
+                 In that case we would have a ":=:" which can be 
+                 abbreviated to ":"                                        */
 
-		// try to find the correct param definition 
-		// unclear what context to use: global at the moment
-		opNode *ref;
+                // try to find the correct param definition 
+                // unclear what context to use: global at the moment
+                opNode *ref;
                 ref = find_var_ref_in_context(root, new opNode(ID,$2));
-		if (ref==NULL){
-		  printf("Data given for param %s which has not been declared!\n",
-			 $2);
-		  exit(1);
-		  
-		}
-		// reference has been found
-		opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
-		// wrap the value_table_list in a single item paramspec_list
-		opNode *on = new opNode(TOKPARAMSPECLIST, $4);
+                if (ref==NULL){
+                  cerr << "Data given for param " << $2 << " which has not"
+                    "been declared!\n";
+                  exit(1);
+                  
+                }
+                // reference has been found
+                opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
+                // wrap the value_table_list in a single item paramspec_list
+                opNode *on = new opNode(TOKPARAMSPECLIST, $4);
                 CompDescrParam* param = new CompDescrParam(onidref->ref, on); 
-		model_comp *mc = onidref->ref;
-		mc->value = param;
+                model_comp *mc = onidref->ref;
+                mc->value = param;
 
               }
             ;
@@ -208,14 +212,14 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
 data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_list
 //                 | PARAM paramdefault_opt COLON set_name COLON param_name_list DEFINED value_item_list
                  | PARAM paramdefault_opt COLON set_name COLON param_name_list DEFINED value_list
-		// for now just simply scan the rhs. Rhs can be:
-		// - single value (for scalar parameters)
-		// - list of element/value pairs (for 1d arrays)
-		// - list of tables of the form 
-		//   ": col col := row val val row val val ...
-		//   (for 2d arrays)
-		// - tables involving templates
-		//   [*,col,*] : col col := ...as above...
+                // for now just simply scan the rhs. Rhs can be:
+                // - single value (for scalar parameters)
+                // - list of element/value pairs (for 1d arrays)
+                // - list of tables of the form 
+                //   ": col col := row val val row val val ...
+                //   (for 2d arrays)
+                // - tables involving templates
+                //   [*,col,*] : col col := ...as above...
 
                  ;
 
@@ -240,16 +244,16 @@ set_name: ID {new opNode(ID,$1);}
 
 value_list: /* empty */ {$$=NULL;}
           | value_list value {
-	      if ($1==NULL){
-		$$ = new opNode(' ',$2);
-	      }else{
-		if ($1->opCode==' '){
-		  $$ = addItemToListNew($1, $2);
-		}else{
-		  $$ = new opNode(' ', $1, $2);
-		}
-	      }
-	    }
+              if ($1==NULL){
+                $$ = new opNode(' ',$2);
+              }else{
+                if ($1->opCode==' '){
+                  $$ = addItemToListNew($1, $2);
+                }else{
+                  $$ = new opNode(' ', $1, $2);
+                }
+              }
+            }
           ;
 
 paramdefault_opt: /* empty */
@@ -258,46 +262,46 @@ paramdefault_opt: /* empty */
 
 paramspec_list: /* empty */ {$$=NULL;}
               | paramspec_list paramspec {
-	          opNode *on1 = $1;
-		  if ($1==NULL){
-		    $$ = new opNode(TOKPARAMSPECLIST, $2);
-		  }else{
-		    if ($1->opCode==TOKPARAMSPECLIST){
-		      $$ = addItemToListNew($1, $2);
-		    }else{	
-		      $$ = new opNode(TOKPARAMSPECLIST, $1, $2);
-		    }
-		  }
-	        }
+                  if ($1==NULL){
+                    $$ = new opNode(TOKPARAMSPECLIST, $2);
+                  }else{
+                    if ($1->opCode==TOKPARAMSPECLIST){
+                      $$ = addItemToListNew($1, $2);
+                    }else{        
+                      $$ = new opNode(TOKPARAMSPECLIST, $1, $2);
+                    }
+                  }
+                }
               ;
 
 //paramspec: param_template_opt value_item_list
-paramspec: param_template_opt value value_list {
+paramspec:  param_template_opt value value_list {
               opNode *vl;
-	      //printf("Executing value_list branch of paramspec\n");
-	      if ($3==NULL){
-		vl = new opNode(' ', $2);
-	      }else{
-		vl = addItemToListBeg($2, $3);
-	      }
-	      if ($1!=NULL){
-		$$ = new opNode(TOKPARAMTEMPLATE, $1, vl);
-	      }else{
-		$$ = vl;
-	      }
+              //printf("Executing value_list branch of paramspec\n");
+              if ($3==NULL){
+                vl = new opNode(' ', $2);
+              }else{
+                vl = addItemToListBeg($2, $3);
+              }
+              if ($1!=NULL){
+                $$ = new opNode(TOKPARAMTEMPLATE, $1, vl);
+              }else{
+                $$ = vl;
+              }
             }
-         | param_template_opt value_table_list{
-	   printf("Executing wrong(?) value_table_list branch of paramspec\n");
-	   exit(1);
-   	  }
+         |  param_template_opt value_table_list{
+              cerr << "Executing wrong(?) value_table_list branch of "
+                "paramspec\n";
+              exit(1);
+            }
          ;
 
 value_table_list: value_table {
                     $$ = new opNode(TOKVALUETABLELIST, $1);
                   }
                 | value_table_list value_table {
-		    $$ = addItemToListNew($1, $2);
-		  }  
+                    $$ = addItemToListNew($1, $2);
+                  }  
                 ;
 
 //value_table: TR COLON col_label_list DEFINED value_table_row_list
@@ -309,17 +313,17 @@ value_table_list: value_table {
 value_table: TR COLON col_label_list DEFINED value_list
            | COLON col_label_list DEFINED value_list {
                opNode *cll = $2;
-	       opNode *vl = $4;
-	       assert(cll->opCode=' ');
-	       assert(vl->opCode=' ');
-	       if (vl->nval%(cll->nval+1)!=0){
-		 printf("DATA: error in line %d:\n",datalineno);
-		 printf("Length of value table (%d)",vl->nval);
-		 printf(" not divisable by column labels +1 (%d)\n",
-			cll->nval+1);
-		 exit(1);
-	       }
-	       $$ = new opNode(TOKVALUETABLE, $2, $4);
+               opNode *vl = $4;
+               assert(cll->opCode=' ');
+               assert(vl->opCode=' ');
+               if (vl->nval%(cll->nval+1)!=0){
+                 cerr << "DATA: error in line " << datalineno << ":\n";
+                 cerr << "Length of value table (" << vl->nval << ")";
+                 cerr << " not divisable by column labels +1 (" << cll->nval+1
+                    << ")\n";
+                 exit(1);
+               }
+               $$ = new opNode(TOKVALUETABLE, $2, $4);
              }
            ;
 
@@ -332,9 +336,9 @@ col_label_list: col_label {
                   $$ = new opNode(' ', $1);
                 }
               | col_label_list col_label {
-		  assert($1 && $1->opCode==' ');
-		  $$ = addItemToListNew($1, $2);
-	        }
+                  assert($1 && $1->opCode==' ');
+                  $$ = addItemToListNew($1, $2);
+                }
               ;
 
 /*
@@ -353,9 +357,9 @@ value_table_row: row_label entry_list
 // an entry is an actual parameter value 
 
 entry_list: entry {
-	      $$ = new opNode(' ',$1);}
+              $$ = new opNode(' ',$1);}
           | entry_list entry{
-	      $$ = addItemToListNew($1, $2);}
+              $$ = addItemToListNew($1, $2);}
           ;
 
 entry: number {$$=$1;}
@@ -370,7 +374,7 @@ row_label: object
 */
 
 param_template_opt: /* empty */
-	          | param_template
+                  | param_template
                   ;
 //      param_template is [*, A2, *] 
 param_template: LSBRACKET templ_item_list RSBRACKET
@@ -385,12 +389,12 @@ templ_item: object
 
 col_label: object {
              $$=$1;
-	     if (logParse) printf("Found 'col_label': %p\n",$1);
+             if (logParse) cout << "Found 'col_label': " << (void*)$1 << "\n";
            }
 
 value: object {
          $$=$1;
-	 if (logParse) printf("Found 'value': %p\n",$1);
+         if (logParse) cout << "Found 'value': " << (void *)$1 << "\n";
        }
 
 
@@ -445,27 +449,27 @@ number: INT_VAL {
 
 
 void dataerror(char *s) {
-  fprintf(stderr, "DATA: %s on line %i\n", s, datalineno);
+  cerr << "DATA: " << s << " on line " << datalineno << "\n";
   //fprintf(stderr, "%s\n", s);
   exit(1);
 }
 
 void parse_data(AmplModel *current_model, char *datafilename){
-	
-  printf("================================================================\n");
-  printf(" Start parsing data file: %s\n",datafilename);
-  printf("================================================================\n");
+        
+  cout << "================================================================\n";
+  cout << " Start parsing data file: " << datafilename << "\n";
+  cout << "================================================================\n";
 
   datain = fopen(datafilename,"r");
   root = current_model;
   if (datain==NULL){
-    printf("ERROR: Data file '%s' not found\n",datafilename);
+    cout << "ERROR: Data file '" << datafilename << "' not found\n";
     exit(1);
   }
-	  
+          
   dataparse();
-  printf("================================================================\n");
-  printf(" Finished parsing data file\n");
-  printf("================================================================\n");
+  cout << "================================================================\n";
+  cout << " Finished parsing data file\n";
+  cout << "================================================================\n";
   //exit(1);
 }

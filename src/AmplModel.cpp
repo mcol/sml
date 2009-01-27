@@ -177,7 +177,6 @@ list<string> *getListOfInstances(string set);
 ExpandedModel*
 AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
 {
-  AmplModel *ampl=this;
   /* the route down the AmplModel tree is encoded in modelname:
          root_MOD1_MOD2 
      the instance is encoded in instancestub 
@@ -537,50 +536,50 @@ void
 AmplModel::check()
 {
   if (name==NULL){
-    printf("AmplModel::check: AmplModel has no name given\n");
+    cerr << "AmplModel::check: AmplModel has no name given\n";
     exit(1);
   }
   if (global_name==""){
-    printf("AmplModel %s has no global name set\n");
+    cerr << "AmplModel has no global name set\n";
     exit(1);
   }
   if (node==NULL && strcmp(name,"root")!=0){
-    printf("AmplModel %s is not root but has no model_comp node associated\n",
-           name);
+    cerr << "AmplModel " << name << " is not root but has no model_comp "
+       "node associated\n";
     exit(1);
   }
   
   if (n_vars<0){
-    printf("AmplModel %s: n_vars = %d\n",name, n_vars);
+    cerr << "AmplModel " << name << ": n_vars = " << n_vars << "\n";
     exit(1);
   }
   if (n_vars<0){
-    printf("AmplModel %s: n_cons = %d\n",name, n_cons);
+    cerr << "AmplModel " << name << ": n_cons = " << n_cons << "\n";
     exit(1);
   }
   if (n_vars<0){
-    printf("AmplModel %s: n_params = %d\n",name, n_params);
+    cerr << "AmplModel " << name << ": n_params = " << n_params << "\n";
     exit(1);
   }
   if (n_vars<0){
-    printf("AmplModel %s: n_sets = %d\n",name, n_sets);
+    cerr << "AmplModel " << name << ": n_sets = "<< n_sets << "\n";
     exit(1);
   }
   if (n_vars<0){
-    printf("AmplModel %s: n_objs = %d\n",name, n_objs);
+    cerr << "AmplModel " << name << ": n_objs = " << n_objs << "\n";
     exit(1);
   }
   if (n_vars<0){
-    printf("AmplModel %s: n_submodels = %d\n",name, n_submodels);
+    cerr << "AmplModel " << name << ": n_submodels = " << n_submodels << "\n";
     exit(1);
   }
   if (n_vars+n_cons+n_params+n_sets+n_submodels+n_objs!=n_total){
-    printf("AmplModel %s: n_total does not equal sum of comps\n");
+    cerr << "AmplModel " << name << ": n_total does not equal sum of comps\n";
     exit(1);
   }
   
   if (parent==NULL && strcmp(name,"root")!=0){
-    printf("AmplModel %s is not root but has no parent\n",name);
+    cerr << "AmplModel " << name << " is not root but has no parent\n";
     exit(1);
   }
   
@@ -677,7 +676,7 @@ AmplModel::addDummyObjective()
       attr = list_on_sum[0];
     }else{
       attr = new opNode('+', list_on_sum[0],list_on_sum[1]);
-      for(i=2;i<list_on_sum.size();i++){
+      for(i=2;i<(int) list_on_sum.size();i++){
         attr = new opNode('+', attr, list_on_sum[i]);
       }
     }
@@ -739,6 +738,9 @@ AmplModel::removeComp(model_comp *comp)
     case TMODEL: 
       n_submodels--;
       break;
+    default:
+      cerr << "removeComp: type " << comp->type << "unrecognised\n";
+      exit(1);
   }
 }
 /* --------------------------------------------------------------------------
@@ -774,6 +776,9 @@ AmplModel::addComp(model_comp *comp)
       subm = (AmplModel*)comp->other;
       subm->parent = this;
       break;
+    default:
+      cerr << "addComp: type " << comp->type << "unrecognised\n";
+      exit(1);
     }
   n_total++;
   comp->model = this;
@@ -847,7 +852,6 @@ bool is_int(char *tok)
  */
 bool 
 is_int(const char *tok){
-  bool ret = true;
   int pos = 0;
 
   if (tok[0]==0) return false;

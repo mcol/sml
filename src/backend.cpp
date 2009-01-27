@@ -583,7 +583,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 
 int count_models_(AmplModel *model)
 {
-  int i, count = 0;
+  int count = 0;
   model_comp* comp;
   if (model->n_submodels>0){
     for(list<model_comp*>::iterator p = model->comps.begin();
@@ -618,7 +618,6 @@ fill_model_list_(AmplModel *model, AmplModel **listam, int *pos)
        listam
        model->level
                                                                             */
-  int i;
   model_comp *comp;
 
   /* this works by first adding the current model to the list and then
@@ -785,7 +784,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
        AmplModel **listam, AmplModel *submodel)
 {
   AmplModel *thism = listam[thislevel];
-  int i, j;
+  int j;
   model_comp *comp;
   
   opNode::default_model = thism;
@@ -977,7 +976,6 @@ void
 write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
 {
   model_comp *comp;
-  int i;
 
   for(list<model_comp*>::iterator p = submodel->comps.begin();
       p!=submodel->comps.end();p++){
