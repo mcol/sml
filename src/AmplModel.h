@@ -54,7 +54,7 @@ class AmplModel{
    *             => Need a way to only look for a match in the current part
    *                of the model tree.
    */
-  symb_entry **symb_hash_table;
+  SymbolTable symbol_table;
 
   /** name of the block defining this (sub)model */
   char *name;          

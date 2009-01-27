@@ -1,22 +1,25 @@
 #ifndef SYMTAB_H
 #define SYMTAB_H
 
-//#include "ampl.h"
-#define N_HASH 100
+#include<string>
+#include<list>
+using namespace std;
 
-/* global symbol list is a hashed linked list of all symbols that are defined */
+class SymbolTable {
+public:
+   enum symb_type {ST_NONE, ST_PARAM, ST_VAR, ST_CONS, ST_OBJ, ST_SET};
+   typedef pair<string, symb_type> Entry;
 
-enum symb_type {ST_NONE, ST_PARAM, ST_VAR, ST_CONS, ST_OBJ, ST_SET};
+private:
+   static const int n_hash = 100; // Number of available has codes
+   static const bool logSymtab = false; // Enable debug logging?
+   list<Entry> table_[n_hash];
 
-class AmplModel;
+public:
+   bool defineSymbol(symb_type, char *id);
 
-typedef struct symb_entry_st{
-  struct symb_entry_st *next;
-  char *name;
-  enum symb_type type;
-} symb_entry;
-
-
-void defineSymbol(int type, char *id, opNode *domain, AmplModel *model);
+private:
+   unsigned long hash_function(char *str);
+};
 
 #endif

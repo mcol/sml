@@ -1,17 +1,48 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "nodes.h"
+#include <iostream>
 #include "symtab.h"
-//#include "ampl.h"
-#include "AmplModel.h"
 
-#include "ampl.tab.h"
-unsigned long hash_function(char *str);
+/* Note: original symboltable also checked that this variable was not defined
+ * in an enclosing scope, rather than just hiding the previously defined
+ * variables as we do now. */
+bool SymbolTable::defineSymbol(symb_type type, char *id)
+{
+   /* Calculate hashcode */
+   int hash = hash_function(id) % n_hash;
 
-static bool logSymtab = false;
+   /* First check id not already defined, return false if it is */
+   for(list<Entry>::iterator i=table_[hash].begin(); i!=table_[hash].end(); ++i)
+      if((*i).first == id) return false;
 
+   /* Otherwise insert at the start of the list */
+   table_[hash].push_back(Entry(id,type));
+   if (logSymtab)
+      cout << "SYMTAB: defined " << id << " of type " << type << "\n";
+
+   /* Sucessfully defined NEW symbol */
+   return true;
+}
+
+/* ----------------------------------------------------------------------------
+hash function:
+---------------------------------------------------------------------------- */
+/* this is djb2 (k=33) of dan bernstein taken from 
+   http://www.cse.yorku.ca/~oz/hash.html
+*/
+
+unsigned long SymbolTable::hash_function(char *str)
+{
+  unsigned long hash = 5381;
+  int c;
+  
+  while (c = *str++)
+    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+  
+  return hash;
+}
+
+
+#if 0
+// OLD defineSymbol
 void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
 {
   char *nametype;
@@ -95,24 +126,4 @@ void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
    }
    if (logSymtab) printf("SYMTAB: defined %s of type %s\n", id, nametype);
 }
-
-/* ----------------------------------------------------------------------------
-hash function:
----------------------------------------------------------------------------- */
-/* this is djb2 (k=33) of dan bernstein taken from 
-   http://www.cse.yorku.ca/~oz/hash.html
-*/
-
-unsigned long
-hash_function(char *str)
-{
-  unsigned long hash = 5381;
-  int c;
-  
-  while (c = *str++)
-    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-  
-  return hash;
-}
-
-
+#endif

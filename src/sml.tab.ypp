@@ -309,7 +309,7 @@ equation: expr ASSIGN expr { $$ = new opNode(ASSIGN, $1, $3); }
 cnstr:   MAXIMIZE ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON expr {
-            defineSymbol(MAXIMIZE, $2, $3, current_model); 
+            current_model->symbol_table.defineSymbol(SymbolTable::ST_OBJ, $2);
             add_obj_to_model(MAXIMIZE, $2, $3, $7);     
             if ($3) rem_indexing($3);
             $$=$2;
@@ -317,7 +317,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
      |   MINIMIZE ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON expr {
-            defineSymbol(MINIMIZE, $2, $3, current_model); 
+            current_model->symbol_table.defineSymbol(SymbolTable::ST_OBJ, $2); 
             add_obj_to_model(MINIMIZE, $2, $3, $7);     
             if ($3) rem_indexing($3);
             $$=$2;
@@ -325,7 +325,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
      |   SUBJECTTO ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON equation { 
-            defineSymbol(SUBJECTTO, $2, $3, current_model); 
+            current_model->symbol_table.defineSymbol(SymbolTable::ST_CONS, $2); 
             add_cons_to_model($2, $3, $7);
             if ($3) rem_indexing($3);
             $$=$2;
@@ -404,7 +404,7 @@ lexpr:   expr
 setdef:  SET ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt setattributes_opt {
-            defineSymbol(SET, $2, $3, current_model); 
+            current_model->symbol_table.defineSymbol(SymbolTable::ST_SET, $2); 
             add_set_to_model($2, $3, $6);
             if (GlobalVariables::logParseModel) 
                cout << "$6 = " << $6 << "\n";
@@ -419,7 +419,8 @@ setdef:  SET ID indexing_opt {
 paramdef:   qualifier PARAM ID indexing_opt {
                if ($4) add_indexing($4);
             } stochattr_opt paramattributes_opt {
-               defineSymbol(PARAM, $3, $4, current_model); 
+               current_model->symbol_table.defineSymbol(
+                  SymbolTable::ST_PARAM, $3); 
                add_param_to_model($3, $4, $7);
                if ($4) rem_indexing($4);
                //$$=$2; 
@@ -429,7 +430,7 @@ paramdef:   qualifier PARAM ID indexing_opt {
 vardef:  VAR ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt varattributes_opt {
-            defineSymbol(VAR, $2, $3, current_model); 
+            current_model->symbol_table.defineSymbol(SymbolTable::ST_VAR, $2); 
             add_var_to_model($2, $3, $6);
             if ($3) rem_indexing($3);
             //$$=$2; 
@@ -915,15 +916,10 @@ int main(int argc, char **argv) {
       exit(1);
    }
 
-
-   /* set up global symbol list here */
-   symb_entry **sht = (symb_entry**)calloc(N_HASH, sizeof(symb_entry*));
-
    /* setup the root of the model tree */
    //AmplModel::root = (AmplModel*)calloc(1, sizeof(AmplModel));
    AmplModel::root = new AmplModel;
    current_model = AmplModel::root;
-   current_model->symb_hash_table = sht;
    current_model->name = (char *)&("root");
    current_model->parent = NULL;
    current_model->setGlobalName();
@@ -980,11 +976,9 @@ begin_model
 void
 begin_model(char *name, opNode *indexing) {
   AmplModel *new_mod = new AmplModel;
-  symb_entry **sht = (symb_entry**)calloc(N_HASH, sizeof(symb_entry*));
   model_comp *newmc;
   
   cout << "Start Model: " << name << "\n";
-  new_mod->symb_hash_table = sht;
   new_mod->name = strdup(name);
 
   /* FIXME: include attrib in definition */
@@ -1005,7 +999,6 @@ begin_smodel
 void
 begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
    StochModel *new_mod;
-   symb_entry **sht = (symb_entry**)calloc(N_HASH, sizeof(symb_entry*));
    model_comp *newmc;
   
    if (stochsets->opCode!=COMMA || stochsets->nchild()!=4){
@@ -1023,7 +1016,6 @@ begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
       (opNode*)stochsets->values[3], // prob
       current_model); 
 
-   new_mod->symb_hash_table = sht;
    new_mod->name = strdup(name);
   
    /* Fixme: include attrib in definition */
