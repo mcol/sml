@@ -54,7 +54,7 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 // FIXME: this stack could be implemented as its own class:
 //        these two would become static class variables 
 // FIXME: this is fairly dumb at the moment: it cannot deal with 
-//         mulitple dimenaions {i in SET1,j in SET2} 
+//         mulitple dimensions {i in SET1,j in SET2} 
 //         SET valued expressions: {i in SET1 cross SET2} 
 //         or conditions:    {(i,j) in SET1:i<j}
 //int n_addIndex;           /* number and list of indexing expressions */
