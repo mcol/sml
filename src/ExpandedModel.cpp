@@ -12,9 +12,17 @@ list<string> ExpandedModel::pathToNodeStack;
 /* --------------------------------------------------------------------------
 ExpandedModel(ampl-model *model)
 -------------------------------------------------------------------------- */
-/* This is the constructor that takes a FLAT AmplModel as argument
-   and creates an Expanded version of it */
-
+/** This is the constructor that takes a FLAT AmplModel as argument
+ * and creates an Expanded version of it 
+ *
+ * It is implemented as a wrapper to AmplModel::createExpandedModel
+ *
+ * @param root The AmplModel node at which to start the expansion
+ *
+ * @bug I believe that the parameter root is (at least implicitly)
+ * assumed to be the root node. I cannot think of any situation where
+ * a different parameter value should be passed
+ */
 ExpandedModel::ExpandedModel(AmplModel *root){
   /* this needs to:
      (1) copy across information on local variables/constraints
@@ -47,10 +55,26 @@ ExpandedModel::ExpandedModel()
 /* --------------------------------------------------------------------------
 ExpandedModel::setLocalVarInfo
 -------------------------------------------------------------------------- */
-/* This routine compares the variable list given in localVarDef with
-   those listed in the corresponding *.col file and sets the 
-   nLocalVar, listLocalVar, nLocalCons entries                             */
+/** This routine identifies the indices of the local variables in the 
+ *  *.nl file that is associated with this ExpandedModel node.
+ * 
 
+ * The routine compares the variable name stubs stored in localVarDef
+ * (which are set up from the constructor using the corresponding flat
+ * model (AmplModel) and the instance (defined by appropriate values
+ * for the indexing variables), with the names of the variables
+ * defined in the *.nl file (obtained by reading the corresponding
+ * *.col file)`
+ *
+ * The routine sets the nLocalVar, listLocalVar, nLocalCons fields of
+ * the object.
+ *
+ * @todo This method should become private 
+ *
+ * @note The method works by comparing all stubs with all names in the
+ * *.col file, this uses a lot of string comparisons and is likely
+ * very inefficient.
+ */
 void 
 ExpandedModel::setLocalVarInfo()
 {
@@ -138,6 +162,10 @@ ExpandedModel::setLocalVarInfo()
 /* --------------------------------------------------------------------------
 ExpandedModel::getNLocalVars
 -------------------------------------------------------------------------- */
+/** Returns the number of variables local to this node
+ *
+ * @return number of local variables
+ */
 int
 ExpandedModel::getNLocalVars()
 {
@@ -151,6 +179,10 @@ ExpandedModel::getNLocalVars()
 /* --------------------------------------------------------------------------
 ExpandedModel::getNLocalCons
 -------------------------------------------------------------------------- */
+/** Returns the number of constraints local to this node
+ *
+ * @return number of local constraints
+ */
 int
 ExpandedModel::getNLocalCons()
 {
@@ -164,6 +196,9 @@ ExpandedModel::getNLocalCons()
 /* ----------------------------------------------------------------------------
 ExpandedModel::print()
 ---------------------------------------------------------------------------- */
+/** Recursively prints out the content of this node plus any of its children.
+ *  Used only for debugging.
+ */
 void
 ExpandedModel::print()
 {

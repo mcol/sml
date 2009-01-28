@@ -17,6 +17,23 @@ Set::Set():
 /* ---------------------------------------------------------------------------
 Set::Set(opNode *list)
 ---------------------------------------------------------------------------- */
+/*! Constructs the Set from a list of set elements given as a tree of opNodes
+ *
+ *  @param list a description of the set elements as read in from the data file
+ *
+ * This constructor assumes that the parameter list describes the set elements
+ * in the following format:
+ * - The top node is of type opNode.opCode=' ', 
+ *    opNode::nval=[\#items in the list]
+ * - Each child describes one element of the set and is of either of the 
+ *   forms
+ *   + opNode.opCode=ID|INT_VAL|FLOAT_VAL, opNode.values[0] = 
+ *   + (...,...,..) represented as opNode.opCode=LBRACKET with one
+ *     child of type COMMA. 
+ *     The COMMA opNode is a list, with number of entries equal to the 
+ *     dimension of the set and each element of type opCode=ID 
+ *     (carrying the actual dscription of the set element).
+ */
 Set::Set(opNode *list):
   elements()
 {

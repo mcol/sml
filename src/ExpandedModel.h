@@ -24,29 +24,67 @@ class NlFile;
 #include "ampl.h"
 
 /** 
- * @class ExpandedModel
- * @brief A model (block) in the expanded model tree. It corresponds roughly to
- *        the a "diagonal" node in the OOPS algebra tree.
+ * @class ExpandedModel 
+ * @brief A submodel (block) in the expanded model tree. It carries all the 
+ * information to describe a block of the problem to the solver. 
+ * It corresponds roughly to the a "diagonal" node in the OOPS algebra tree.
  * 
- *  The ExpandedModel object roughly corresponds to a "diagonal" node in the 
- *  OOPS Matrix tree. The difference is that complicating variables/constraints
- *  belong to the parent node in the ExpandedModel tree, whereas in the OOPS
- *  matrix tree, they would belong to the final diagonal child node.
+ * The ExpandedModel object describes a (sub)block of the model
+ * together with pointers to its children (depended sub-blocks). A
+ * tree of ExpandedModel objects describes the whole problem together with its
+ * structure. 
+ *
+ * A tree of ExpandedModel objects is the means by which the problem
+ * (after being parsed by SML) is communicated to a solver backend. It
+ * thus forms the interface between SML and a solver.
+ *
+ * An ExpandedModel object has information on the variables,
+ * constraints and objectives that describe this sub-block of the
+ * problem as well as pointers to its children (sub-blocks).  It
+ * further (through NlFile) provides routines to evaluate the
+ * constraint and objectives defined in this block (and their
+ * derivatives).
+ *
+ * Information about the sub-block is handled as a two-layer
+ * structure. The first layer (represented by an ExpandedModel object)
+ * provides 'static' information about the block, such as the
+ * dimensions (number of local constraints and variables), list of
+ * variable and constraint names and a list of children.
+ *
+ * The second layer (represented by an NlFile object) provides access to the 
+ * 'non-static' information such as function and derivative values.
+ *
+ * The ExpandedModel object roughly corresponds to a "diagonal" node
+ * in the OOPS Matrix tree. The difference is that complicating
+ * variables/constraints belong to the parent node in the
+ * ExpandedModel tree, whereas in the OOPS matrix tree, they would
+ * belong to the final diagonal child node.
  *
  *  The ExpandedModel tree is the natural representation for a (Benders)
  *  decomposition solver, where complicating variables/constraints do 
  *  indeed belong to the master problem.
  *
- *  An ExpandedModel is defined by an NlFile (given information about
- *  its constraints) as well as a variable list. The variable list is first
- *  given as a list of variable names that have been defined as local to this
- *  node in the structured AMPL file ExpandedModel::localVarDef
- *  This is compared against the variables that are defined in the NlFile
- *  (obtained from the *.col file corresponding to the *.nl file)
- *  and translated into 
- *   - number of local variables: ExpandedModel::nLocalVars
- *   - list of names of local variables: ExpandedModel::listOfVarNames
- *   - their indices in the NlFile: ExpandedModel::listOfVars
+ * @details 
+ * The ExpandedModel tree is created (constructed) from the (flat)
+ * AmplModel tree by expanding the indexing sets associated with every
+ * AmplModel object. From the AmplModel it gets passed a list of local
+ * variable and constraint name stubs (in ExpandedModel::localVarDef -
+ * consisting of the global entity name together with the first part
+ * (identifying the particular node) of the indexing parameters). The
+ * ExpandedModel object is also passed the corresponding *.nl file
+ * (which provides only the local constraints, but not just the local
+ * variables, but all the variables that are refered to in the local
+ * constraints). The constructor then compares the (alphanumeric) list
+ * of variable name stubs with the variables defined in the *.nl file
+ * (from the corresponding *.col file).  to generate the list of local
+ * variables (ExpandedModel::listOfVarNames), and their indices within
+ * the *.nl file (ExpandedModel::listOfVars). This information is then
+ * used by the routines in ExpandedModel and NlFile to provide an
+ * interface into the problem to the solver.
+ *
+ * @todo The Amplsolver interface routines (currently accessed through
+ * the field nlfile) should be made accessible from this object (by
+ * providing some wrapper routines)
  */
 class ExpandedModel {
 
@@ -54,7 +92,12 @@ class ExpandedModel {
   
   // local information:
   string model_file; //!< name of the *.nl file that describes the problem data
-  NlFile *nlfile;   //!< The NlFile object associated with model_file
+
+  /** The NlFile object associated with model_file. 
+   *  Provides interface to routines that evaluate objective and constraint 
+   *   functions.   */
+  NlFile *nlfile;   
+
   //list of constraints
   // FIXME: can we assume that all constraints in *.nl belong to this node?
   //list of variables
@@ -65,11 +108,11 @@ class ExpandedModel {
   int nLocalVars;  //!< number of local variables
   int nLocalCons;  //!< number of locl constraints
   
-  /** list of global names of local variables */
-  list<string> listOfVarNames; //!< list of local variables
+  //! list of global names of local variables 
+  list<string> listOfVarNames; 
 
-  /** indices of local variables in the corresponding *.nl file */
-  int *listOfVars;          //!< indices of local variables in *.nl file
+  //! indices of local variables in the corresponding *.nl file */
+  int *listOfVars;        
 
 
   /** Indicator if information on local variables 
@@ -92,22 +135,22 @@ class ExpandedModel {
 
   // -------------------------- methods ------------------------------------
   // public:
-  /** takes FLAT AmplModel tree and expands it into an ExpandedModel tree */
+
+  //! takes flat AmplModel tree and expands it into an ExpandedModel tree 
   ExpandedModel(AmplModel *model);
 
   ExpandedModel();     //< constructor
 
-  void print();            //< Recursively print contents of this instance
+  //! Recursively print contents of this instance
+  void print();            
   
-  /** Return nb local vars (make sure setLocalVarInfo is called first) */
+  //! Return nb local vars.
   int getNLocalVars();    
 
-  /** Return nb local cons (make sure setLocalVarInfo is called first) */
+  //! Return nb local cons.
   int getNLocalCons();
 
-  /** sets nLocalVar, listOfVars, nLocalCons, listOfVarNames.
-   *  
-   */
+  //! sets nLocalVar, listOfVars, nLocalCons, listOfVarNames.
   void setLocalVarInfo(); 
 
 };

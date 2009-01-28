@@ -32,8 +32,7 @@ class Set: public CompDescr{
   // ---------------- constructors -----------------
   Set(); //!< default constructor
 
-  /** construct  a set from a list of elements in an opNode */
-  Set(opNode *list_of_els); //!< 
+  Set(opNode *list_of_els); //!< construct a set from a list of elements in an opNode
 
   // ---------------- methods -----------------
 
