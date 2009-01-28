@@ -1,7 +1,8 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
 #include "OOPSBlock.h"
 #include "GlobalVariables.h"
-#include <iostream>
-#include <fstream>
 
 /* ----------------------------------------------------------------------------
 OOPSBlock::OOPSBlock(ExpandedModel*, list<string>*)
@@ -22,9 +23,9 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   list<int> listColIx;
 
   if (GlobalVariables::prtLvl>=2){
-    printf("-------------------------OOPS Block---------------------------\n");
-    printf("Generate OOPSBlock: col: %s/ row: %s\n",
-           colmod->model_file.c_str(), rowmod->model_file.c_str());
+    cout << "-------------------------OOPS Block---------------------------\n";
+    cout << "Generate OOPSBlock: col: " << colmod->model_file << 
+      "/ row: " << rowmod->model_file << endl;
   }
 
   this->em = rowmod;
@@ -80,26 +81,25 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   //printf("Nb_row = %d\n",ncon);
 
   if (GlobalVariables::prtLvl>=3){
-    printf("The NlFile declares these variables:\n"); 
+    cout << "The NlFile declares these variables:\n"; 
     int cnt=0;
     for(list<string>::iterator p=colfilelist.begin();p!=colfilelist.end();p++){
-      printf("%2d: %s\n",cnt, (*p).c_str());
+      cout << setw(2) << cnt << ": " << *p << endl;
       cnt++;
     }
 
-    printf("The column block defines %d variables:\n",nvar);
+    cout << "The column block defines " << nvar << " variables:\n";
     cnt =0;
     for(list<string>::iterator p=colmod->listOfVarNames.begin();
         p!=colmod->listOfVarNames.end();p++){
-      printf(" at %2d:  %s\n",lvar[cnt], (*p).c_str());
+      cout << " at " << setw(2) << lvar[cnt] << ":  " << *p << endl;
       cnt++;
     }
   }
  
   if (GlobalVariables::prtLvl>=1){
-    printf("OOPS Block: %s(rw)/%s(cl): %dx%d\n",
-           rowmod->model_file.c_str(), colmod->model_file.c_str(),
-           ncon, nvar);
+    cout << "OOPS Block: " << rowmod->model_file << "(rw)/" <<
+       colmod->model_file << "(cl): " << ncon << "x" << nvar << "\n";
   }
   
 }
