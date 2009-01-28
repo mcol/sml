@@ -23,7 +23,6 @@ ExpandedModel::ExpandedModel(AmplModel *root){
          (2b) and add them all (recursively) to this model-object
   */
   
-
   ExpandedModel* em = root->createExpandedModel(string("root"),string(""));
 
   model_file = em->model_file;

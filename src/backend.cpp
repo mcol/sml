@@ -188,7 +188,6 @@ process_model(AmplModel *model) /* should be called with model==root */
 {
   int i, j, k, n_models, n;
   AmplModel **model_list;
-  char buffer[200];   /* this is the name of the model file */
   
   cout << "-------------- start of process_model ----------------------\n";
 
@@ -216,6 +215,7 @@ process_model(AmplModel *model) /* should be called with model==root */
   /* and */
   /* 3) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate the script file */
   ofstream fscript("script.scr");
+  string filename;   /* this is the name of the model file */
   
   /* loop over every single model defined */
   for(i=0;i<n_models;i++){
@@ -228,27 +228,24 @@ process_model(AmplModel *model) /* should be called with model==root */
     this_model = model_list[i];
     if (this_model->parent==NULL){
       /* this is root */
-      sprintf(buffer, "%s", "root");
+      filename = "root";
     }else{
       /* find name if model file by concatenating the names of all ancestors */
-      char *bufcopy;
       AmplModel *tmp_model;
       tmp_model = this_model;
-      sprintf(buffer, "%s", tmp_model->name);
+      filename = tmp_model->name;
       while (tmp_model->parent){
         tmp_model = tmp_model->parent;
-        bufcopy = strdup(buffer);
-        sprintf(buffer, "%s_%s",tmp_model->name, bufcopy);
-        free(bufcopy);
+        filename = tmp_model->name + ("_" + filename);
       }
     }
-    strcat(buffer, ".mod");
+    filename = filename + ".mod";
 
 
     /* ==================== write the script file ===================== */
 
     fscript << "\nreset;\noption auxfiles rc;\noption presolve 0;\n";
-    fscript << "model " << buffer << ";\ndata ../" <<
+    fscript << "model " << filename << ";\ndata ../" <<
        GlobalVariables::datafilename << ";\n";
     /* FIXME: need to know the name of the global data file 
            this should be an argument to the parser that is passed
@@ -289,7 +286,7 @@ process_model(AmplModel *model) /* should be called with model==root */
        for each model on the list */
 
     /* change extension of current model name to ".crd" */
-    n = strlen(buffer);buffer[n-4] = 0;//strcat(buffer, ".crd");
+    filename.erase(filename.size()-4);
     
     l_addIndex.clear();
 
@@ -402,36 +399,29 @@ process_model(AmplModel *model) /* should be called with model==root */
         // this level attached
         
         // so buffer here should be name of current model
-        int len = strlen(buffer);
-        int os;
-        char *p = buffer+len;
-        char *p1;
-        os = sprintf(p, "_%s", submodel->name);
-        p1 = p+os;
+        string rootfilename = filename;
+        filename += "_";
+        filename += submodel->name;
         // for all levels from root up to here add the value of 
         // indexing variables
         
 
-        os = sprintf(p1, "\"");
-        p1 += os;
+        filename+= "\"";
         for(k=1;k<=this_model->level;k++){
           // get all the indexing variables and add them together (joined by &)
           opNodeIx *ixn = (anc_list[k]->node)->indexing;
           if (ixn){
             list<opNode *>* dvl = ixn->getListDummyVars();
-            char buffer2[50], *p=buffer2; // hides the global p
-            int os2;
+            string innerp = "";
             for(list<opNode *>::iterator q=dvl->begin();q!=dvl->end();q++){
-              os2 = sprintf(p, "%s&",(*q)->print().c_str());
-              p+=os2;
+              innerp += (*q)->print() + "&";
             }
-            p--;p[0]=0; // delete the last '&'
+            innerp.erase(innerp.size()-1); // delete the last '&'
             
-            os = sprintf(p1, "&\"_\"&%s", buffer2);
-            p1+=os;
+            filename += "&\"_\"&" + innerp;
           }
         }
-        sprintf(p1, "&\".crd\"");
+        filename += "&\".crd\"";
         //printf("name of file is: %s\n",buffer);
 
         // Need to write something like
@@ -442,15 +432,15 @@ process_model(AmplModel *model) /* should be called with model==root */
         // scriptfile
         if (set){
           for(j=1;j<=this_model->level;j++) fscript << "  "; 
-          fscript << "print card(" << set << ") > (\"" << buffer << ");\n";
-          sprintf(p1, "&\".set\"");
+          fscript << "print card(" << set << ") > (\"" << filename << ");\n";
+          filename.replace(filename.find("&\".crd\""), 7, "&\".set\"");
           for(j=1;j<=this_model->level;j++) fscript << "  "; 
-          fscript << "display " << set << " > (\"" << buffer << ");\n";
+          fscript << "display " << set << " > (\"" << filename << ");\n";
         }else{
-          fscript << "print \"0\" > (\"" << buffer << ");\n";
+          fscript << "print \"0\" > (\"" << filename << ");\n";
         }
 
-        *p=0; //delete the extension again         
+        filename = rootfilename; //delete the extension again
       }
     }
     
@@ -462,7 +452,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     /* take the .mod suffix away from buffer */
     //n = strlen(buffer);buffer[n-4] = 0;
     for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
-    fscript << "write (\"b" << buffer << "\"";
+    fscript << "write (\"b" << filename << "\"";
     for(k=1;k<=this_model->level;k++) {
       // get all the indexing variables and add them together (joined by &)
       opNodeIx *ixn = (anc_list[k]->node)->indexing;
@@ -491,16 +481,16 @@ process_model(AmplModel *model) /* should be called with model==root */
     
     /* write the submodel file */
     //n = strlen(buffer);buffer[n-4] = 0;
-    strcat(buffer, ".mod");
-    ofstream fout(buffer);
-    cout << "Write to model file: " << buffer << "\n";
+    filename += ".mod";
+    ofstream fout(filename.c_str());
+    cout << "Write to model file: " << filename << "\n";
     write_ampl_for_submodel(fout, model_list[n_models-1], model_list[i]);
     fout.close();
 
     /* FIXME: this looks redundant */
     /* and also write the column file for this submodel */
-    n = strlen(buffer);buffer[n-4] = 0;strcat(buffer, ".acl");
-    fout.open(buffer);
+    filename.replace(filename.find(".mod"), 4, ".acl");
+    fout.open(filename.c_str());
     write_columnfile_for_submodel(fout, model_list[i]);
     fout.close();
     free(anc_list);

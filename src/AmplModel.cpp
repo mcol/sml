@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <cassert>
 #include "backend.h"
@@ -649,10 +650,10 @@ AmplModel::addDummyObjective()
             commaseplist.push_back(newon);
           }else{
             // need to make up a dummy variable
-            char buffer[20];
-            sprintf(buffer, "dum%d", i);
-            opNode *newon = new opNode(IN, new opNode(ID, strdup(buffer)), 
-                                     ix->sets[i]);
+            ostringstream ost;
+            ost << "dum" << i;
+            opNode *newon = new opNode(IN,
+              new opNode(ID,strdup(ost.str().c_str())),ix->sets[i]);
             commaseplist.push_back(newon);
           }
         } // end for

@@ -79,6 +79,7 @@ class AmplModel{
   /** The list of components of this model 
    */
   list<model_comp*> comps;
+
   //model_comp *first; /**< pointer to the first model component */
   //model_comp *last;  /**< pointer to the last model component */
   //model_comp *vars;
