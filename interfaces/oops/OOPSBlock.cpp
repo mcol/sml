@@ -24,7 +24,7 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   if (GlobalVariables::prtLvl>=2){
     printf("-------------------------OOPS Block---------------------------\n");
     printf("Generate OOPSBlock: col: %s/ row: %s\n",
-	   colmod->model_file.c_str(), rowmod->model_file.c_str());
+           colmod->model_file.c_str(), rowmod->model_file.c_str());
   }
 
   this->em = rowmod;
@@ -55,7 +55,7 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   
   if (GlobalVariables::prtLvl>=2){
     printf("Read %d lines from file %s.col\n",colfilelist.size(),
-	   rowmod->model_file.c_str());
+           rowmod->model_file.c_str());
   }
 
   // -------------- compare this listOfVarNames against this list
@@ -67,8 +67,8 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
     int cnt=0;
     for(list<string>::iterator q=colfilelist.begin();q!=colfilelist.end();q++){
       if ((*p)==(*q)){
-	lvar[i] = cnt;
-	break;
+        lvar[i] = cnt;
+        break;
       }
       cnt++;
     }
@@ -90,7 +90,7 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
     printf("The column block defines %d variables:\n",nvar);
     cnt =0;
     for(list<string>::iterator p=colmod->listOfVarNames.begin();
-	p!=colmod->listOfVarNames.end();p++){
+        p!=colmod->listOfVarNames.end();p++){
       printf(" at %2d:  %s\n",lvar[cnt], (*p).c_str());
       cnt++;
     }
@@ -98,8 +98,8 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
  
   if (GlobalVariables::prtLvl>=1){
     printf("OOPS Block: %s(rw)/%s(cl): %dx%d\n",
-	   rowmod->model_file.c_str(), colmod->model_file.c_str(),
-	   ncon, nvar);
+           rowmod->model_file.c_str(), colmod->model_file.c_str(),
+           ncon, nvar);
   }
   
 }
