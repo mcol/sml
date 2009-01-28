@@ -173,17 +173,24 @@ NlFile::getHessianEntries(int *colbegH, int *rownbsH, double *eltsH)
   ASL_free((ASL**)&asl);
 }
 
-/* ===========================================================================
-Stuff that is not currently a class method
-============================================================================ */
-
 
 
 /* ----------------------------------------------------------------------------
 getNoNonzerosAMPL
 ---------------------------------------------------------------------------- */
+/** Returns the number of nonzeros for a (vertical) slice of the
+ *  constraint matrix (Jacobian) defined in this file.
+ *
+ *  @param nvar Number of variables (columns) in the slice
+ *  @param lvar The indices of the variables in the slice
+ *  @return Number of nonzeros in the slice of the jacobian
+ *
+ *  For the part of the problem defined by the intersection of all the
+ *  constraints in the *.nl file and the variables given by nvar, lvar
+ *  this routine will return the nonzeros in the Jacobian.
+ */
 int 
-getNoNonzerosAMPL(string nlfilename, int nvar, int *lvar)
+NlFile::getNoNonzerosAMPL(int nvar, int *lvar)
 {
   /* FIXME: the convenient column wise data access is only available for
             the LP reader ASL_read_f. For ASL_read_pfgh this results in 
@@ -234,8 +241,23 @@ getNoNonzerosAMPL(string nlfilename, int nvar, int *lvar)
 /* ----------------------------------------------------------------------------
 fillSparseAMPL
 ---------------------------------------------------------------------------- */
+/** Returns a (vertical) slice of the constraint matrix (Jacobian)
+ *  defined in this file in (columnwise) sparse matrix format (by
+ *  filling in the memory locations provided).
+ *
+ *  @param[in] nvar Number of variables (columns) in the slice
+ *  @param[in] lvar The indices of the variables in the slice
+ *  @param[out] colbeg Pointer to column starts in rownbs, el
+ *  @param[out] collen Vector of column lengths
+ *  @param[out] rownbs Row indices for the sparse elements
+ *  @param[out] el The actual nonzero elements.
+ *  
+ *  For the part of the problem defined by the intersection of all the
+ *  constraints in the *.nl file and the variables given by nvar, lvar
+ *  this routine will return the Jacobian in (columnwise) sparse matrix format.
+ */
 void
-fillSparseAMPL(string nlfilename, int nvar, int *lvar, 
+NlFile::fillSparseAMPL(int nvar, int *lvar, 
 		  int *colbeg, int *collen, int *rownbs, double *el)
 {
   /* FIXME: the convenient column wise data access is only available for
@@ -288,10 +310,17 @@ fillSparseAMPL(string nlfilename, int nvar, int *lvar,
 
 
 /* ----------------------------------------------------------------------------
-getRhsAMPL
+getRowLowBoundsAMPL
 ---------------------------------------------------------------------------- */
+/** Returns the constraint (row) lower bounds for the constraints
+ *  defined in this *.nl file.
+ *
+ *  @param[out] elts The row lower limits as a dense vector.
+ *
+ */
+
 void 
-getRhsAMPL(string nlfilename, int nvar, int *lvar, double *elts)
+NlFile::getRowLowBoundsAMPL(double *elts)
 {
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
@@ -310,13 +339,44 @@ getRhsAMPL(string nlfilename, int nvar, int *lvar, double *elts)
   }
   
   for(int i=0;i<n_con; i++){
-    if (fabs(LUrhs[2*i]-LUrhs[2*i+1])>1e-6){
-      printf("At the moment only support equality constraints!\n");
-      printf("Bounds for c/s %d in %s: %f %f\n",i, nlfilename.c_str(),
-	     LUrhs[2*i], LUrhs[2*i+1]);
-      exit(1);
-    }
     elts[i] = LUrhs[2*i];
+  }
+  
+  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
+
+}
+
+/* ----------------------------------------------------------------------------
+getRowUpBoundsAMPL
+---------------------------------------------------------------------------- */
+/** Returns the constraint (row) upper bounds for the constraints
+ *  defined in this *.nl file.
+ *
+ *  @param[out] elts The row upper limits as a dense vector.
+ *
+ */
+
+void 
+NlFile::getRowUpBoundsAMPL(double *elts)
+{
+  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
+  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
+  
+  printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
+  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
+  if (nl==NULL){
+    printf("File not found %s\n",nlfilename.c_str());
+    exit(1);
+  }
+  
+  int err = pfgh_read(nl, ASL_return_read_err);
+  if (err!=0){
+    printf("pfgh_read returns err=%d\n",err);
+    exit(1);
+  }
+  
+  for(int i=0;i<n_con; i++){
+    elts[i] = LUrhs[2*i+1];
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
@@ -326,23 +386,32 @@ getRhsAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 /* ----------------------------------------------------------------------------
 getObjAMPL
 ---------------------------------------------------------------------------- */
-/** Evaluates the objective gradient (linear coefficients) stored in a 
- *  given *.nl file
+/** Evaluates the objective gradient (linear coefficients) for a
+ *  (vertical) slice of the problem stored in the *.nl file.
+ *
+ *  @param[in] nvar Number of variables defining the slice
+ *  @param[in] lvar The indices of the variables defining the slice
+ *  @param[out] elts The objective gradient vector w.r.t. the variables 
+ *  defined in nvar/lvar
+ *
  *  @bug This only works for linear objective functions: 
- *       No vector x at which the objective should be evaluated is passed in
+ *     No vector x at which the objective should be evaluated is passed in
  *
- *  @attention Assume that the last objective defined in a model is the 
- *             dummy objective so this will be ignored
  *
- *  @param nlfilename The name of the *.nl file that should be evaluated
- *  @param nvar Number of coefficients that should be evaluated
- *  @param lvar List of (local) indices of variables that should be evaluated
- *  @param elts Vector to return the objective coefficients in
+ *  @attention This routine evaluates the second last objective
+ *  function defined in the *.nl file. Standard AMPL behaviour is to
+ *  evaluate the last defined objective function (unless otherwise
+ *  specified). Since for the SML generated *.nl file the final
+ *  objective function is the dummy objective, this routine will by
+ *  default evaluate the second last objective.
+ *
+ *  @note SML in principle supports the definition of several
+ *  objective functions. It is unclear how the user would choose
+ *  them. I assume by passing some option into the 
+ *  "ExpandedModel *generateSML(....)" function
  */
-
-
 void 
-getObjAMPL(string nlfilename, int nvar, int *lvar, double *elts)
+NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
 {
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
@@ -378,10 +447,19 @@ getObjAMPL(string nlfilename, int nvar, int *lvar, double *elts)
 
 }
 /* ----------------------------------------------------------------------------
-getBndAMPL
+getColUpBoundsAMPL
 ---------------------------------------------------------------------------- */
+/** Returns upper variable (column) bounds for a selection of the
+ *  variables in the *.nl file.
+ *
+ *  @param[in] nvar Number of variables defining the slice
+ *  @param[in] lvar The indices of the variables defining the slice
+ *  @param[out] elts The upper bounds for the defined variables. 
+ *
+ */
+ 
 void 
-getBndAMPL(string nlfilename, int nvar, int *lvar, double *elts)
+NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
 {
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
@@ -401,13 +479,48 @@ getBndAMPL(string nlfilename, int nvar, int *lvar, double *elts)
   
   for(int i=0;i<nvar; i++){
     int ix = lvar[i];
-    if (fabs(LUv[2*ix])>1e-6){
-      printf("At the moment only support lower variable bound of 0!\n");
-      printf("Bounds for var %d in %s: %f %f\n",ix, nlfilename.c_str(),
-	     LUv[2*ix], LUv[2*ix+1]);
-      exit(1);
-    }
     elts[i] = LUv[2*ix+1];
+  }
+  
+  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
+
+}
+
+
+/* ----------------------------------------------------------------------------
+getColLowBoundsAMPL
+---------------------------------------------------------------------------- */
+/** Returns lower variable (column) bounds for a selection of the
+ *  variables in the *.nl file.
+ *
+ *  @param[in] nvar Number of variables defining the slice
+ *  @param[in] lvar The indices of the variables defining the slice
+ *  @param[out] elts The lower bounds for the defined variables. 
+ *
+ */
+ 
+void 
+NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
+{
+  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
+  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
+  
+  printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
+  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
+  if (nl==NULL){
+    printf("File not found %s\n",nlfilename.c_str());
+    exit(1);
+  }
+  
+  int err = pfgh_read(nl, ASL_return_read_err);
+  if (err!=0){
+    printf("pfgh_read returns err=%d\n",err);
+    exit(1);
+  }
+  
+  for(int i=0;i<nvar; i++){
+    int ix = lvar[i];
+    elts[i] = LUv[2*ix];
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?

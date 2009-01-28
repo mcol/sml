@@ -11,37 +11,46 @@
 using namespace std;
 
 /** @class NlFile 
- *  @brief
- *  This object represents a *.nl file. It includes convenient routines
- *  to read data from the *.nl file. 
+
+ *  @brief This object represents a *.nl file. It is associated with
+ *  an ExpandedModel object and provides routines to access the *.nl
+ *  file through the amplsolver library.
+ *
+ *  
+ *
+ *  @note The main reason for having the class is that the use of
+ *  amplsolver (AMPL's nl-file reading library) requires the inclusing
+ *  of asl.h which defines lots of global variables with inconvenient
+ *  names like 'list'. This way, only this class has to avoid name
+ *  clashes 
+ *
+ *  @attention This class only stores the filename as a
+ *  reference, it therefore reopens the *.nl file every time a method
+ *  is called. It would probably be better to open the file once and
+ *  then keep a pointer to amplsolver's ASL structure. However it is
+ *  not clear if this would work (due to global variables)
  * 
- *  The main reason for having the class is that the use of amplsolver 
- *  (AMPL's nl-file reading library) requires the inclusing of asl.h
- *  which defines lots of global variables with inconvenient names 
- *  like 'list'. This way, only this class has to avoid name clashes
- *  @attention This class only stores the filename as a reference, it
- *             therefore reopens the *.nl file everytime a method is called
- *             It would probably be better to open the file once and then
- *             keep a pointer to amplsolver's ASL structure. However it
- *             is not clear if this would work (due to global variables) 
+ * @bug This class currently only supports problems that are defined
+ * by equality constraints (constraint upper and lower bounds are
+ * equal. The restriction could be easily removed.  
  */ 
 class NlFile {
  public:
-  string nlfilename; //< Filename of *.nl file without *.nl extension
-  int ncol;          //< # constraints defined in this file
-  int nrow;          //< # variables defined in this file
-  int nzH;           //< # Hessian nonzeros 
-  int nzA;           //< # Jacoabian nonzeros (defined in this file)
+  string nlfilename; //!< Filename of *.nl file without *.nl extension
+  int ncol;          //!< # constraints defined in this file
+  int nrow;          //!< # variables defined in this file
+  int nzH;           //!< # Hessian nonzeros 
+  int nzA;           //!< # Jacoabian nonzeros (defined in this file)
   // -------------------------- methods ------------------------------------
   NlFile(string nlfilename);
 
-  /** return number of variables defined in this *.nl file */
+  //! return number of variables defined in this *.nl file 
   int getNoVariables();
 
-  /** return number of constraints defined in this *.nl file */
+  //! return number of constraints defined in this *.nl file 
   int getNoConstraints();
 
-  /** return number of Hessian entries defined in this *.nl file */
+  //! return number of Hessian entries defined in this *.nl file 
   int getNoHessianEntries();
 
   /** return objective Hessian structure in this *.nl file.
@@ -62,15 +71,18 @@ class NlFile {
    *         is redundant.
    */
   void readCommonScalarValues();
+  int getNoNonzerosAMPL(int nvar, int *lvar);
+
+  void fillSparseAMPL(int nvar, int *lvar, 
+		      int *colbeg, int *collen, int *rownbs, double *el);
+  void getRowLowBoundsAMPL(double *elts);
+  void getRowUpBoundsAMPL(double *elts);
+  void getObjAMPL(int nvar, int *lvar, double *elts);
+  void getColLowBoundsAMPL(int nvar, int *lvar, double *elts);
+  void getColUpBoundsAMPL(int nvar, int *lvar, double *elts);
 };
 
-int getNoNonzerosAMPL(string nlfilename, int nvar, int *lvar);
 
-void fillSparseAMPL(string nlfilename, int nvar, int *lvar, 
-		      int *colbeg, int *collen, int *rownbs, double *el);
 
-void getRhsAMPL(string nlfilename, int nvar, int *lvar, double *elts);
-void getObjAMPL(string nlfilename, int nvar, int *lvar, double *elts);
-void getBndAMPL(string nlfilename, int nvar, int *lvar, double *elts);
 
 #endif

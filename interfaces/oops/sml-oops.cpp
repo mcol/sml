@@ -12,6 +12,7 @@ extern "C" {
 #include "oops/OopsInterface.h"
 //#include "oops/MatrixSparseSimple.h"
 #include "oops/CallBack.h"
+#include <math.h>
 }
 //#define asl cur_ASL
 
@@ -594,10 +595,10 @@ SMLCallBack(CallBackInterfaceType *cbi)
   //NodeId *id = (NodeId*)cbi->id;
   if (cbi->row_nbs==NULL){
     // only want number of nonzeros back
-    cbi->nz = getNoNonzerosAMPL(obl->em->model_file, obl->nvar, obl->lvar);
+    cbi->nz = obl->em->nlfile->getNoNonzerosAMPL(obl->nvar, obl->lvar);
   }else{
     // want to fill in matrices
-    fillSparseAMPL(obl->em->model_file, obl->nvar, obl->lvar, cbi->col_beg,
+    obl->em->nlfile->fillSparseAMPL(obl->nvar, obl->lvar, cbi->col_beg,
 		   cbi->col_len, cbi->row_nbs, cbi->element);
   }
   
@@ -718,14 +719,31 @@ FillRhsVector(Vector *vb)
   Tree *T = vb->node;
   DenseVector *dense = GetDenseVectorFromVector(vb);
 
+  double *checkub = new double[dense->dim];
+
   Algebra *A = (Algebra*)T->nodeOfAlg; // the diagonal node that spawned this tree
   OOPSBlock *obl = (OOPSBlock*)A->id; // and its id structure
+  NlFile *nlf = obl->em->nlfile;
 
   // FIXME: should the id structure include information on the ExpandedModel
   //        as well? That way we could do some more sanity checks
 
-  getRhsAMPL(obl->em->model_file, obl->nvar, obl->lvar, dense->elts);
+  nlf->getRowLowBoundsAMPL(dense->elts);
+  nlf->getRowUpBoundsAMPL(checkub);
 
+  
+  // check that lower and upper constraint bounds are the same due to the 
+  // OOPS restriction
+  for(int i=0;i<dense->dim; i++){
+    if (fabs(dense->elts[i]-checkub[i])>1e-6){
+      printf("At the moment OOPS only supports equality constraints!\n");
+      printf("Bounds for c/s %d in %s: %f %f\n",i, nlf->nlfilename.c_str(),
+	     dense->elts[i], checkub[i]);
+      exit(1);
+    }
+  }
+      
+  free(checkub);
 }
 
 /* ---------------------------------------------------------------------------
@@ -742,7 +760,7 @@ FillObjVector(Vector *vc)
   //NodeId *id = (NodeId*)A->id;        // and its id structure
 
   assert(obl->nvar==T->end-T->begin);
-  getObjAMPL(obl->em->model_file, obl->nvar, obl->lvar, dense->elts);
+  obl->em->nlfile->getObjAMPL(obl->nvar, obl->lvar, dense->elts);
 
 }
 
@@ -754,12 +772,26 @@ FillUpBndVector(Vector *vu)
 {
   Tree *T = vu->node;
   DenseVector *dense = GetDenseVectorFromVector(vu);
+  double *lowbndchk = new double[dense->dim];
 
   Algebra *A = (Algebra *)T->nodeOfAlg; // the diagonal node that spawned this tree
   //NodeId *id = (NodeId*)A->id;        // and its id structure
   OOPSBlock *obl = (OOPSBlock*)A->id;        // and its id structure
+  NlFile *nlf = obl->em->nlfile;
 
   assert(obl->nvar==T->end-T->begin);
-  getBndAMPL(obl->em->model_file, obl->nvar, obl->lvar, dense->elts);
+  nlf->getColUpBoundsAMPL(obl->nvar, obl->lvar, dense->elts);
+  nlf->getColLowBoundsAMPL(obl->nvar, obl->lvar, lowbndchk);
+
+  for(int i=0;i<dense->dim;i++){
+    if (fabs(lowbndchk[i])>1e-6) {
+      printf("Found lower bound !=0 (=%f) in variable %i in model %s",
+	     lowbndchk[i], i, nlf->nlfilename.c_str());
+      printf("Currently OOPS can only cope with zero lower bounds\n");
+      exit(1);
+    }
+  }
+
+  free(lowbndchk);
 
 }
