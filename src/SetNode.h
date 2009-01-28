@@ -2,6 +2,7 @@
 #define SETNODE_H
 
 #include <cassert>
+#include <vector>
 #include "nodes.h"
 #include "sml.tab.h"
 
@@ -26,12 +27,9 @@ private:
    int interval_;
 
 public:
-   SimpleSet(opNode *bnd1, opNode *bnd2) :
-      SetNode(DOTDOT, bnd1, bnd2),
-      interval_(1)
-   {
-
-   }
+   bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
+   SimpleSet(opNode *bnd1, opNode *bnd2);
+   vector<string> members();
 };
 
 /** @class ListSet
