@@ -84,8 +84,8 @@ ExpandedModel::setLocalVarInfo()
   }
   
   if (GlobalVariables::prtLvl>=2)
-    printf("Read %d lines from file %s.col\n",colfilelist.size(),
-	   model_file.c_str());
+    cout << "Read " << colfilelist.size() << " lines from file " << 
+       model_file << ".col\n";
 
   // -------------- compare this list against the given VarDefs
   
@@ -95,14 +95,15 @@ ExpandedModel::setLocalVarInfo()
 
     int len = (*p).size();
 
-    int cnt;list<string>::iterator q;
-    for(q=colfilelist.begin(),cnt=0;q!=colfilelist.end();q++,cnt++){
+    int cnt;
+    list<string>::iterator q;
+    for(q=colfilelist.begin(),cnt=0; q!=colfilelist.end(); ++q,++cnt){
       string cand(*q, 0, len);
       if (cand==(*p)) {
-	if (GlobalVariables::prtLvl>=3)
-	  printf("Match of %s and %s\n",cand.c_str(), (*p).c_str());
-	listColIx.push_back(cnt);
-	listOfVarNames.push_back(*q);
+        if (GlobalVariables::prtLvl>=3)
+          cout << "Match of " << cand << " and " << *p << "\n";
+        listColIx.push_back(cnt);
+        listOfVarNames.push_back(*q);
       }
       
     }
@@ -118,8 +119,9 @@ ExpandedModel::setLocalVarInfo()
   
   nLocalVars = listColIx.size();
   listOfVars = (int*)calloc(nLocalVars, sizeof(int));
-  int cnt;list<int>::iterator p;
-  for(p=listColIx.begin(),cnt=0;p!=listColIx.end();p++,cnt++){
+  int cnt;
+  list<int>::iterator p;
+  for(p=listColIx.begin(),cnt=0; p!=listColIx.end(); ++p,++cnt){
     listOfVars[cnt] = (*p);
   }
   
@@ -129,8 +131,8 @@ ExpandedModel::setLocalVarInfo()
   //printf("Found %d constraints\n",nLocalCons);
 
   if (GlobalVariables::prtLvl>=1)
-    printf("setLocalVarInfo(): %s (%dx%d)\n",model_file.c_str(),
-	   nLocalCons,nLocalVars);
+    cout << "setLocalVarInfo(): " << model_file << " (" << nLocalCons <<
+      "x" << nLocalVars << ")\n";
 
 }
 
@@ -166,28 +168,28 @@ ExpandedModel::print()
 void
 ExpandedModel::print()
 {
-  printf("EM: ------------------------------------------------------------\n");
+  cout << "EM: ------------------------------------------------------------\n";
   if (nlfile==NULL){
-    printf("EM: No NlFile attached\n");
+    cerr << "EM: No NlFile attached\n";
     exit(1);
   }
-  printf("EM: This is ExpandedModel: %s\n",(nlfile->nlfilename).c_str());
-  printf("EM: Nb children: %d\n", children.size());
-  printf("EM: Nb local variable definitions: %d\n",localVarDef.size());
+  cout << "EM: This is ExpandedModel: " <<  nlfile->nlfilename << "\n";
+  cout << "EM: Nb children: " << children.size() << "\n";
+  cout << "EM: Nb local variable definitions: " << localVarDef.size() << "\n";
   for(list<string>::iterator p=localVarDef.begin();p!=localVarDef.end();p++){
-    printf("EM:   %s\n",(*p).c_str());
+    cout << "EM:   " << *p << "\n";
   }
   if (!localVarInfoSet){
-    printf("EM: Further information on local variables not set\n");
+    cout << "EM: Further information on local variables not set\n";
   }else{
-    printf("EM: Nb local Variables: %d\n",nLocalVars);
-    for(int i=0;i<nLocalVars;i++) printf("%d ",listOfVars[i]);
-    printf("\n");
-    printf("EM: Nb local Constraints: %d\n", nLocalCons);
+    cout << "EM: Nb local Variables: " << nLocalVars << "\n";
+    for(int i=0;i<nLocalVars;i++) cout << listOfVars[i] << " ";
+    cout << "\n";
+    cout << "EM: Nb local Constraints: " <<  nLocalCons << "\n";
   }
 
   if (children.size()>0)
-    printf("EM: now list the children:\n");
+    cout << "EM: now list the children:\n";
   
   for(int i=0;i<children.size();i++){
     ExpandedModel *em = children.at(i);
