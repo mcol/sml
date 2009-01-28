@@ -662,24 +662,20 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
   //model_comp *node = opn->values[0];  /* this is the model_component */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
-  char namebuffer[200];
-  char arglistbuffer[200];
+  string globalName;
+  string arglist;
   int n_index = 0;
   //  int p_ix_list = n_addIndex-1;
   int i;
 
-  namebuffer[0]=0;
+  globalName = "";
   /* need to get list of model names and argument list to prefix */
   if (witharg==NOARG||witharg==WITHARG){
-    strcpy(namebuffer, node->id);
+    globalName = node->id;
     tmp = model_of_comp;
     while(strcmp(tmp->name,"root")!=0){
       /* work on name */
-      char *tmpc = strdup(namebuffer);
-      strcpy(namebuffer, tmp->name);
-      strcat(namebuffer, "_");
-      strcat(namebuffer, tmpc);
-      free(tmpc);
+      globalName = tmp->name + ("_" + globalName);
       
       if (tmp->parent==NULL) {
         printf("has no parent >%s<\n",tmp->name);
@@ -689,7 +685,7 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
     }
   }
   
-  if (witharg==NOARG) return strdup(namebuffer);
+  if (witharg==NOARG) return strdup(globalName.c_str());
   /* FIXME: still need to add the argument list, every level down from root
             should have put a indexing expression on the l_addIndex list
             use the dummyVar parts from this
@@ -762,7 +758,7 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
           //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
           opNode *dv = (*p)->dummyVar;
           if (dv) {
-            sprintf(arglistbuffer, "%s", dv->printDummyVar().c_str());
+            arglist = dv->printDummyVar();
             //printf("add dummy variable: %s\n",print_opNode(dv));
             n_index++;
           }
@@ -771,8 +767,8 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
           //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
           opNode *dv = (*p)->dummyVar;
           if (dv){
-            strcat(arglistbuffer,",");
-            strcat(arglistbuffer,dv->printDummyVar().c_str());
+            arglist += ",";
+            arglist += dv->printDummyVar();
             //printf("add dummy variable: %s\n",print_opNode(dv));
             n_index++;
           }
@@ -798,13 +794,13 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
 
   if (opn->nval+n_index>0){
     if (n_index==0){
-      sprintf(arglistbuffer, "%s", (opn->getArgumentList()).c_str());
+      arglist = opn->getArgumentList();
     }else{
       if (opn->nval==0){
         // arglistbuffer stays as it is
       }else{
-        char *tmpc = strdup(arglistbuffer);
-        sprintf(arglistbuffer, "%s,%s", tmpc, (opn->getArgumentList()).c_str());
+        arglist += ",";
+        arglist += opn->getArgumentList();
       }
     }
     //for(i=0;i<opn->nval;i++){
@@ -819,12 +815,9 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
     //}
     //}
     
-    strcat(namebuffer, "[");
-    strcat(namebuffer, arglistbuffer);
-    strcat(namebuffer, "]");
-
+    globalName += "[" + arglist + "]";
   }
-  return strdup(namebuffer);
+  return strdup(globalName.c_str());
 }
 
 /* FIXME: this is a stub for getGlobalNameNew, a version of getGlobalName
@@ -894,24 +887,20 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
   //model_comp *node = opn->values[0];  /* this is the model_component */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
-  char namebuffer[200];
-  char arglistbuffer[200];
+  string arglist;
+  string globalName;
   int n_index = 0;
   //  int p_ix_list = n_addIndex-1;
   int i;
 
-  namebuffer[0]=0;
+  globalName = "";
   /* need to get list of model names and argument list to prefix */
   if (witharg==NOARG||witharg==WITHARG){
-    strcpy(namebuffer, node->id);
+    globalName = node->id;
     tmp = model_of_comp;
     while(strcmp(tmp->name,"root")!=0){
       /* work on name */
-      char *tmpc = strdup(namebuffer);
-      strcpy(namebuffer, tmp->name);
-      strcat(namebuffer, "_");
-      strcat(namebuffer, tmpc);
-      free(tmpc);
+      globalName = tmp->name + ("_" + globalName);
       
       if (tmp->parent==NULL) {
         printf("has no parent >%s<\n",tmp->name);
@@ -921,7 +910,7 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
     }
   }
   
-  if (witharg==NOARG) return strdup(namebuffer);
+  if (witharg==NOARG) return strdup(globalName.c_str());
   /* FIXME: still need to add the argument list, every level down from root
             should have put a indexing expression on the l_addIndex list
             use the dummyVar parts from this
@@ -997,7 +986,7 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
             //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
             opNode *dv = indexing_model->dummyVarExpr[p];
             if (dv) {
-              sprintf(arglistbuffer, "%s", dv->printDummyVar().c_str());
+              arglist = dv->printDummyVar();
               //printf("add dummy variable: %s\n",print_opNode(dv));
               n_index++;
             }
@@ -1006,8 +995,8 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
             //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
             opNode *dv = indexing_model->dummyVarExpr[p];
             if (dv){
-              strcat(arglistbuffer,",");
-              strcat(arglistbuffer,dv->printDummyVar().c_str());
+              arglist += ",";
+              arglist += dv->printDummyVar();
               //printf("add dummy variable: %s\n",print_opNode(dv));
               n_index++;
             }
@@ -1034,13 +1023,13 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
 
   if (opn->nval+n_index>0){
     if (n_index==0){
-      sprintf(arglistbuffer, "%s", (opn->getArgumentList()).c_str());
+      arglist = opn->getArgumentList();
     }else{
       if (opn->nval==0){
         // arglistbuffer stays as it is
       }else{
-        char *tmpc = strdup(arglistbuffer);
-        sprintf(arglistbuffer, "%s,%s", tmpc, (opn->getArgumentList()).c_str());
+        arglist += ",";
+        arglist += opn->getArgumentList();
       }
     }
     //for(i=0;i<opn->nval;i++){
@@ -1055,12 +1044,10 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
     //}
     //}
     
-    strcat(namebuffer, "[");
-    strcat(namebuffer, arglistbuffer);
-    strcat(namebuffer, "]");
+    globalName += "[" + arglist + "]";
 
   }
-  return strdup(namebuffer);
+  return strdup(globalName.c_str());
 }
 
 /* --------------------------------------------------------------------------

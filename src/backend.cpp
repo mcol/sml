@@ -458,15 +458,13 @@ process_model(AmplModel *model) /* should be called with model==root */
       opNodeIx *ixn = (anc_list[k]->node)->indexing;
       if (ixn){
         list<opNode *>* dvl = ixn->getListDummyVars();
-        char buffer2[50], *p=buffer2; // assume that this hides the global p
-        int os2;
+        string textrep = "";
         for(list<opNode *>::iterator q=dvl->begin();q!=dvl->end();q++){
-          os2 = sprintf(p, "%s&",(*q)->print().c_str());
-          p+=os2;
+          textrep += (*q)->print() + "&";
         }
-        p--;p[0]=0; // delete the last '&'
+        textrep.erase(textrep.size()-1); // delete the last '&'
   
-        fscript << "&\"_\"&" << buffer2;
+        fscript << "&\"_\"&" << textrep;
       }
     }
     fscript << ");\n";
