@@ -25,7 +25,7 @@
   opNodeIx *opPtrIx;
 }
 
-%type <opPtr> number object setelements param_name col_label
+%type <opPtr> number object set_elements param_name col_label
 %type <opPtr> paramspec_list paramspec value_list value param_template_opt
 %type <opPtr> value_table value_table_list col_label_list
  //%type <opPtr> entry_list entry string row_label
@@ -114,7 +114,7 @@ data_statement: data_paramdef SEMICOLON
               | data_setdef SEMICOLON
               ;
 
-data_setdef: SET ID DEFINED setelements {
+data_setdef: SET ID DEFINED set_elements {
         //$2 is the set being defined
                //$4 are the set elements given as a ' ' node with list         
                 Set *set = new Set($4); 
@@ -135,8 +135,8 @@ data_setdef: SET ID DEFINED setelements {
               }
               
 
-setelements: /* empty */ {$$=NULL;}
-           | setelements object {
+set_elements: /* empty */ {$$=NULL;}
+           | set_elements object {
                //// now a set element should be a string. If something else is
                //// specified then convert it
                  //opNode *on = $2;
