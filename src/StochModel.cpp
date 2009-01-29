@@ -63,7 +63,7 @@ StochModel::expandStages()
   /* analyze all dependencies of this expression */
   model_comp::untagAll();
   
-  stageset->findIDREF(&dep);
+  stageset->findIDREF(dep);
   for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
     if (logSM) printf("dep: %s\n",(*q)->id);
     (*q)->tagDependencies();
@@ -168,7 +168,7 @@ StochModel::expandStagesOfComp()
   for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc = dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
-      smc->stageset->findIDREF(&dep);
+      smc->stageset->findIDREF(dep);
       for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
         if (logSM) printf("dep: %s\n",(*q)->id);
         (*q)->tagDependencies();
@@ -614,7 +614,7 @@ void
 StochModel::_transcribeComponents(AmplModel *current, int level)
 {
   model_comp *mc;
-  list<opNode*>* dv;
+  list<opNode*> dv;
   // need to set stage and node for the current model
   
   /* What should we do here: I think use quotation marks if the set of stages
@@ -631,7 +631,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
   }else{
     opNodeIx *cnix = current->node->indexing;
     dv = cnix->getListDummyVars();
-    opNode::node = (dv->front())->print();
+    opNode::node = (dv.front())->print();
   }
 
   //list<model_comp*> newcomps(current->comps.size());

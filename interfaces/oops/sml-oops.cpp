@@ -65,7 +65,7 @@ SML_OOPS_driver(ExpandedModel *root)
 
   PARALLEL_CODE(
                 int    InitPar  = InitLippPar(argc, argv);
-		)
+                )
   printout = stdout;
   
   SMLReturn *Pb = generateSML(root);
@@ -165,17 +165,17 @@ createA(ExpandedModel *A)
 
     if (A->nLocalCons<0){
       printf("CreateA: local block has %d constraints: Not initialised?\n",
-	     A->nLocalCons);
+             A->nLocalCons);
       exit(1);
     }
     if (GlobalVariables::prtLvl>=1){
       printf("SMLOOPS: Create leaf node: %s (%dx%d)\n",
-	     (A->model_file+":"+A->model_file).c_str(),
-	     A->nLocalCons, A->nLocalVars);
+             (A->model_file+":"+A->model_file).c_str(),
+             A->nLocalCons, A->nLocalVars);
     }
     Alg = NewAlgebraSparse(A->nLocalCons, A->nLocalVars, 
-			   (A->model_file+":"+A->model_file).c_str(),
-			   (CallBackFunction)SMLCallBack, obl);
+                           (A->model_file+":"+A->model_file).c_str(),
+                           (CallBackFunction)SMLCallBack, obl);
       
       
     //ASL_pfgh *asl;
@@ -236,11 +236,11 @@ createA(ExpandedModel *A)
     //id->lvar = A->listOfVars;
 
     D[nblk] = NewAlgebraSparse(A->nLocalCons, A->nLocalVars, 
-			       (A->model_file+":"+A->model_file).c_str(),
-			       (CallBackFunction)SMLCallBack, obl);
+                               (A->model_file+":"+A->model_file).c_str(),
+                               (CallBackFunction)SMLCallBack, obl);
 
     Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
-				(A->model_file+":"+A->model_file).c_str()); 
+                                (A->model_file+":"+A->model_file).c_str()); 
 
   }
 
@@ -268,8 +268,8 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
     //id->lvar = nondiag->listOfVars;
 
     Alg = NewAlgebraSparse(diag->nLocalCons, nondiag->nLocalVars, 
-			   (diag->model_file+":"+nondiag->model_file).c_str(),
-			   (CallBackFunction)SMLCallBack, obl);
+                           (diag->model_file+":"+nondiag->model_file).c_str(),
+                           (CallBackFunction)SMLCallBack, obl);
 
   }else{
     // this is going to be a BlockDense Algebra
@@ -291,10 +291,10 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
     //id->lvar = nondiag->listOfVars;
 
     B[nblk] = NewAlgebraSparse(diag->nLocalCons, nondiag->nLocalVars, 
-			   (diag->model_file+":"+nondiag->model_file).c_str(), 
-			       (CallBackFunction)SMLCallBack, obl);
+                           (diag->model_file+":"+nondiag->model_file).c_str(), 
+                               (CallBackFunction)SMLCallBack, obl);
     Alg = NewAlgebraBlockDense(1, nblk+1, B, 
-		      (diag->model_file+":"+nondiag->model_file).c_str());
+                      (diag->model_file+":"+nondiag->model_file).c_str());
 
   }
 
@@ -319,8 +319,8 @@ createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
     //id->lvar = diag->listOfVars;
 
     Alg = NewAlgebraSparse(nondiag->nLocalCons, diag->nLocalVars, 
-			   (nondiag->model_file+":"+diag->model_file).c_str(),
-			   (CallBackFunction)SMLCallBack, obl);
+                           (nondiag->model_file+":"+diag->model_file).c_str(),
+                           (CallBackFunction)SMLCallBack, obl);
 
   }else{
     // this is going to be a BlockDense Algebra
@@ -342,11 +342,11 @@ createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
     //id->lvar = diag->listOfVars;
 
     B[nblk] = NewAlgebraSparse(nondiag->nLocalCons, diag->nLocalVars, 
-			   (nondiag->model_file+":"+diag->model_file).c_str(), 
-			       (CallBackFunction)SMLCallBack, obl);
+                           (nondiag->model_file+":"+diag->model_file).c_str(), 
+                               (CallBackFunction)SMLCallBack, obl);
 
     Alg = NewAlgebraBlockDense(nblk+1, 1, B, 
-		       (nondiag->model_file+":"+diag->model_file).c_str());
+                       (nondiag->model_file+":"+diag->model_file).c_str());
 
   }
 
@@ -376,8 +376,8 @@ createQ(ExpandedModel *A)
     id->lcolvar = A->listOfVars;
 
     Alg = NewAlgebraSparse(A->nLocalVars, A->nLocalVars, 
-			   ("Q"+A->model_file+":"+A->model_file).c_str(),
-			   (CallBackFunction)SMLCallBackQ, id);
+                           ("Q"+A->model_file+":"+A->model_file).c_str(),
+                           (CallBackFunction)SMLCallBackQ, id);
       
       
   }else{
@@ -393,7 +393,7 @@ createQ(ExpandedModel *A)
 
        AMPL will give us 
          sputinfo->hcolstarts
-	 sputinfo->hrownos
+         sputinfo->hrownos
        for the Hessian defined in this model file. This could be either
        upper triangle only or the full matrix
 
@@ -430,14 +430,16 @@ createQ(ExpandedModel *A)
       int ix = A->listOfVars[i];
       // and scan through the Hessian structure of this row
       for(int j=colbegH[ix];j<colbegH[ix+1];j++){
-	int row = rownbsH[j];
-	if (marker[row]==0){
-	  // this is an entry in a row that does not belong to this node
-	  // (but presumably to a child node)
-	  foundCross = true;
-	}
+        int row = rownbsH[j];
+        if (marker[row]==0){
+          // this is an entry in a row that does not belong to this node
+          // (but presumably to a child node)
+          foundCross = true;
+        }
       }
     }
+    free(colbegH); free(rownbsH);
+    free(marker);
     
     if (foundCross){
       /* every child is a diagonal block */
@@ -450,9 +452,9 @@ createQ(ExpandedModel *A)
       R = (Algebra **)calloc(nblk, sizeof(Algebra *));
       
       for(i=0; i<nblk; i++){
-	D[i] = createQ((A->children).at(i));
-	B[i] = createBottomQ(A, (A->children).at(i));
-	R[i] = createRhsQ(A, (A->children).at(i));
+        D[i] = createQ((A->children).at(i));
+        B[i] = createBottomQ(A, (A->children).at(i));
+        R[i] = createRhsQ(A, (A->children).at(i));
       }
 
       /* The final D[nblk] block is defined by local constraints/variables */
@@ -469,11 +471,11 @@ createQ(ExpandedModel *A)
       id->lrowvar = A->listOfVars;
 
       D[nblk] = NewAlgebraSparse(A->nLocalVars, A->nLocalVars, 
-				 ("Q"+A->model_file+":"+A->model_file).c_str(),
-				 (CallBackFunction)SMLCallBackQ, id);
+                                 ("Q"+A->model_file+":"+A->model_file).c_str(),
+                                 (CallBackFunction)SMLCallBackQ, id);
 
       Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
-			     ("Q"+A->model_file+":"+A->model_file).c_str()); 
+                             ("Q"+A->model_file+":"+A->model_file).c_str()); 
 
     }else{ // Not foundCross => setup BlockDiagMatrix
       /* every child is a diagonal block */
@@ -484,7 +486,7 @@ createQ(ExpandedModel *A)
       D = (Algebra **)calloc(nblk+1, sizeof(Algebra *));
       
       for(i=0; i<nblk; i++){
-	D[i] = createQ((A->children).at(i));
+        D[i] = createQ((A->children).at(i));
       }
 
       /* The final D[nblk] block is defined by local constraints/variables */
@@ -501,11 +503,11 @@ createQ(ExpandedModel *A)
       id->lrowvar = A->listOfVars;
 
       D[nblk] = NewAlgebraSparse(A->nLocalVars, A->nLocalVars, 
-				 ("Q"+A->model_file+":"+A->model_file).c_str(),
-				 (CallBackFunction)SMLCallBackQ, id);
+                                 ("Q"+A->model_file+":"+A->model_file).c_str(),
+                                 (CallBackFunction)SMLCallBackQ, id);
 
       Alg = NewAlgebraBlockDiag(nblk+1, D, 
-			("Q"+A->model_file+":"+A->model_file).c_str()); 
+                        ("Q"+A->model_file+":"+A->model_file).c_str()); 
       
     }
   }
@@ -599,7 +601,7 @@ SMLCallBack(CallBackInterfaceType *cbi)
   }else{
     // want to fill in matrices
     obl->em->nlfile->fillSparseAMPL(obl->nvar, obl->lvar, cbi->col_beg,
-		   cbi->col_len, cbi->row_nbs, cbi->element);
+                   cbi->col_len, cbi->row_nbs, cbi->element);
   }
   
 
@@ -666,10 +668,12 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
       int col = id->lcolvar[i];
       // scan through this column
       for(int j=colbegH[col];j<colbegH[col+1];j++){
-	int row = rownbsH[j];
-	if (marker[row]==1) cbi->nz++;
+        int row = rownbsH[j];
+        if (marker[row]==1) cbi->nz++;
       }
     }
+    free(rownbsH); free(colbegH);
+    free(marker);
     return;
   }else{
     // only want number of nonzeros back
@@ -693,14 +697,16 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
       cbi->col_beg[i] = cbi->nz;
       // scan through this column
       for(int j=colbegH[col];j<colbegH[col+1];j++){
-	int row = rownbsH[j];
-	if (marker[row]!=0) {
-	  cbi->element[cbi->nz] = eltsH[j];
-	  cbi->row_nbs[cbi->nz] = marker[row]-1; // to get the local numbering
-	  cbi->nz++;
-	}
+        int row = rownbsH[j];
+        if (marker[row]!=0) {
+          cbi->element[cbi->nz] = eltsH[j];
+          cbi->row_nbs[cbi->nz] = marker[row]-1; // to get the local numbering
+          cbi->nz++;
+        }
       }
     }
+    free(colbegH); free(rownbsH); free(eltsH);
+    free(marker);
     cbi->col_beg[id->ncolvar] = cbi->nz;
     for(int i=0;i<id->ncolvar;i++) 
       cbi->col_len[i] = cbi->col_beg[i+1]-cbi->col_beg[i];
@@ -738,7 +744,7 @@ FillRhsVector(Vector *vb)
     if (fabs(dense->elts[i]-checkub[i])>1e-6){
       cerr << "At the moment OOPS only supports equality constraints!\n";
       cerr << "Bounds for c/s " << i << " in " << nlf->nlfilename << ": " <<
-	     dense->elts[i] << " " <<  checkub[i] << endl;
+             dense->elts[i] << " " <<  checkub[i] << endl;
       exit(1);
     }
   }
@@ -786,7 +792,7 @@ FillUpBndVector(Vector *vu)
   for(int i=0;i<dense->dim;i++){
     if (fabs(lowbndchk[i])>1e-6) {
       printf("Found lower bound !=0 (=%f) in variable %i in model %s",
-	     lowbndchk[i], i, nlf->nlfilename.c_str());
+             lowbndchk[i], i, nlf->nlfilename.c_str());
       printf("Currently OOPS can only cope with zero lower bounds\n");
       exit(1);
     }

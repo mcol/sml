@@ -514,7 +514,6 @@ AmplModel::dump(ostream &fout)
 void 
 AmplModel::dump(ostream &fout)
 {
-
   fout << "DUMP: ----------------------------------------------------------\n";
   fout << "DP: This is AmplModel (" << (void *) this << "): " << name << "\n";
   fout << "DP: global name: " << global_name << "\n";

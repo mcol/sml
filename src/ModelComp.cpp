@@ -132,7 +132,7 @@ model_comp::setUpDependencies()
   if (indexing) {
     // get list of IDREF nodes in 'indexing'
     list<model_comp*> lmc;
-    indexing->findIDREF(&lmc);
+    indexing->findIDREF(lmc);
     for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
@@ -148,7 +148,7 @@ model_comp::setUpDependencies()
        cout << " dependencies in attributes: " << *attributes << "\n";
     //attrib->findIDREF();
     list<model_comp*> lmc;
-    attributes->findIDREF(&lmc);
+    attributes->findIDREF(lmc);
     // lmc should be a list of model components
     // how do I iterate through it?
     for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
@@ -227,7 +227,7 @@ model_comp::setTo(char *id, compType type,
   if (prtAnaDep) printf(" dependencies in indexing: \n");
   if (indexing) {
     list<model_comp*> lmc;
-    indexing->findIDREF(&lmc);
+    indexing->findIDREF(lmc);
     for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
@@ -243,7 +243,7 @@ model_comp::setTo(char *id, compType type,
       printf(" dependencies in attributes: %s\n", attrib->print().c_str());
     //attrib->findIDREF();
     list<model_comp*> lmc;
-    attrib->findIDREF(&lmc);
+    attrib->findIDREF(lmc);
     // lmc should be a list of model components
     // how do I iterate through it?
     for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){

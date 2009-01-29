@@ -411,9 +411,9 @@ process_model(AmplModel *model) /* should be called with model==root */
           // get all the indexing variables and add them together (joined by &)
           opNodeIx *ixn = (anc_list[k]->node)->indexing;
           if (ixn){
-            list<opNode *>* dvl = ixn->getListDummyVars();
+            list<opNode *> dvl = ixn->getListDummyVars();
             string innerp = "";
-            for(list<opNode *>::iterator q=dvl->begin();q!=dvl->end();q++){
+            for(list<opNode *>::iterator q=dvl.begin();q!=dvl.end();q++){
               innerp += (*q)->print() + "&";
             }
             innerp.erase(innerp.size()-1); // delete the last '&'
@@ -457,9 +457,9 @@ process_model(AmplModel *model) /* should be called with model==root */
       // get all the indexing variables and add them together (joined by &)
       opNodeIx *ixn = (anc_list[k]->node)->indexing;
       if (ixn){
-        list<opNode *>* dvl = ixn->getListDummyVars();
+        list<opNode *> dvl = ixn->getListDummyVars();
         string textrep = "";
-        for(list<opNode *>::iterator q=dvl->begin();q!=dvl->end();q++){
+        for(list<opNode *>::iterator q=dvl.begin();q!=dvl.end();q++){
           textrep += (*q)->print() + "&";
         }
         textrep.erase(textrep.size()-1); // delete the last '&'
@@ -493,6 +493,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     fout.close();
     free(anc_list);
   }
+  free(model_list);
 
   fscript.close();
 

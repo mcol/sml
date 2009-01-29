@@ -357,6 +357,7 @@ indexing_opt: /* empty */ {$$=NULL;}
 indexing:   LBRACE setexpr_list COLON lexpr RBRACE {
                opNode *tmp = new opNode(LBRACE, new opNode(COLON, $2, $4));
                $$ = new opNodeIx(tmp);
+               delete tmp;
             }
         |   LBRACE setexpr_list RBRACE {
                opNodeIx *tmp = new opNodeIx(new opNode(LBRACE, $2));

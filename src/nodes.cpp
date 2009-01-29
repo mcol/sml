@@ -551,6 +551,7 @@ print_opNodesymb(opNode *node)
   
   buffer = (char*)calloc(retsize, sizeof(char));
   strcpy(buffer, symb);
+  free(symb);
   strcat(buffer, "(");
   for(i=0;i<node->nval;i++){
     strcat(buffer, arg[i]);
@@ -592,6 +593,10 @@ opNode::opNode (int code, void *val1, void *val2, void* val3)
    if(val3) values[2] = (void *) val3;
 
    if (logCreate) cout << "created " << nval << "-ary op: " << opCode << "\n";
+}
+
+opNode::~opNode() {
+   if(values) free(values);
 }
 
 
@@ -764,20 +769,20 @@ opNode::findIDREF(list<model_comp> *lmc)
 ---------------------------------------------------------------------------- */
 /* find the list of all the IDREF nodes at or below the current node */
 void
-opNode::findIDREF(list<model_comp*> *lmc)
+opNode::findIDREF(list<model_comp*> &lmc)
 {
   int i;
 
   if (opCode==IDREF){
     //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
     //				NULL, NULL, NOARG));
-    lmc->push_back(((opNodeIDREF*)this)->ref);
+    lmc.push_back(((opNodeIDREF*)this)->ref);
   }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
     return;
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
-	((opNode*)values[i])->findIDREF(lmc);
+	     ((opNode*)values[i])->findIDREF(lmc);
       }
     }
   }
@@ -990,16 +995,16 @@ opNodeIx::printDiagnostic(ostream &fout)
 /* ---------------------------------------------------------------------------
 opNodeIx::getListDummyVars
 -----------------------------------------------------------------------------*/
-list<opNode *>*
+list<opNode *>
 opNodeIx::getListDummyVars()
 {
-  list<opNode *>* l = new list<opNode *>;
+  list<opNode *> l;
   
   for(int i=0;i<ncomp;i++){
     opNode *dv = dummyVarExpr[i];
     // a dummy var expression is either ID/IDREF or (ID1,...IDn)
     if (dv->opCode==ID||dv->opCode==IDREF){
-      l->push_back(dv);
+      l.push_back(dv);
     }else if(dv->opCode==LBRACKET){
       dv = (opNode*)*(dv->begin());
       if (dv->opCode!=COMMA){
@@ -1008,7 +1013,7 @@ opNodeIx::getListDummyVars()
 	     exit(1);
       }
       for(opNode::Iterator j=dv->begin(); j!=dv->end(); ++j){
-	     l->push_back((opNode*)*j);
+	     l.push_back((opNode*)*j);
       }
     }else{
       cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";

@@ -57,6 +57,8 @@ class opNode {
   // Constructors
   opNode();
   opNode(int opCode, void *val1=NULL, void *val2=NULL, void *val3=NULL);
+  // Destructor
+  virtual ~opNode();
 
   /** for nodes that are indexing expressions, get the set that is indexed over
    * FIXME: move this to opNodeIx, also indexing expressions are more compl. */
@@ -79,7 +81,7 @@ class opNode {
   void findIDREF();           
 
   /** find all IDREFs below current node */
-  void findIDREF(list<model_comp*> *lmc);
+  void findIDREF(list<model_comp*> &lmc);
 
   /** find all IDREF nodes below current node */
   void findIDREF(list<opNode*> *lnd);
@@ -181,7 +183,7 @@ class opNodeIx : public opNode {
   opNode *hasDummyVar(char *name); 
 
   //! returns list of all dummy variables defined by this index'g expression 
-  list<opNode *>* getListDummyVars(); 
+  list<opNode *> getListDummyVars(); 
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
