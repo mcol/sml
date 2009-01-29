@@ -736,14 +736,14 @@ FillRhsVector(Vector *vb)
   // OOPS restriction
   for(int i=0;i<dense->dim; i++){
     if (fabs(dense->elts[i]-checkub[i])>1e-6){
-      printf("At the moment OOPS only supports equality constraints!\n");
-      printf("Bounds for c/s %d in %s: %f %f\n",i, nlf->nlfilename.c_str(),
-	     dense->elts[i], checkub[i]);
+      cerr << "At the moment OOPS only supports equality constraints!\n";
+      cerr << "Bounds for c/s " << i << " in " << nlf->nlfilename << ": " <<
+	     dense->elts[i] << " " <<  checkub[i] << endl;
       exit(1);
     }
   }
       
-  free(checkub);
+  delete [] checkub;
 }
 
 /* ---------------------------------------------------------------------------
@@ -792,6 +792,6 @@ FillUpBndVector(Vector *vu)
     }
   }
 
-  free(lowbndchk);
+  delete [] lowbndchk;
 
 }
