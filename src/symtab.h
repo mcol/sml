@@ -8,7 +8,15 @@ using namespace std;
 class SymbolTable {
 public:
    enum symb_type {ST_NONE, ST_PARAM, ST_VAR, ST_CONS, ST_OBJ, ST_SET};
-   typedef pair<string, symb_type> Entry;
+   class Entry {
+     public:
+      const string id;
+      const symb_type type;
+
+     public:
+      Entry(const string new_id, const symb_type new_type) :
+         id(new_id), type(new_type) {}
+   };
 
 private:
    static const int n_hash = 100; // Number of available has codes

@@ -11,7 +11,7 @@ bool SymbolTable::defineSymbol(symb_type type, char *id)
 
    /* First check id not already defined, return false if it is */
    for(list<Entry>::iterator i=table_[hash].begin(); i!=table_[hash].end(); ++i)
-      if((*i).first == id) return false;
+      if((*i).id == id) return false;
 
    /* Otherwise insert at the start of the list */
    table_[hash].push_back(Entry(id,type));
