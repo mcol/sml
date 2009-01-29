@@ -488,40 +488,34 @@ opNode::dump(ostream &fout)
 char *
 print_opNodesymb(opNode *node)
 {
-  char *buffer;
   int i;
 
   if (node==NULL){
-    buffer = strdup("NULL");
-    return buffer;
+    return strdup("NULL");
   }
   if (node->opCode==ID){
-    buffer = strdup("(ID T)");
-    return buffer;
+    return strdup("(ID T)");
   }
   if (node->opCode==INT_VAL){
-    char buffer3[20];
     assert(node->nval==1);
-    sprintf(buffer3, "T:%d",*(int*)node->values[0]);
-    buffer = strdup(buffer3);
-    return buffer;
+    string temp = "T:" + *(int*)node->values[0];
+    return strdup(temp.c_str());
   }
   if (node->opCode==FLOAT_VAL){
-    char buffer3[20];
     assert(node->nval==1);
-    sprintf(buffer3, "T:%f",*(double*)node->values[0]);
-    buffer = strdup(buffer3);
-    return buffer;
+    string temp = "T:" + *(int*)node->values[0];
+    return strdup(temp.c_str());
   }
 
   // start new version
   // print node symbol
   int retsize=0;
+  char *buffer;
   char *symb;
   char **arg;
   switch (node->opCode)
   {
-  case IDREF:{
+  case IDREF: {
     opNodeIDREF *onir= dynamic_cast<opNodeIDREF*>(node);
     if (onir==NULL) {
       cerr << "Some IDREF node still not opNodeIDREF\n";
@@ -532,7 +526,8 @@ print_opNodesymb(opNode *node)
     sprintf(buffer3, "IDREF(%p:%s(%p))",node, mc->id, mc);
     //return strdup(buffer3);
     symb = strdup(buffer3);
-    break;}
+  }
+  break;
   case ASSIGN: symb = strdup("ASSIGN"); break;
   case IN:     symb = strdup("IN"); break;
   case SUM:    symb = strdup("SUM"); break;
