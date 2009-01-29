@@ -918,11 +918,8 @@ int main(int argc, char **argv) {
 
    /* setup the root of the model tree */
    //AmplModel::root = (AmplModel*)calloc(1, sizeof(AmplModel));
-   AmplModel::root = new AmplModel;
+   AmplModel::root = new AmplModel("root");
    current_model = AmplModel::root;
-   current_model->name = (char *)&("root");
-   current_model->parent = NULL;
-   current_model->setGlobalName();
    is_stoch_model = false;
    is_deterministic_loc = false;
    stages_loc = NULL;
