@@ -388,10 +388,10 @@ setexpr_item : setexpression
                }
              ;
 
-dummy_member : ID {$$=new opNode(ID, $1);}
+dummy_member : ID {$$=new IDNode($1);}
              | LBRACKET ID COMMA ID RBRACKET {
                   opNode *tmp = new opNode(LBRACKET, 
-                     new opNode(COMMA, new opNode(ID,$2), new opNode(ID,$4)));
+                     new opNode(COMMA, new IDNode($2), new IDNode($4)));
                   $$ = tmp;
                }
              ;
@@ -667,12 +667,12 @@ identifier: iditem {
 
 
 iditem:  ID {                               /* simple identifier */
-            $$=new opNode(ID, $1);
+            $$=new IDNode($1);
          }
       |  ID LSBRACKET expr_list RSBRACKET { /* subscripted id'fier */
             if (GlobalVariables::logParseModel) 
                cout << print_opNodesymb($3) << "\n";
-            $$ = new opNode(LSBRACKET, new opNode(ID,$1), $3);
+            $$ = new opNode(LSBRACKET, new IDNode($1), $3);
             //printf("%s\n", print_opNodesymb($$));
          }
       |  ID LBRACKET INT_VAL SEMICOLON expr_list RBRACKET {
@@ -681,7 +681,7 @@ iditem:  ID {                               /* simple identifier */
             // two arguments, where the second argument is the ancestor
             // $3 is (long int*) => change its sign
             *$3 = -(*$3);
-            opNode *nd = new opNode(ID, $1, $3);
+            opNode *nd = new IDNode($1, new ValueNode<long>(*$3));
             $$ = new opNode(LSBRACKET, nd, $5);
          }      
       |  ANCESTOR LBRACKET INT_VAL RBRACKET DOT iditem {

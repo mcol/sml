@@ -1214,3 +1214,8 @@ opNodeIDREF::clone()
 
   return newn;
 }
+
+IDNode::IDNode(char *new_name, opNode *indexing) :
+   opNode(ID, new_name, indexing), name(new_name) {}
+IDNode::IDNode(const string new_name, opNode *indexing) :
+   opNode(ID, strdup(new_name.c_str()), indexing), name(new_name) {}

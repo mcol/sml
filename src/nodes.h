@@ -220,6 +220,31 @@ class opNodeIx : public opNode {
 //};
 
 /* ----------------------------------------------------------------------------
+IDNode
+---------------------------------------------------------------------------- */
+/** \brief A node on the tree representing a user identifier [ie variable name]
+ */
+
+class IDNode : public opNode {
+  public:
+   const string name;
+  
+  public:
+   IDNode(char *new_name, opNode *indexing=NULL);
+   IDNode(const string name, opNode *indexing=NULL);
+   double getFloatVal() { return atof(name.c_str()); }
+   char *getValue() { return strdup(name.c_str()); }
+   void findIDREF(list<model_comp*> &lmc) { return; }
+   void findIDREF(list<opNode*> &lnd) { return; }
+   // We never search for ID:
+   void findOpCode(int oc, list<opNode*> *lnd) { return; }
+   ostream& put(ostream&s) const { return s << name; }
+   opNode *deep_copy() { return new IDNode(name); }
+   opNode *clone() { return deep_copy(); }
+};
+
+
+/* ----------------------------------------------------------------------------
 opNodeIDREF 
 ---------------------------------------------------------------------------- */
 /** \brief A node on the tree representing a reference to a model_comp. 

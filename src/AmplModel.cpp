@@ -651,8 +651,7 @@ AmplModel::addDummyObjective()
             // need to make up a dummy variable
             ostringstream ost;
             ost << "dum" << i;
-            opNode *newon = new opNode(IN,
-              new opNode(ID,strdup(ost.str().c_str())),ix->sets[i]);
+            opNode *newon = new opNode(IN, new IDNode(ost.str()), ix->sets[i]);
             commaseplist.push_back(newon);
           }
         } // end for
