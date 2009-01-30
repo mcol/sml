@@ -252,7 +252,7 @@ ostream& opNode::put(ostream&s) const {
   const opNodeIDREF *onidref;
   static int level=0;
 
-  if(&node == NULL) return s;
+  if(this == NULL) return s;
 
   opNode::Iterator i = this->begin();
   /*if(s!=cout) {
@@ -408,7 +408,7 @@ ostream& opNode::put(ostream&s) const {
       break;
     case IDREF:
     case IDREFM:
-      if(!(onidref = (const opNodeIDREF*)(&node))) {
+      if(!(onidref = (const opNodeIDREF*)(this))) {
          cerr << "Cast of node to opNodeIDREF failed!\n";
          exit(1);
       }
