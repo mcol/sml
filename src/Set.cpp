@@ -44,7 +44,7 @@ Set::Set(opNode *list):
   
   // have a look at the first item to get the dimension of the set
   item = (opNode *)*(list->begin());
-  if (item->opCode==ID||item->opCode==INT_VAL||item->opCode==FLOAT_VAL){
+  if (item->opCode==ID||item->opCode==-99){
     this->dim = 1;
   }else{
     // otherwise this needs to be an element of form (.., .., ..)
@@ -62,7 +62,7 @@ Set::Set(opNode *list):
     if (dim==1) {
       char** array = (char**)calloc(1, sizeof(char*));
       //string *array = (string*)calloc(1, sizeof(string));
-      assert(item->opCode==ID||item->opCode==INT_VAL||item->opCode==FLOAT_VAL);
+      assert(item->opCode==ID || item->opCode==-99);
       array[0] = item->getValue();
       //this->elements.push_back(array);
       add(SetElement(1,array));

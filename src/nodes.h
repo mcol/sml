@@ -2,6 +2,7 @@
 #define NODES_H
 
 #include <iostream>
+#include <sstream>
 #include <list>
 class model_comp;
 using namespace std;
@@ -68,7 +69,7 @@ class opNode {
 
   /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
       the value of this node as a c_string */
-  char *getValue();  //!< Returns value of ID, INT_VAL and FLOAT_VAL node
+  virtual char *getValue();  //!< Returns value of ID, INT_VAL and FLOAT_VAL node
 
   void dump(ostream &fout); //!< diagnostic printing
 
@@ -81,13 +82,13 @@ class opNode {
   void findIDREF();           
 
   /** find all IDREFs below current node */
-  void findIDREF(list<model_comp*> &lmc);
+  virtual void findIDREF(list<model_comp*> &lmc);
 
   /** find all IDREF nodes below current node */
-  void findIDREF(list<opNode*> *lnd);
+  virtual void findIDREF(list<opNode*> *lnd);
 
   /** find all nodes of opCode oc below current node */
-  void findOpCode(int oc, list<opNode*> *lnd);
+  virtual void findOpCode(int oc, list<opNode*> *lnd);
 
   /** find model_comp (if it exitst) refered to by this opNode:
    *  If the expression given by this opNode is an immediate reference to
@@ -96,7 +97,7 @@ class opNode {
   model_comp *findModelComp();
   
   //! returns the 'double' represented by this node (if of type INT/FLOAT_VAL)
-  double getFloatVal();
+  virtual double getFloatVal();
 
   opNode &merge(const opNode &src);
 
@@ -154,6 +155,8 @@ class opNode {
   /** creates a copy of the node, reusing the pointer in the current node */
   virtual opNode *clone();
   //  virtual void foo();
+
+  virtual ostream& put(ostream&s) const;
 };
 
 /** \brief A node on the operator tree representing an indexing expression. 
@@ -249,8 +252,35 @@ class opNodeIDREF : public opNode {
   
   //! creates a copy using all new datastrutures (does not duplicate ->ref)
   opNodeIDREF *deep_copy();
+
+  ostream& put(ostream&s) const;
 };
 
+/** @class ValueNode
+ * represents a value.
+ */
+template<class T> class ValueNode : public opNode {
+  public:
+   const T value;
+
+  public:
+   ValueNode(const T new_value) :
+      opNode(-99,new T(new_value)), value(new_value) {}
+   double getFloatVal() { return value; }
+   char *getValue();
+   void findIDREF(list<model_comp*> &lmc) { return; }
+   void findIDREF(list<opNode*> &lnd) { return; }
+   // We never search for INT_VAL or FLOAT_VAL:
+   void findOpCode(int oc, list<opNode*> *lnd) { return; }
+   ostream& put(ostream&s) const { return s << this->value; }
+   opNode *deep_copy() { return new ValueNode<T>(value); }
+   opNode *clone() { return deep_copy(); }
+};
+template<class T> char *ValueNode<T>::getValue() {
+   ostringstream ost;
+   ost << value;
+   return strdup(ost.str().c_str());
+}
 
 // typedef struct {
 //   int relCode;
@@ -293,7 +323,5 @@ char *print_opNodesymb(opNode *node);
 
 ostream& operator<<(ostream& s, const opNode &node);
 ostream& operator<<(ostream& s, const opNode *node);
-ostream& operator<<(ostream& s, const opNodeIDREF &node);
-ostream& operator<<(ostream& s, const opNodeIDREF *node);
 
 #endif

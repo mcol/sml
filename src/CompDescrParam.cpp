@@ -195,7 +195,7 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
           pos_in_array += indices[k]->findPos(SetElement(1,&obj));
         }          
         opNode *on = (opNode *)paramspec->values[pos_in_paramspec+nobj];
-        assert(on->opCode==ID||on->opCode==INT_VAL||on->opCode==FLOAT_VAL);
+        assert(on->opCode==ID||on->opCode==-99);
         if (is_symbolic){
           if (on->opCode==ID){
             symvalues[pos_in_array] = string((char*)on->values[0]);
@@ -203,13 +203,7 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
             symvalues[pos_in_array] = to_string(on->values[0]);
           }            
         }else{ // not symbolic => numeric
-          if (on->opCode==ID){
-            values[pos_in_array] = atof((char*)on->values[0]);
-          }else if (on->opCode==INT_VAL){
-            values[pos_in_array] = *(int*)(on->values[0]);
-          }else{ // FLOAT_VAL
-            values[pos_in_array] = *(double*)(on->values[0]);
-          }
+          values[pos_in_array] = on->getFloatVal();
         }
         nread++;
       }// end loop over j

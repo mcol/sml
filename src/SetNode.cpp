@@ -7,11 +7,12 @@ SimpleSet::SimpleSet(opNode *bnd1, opNode *bnd2) :
    interval_(1),
    parsed_(false)
 {
-   if(bnd1->opCode!=INT_VAL) return;
-   lower_bound_ = *(int*)*(bnd1->begin());
+   ValueNode<long> *inode;
+   if(!(inode = dynamic_cast<ValueNode<long> *>(bnd1))) return;
+   lower_bound_ = inode->value;
 
-   if(bnd2->opCode!=INT_VAL) return;
-   upper_bound_ = *(int*)*(bnd2->begin());
+   if(!(inode = dynamic_cast<ValueNode<long> *>(bnd2))) return;
+   upper_bound_ = inode->value;
 
    parsed_ = true;
    cout << "Parsed Set " << lower_bound_ << ".." << upper_bound_ << endl;

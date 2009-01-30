@@ -94,12 +94,12 @@ object: ID {
             ":" << $1 << "\n";
         }
       | INT_VAL {
-          $$ = new opNode(INT_VAL,$1);
+          $$ = (opNode *) new ValueNode<long>(*$1);
           if (logParse) cout << "Found 'object' of type INT_VAL: " << (void*)$$
             << ":" << *$1 << "\n";
         }
       | FLOAT_VAL {
-          $$ = new opNode(FLOAT_VAL,$1);
+          $$ = (opNode *) new ValueNode<double>(*$1);
           if (logParse) cout << "Found 'object' of type FLOAT_VAL: " <<
             (void*)$$ << ":" << *$1 << "\n";
         }
@@ -424,10 +424,10 @@ value: object {
 number: INT_VAL {
   /* not entirly sure what is returned here as $1 */
   // Aparently a pointer to long int
-          $$=new opNode(INT_VAL, $1);
+          $$=(opNode *) new ValueNode<long>(*$1);
        }
      | FLOAT_VAL { 
-         $$=new opNode(FLOAT_VAL, $1);
+         $$=(opNode *) new ValueNode<double>(*$1);
        }
 //     | identifier { 
 //          $$=new opNode(0, $1);

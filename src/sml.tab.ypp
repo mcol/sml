@@ -470,7 +470,7 @@ setattributes: setattribute {$$=$1;}
              ;
 
 setattribute:  DIMEN INT_VAL {
-                  $$ = new opNode(DIMEN, new opNode(INT_VAL, $2));
+                  $$ = new opNode(DIMEN, new ValueNode<long>(*$2));
                }
             |  WITHIN setexpression {
                   $$ = new opNode(WITHIN, $2);
@@ -779,7 +779,7 @@ reduction_op:  SUM { $$=SUM; }
 value:   INT_VAL {
             /* not entirly sure what is returned here as $1 */
             // Aparently a pointer to long int
-            $$=new opNode(INT_VAL, $1);
+            $$=new ValueNode<long>(*$1);
             //$$ = (opNode *) malloc(sizeof(opNode));
             //$$->opCode = INT_VAL;
             //$$->values = (void **) malloc(1*sizeof(void *));
@@ -787,7 +787,7 @@ value:   INT_VAL {
             //*((int *) $$->values[0]) = $1;
          }
      |   FLOAT_VAL { 
-            $$=new opNode(FLOAT_VAL, $1);
+            $$=new ValueNode<double>(*$1);
             //$$ = (opNode *) malloc(sizeof(opNode));
             //$$->opCode = FLOAT_VAL;
             //$$->values = (void **) malloc(1*sizeof(void *));

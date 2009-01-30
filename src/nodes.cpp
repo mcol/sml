@@ -240,36 +240,37 @@ opNode::print()
 ostream&
 operator<<(ostream&s, const opNode *node) {
    if(node == NULL) return s;
-   return s << *node;
+   return node->put(s);
 }
 
 ostream&
 operator<<(ostream&s, const opNode &node) {
+   return node.put(s);
+}
+
+ostream& opNode::put(ostream&s) const {
   const opNodeIDREF *onidref;
   static int level=0;
 
   if(&node == NULL) return s;
 
-  opNode::Iterator i = node.begin();
+  opNode::Iterator i = this->begin();
   /*if(s!=cout) {
      for(int j=0; j<level; ++j) cout << " ";
      if(level!=0) cout << "-";
      level++;
-     cout << "here " << node.opCode << "(" << node << ")\n";
+     cout << "here " << this->opCode << "(" << node << ")\n";
   }*/
 
-  switch (node.opCode)
+  switch (this->opCode)
     {
     case 0:          s << *(opNode*) *i;                 break;
-      /* these are terminals */
-    case INT_VAL:    s << *((int *)(*i));                break;
-    case FLOAT_VAL:  s << *((double *)(*i));             break;
       /* these are lots of simple binary operators */
     case NODE:       s << opNode::node;                  break;
     case STAGE:      s << opNode::stage;                 break;
     case ID:         s << (const char*)*i;               break;
     case ' ':        
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << ' ' << *(opNode*)*i;
       break;
     case DOT:
@@ -278,7 +279,7 @@ operator<<(ostream&s, const opNode &node) {
       break;
     case COMMA:
       s << *(opNode*)*i;
-      for(++i;i!=node.end();++i) {
+      for(++i;i!=this->end();++i) {
          s << "," << (*(opNode*)*i);
       }
       break;
@@ -287,35 +288,35 @@ operator<<(ostream&s, const opNode &node) {
       s << *(opNode*)*(++i);
       break;
     case GE:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << ">=" <<  *(opNode*)*i;
       break;
     case GT:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << ">" <<  *(opNode*)*i;
       break;
     case LE:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << "<=" <<  *(opNode*)*i;
       break;
     case LT:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << "<" <<  *(opNode*)*i;
       break;
     case EQ:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << "==" <<  *(opNode*)*i;
       break;
     case DIFF:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << " diff " <<  *(opNode*)*i;
       break;
     case CROSS:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << " cross " <<  *(opNode*)*i;
       break;
     case DOTDOT:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << " .. " <<  *(opNode*)*i;
       break;
     case '+':
@@ -323,7 +324,7 @@ operator<<(ostream&s, const opNode &node) {
       s << "+" << *(opNode*)*(++i);
       break;
     case '-':
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << "-" <<  *(opNode*)*i;
       break;
     case '*':
@@ -368,7 +369,7 @@ operator<<(ostream&s, const opNode &node) {
       s << "within " << *(opNode*)*i;
       break;
     case LSBRACKET:
-      if (node.nval==1){
+      if (this->nval==1){
          s << "[" << *(opNode*)*i << "]";
       } else {
          s << *(opNode*)*i << "[";
@@ -382,7 +383,7 @@ operator<<(ostream&s, const opNode &node) {
       s << "(" << *(opNode*)*i << ")";
       break;
     case ASSIGN:
-      if (node.nval==1){
+      if (this->nval==1){
          s << "=" << *(opNode*)*i;
       }else{
          s << *(opNode*)*i;
@@ -390,68 +391,67 @@ operator<<(ostream&s, const opNode &node) {
       }
       break;
     case DEFINED:
-      if(node.nval!=1) {
+      if(this->nval!=1) {
          cerr << "':=' used as binary operator?\n";
          exit(1);
       }
       s << ":=" << *(opNode*)*i;
       break;
     case COLON:
-      if(node.nval>1) s << *(opNode*)*(i++);
+      if(this->nval>1) s << *(opNode*)*(i++);
       s << ":" <<  *(opNode*)*i;
       break;
     case IF:
       s << "if " << *(opNode*)*i;
       s << " then " << *(opNode*)*(++i);
-      if(node.nval==3) s << " else " << *(opNode*)*(++i);
+      if(this->nval==3) s << " else " << *(opNode*)*(++i);
       break;
     case IDREF:
     case IDREFM:
-      if(!(onidref = dynamic_cast<const opNodeIDREF*>(&node))) {
+      if(!(onidref = (const opNodeIDREF*)(&node))) {
          cerr << "Cast of node to opNodeIDREF failed!\n";
          exit(1);
       }
-      s << *onidref;
+      s << onidref;
+      break;
+    case -99: // tempalte<class T> ValueNode
+      cerr << "FAIL(-99)";
+      throw exception();
       break;
     default: 
-      cerr << "Unknown opcode " << node.opCode << "\n";
-      cerr << ".nval = " << node.nval << "\n";
-      for(; i!=node.end(); ++i) {
+      s << endl;
+      cerr << "Unknown opcode " << this->opCode << "\n";
+      cerr << ".nval = " << this->nval << "\n";
+      for(; i!=this->end(); ++i) {
          cerr << "val[" << *(opNode*) *i << "]\n";
       }
+      throw exception();
       exit(1);
     }
   if(s!=cout) level--;
   return s;
 }
 
-ostream&
-operator<<(ostream& s, const opNodeIDREF *node) {
-   if(node==NULL) return s;
-   return s<< *node;
-}
-
-ostream&
-operator<<(ostream& s, const opNodeIDREF &node) {
+ostream& opNodeIDREF::put(ostream& s) const {
    model_comp *thisc;
 
-   switch(node.opCode) {
+   switch(this->opCode) {
    case IDREF:
-      if (node.nval<0) {
+      if (this->nval<0) {
 	      // as yet unset IDREF
          s << "IDREF";
       } else if (opNode::use_global_names) {
-	      s << getGlobalNameNew(node.ref, &node, node.default_model,
+	      s << getGlobalNameNew(this->ref, this, this->default_model,
             WITHARG);
       } else {
          /* this is the new ID processor */
-	      thisc = node.ref;
-         if(node.nval==0) {
+	      thisc = this->ref;
+         if(this->nval==0) {
             s << thisc->id;
          } else {
-            opNode::Iterator i=node.begin();
+            opNode::Iterator i=this->begin();
             s << thisc->id << "[" << *(opNode*)*i;
-            for(++i; i!=node.end(); ++i){
+            for(++i; i!=this->end(); ++i){
                s << "," << *(opNode*)*i;
             }
             s << "]";
@@ -461,11 +461,12 @@ operator<<(ostream& s, const opNodeIDREF &node) {
    case IDREFM:
       /* this is the new ID processor (for submodels) */
       // ??? is this correct
-      thisc = (model_comp*)node.ref;
+      thisc = (model_comp*)this->ref;
       s << thisc->id;
       break;
    default:
-      s << (opNode) node;
+      cerr << "In fn opNodeIDREF::put bu not an IDREF or IDREFM\n";
+      exit(1);
    }
 
    return s;
@@ -489,6 +490,8 @@ char *
 print_opNodesymb(opNode *node)
 {
   int i;
+  ValueNode<long> *inode;
+  ValueNode<double> *dnode;
 
   if (node==NULL){
     return strdup("NULL");
@@ -496,14 +499,14 @@ print_opNodesymb(opNode *node)
   if (node->opCode==ID){
     return strdup("(ID T)");
   }
-  if (node->opCode==INT_VAL){
-    assert(node->nval==1);
-    string temp = "T:" + *(int*)node->values[0];
+  if ((inode = dynamic_cast<ValueNode<long> *>(node))){
+    string temp = "T:";
+    temp += inode->getValue();
     return strdup(temp.c_str());
   }
-  if (node->opCode==FLOAT_VAL){
-    assert(node->nval==1);
-    string temp = "T:" + *(int*)node->values[0];
+  if ((dnode = dynamic_cast<ValueNode<double> *>(node))){
+    string temp = "T:";
+    temp += dnode->getValue();
     return strdup(temp.c_str());
   }
 
@@ -624,18 +627,6 @@ opNode::deep_copy()
     newn->values[0] = strdup((char *)values[0]);
     return newn;
   }
-  if (opCode==INT_VAL){
-    assert(nval==1);
-    newn->values[0] = (int*)calloc(1, sizeof(int));
-    *((int*)(newn->values[0])) = *(int*)(values[0]);
-    return newn;
-  }
-  if (opCode==FLOAT_VAL){
-    assert(nval==1);
-    newn->values[0] = (double*)calloc(1, sizeof(double));
-    *((double*)(newn->values[0])) = *(double*)(values[0]);
-    return newn;
-  }
   
   for(int i=0;i<nval;i++)
     newn->values[i] = ((opNode*)values[i])->deep_copy();
@@ -670,17 +661,11 @@ char *opNode::getFloatVal()
 double 
 opNode::getFloatVal()
 {
-  if (opCode!=INT_VAL && opCode!=FLOAT_VAL && opCode!=ID){
+  if (opCode!=ID){
     cerr << "Attempting to call getFloatVal for an opNode not of type INT_VAL/FLOAT_VAL/ID\n";
     exit(1);
   }
-  if (opCode==INT_VAL){
-    return (double) (*(int*)values[0]);
-  }else if (opCode==ID){
-    return atof((char*)values[0]);
-  }
-  
-  return *(double*)values[0];
+  return atof((char*)values[0]);
 }
 
 /* --------------------------------------------------------------------------
@@ -691,27 +676,13 @@ opNode *opNode::getValue()
 char *
 opNode::getValue()
 {
-  char buffer[20]; 
-  if (opCode!=INT_VAL && opCode!=FLOAT_VAL && opCode!=ID){
+  if (opCode!=ID){
     cerr << "Attempting to call getValue for an opNode not of type ID/INT_VAL/FLOAT_VAL\n";
     exit(1);
   }
-  if (opCode==ID){
-    return (char*)values[0];
-  }else if (opCode==INT_VAL){
-    sprintf(buffer, "%i",*(int*)values[0]);
-    return strdup(buffer);
-  }else {
-    //sprintf(buffer, "%f",*(int*)values[0]);
-    cerr << "Calling getValue() for a FLOAT_VAL node: " << *((int*)values[0])
-      << ".\n";
-    cerr << "If this is an attempt to use a float as a set element it "
-       "might cause problems\n";
-    exit(1);
-    //return strdup(buffer);
-  }
-  
+  return (char*)values[0];
 }
+
 /* --------------------------------------------------------------------------
 char *opNode::printDummyVar()
 ---------------------------------------------------------------------------- */
@@ -777,7 +748,7 @@ opNode::findIDREF(list<model_comp*> &lmc)
     //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lmc.push_back(((opNodeIDREF*)this)->ref);
-  }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
+  }else if (opCode==ID) {
     return;
   }else{
     for(i=0;i<nval;i++){
@@ -800,8 +771,11 @@ opNode::findIDREF(list<opNode*> *lnd)
     //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
-  }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
+  }else if (opCode==ID) {
     // if terminal then return
+    return;
+  }else if (opCode==-99) {
+    cerr << "BAD findIDREF(-99)\n";
     return;
   }else{
     for(i=0;i<nval;i++){
@@ -824,7 +798,7 @@ opNode::findOpCode(int oc, list<opNode*> *lnd)
     //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
-  }else if (opCode==ID||opCode==INT_VAL||opCode==FLOAT_VAL) {
+  }else if (opCode==ID) {
     // if terminal then return
     return;
   }else{
