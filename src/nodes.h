@@ -242,10 +242,7 @@ class opNodeIDREF : public opNode {
   int stochparent; //!< levels above this one for which the reference is
   // ---------------------------- methods -----------------------------
   // constructor
-  opNodeIDREF(); //!< default constructor setting everything to 0/NULL
-
-  //! set up an IDREF node that points to the given model_comp
-  opNodeIDREF(model_comp *ref); 
+  opNodeIDREF(model_comp *r=NULL);
   
   //! creates a shallow copy: points to the same components as the original
   opNodeIDREF *clone();

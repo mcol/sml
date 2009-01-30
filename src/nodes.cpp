@@ -1167,22 +1167,8 @@ opNodeIDREF methods
 /* --------------------------------------------------------------------------
 opNodeIDREF::opNodeIDREF(model_comp *r)
 ---------------------------------------------------------------------------- */
-opNodeIDREF::opNodeIDREF(): 
-  opNode(),
-  ref(NULL),
-  stochparent(0)
-{}
-
-/* --------------------------------------------------------------------------
-opNodeIDREF::opNodeIDREF(model_comp *r)
----------------------------------------------------------------------------- */
-opNodeIDREF::opNodeIDREF(model_comp *r): opNode()
-{
-  ref = r;
-  stochparent = 0;
-  opCode = IDREF;
-  nval = 0; // this is correct if there is no subscripting expression
-}
+opNodeIDREF::opNodeIDREF(model_comp *r) :
+  opNode(IDREF), ref(r), stochparent(0) {}
 
 /* --------------------------------------------------------------------------
 opNodeIDREF *opNodeIDREF::deep_copy()
