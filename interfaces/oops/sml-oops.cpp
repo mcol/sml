@@ -147,58 +147,32 @@ createA
 --------------------------------------------------------------------------- */
 /* This routine sets up the matrix A from the ExpandedModel tree */
 Algebra *
-createA(ExpandedModel *A)
+createA(ExpandedModel *em)
 {
   Algebra *Alg;
 
-  if (!A->localVarInfoSet) A->setLocalVarInfo();
-  if (A->children.size()==0){
+  //if (!A->localVarInfoSet) A->setLocalVarInfo();
+  if (em->children.size()==0){
     // this is final node: read in *.nl file to get dimensions 
 
     
-    OOPSBlock *obl = new OOPSBlock(A, A);
-    //NodeId *id = new NodeId();
+    OOPSBlock *obl = new OOPSBlock(em, em);
 
-    //id->amplfile = (A->model_file).c_str();
-    //id->nvar = A->nLocalVars;
-    //id->lvar = A->listOfVars;
-
-    if (A->nLocalCons<0){
+    if (em->getNLocalCons()<0){
       printf("CreateA: local block has %d constraints: Not initialised?\n",
-             A->nLocalCons);
+             em->getNLocalCons());
       exit(1);
     }
     if (GlobalVariables::prtLvl>=1){
       printf("SMLOOPS: Create leaf node: %s (%dx%d)\n",
-             (A->model_file+":"+A->model_file).c_str(),
-             A->nLocalCons, A->nLocalVars);
+             (em->model_file+":"+em->model_file).c_str(),
+             em->getNLocalCons(), em->getNLocalVars());
     }
-    Alg = NewAlgebraSparse(A->nLocalCons, A->nLocalVars, 
-                           (A->model_file+":"+A->model_file).c_str(),
+    Alg = NewAlgebraSparse(em->getNLocalCons(), em->getNLocalVars(), 
+                           (em->model_file+":"+em->model_file).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
       
       
-    //ASL_pfgh *asl;
-    //FILE *nl;
-    //int err;
-
-    //    asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-    ////asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-
-    //printf("Opening %s\n",(A->model_file).c_str());
-    ////ain = fopen((A->model_file).c_str(), "r");
-    //nl = jac0dim(const_cast<char*>((A->model_file).c_str()), (A->model_file).size());
-    //if (nl==NULL){
-    //  printf("File not found %s\n",(A->model_file).c_str());
-    //  exit(1);
-    //}
-    //err = pfgh_read(nl, ASL_return_read_err);
-    //if (err!=0){
-    //  printf("pfgh_read returns err=%d\n",err);
-    //  exit(1);
-    // }
-    //printf("Problem dimensions are %d x %d\n",n_var, n_con);
-    //exit(1);
 
   }else{
     /* this is a complex node, set up DblBordDiag with
@@ -211,15 +185,15 @@ createA(ExpandedModel *A)
     Algebra **D, **B, **R;
     int nblk, i;
 
-    nblk = (A->children).size();
+    nblk = (em->children).size();
     D = (Algebra **)calloc(nblk+1, sizeof(Algebra *));
     B = (Algebra **)calloc(nblk, sizeof(Algebra *));
     R = (Algebra **)calloc(nblk, sizeof(Algebra *));
 
     for(i=0; i<nblk; i++){
-      D[i] = createA((A->children).at(i));
-      B[i] = createBottom(A, (A->children).at(i));
-      R[i] = createRhs(A, (A->children).at(i));
+      D[i] = createA((em->children).at(i));
+      B[i] = createBottom(em, (em->children).at(i));
+      R[i] = createRhs(em, (em->children).at(i));
     }
 
     /* The final D[nblk] block is defined by local constraints/variables */
@@ -227,20 +201,14 @@ createA(ExpandedModel *A)
     // this is final node: read in *.nl file to get dimensions 
     // I suspect we can just copy in the code from the leaf node case above 
 
-    OOPSBlock *obl = new OOPSBlock(A, A);
+    OOPSBlock *obl = new OOPSBlock(em, em);
 
-    //NodeId *id = new NodeId();
-
-    //id->amplfile = (A->model_file).c_str();
-    //id->nvar = A->nLocalVars;
-    //id->lvar = A->listOfVars;
-
-    D[nblk] = NewAlgebraSparse(A->nLocalCons, A->nLocalVars, 
-                               (A->model_file+":"+A->model_file).c_str(),
+    D[nblk] = NewAlgebraSparse(em->getNLocalCons(), em->getNLocalVars(), 
+                               (em->model_file+":"+em->model_file).c_str(),
                                (CallBackFunction)SMLCallBack, obl);
 
     Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
-                                (A->model_file+":"+A->model_file).c_str()); 
+                                (em->model_file+":"+em->model_file).c_str()); 
 
   }
 
@@ -261,13 +229,7 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
 
     OOPSBlock *obl = new OOPSBlock(diag, nondiag);
     
-    //NodeId *id = new NodeId();
-
-    //id->amplfile = (diag->model_file).c_str();
-    //id->nvar = nondiag->nLocalVars;
-    //id->lvar = nondiag->listOfVars;
-
-    Alg = NewAlgebraSparse(diag->nLocalCons, nondiag->nLocalVars, 
+    Alg = NewAlgebraSparse(diag->getNLocalCons(), nondiag->getNLocalVars(), 
                            (diag->model_file+":"+nondiag->model_file).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
 
@@ -286,11 +248,8 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
     //NodeId *id = new NodeId();
     
     OOPSBlock *obl = new OOPSBlock(diag, nondiag);
-    //id->amplfile = (diag->model_file).c_str();
-    //id->nvar = nondiag->nLocalVars;
-    //id->lvar = nondiag->listOfVars;
 
-    B[nblk] = NewAlgebraSparse(diag->nLocalCons, nondiag->nLocalVars, 
+    B[nblk] = NewAlgebraSparse(diag->getNLocalCons(),nondiag->getNLocalVars(), 
                            (diag->model_file+":"+nondiag->model_file).c_str(), 
                                (CallBackFunction)SMLCallBack, obl);
     Alg = NewAlgebraBlockDense(1, nblk+1, B, 
@@ -312,13 +271,8 @@ createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
   if (nondiag->children.size()==0){
 
     OOPSBlock *obl = new OOPSBlock(nondiag, diag);
-    //NodeId *id = new NodeId();
 
-    //id->amplfile = (nondiag->model_file).c_str();
-    //id->nvar = diag->nLocalVars;
-    //id->lvar = diag->listOfVars;
-
-    Alg = NewAlgebraSparse(nondiag->nLocalCons, diag->nLocalVars, 
+    Alg = NewAlgebraSparse(nondiag->getNLocalCons(), diag->getNLocalVars(), 
                            (nondiag->model_file+":"+diag->model_file).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
 
@@ -335,13 +289,7 @@ createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
     // defined in diag
     OOPSBlock *obl = new OOPSBlock(nondiag, diag);
 
-    //NodeId *id = new NodeId();
-
-    //id->amplfile = (nondiag->model_file).c_str();
-    //id->nvar = diag->nLocalVars;
-    //id->lvar = diag->listOfVars;
-
-    B[nblk] = NewAlgebraSparse(nondiag->nLocalCons, diag->nLocalVars, 
+    B[nblk] = NewAlgebraSparse(nondiag->getNLocalCons(),diag->getNLocalVars(), 
                            (nondiag->model_file+":"+diag->model_file).c_str(), 
                                (CallBackFunction)SMLCallBack, obl);
 
@@ -359,24 +307,24 @@ createQ
 --------------------------------------------------------------------------- */
 /* This routine sets up the matrix Q from the ExpandedModel tree */
 Algebra *
-createQ(ExpandedModel *A)
+createQ(ExpandedModel *em)
 {
   Algebra *Alg;
 
-  if (!A->localVarInfoSet) A->setLocalVarInfo();
-  if (A->children.size()==0){
+  //if (!em->localVarInfoSet) em->setLocalVarInfo();
+  if (em->children.size()==0){
     // this is final node: read in *.nl file to get dimensions 
 
     NodeIdQ *id = new NodeIdQ();
 
-    id->nlfile = A->nlfile;
-    id->nrowvar = A->nLocalVars;
-    id->lrowvar = A->listOfVars;
-    id->ncolvar = A->nLocalVars;
-    id->lcolvar = A->listOfVars;
+    id->nlfile = em->nlfile;
+    id->nrowvar = em->getNLocalVars();
+    id->lrowvar = em->listOfVars;
+    id->ncolvar = em->getNLocalVars();
+    id->lcolvar = em->listOfVars;
 
-    Alg = NewAlgebraSparse(A->nLocalVars, A->nLocalVars, 
-                           ("Q"+A->model_file+":"+A->model_file).c_str(),
+    Alg = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
+                           ("Q"+em->model_file+":"+em->model_file).c_str(),
                            (CallBackFunction)SMLCallBackQ, id);
       
       
@@ -413,21 +361,21 @@ createQ(ExpandedModel *A)
        - bottom from this *.nl file and col from the children              */
 
 
-    int nzH = (A->nlfile)->getNoHessianEntries();
-    int colH = (A->nlfile)->getNoVariables(); 
+    int nzH = (em->nlfile)->getNoHessianEntries();
+    int colH = (em->nlfile)->getNoVariables(); 
     int *colbegH = (int *)malloc((colH+1)*sizeof(int));
     int *rownbsH = (int *)malloc(nzH*sizeof(int));
-    (A->nlfile)->getHessianStructure(colbegH, rownbsH);
+    (em->nlfile)->getHessianStructure(colbegH, rownbsH);
 
     // now scan to see of there are any off-diagonal entries
 
     // set marker array that indicates the local variables
     int *marker = (int*)calloc(colH, sizeof(int));
-    for(int i=0;i<A->nLocalVars;i++) marker[A->listOfVars[i]]=1;
+    for(int i=0;i<em->getNLocalVars();i++) marker[em->listOfVars[i]]=1;
 
     bool foundCross = false;
-    for(int i=0;i<A->nLocalVars;i++){
-      int ix = A->listOfVars[i];
+    for(int i=0;i<em->getNLocalVars();i++){
+      int ix = em->listOfVars[i];
       // and scan through the Hessian structure of this row
       for(int j=colbegH[ix];j<colbegH[ix+1];j++){
         int row = rownbsH[j];
@@ -446,15 +394,15 @@ createQ(ExpandedModel *A)
       Algebra **D, **B, **R;
       int nblk, i;
       
-      nblk = (A->children).size();
+      nblk = (em->children).size();
       D = (Algebra **)calloc(nblk+1, sizeof(Algebra *));
       B = (Algebra **)calloc(nblk, sizeof(Algebra *));
       R = (Algebra **)calloc(nblk, sizeof(Algebra *));
       
       for(i=0; i<nblk; i++){
-        D[i] = createQ((A->children).at(i));
-        B[i] = createBottomQ(A, (A->children).at(i));
-        R[i] = createRhsQ(A, (A->children).at(i));
+        D[i] = createQ((em->children).at(i));
+        B[i] = createBottomQ(em, (em->children).at(i));
+        R[i] = createRhsQ(em, (em->children).at(i));
       }
 
       /* The final D[nblk] block is defined by local constraints/variables */
@@ -464,29 +412,29 @@ createQ(ExpandedModel *A)
 
       NodeIdQ *id = new NodeIdQ();
 
-      id->nlfile = A->nlfile;
-      id->ncolvar = A->nLocalVars;
-      id->lcolvar = A->listOfVars;
-      id->nrowvar = A->nLocalVars;
-      id->lrowvar = A->listOfVars;
+      id->nlfile = em->nlfile;
+      id->ncolvar = em->getNLocalVars();
+      id->lcolvar = em->listOfVars;
+      id->nrowvar = em->getNLocalVars();
+      id->lrowvar = em->listOfVars;
 
-      D[nblk] = NewAlgebraSparse(A->nLocalVars, A->nLocalVars, 
-                                 ("Q"+A->model_file+":"+A->model_file).c_str(),
+      D[nblk] = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
+                            ("Q"+em->model_file+":"+em->model_file).c_str(),
                                  (CallBackFunction)SMLCallBackQ, id);
 
       Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
-                             ("Q"+A->model_file+":"+A->model_file).c_str()); 
+                             ("Q"+em->model_file+":"+em->model_file).c_str()); 
 
     }else{ // Not foundCross => setup BlockDiagMatrix
       /* every child is a diagonal block */
       Algebra **D;
       int nblk, i;
       
-      nblk = (A->children).size();
+      nblk = (em->children).size();
       D = (Algebra **)calloc(nblk+1, sizeof(Algebra *));
       
       for(i=0; i<nblk; i++){
-        D[i] = createQ((A->children).at(i));
+        D[i] = createQ((em->children).at(i));
       }
 
       /* The final D[nblk] block is defined by local constraints/variables */
@@ -496,18 +444,18 @@ createQ(ExpandedModel *A)
 
       NodeIdQ *id = new NodeIdQ();
 
-      id->nlfile = A->nlfile;
-      id->ncolvar = A->nLocalVars;
-      id->lcolvar = A->listOfVars;
-      id->nrowvar = A->nLocalVars;
-      id->lrowvar = A->listOfVars;
+      id->nlfile = em->nlfile;
+      id->ncolvar = em->getNLocalVars();
+      id->lcolvar = em->listOfVars;
+      id->nrowvar = em->getNLocalVars();
+      id->lrowvar = em->listOfVars;
 
-      D[nblk] = NewAlgebraSparse(A->nLocalVars, A->nLocalVars, 
-                                 ("Q"+A->model_file+":"+A->model_file).c_str(),
+      D[nblk] = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
+                              ("Q"+em->model_file+":"+em->model_file).c_str(),
                                  (CallBackFunction)SMLCallBackQ, id);
 
       Alg = NewAlgebraBlockDiag(nblk+1, D, 
-                        ("Q"+A->model_file+":"+A->model_file).c_str()); 
+                        ("Q"+em->model_file+":"+em->model_file).c_str()); 
       
     }
   }
@@ -597,11 +545,15 @@ SMLCallBack(CallBackInterfaceType *cbi)
   //NodeId *id = (NodeId*)cbi->id;
   if (cbi->row_nbs==NULL){
     // only want number of nonzeros back
-    cbi->nz = obl->em->nlfile->getNoNonzerosAMPL(obl->nvar, obl->lvar);
+    //cbi->nz = obl->emrow->nlfile->getNoNonzerosAMPL(obl->nvar, obl->lvar);
+    cbi->nz = obl->emrow->getNzJacobianOfIntersection(obl->emcol);
+    //assert(nz==cbi->nz);
   }else{
     // want to fill in matrices
-    obl->em->nlfile->fillSparseAMPL(obl->nvar, obl->lvar, cbi->col_beg,
-                   cbi->col_len, cbi->row_nbs, cbi->element);
+    //obl->emrow->nlfile->fillSparseAMPL(obl->nvar, obl->lvar, cbi->col_beg,
+    //cbi->col_len, cbi->row_nbs, cbi->element);
+    obl->emrow->getJacobianOfIntersection(obl->emcol, cbi->col_beg,
+		 cbi->col_len, cbi->row_nbs, cbi->element);
   }
   
 
@@ -658,8 +610,8 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
     nlfile->getHessianStructure(colbegH, rownbsH);
     
     // mark all the relevant rows
-    int *marker = (int *)calloc(nlfile->ncol, sizeof(int));
-    for(int i=0;i<nlfile->ncol;i++) marker[i] = 0;
+    int *marker = (int *)calloc(nlfile->getNoVariables(), sizeof(int));
+    for(int i=0;i<nlfile->getNoVariables();i++) marker[i] = 0;
     for(int i=0;i<id->nrowvar;i++) marker[id->lrowvar[i]] = 1;
 
     // and go through all relevant columns and count the number of entries
@@ -686,8 +638,8 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
     nlfile->getHessianEntries(colbegH, rownbsH, eltsH);
     
     // mark all the relevant rows
-    int *marker = (int *)calloc(nlfile->ncol, sizeof(int));
-    for(int i=0;i<nlfile->ncol;i++) marker[i] = 0;
+    int *marker = (int *)calloc(nlfile->getNoVariables(), sizeof(int));
+    for(int i=0;i<nlfile->getNoVariables();i++) marker[i] = 0;
     for(int i=0;i<id->nrowvar;i++) marker[id->lrowvar[i]] = i+1;
 
     // and go through all relevant columns and copy the entries
@@ -729,13 +681,17 @@ FillRhsVector(Vector *vb)
 
   Algebra *A = (Algebra*)T->nodeOfAlg; // the diagonal node that spawned this tree
   OOPSBlock *obl = (OOPSBlock*)A->id; // and its id structure
-  NlFile *nlf = obl->em->nlfile;
+  NlFile *nlf = obl->emrow->nlfile;
+  ExpandedModel *emrow = obl->emrow;
 
   // FIXME: should the id structure include information on the ExpandedModel
   //        as well? That way we could do some more sanity checks
 
-  nlf->getRowLowBoundsAMPL(dense->elts);
-  nlf->getRowUpBoundsAMPL(checkub);
+  emrow->getRowLowBounds(dense->elts);
+  emrow->getRowUpBounds(checkub);
+
+  //nlf->getRowLowBoundsAMPL(dense->elts);
+  //nlf->getRowUpBoundsAMPL(checkub);
 
   
   // check that lower and upper constraint bounds are the same due to the 
@@ -743,7 +699,7 @@ FillRhsVector(Vector *vb)
   for(int i=0;i<dense->dim; i++){
     if (fabs(dense->elts[i]-checkub[i])>1e-6){
       cerr << "At the moment OOPS only supports equality constraints!\n";
-      cerr << "Bounds for c/s " << i << " in " << nlf->nlfilename << ": " <<
+      cerr << "Bounds for c/s " << i << " in " << emrow->model_file << ": " <<
              dense->elts[i] << " " <<  checkub[i] << endl;
       exit(1);
     }
@@ -766,8 +722,22 @@ FillObjVector(Vector *vc)
   //NodeId *id = (NodeId*)A->id;        // and its id structure
 
   assert(obl->nvar==T->end-T->begin);
-  obl->em->nlfile->getObjAMPL(obl->nvar, obl->lvar, dense->elts);
 
+  //double *test = new double[obl->nvar];
+  //for(int i=0;i<obl->nvar;i++) test[i] = 0.;
+
+  //obl->emrow->nlfile->getObjAMPL(obl->nvar, obl->lvar, test);
+  //for (int i=0;i<obl->nvar;i++) printf("SO:%d %d\n",i,obl->lvar[i]);
+  obl->emrow->getObjGradient(dense->elts);
+  
+  //for(int i=0;i<obl->nvar;i++){
+  //  if (test[i]!=dense->elts[i]) {
+  //    printf("OOPS!: %g vs %g\n",test[i], dense->elts[i]);
+  //    exit(1);
+  //  }
+  //}
+
+  //delete [] test;
 }
 
 /* ---------------------------------------------------------------------------
@@ -783,16 +753,29 @@ FillUpBndVector(Vector *vu)
   Algebra *A = (Algebra *)T->nodeOfAlg; // the diagonal node that spawned this tree
   //NodeId *id = (NodeId*)A->id;        // and its id structure
   OOPSBlock *obl = (OOPSBlock*)A->id;        // and its id structure
-  NlFile *nlf = obl->em->nlfile;
+  assert(obl->emrow==obl->emcol); // this should be a diagonal block
+  //NlFile *nlf = obl->emrow->nlfile;
+  ExpandedModel *emrow = obl->emrow;
+
+  //double *test = new double[dense->dim];
 
   assert(obl->nvar==T->end-T->begin);
-  nlf->getColUpBoundsAMPL(obl->nvar, obl->lvar, dense->elts);
-  nlf->getColLowBoundsAMPL(obl->nvar, obl->lvar, lowbndchk);
+  //nlf->getColUpBoundsAMPL(obl->nvar, obl->lvar, test);
+  emrow->getColUpBounds(dense->elts);
+  //for(int i=0;i<dense->dim;i++){
+  //  if (test[i]!=dense->elts[i]) {printf("OOPS1!\n");exit(1);}
+  //}
+
+  //nlf->getColLowBoundsAMPL(obl->nvar, obl->lvar, test);
+  emrow->getColLowBounds(lowbndchk);
+  //for(int i=0;i<dense->dim;i++){
+  //  if (test[i]!=lowbndchk[i]) {printf("OOPS2!\n");exit(1);}
+  //}
 
   for(int i=0;i<dense->dim;i++){
     if (fabs(lowbndchk[i])>1e-6) {
       printf("Found lower bound !=0 (=%f) in variable %i in model %s",
-             lowbndchk[i], i, nlf->nlfilename.c_str());
+             lowbndchk[i], i, emrow->model_file.c_str());
       printf("Currently OOPS can only cope with zero lower bounds\n");
       exit(1);
     }
