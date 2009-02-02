@@ -1,5 +1,9 @@
 #ifndef AMPLSOLVERCALLS_H
 #define AMPLSOLVERCALLS_H
+#include <string>
+#include <map>
+#include <assert.h>
+#include "ExpandedModel.h"
 
 /* the asl_pfgh.h file in amplsolver globally redefines list
    => this is a separate file that provides all the calls to the
@@ -7,8 +11,27 @@
 
 */
 
-#include <string>
 using namespace std;
+
+class IndexListValue {
+ public:
+  int nvar;
+  int *lvar;
+  int count;
+  // provide a constructor that just sets everything to nonsensical values.
+  IndexListValue();
+  IndexListValue(int nvar, int *lvar, int count);
+};
+
+inline IndexListValue::IndexListValue():nvar(-1),lvar(NULL),count(-1){}
+inline IndexListValue::IndexListValue(int new_nvar, int *new_lvar, 
+				      int new_count)
+{
+  nvar = new_nvar; 
+  lvar = new_lvar;
+  count = new_count;
+}
+
 
 /** @class NlFile 
 
@@ -30,40 +53,53 @@ using namespace std;
  *  then keep a pointer to amplsolver's ASL structure. However it is
  *  not clear if this would work (due to global variables)
  * 
- * @bug This class currently only supports problems that are defined
- * by equality constraints (constraint upper and lower bounds are
- * equal. The restriction could be easily removed.  
+ *  @bug The Hessian routines are not tested. The interface should
+ *  probably change as well (i.e. pass in a list of variables w.r.t
+ *  which the Hessian should be evaluated.
  */ 
 class NlFile {
- public:
+  friend class ExpandedModel;
+
+  //public:
   string nlfilename; //!< Filename of *.nl file without *.nl extension
   int ncol;          //!< # constraints defined in this file
   int nrow;          //!< # variables defined in this file
   int nzH;           //!< # Hessian nonzeros 
   int nzA;           //!< # Jacoabian nonzeros (defined in this file)
+
+  /** The NlFile defines constraints that span over several column
+   * blocks. Typically only the intersection with one of these blocks
+   * needs to be avaluates. For this we need to know which columns in
+   * the NlFile belong to a given column block (given by an
+   * ExpandedModel). This is stored in terms of this map: for every
+   * ExpandedModel it gives an array of indices of the corresponding
+   * columns.
+   *
+   * @note Might want to be able to look up dimension and list
+   * (nval/lval). In this case we need to store a structure of
+   * (nval/lval) items on the map
+   *
+   * @note This information is needed in various places and is
+   * computed fairly ineffciently (by O(n^2) string comparisons). In
+   * order not to redo work, any index list that is computed is stored
+   * on this map. The computation is done by
+   * findIxOfLocalVarsInNlFile, which will check if the required list
+   * is already on the map.
+   *
+   * @bug findIxOfLocalVarsInNlFile should probably become a member of
+   * this class.
+   *
+   * @note I am not sure if this is the correct place to store this map.
+   */
+  map<ExpandedModel*, IndexListValue*> indexList;
   // -------------------------- methods ------------------------------------
+ public:
   NlFile(string nlfilename);
 
-  //! return number of variables defined in this *.nl file 
-  int getNoVariables();
+ private:
 
   //! return number of constraints defined in this *.nl file 
   int getNoConstraints();
-
-  //! return number of Hessian entries defined in this *.nl file 
-  int getNoHessianEntries();
-
-  /** return objective Hessian structure in this *.nl file.
-   *  Assumes that the Hessian is constant (pass in x=0).
-   *  Only returns the Hessian of the objective.
-   */
-  void getHessianStructure(int *colbeg, int *rownbs);
-
-  /** return objective Hessian entries in this *.nl file.
-   *  Assumes that the Hessian is constant (pass in x=0).
-   *  Only returns the Hessian of the objective.
-   */
-  void getHessianEntries(int *colbeg, int *rownbs, double *el);
 
   /** common method that opens the *.nl file and reads the scalar values
    *  n_con, n_var, nnz
@@ -80,6 +116,33 @@ class NlFile {
   void getObjAMPL(int nvar, int *lvar, double *elts);
   void getColLowBoundsAMPL(int nvar, int *lvar, double *elts);
   void getColUpBoundsAMPL(int nvar, int *lvar, double *elts);
+  int findIxOfLocalVarsInNlFile(ExpandedModel *em, int *lvar);
+
+  
+  // Here follow stuff for which wrapper routines in ExpandedModel do not
+  // exist yet.
+ public:
+  // this is here since createQ accesses it directly
+  //! return number of variables defined in this *.nl file 
+  int getNoVariables();
+
+
+  //! return number of Hessian entries defined in this *.nl file 
+  int getNoHessianEntries();
+
+  /** return objective Hessian structure in this *.nl file.
+   *  Assumes that the Hessian is constant (pass in x=0).
+   *  Only returns the Hessian of the objective.
+   */
+  void getHessianStructure(int *colbeg, int *rownbs);
+
+  /** return objective Hessian entries in this *.nl file.
+   *  Assumes that the Hessian is constant (pass in x=0).
+   *  Only returns the Hessian of the objective.
+   */
+  void getHessianEntries(int *colbeg, int *rownbs, double *el);
+
+
 };
 
 

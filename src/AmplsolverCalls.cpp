@@ -248,7 +248,7 @@ fillSparseAMPL
  *  @param[in] nvar Number of variables (columns) in the slice
  *  @param[in] lvar The indices of the variables in the slice
  *  @param[out] colbeg Pointer to column starts in rownbs, el
- *  @param[out] collen Vector of column lengths
+ *  @param[out] collen Vector of column lengths (can be NULL)
  *  @param[out] rownbs Row indices for the sparse elements
  *  @param[out] el The actual nonzero elements.
  *  
@@ -293,10 +293,10 @@ NlFile::fillSparseAMPL(int nvar, int *lvar,
     if (col==-1){
       // this column is not present in the AMPL file => empty column
       colbeg[i] = tt_nz;
-      collen[i] = 0;
+      if (collen) collen[i] = 0;
     }else{
       colbeg[i] = tt_nz;
-      collen[i] = A_colstarts[col+1]-A_colstarts[col];
+      if (collen) collen[i] = A_colstarts[col+1]-A_colstarts[col];
       for(int j=A_colstarts[col];j<A_colstarts[col+1];j++){
 	rownbs[tt_nz] = A_rownos[j];
 	el[tt_nz] = (double)A_vals[j];
@@ -525,4 +525,35 @@ NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 
+}
+
+/* -------------------------------------------------------------------------
+NlFile::findIxOfLocalVarsInNlFile
+-------------------------------------------------------------------------- */
+/** Find the indices of the local variables of a given model in this nlfile
+ *
+ * @param[in] em  The model that defines the local variables
+ * @param[out] lvar Assumed to be allocated with em->nLocalVar elements
+ *     lvar[i] is the the index of the ith local variable in em in the 
+ *     nlfile.
+ *
+ * @return The number of matches found
+ *
+ * The given nlfile will define variables spanning different column blocks.
+ * This routine scans through those variables and sees if any of them match
+ * the local variables of the model 'em'. For every local variable in em
+ * it returns '-1' if it is not found in the nlfile, or the position at 
+ * which it is found in the nlfile otherwise. 
+ *
+ * @bug We should change the way this method is called, so that it can just
+ * return the lvar stored on the map. Probably lvar should be returned as a 
+ * C++ vector.
+ */
+
+int
+NlFile::findIxOfLocalVarsInNlFile(ExpandedModel *em, int *lvar)
+{
+  
+  // call the corresponding routine in the ExpandedModel class
+  return em->findIxOfLocalVarsInNlFile(this, lvar);
 }
