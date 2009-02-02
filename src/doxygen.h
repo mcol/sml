@@ -52,9 +52,11 @@ In order to process an SML file say
 sml name-of-smlfile name-of-datafile
 \endcode
 
-\section interface Solver Interface
+\section sec_interface Solver Interface
 
-to be written...
+SML can be interfaced with any structure exploiting solver as the backend. 
+
+A detailed description of the \ref interface "Solver Interface" can be found here.
 
 \section Internals
 
@@ -538,5 +540,37 @@ they are defined in different stages, i.e.
 This can probably remedied by encoding the stages information in the
 internally used global name somehow.
 
+
+\page interface Solver Interface
+
+The information about the problem and its structure as processed by
+SML is stored in a tree of ExpandedModel objects. The solver can be called by
+
+\code
+SML_OOPS_driver(em)
+\endcode
+where 'em' is the ExpandedModel representing the root node.
+
+@bug This behaviour should be changed. Rather we should do something like Amplsolver: 
+- Either, compile SML into a library that provides a call of the form
+\code
+ExpandedModel *SML_process_model(char *model_file_name, char *data_file_name)
+\endcode
+- Or, pass the name of the solver to SML as a command line argument
+\code
+sml name-of-smlfile name-of-datafile name-of-solver 
+\endcode
+and SML would then finish with a final call of the form
+\code
+SML_<name-of-solver>_driver(em);
+\endcode
+
+Each ExpandedModel object represents one node of the Expanded Model
+tree. It roughly corresponds to a child in a decomposition scheme
+applied to solve the problem. It gives information about the variables
+and constraints local to this node as well as links to any children.
+
+It further provides an interface to AMPL that provides functions to
+ask AMPL to evaluate constraint functions on this node.
 
 */
