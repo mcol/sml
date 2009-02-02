@@ -20,7 +20,7 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
 
 
   list<string> colfilelist;
-  list<int> listColIx;
+  //list<int> listColIx;
 
   if (GlobalVariables::prtLvl>=2){
     cout << "-------------------------OOPS Block---------------------------\n";
@@ -28,11 +28,14 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
       "/ row: " << rowmod->model_file << endl;
   }
 
-  this->em = rowmod;
-  this->nlfile = rowmod->nlfile;
-
+  this->emrow = rowmod;
+  this->emcol = colmod;
   this->nvar = colmod->getNLocalVars();
   this->ncon = rowmod->getNLocalCons();
+
+#ifdef REDUNDANT
+  this->nlfile = rowmod->nlfile;
+
   this->lvar = (int*)malloc(nvar*sizeof(int));
   
   for(int i=0;i<nvar;i++) lvar[i] = -1;
@@ -101,5 +104,6 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
     cout << "OOPS Block: " << rowmod->model_file << "(rw)/" <<
        colmod->model_file << "(cl): " << ncon << "x" << nvar << "\n";
   }
-  
+#endif  
+
 }

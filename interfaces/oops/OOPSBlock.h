@@ -19,11 +19,12 @@ class OOPSBlock;
  */
 class OOPSBlock {
  public:
-  ExpandedModel *em;    //!< Expanded Model giving row information
-  NlFile *nlfile;       //!< The NlFile correspoding to the ExpandedModel
-   int ncon;             //!< number of rows in this block
+  ExpandedModel *emrow;    //!< Expanded Model giving row information
+  ExpandedModel *emcol;    //!< Expanded Model giving col information
+  //  NlFile *nlfile;       //!< The NlFile correspoding to the ExpandedModel
+  int ncon;             //!< number of rows in this block
   int nvar;             //!< number of columns in this block
-  int *lvar;            //!< list of indices into the NlFile (-1 if not decl)
+  //  int *lvar;            //!< list of indices into the NlFile (-1 if not decl)
   // --------------------------- methods -----------------------------------
   /** constrct an OOPS block from the cross section of two ExpandedModel's
    *  @param rowmod       The model giving the row information
