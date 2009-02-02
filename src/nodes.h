@@ -44,7 +44,7 @@ class opNode {
    *  name of the entity. If there are two arguments the second argument is
    *  an (int*) stating the ancestor information as set by ancestor(1).ID in
    *  stochastic programming */
-  void **values; //!< list of arguments 
+  opNode **values; //!< list of arguments 
 
   /* FIXME: not sure if these two should be part of the class. They are 
      global variables that affect the print() method */
@@ -57,7 +57,7 @@ class opNode {
   // ------------------------ methods -----------------------------------
   // Constructors
   opNode();
-  opNode(int opCode, void *val1=NULL, void *val2=NULL, void *val3=NULL);
+  opNode(int opCode, opNode *val1=NULL, opNode *val2=NULL, opNode *val3=NULL);
   // Destructor
   virtual ~opNode();
 
@@ -105,10 +105,10 @@ class opNode {
 
   class Iterator {
      private:
-      void **ptr;
+      opNode **ptr;
 
      public:
-      Iterator(void **p) { ptr=p; }
+      Iterator(opNode **p) { ptr=p; }
       ~Iterator() {}
 
       Iterator& operator=(const Iterator &other) {
@@ -131,11 +131,11 @@ class opNode {
          return tmp;
       }
 
-      void* operator*() const {
+      opNode* operator*() const {
          return *ptr;
       }
 
-      void** operator&() const {
+      opNode** operator&() const {
          return ptr;
       }
   };
@@ -183,7 +183,7 @@ class opNodeIx : public opNode {
   opNodeIx(opNode *on); //!< initialise values from an opNode
 
   //! Finds if the indexing expression defines a given dummy variable 
-  opNode *hasDummyVar(char *name); 
+  opNode *hasDummyVar(const char *const name); 
 
   //! returns list of all dummy variables defined by this index'g expression 
   list<opNode *> getListDummyVars(); 
@@ -230,7 +230,7 @@ class IDNode : public opNode {
    const string name;
   
   public:
-   IDNode(char *new_name, opNode *indexing=NULL);
+   IDNode(const char *const new_name, opNode *indexing=NULL);
    IDNode(const string name, opNode *indexing=NULL);
    double getFloatVal() { return atof(name.c_str()); }
    char *getValue() { return strdup(name.c_str()); }
@@ -238,8 +238,16 @@ class IDNode : public opNode {
    void findIDREF(list<opNode*> &lnd) { return; }
    // We never search for ID:
    void findOpCode(int oc, list<opNode*> *lnd) { return; }
-   ostream& put(ostream&s) const { return s << name; }
-   opNode *deep_copy() { return new IDNode(name); }
+   ostream& put(ostream&s) const { 
+      return s << name;
+   }
+   opNode *deep_copy() { 
+      if(values) { // we have a ancestor index
+         return new IDNode(name, (*values)->deep_copy());
+      } else {
+         return new IDNode(name); 
+      }
+   }
    opNode *clone() { return deep_copy(); }
 };
 
@@ -287,7 +295,7 @@ template<class T> class ValueNode : public opNode {
 
   public:
    ValueNode(const T new_value) :
-      opNode(-99,new T(new_value)), value(new_value) {}
+      opNode(-99), value(new_value) {}
    double getFloatVal() { return value; }
    char *getValue();
    void findIDREF(list<model_comp*> &lmc) { return; }
@@ -336,9 +344,9 @@ typedef struct _indexNode {
 //void freeOpNode(opNode *target);
 //indexNode *newIndexNode(opNode *node);
 //opNode *addItemToList(opNode *list, opNode *newitem);
-opNode *addItemToListNew(opNode *list, void *newitem);
+opNode *addItemToListNew(opNode *list, opNode *newitem);
 opNode *addItemToListOrCreate(int oc, opNode *list, opNode *newitem);
-opNode *addItemToListBeg(void *newitem, opNode *list);
+opNode *addItemToListBeg(opNode *newitem, opNode *list);
 //retType *newRetType(opNode *node, opNode *indexing, 
 //		    struct AmplModel_st *context);
 char *print_opNodesymb(opNode *node);

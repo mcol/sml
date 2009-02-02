@@ -25,7 +25,7 @@
   opNodeIx *opPtrIx;
 }
 
-%type <opPtr> number object set_elements param_name col_label
+%type <opPtr> number object set_elements param_name set_name col_label
 %type <opPtr> paramspec_list paramspec value_list value param_template_opt
 %type <opPtr> value_table value_table_list col_label_list
  //%type <opPtr> entry_list entry string row_label
@@ -84,12 +84,12 @@ data_statements: /* empty */
  */
 
 object: ID {
-          $$ = new opNode(ID,$1);
+          $$ = new IDNode($1);
           if (logParse) cout << "Found 'object' of type ID: " << (void*)$$ << 
             ":" << $1 << "\n";
         }
       | CHARACTER_STRING {
-          $$ = new opNode(ID, $1);
+          $$ = new IDNode($1);
           if (logParse) cout << "Found 'object' of type ID: " << (void*)$$ <<
             ":" << $1 << "\n";
         }
@@ -121,7 +121,7 @@ data_setdef: SET ID DEFINED set_elements {
                 opNode *ref;
                 // try to find the correct set definition 
                 // unclear what context to use: global at the moment
-                ref = find_var_ref_in_context(root, new opNode(ID,$2));
+                ref = find_var_ref_in_context(root, new IDNode($2));
                 if (ref==NULL){
                   cerr << "Data given for set " << $2 << " which has not been"
                     "declared!\n",
@@ -150,7 +150,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
                 // try to find the correct param definition 
                 // unclear what context to use: global at the moment
                 opNode *ref;
-                ref = find_var_ref_in_context(root, new opNode(ID,$2));
+                ref = find_var_ref_in_context(root, $2);
                 if (ref==NULL){
                   cerr << "Data given for set " << $2 << " which has not been"
                     "declared!\n";
@@ -173,7 +173,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
                 // try to find the correct param definition 
                 // unclear what context to use: global at the moment
                 opNode *ref;
-                ref = find_var_ref_in_context(root, new opNode(ID,$2));
+                ref = find_var_ref_in_context(root, $2);
                 if (ref==NULL){
                   cerr << "Data given for param " << $2 << " which has not"
                     "been declared!\n";
@@ -209,8 +209,8 @@ data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_li
 param_name_list: param_name
                | param_name_list param_name
                ;
-param_name: ID {new opNode(ID,$1);}
-set_name: ID {new opNode(ID,$1);}
+param_name: ID {$$=new IDNode($1);}
+set_name: ID {$$=new IDNode($1);}
 
 //value_item_list: value_item
 //               | value_item_list value_item
@@ -350,7 +350,7 @@ entry: number {$$=$1;}
      | DOT {$$=new opNode(DOT, NULL);}
      ;
  
-string: ID {new opNode(ID,$1);}
+string: ID {$$=new IDNode($1);}
 
 row_label: object
 

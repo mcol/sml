@@ -1127,7 +1127,7 @@ model_comp::moveUp(int level){
       // => need to add indexing expressions between posm and level-1
       // starting with level-1
       int shift = level-posm;
-      void **newval = (void**)calloc(onidr->nval+shift, sizeof(void*));
+      opNode **newval = (opNode**)calloc(onidr->nval+shift, sizeof(opNode*));
       for(i=0;i<onidr->nval;i++) newval[i+shift] = onidr->values[i];
       for(i=0;i<shift;i++){
         opNodeIx *mix = mlist[level-1-i]->ix;

@@ -98,10 +98,10 @@ newIndexNode(opNode *node){
 addItemToListNew
 -------------------------------------------------------------------------- */
 opNode *
-addItemToListNew(opNode *list, void *newitem)
+addItemToListNew(opNode *list, opNode *newitem)
 {
   /* extend the size of the node by one */
-  void **newvalues = (void **)calloc(list->nval+1, sizeof(void *));
+  opNode **newvalues = (opNode **)calloc(list->nval+1, sizeof(opNode *));
   int i;
 
   for (i=0;i<list->nval;i++){
@@ -117,10 +117,10 @@ addItemToListNew(opNode *list, void *newitem)
 addItemToListBeg
 -------------------------------------------------------------------------- */
 opNode *
-addItemToListBeg(void *newitem, opNode *list)
+addItemToListBeg(opNode *newitem, opNode *list)
 {
   /* extend the size of the node by one */
-  void **newvalues = (void **)calloc(list->nval+1, sizeof(void *));
+  opNode **newvalues = (opNode **)calloc(list->nval+1, sizeof(opNode *));
   int i;
 
   for (i=0;i<list->nval;i++){
@@ -159,7 +159,7 @@ addItemToListOrCreate(int oc, opNode *list, opNode *newitem)
     if (newitem==NULL) return list;
     
     /* extend the size of the node by one */
-    void **newvalues = (void **)calloc(list->nval+1, sizeof(void *));
+    opNode **newvalues = (opNode **)calloc(list->nval+1, sizeof(opNode *));
     int i;
 
     for (i=0;i<list->nval;i++){
@@ -264,101 +264,112 @@ ostream& opNode::put(ostream&s) const {
 
   switch (this->opCode)
     {
-    case 0:          s << *(opNode*) *i;                 break;
+    case 0:          s << **i;                           break;
       /* these are lots of simple binary operators */
-    case NODE:       s << opNode::node;                  break;
-    case STAGE:      s << opNode::stage;                 break;
-    case ID:         s << (const char*)*i;               break;
+    case -100: // FIXME: was originally a NODE or STAGE but now contains an ID.
+      s << *i;
+      break;
+    case NODE:
+      s << opNode::node;
+      break;
+    case STAGE:
+      s << opNode::stage;
+      break;
+    case ID:
+                     //s << (const char*)*i;               break;
+      cerr << "ID put bad." << endl;
+      throw exception();
+      break;
     case ' ':        
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << ' ' << *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << ' ' << **i;
       break;
     case DOT:
-      s << *(opNode*)*i << ".";
-      s << *(opNode*)*(++i);
+      s << **i << ".";
+      s << **(++i);
       break;
     case COMMA:
-      s << *(opNode*)*i;
+      s << **i;
       for(++i;i!=this->end();++i) {
-         s << "," << (*(opNode*)*i);
+         s << "," << (**i);
       }
       break;
     case IN:
-      s << *(opNode*)*i << " in ";
-      s << *(opNode*)*(++i);
+      s << **i << " in ";
+      s << **(++i);
       break;
     case GE:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << ">=" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << ">=" <<  **i;
       break;
     case GT:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << ">" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << ">" <<  **i;
       break;
     case LE:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << "<=" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << "<=" <<  **i;
       break;
     case LT:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << "<" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << "<" <<  **i;
       break;
     case EQ:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << "==" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << "==" <<  **i;
       break;
     case DIFF:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << " diff " <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << " diff " <<  **i;
       break;
     case CROSS:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << " cross " <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << " cross " <<  **i;
       break;
     case DOTDOT:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << " .. " <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << " .. " <<  **i;
       break;
     case '+':
-      s << *(opNode*)*i;
-      s << "+" << *(opNode*)*(++i);
+      s << **i;
+      s << "+" << **(++i);
       break;
     case '-':
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << "-" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << "-" <<  **i;
       break;
     case '*':
-      s << *(opNode*)*i << "*";
-      s << *(opNode*)*(++i);
+      s << **i << "*";
+      s << **(++i);
       break;
     case '/':
-      s << *(opNode*)*i << "/";
-      s << *(opNode*)*(++i);
+      s << **i << "/";
+      s << **(++i);
       break;
     case SUM:
-      s << "sum " << *(opNode*)*i;
-      s << *(opNode*)*(++i);
+      s << "sum " << **i;
+      s << **(++i);
       break;
     case MAX:
-      s << "max " << *(opNode*)*i;
-      s << *(opNode*)*(++i);
+      s << "max " << **i;
+      s << **(++i);
       break;
     case MIN:
-      s << "min " << *(opNode*)*i;
-      s << *(opNode*)*(++i);
+      s << "min " << **i;
+      s << **(++i);
       break;
     case EXPECTATION:
-      s << "Exp( " << *(opNode*)*i << ")";
+      s << "Exp( " << **i << ")";
       break;
     case LAST:
-      s << "last( " << *(opNode*)*i << ")";
+      s << "last( " << **i << ")";
       break;
     case FIRST:
-      s << "first( " << *(opNode*)*i << ")";
+      s << "first( " << **i << ")";
       break;
       // -------------------------functions f(..) --------------------------
     case ORD:
-      s << "ord" << *(opNode*)*i;
+      s << "ord" << **i;
       break;
       // -------------------------terminals --------------------------
     case ORDERED:    s << " ordered";                    break;
@@ -366,28 +377,28 @@ ostream& opNode::put(ostream&s) const {
     case DETERMINISTIC: s << " deterministic";           break;
       /* these are lots of simple unary operators */
     case WITHIN:
-      s << "within " << *(opNode*)*i;
+      s << "within " << **i;
       break;
     case LSBRACKET:
       if (this->nval==1){
-         s << "[" << *(opNode*)*i << "]";
+         s << "[" << **i << "]";
       } else {
-         s << *(opNode*)*i << "[";
-         s << *(opNode*)*(++i) << "]";
+         s << **i << "[";
+         s << **(++i) << "]";
       }
       break;
     case LBRACE:
-      s << "{" << *(opNode*)*i << "}";
+      s << "{" << **i << "}";
       break;
     case LBRACKET:
-      s << "(" << *(opNode*)*i << ")";
+      s << "(" << **i << ")";
       break;
     case ASSIGN:
       if (this->nval==1){
-         s << "=" << *(opNode*)*i;
+         s << "=" << **i;
       }else{
          s << *(opNode*)*i;
-         s << "=" << *(opNode*)*(++i);
+         s << "=" << **(++i);
       }
       break;
     case DEFINED:
@@ -395,16 +406,16 @@ ostream& opNode::put(ostream&s) const {
          cerr << "':=' used as binary operator?\n";
          exit(1);
       }
-      s << ":=" << *(opNode*)*i;
+      s << ":=" << **i;
       break;
     case COLON:
-      if(this->nval>1) s << *(opNode*)*(i++);
-      s << ":" <<  *(opNode*)*i;
+      if(this->nval>1) s << **(i++);
+      s << ":" <<  **i;
       break;
     case IF:
-      s << "if " << *(opNode*)*i;
-      s << " then " << *(opNode*)*(++i);
-      if(this->nval==3) s << " else " << *(opNode*)*(++i);
+      s << "if " << **i;
+      s << " then " << **(++i);
+      if(this->nval==3) s << " else " << **(++i);
       break;
     case IDREF:
     case IDREFM:
@@ -423,7 +434,7 @@ ostream& opNode::put(ostream&s) const {
       cerr << "Unknown opcode " << this->opCode << "\n";
       cerr << ".nval = " << this->nval << "\n";
       for(; i!=this->end(); ++i) {
-         cerr << "val[" << *(opNode*) *i << "]\n";
+         cerr << "val[" << **i << "]\n";
       }
       throw exception();
       exit(1);
@@ -450,9 +461,9 @@ ostream& opNodeIDREF::put(ostream& s) const {
             s << thisc->id;
          } else {
             opNode::Iterator i=this->begin();
-            s << thisc->id << "[" << *(opNode*)*i;
+            s << thisc->id << "[" << **i;
             for(++i; i!=this->end(); ++i){
-               s << "," << *(opNode*)*i;
+               s << "," << **i;
             }
             s << "]";
          }
@@ -548,7 +559,7 @@ print_opNodesymb(opNode *node)
   if (node->nval>0)
     arg = (char**)calloc(node->nval, sizeof(char*));
   for(i=0;i<node->nval;i++){
-    arg[i] = print_opNodesymb((opNode*)node->values[i]);
+    arg[i] = print_opNodesymb(node->values[i]);
     retsize += strlen(arg[i])+2;
   }
   
@@ -579,7 +590,7 @@ opNode::opNode()
   values = NULL;
 }
 
-opNode::opNode (int code, void *val1, void *val2, void* val3)
+opNode::opNode (int code, opNode *val1, opNode *val2, opNode* val3)
 {
    opCode = code;
 
@@ -589,11 +600,11 @@ opNode::opNode (int code, void *val1, void *val2, void* val3)
    if(val3) nval++;
 
    values = NULL;
-   if(nval) values = (void **) malloc(nval*sizeof(void *));
+   if(nval) values = (opNode **) malloc(nval*sizeof(opNode *));
 
-   if(val1) values[0] = (void *) val1;
-   if(val2) values[1] = (void *) val2;
-   if(val3) values[2] = (void *) val3;
+   if(val1) values[0] = val1;
+   if(val2) values[1] = val2;
+   if(val3) values[2] = val3;
 
    if (logCreate) cout << "created " << nval << "-ary op: " << opCode << "\n";
 }
@@ -618,18 +629,20 @@ opNode::deep_copy()
   newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0)
-    newn->values = (void **)calloc(nval, sizeof(void *));
+    newn->values = (opNode **)calloc(nval, sizeof(opNode *));
 
   /* Values are copied depending on the type of the opNode */
   /* ID/IDREF/INT_VAL/FLOAT_VAL/IDREFM are treated differently */
   if (opCode==ID){
-    assert(nval==1);
+    cerr << "Called deep_copy for ID" << endl;
+    throw exception();
+    /*assert(nval==1);
     newn->values[0] = strdup((char *)values[0]);
-    return newn;
+    return newn;*/
   }
   
   for(int i=0;i<nval;i++)
-    newn->values[i] = ((opNode*)values[i])->deep_copy();
+    newn->values[i] = values[i]->deep_copy();
   return newn;
 }
 /* --------------------------------------------------------------------------
@@ -646,7 +659,7 @@ opNode::clone()
   }
   newn->opCode = opCode;
   newn->nval = nval;
-  newn->values = (void **)calloc(nval, sizeof(void *));
+  newn->values = (opNode **)calloc(nval, sizeof(opNode *));
   for(int i=0;i<nval;i++)
     newn->values[i] = values[i];
   return newn;
@@ -662,9 +675,12 @@ double
 opNode::getFloatVal()
 {
   if (opCode!=ID){
-    cerr << "Attempting to call getFloatVal for an opNode not of type INT_VAL/FLOAT_VAL/ID\n";
+    cerr << "Attempting to call getFloatVal for an opNode not of type"
+       "INT_VAL/FLOAT_VAL/ID\n";
     exit(1);
   }
+  cerr << "Badness IDNode::getFloatVal?" << endl;
+  throw exception();
   return atof((char*)values[0]);
 }
 
@@ -676,6 +692,8 @@ opNode *opNode::getValue()
 char *
 opNode::getValue()
 {
+  cerr << "Attempting to call getValue on something funny." << endl;
+  throw exception();
   if (opCode!=ID){
     cerr << "Attempting to call getValue for an opNode not of type ID/INT_VAL/FLOAT_VAL\n";
     exit(1);
@@ -724,13 +742,13 @@ opNode::findIDREF()
 
   if (opCode==IDREF){
     cout << getGlobalName((model_comp*)this->values[0], NULL, NULL, NOARG) <<
-      "\n";
+      endl;
   }else if (opCode==ID) {
     return;
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
-	     ((opNode*)values[i])->findIDREF();
+	     values[i]->findIDREF();
       }
     }
   }
@@ -780,7 +798,7 @@ opNode::findIDREF(list<opNode*> *lnd)
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
-	((opNode*)values[i])->findIDREF(lnd);
+	     values[i]->findIDREF(lnd);
       }
     }
   }
@@ -804,7 +822,7 @@ opNode::findOpCode(int oc, list<opNode*> *lnd)
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
-	((opNode*)values[i])->findOpCode(oc, lnd);
+	     values[i]->findOpCode(oc, lnd);
       }
     }
   }
@@ -822,7 +840,7 @@ model_comp *opNode::findModelComp()
 {
   opNode *on = this;
   while ((on->opCode==LBRACKET || on->opCode==LBRACE) && on->nval==1){
-    on = (opNode*)on->values[0];
+    on = on->values[0];
   }
 
   if (opCode==IDREF){
@@ -847,8 +865,8 @@ opNode *opNode::getIndexingSet()
   if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
   /* assumes that the next level is the 'IN' keyword (if present) */
   if (ix->opCode==IN){
-    dummyVar = (opNode*)ix->values[0];
-    set = (opNode*)ix->values[1];
+    dummyVar = ix->values[0];
+    set = ix->values[1];
   }else{
     dummyVar = NULL;
     set = ix;
@@ -881,19 +899,19 @@ opNode::getArgumentList() const
    if (on==NULL){
       cout << "WARNING: This is an IDREF opNode not of type opNodeIDREF\n";
       if (nval>0){
-         arglist += ((opNode*)values[1])->print();
+         arglist += values[1]->print();
          for(int i=1;i<nval;i++){
 	         arglist += ",";
-	         arglist += ((opNode*)values[1+i])->print();
+	         arglist += values[1+i]->print();
          }
       }
    }else{
       if (nval>0){
          opNode::Iterator i = begin();
-         arglist += ((opNode*)*i)->print();
+         arglist += (*i)->print();
          for(++i;i!=end();++i){
             arglist += ",";
-	         arglist += ((opNode*)*i)->print();
+	         arglist += (*i)->print();
          }
       }
   }
@@ -906,9 +924,9 @@ opNode::getArgumentList() const
  * The items from src are prepended to this object's values
  */
 opNode &opNode::merge(const opNode &src) {
-   void **newvalues = (void **)calloc(src.nval+nval,sizeof(void *));
+   opNode **newvalues = (opNode **)calloc(src.nval+nval,sizeof(opNode *));
 
-   void **ptr = newvalues;
+   opNode **ptr = newvalues;
    for(int i=0;i<src.nval;i++)
       *(ptr++) = src.values[i];
    for(int i=0;i<nval;i++)
@@ -980,14 +998,14 @@ opNodeIx::getListDummyVars()
     if (dv->opCode==ID||dv->opCode==IDREF){
       l.push_back(dv);
     }else if(dv->opCode==LBRACKET){
-      dv = (opNode*)*(dv->begin());
+      dv = *(dv->begin());
       if (dv->opCode!=COMMA){
 	     cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
 	     cerr << "Given expression: " << dv << "\n";
 	     exit(1);
       }
       for(opNode::Iterator j=dv->begin(); j!=dv->end(); ++j){
-	     l.push_back((opNode*)*j);
+	     l.push_back(*j);
       }
     }else{
       cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
@@ -1024,8 +1042,8 @@ void opNodeIx::splitExpression()
   tmp = (opNode*)this->values[0];
   // discard the colon (if there is one present: only interested in lhs) 
   if (tmp->opCode==COLON) {
-    qualifier = (opNode*)tmp->values[1];
-    tmp = (opNode*)tmp->values[0];
+    qualifier = tmp->values[1];
+    tmp = tmp->values[0];
   }else{
     qualifier = NULL;
   }
@@ -1039,19 +1057,19 @@ void opNodeIx::splitExpression()
       tmp2 = findKeywordinTree((opNode*)tmp->values[i], IN);
       /* everything to the left of IN is a dummy variables */
       if (tmp2){
-	dummyVarExpr[i] = (opNode*)tmp2->values[0];
-	sets[i] = (opNode*)tmp2->values[1];
+	     dummyVarExpr[i] = tmp2->values[0];
+	     sets[i] = tmp2->values[1];
       } else {
 	/* just set, but no dummyVar given */
-	dummyVarExpr[i] = NULL;
-	sets[i] = (opNode*)tmp->values[i];
+	     dummyVarExpr[i] = NULL;
+	     sets[i] = tmp->values[i];
       }
       /* try to find model_comp of the set expression, 
 	 If it doesn't exist create */
       if (model_comp *mc = sets[i]->findModelComp()){
-	sets_mc[i] = mc;
+	     sets_mc[i] = mc;
       }else{
-	sets_mc[i] = new model_comp("dummy", TSET, NULL, sets[i]);
+	     sets_mc[i] = new model_comp("dummy", TSET, NULL, sets[i]);
       }
     }
   }else{
@@ -1059,14 +1077,14 @@ void opNodeIx::splitExpression()
     this->sets = (opNode**)calloc(1, sizeof(opNode*));
     this->sets_mc = (model_comp**)calloc(1, sizeof(model_comp*));
     this->dummyVarExpr = (opNode**)calloc(1, sizeof(opNode*));
-    tmp2 = findKeywordinTree((opNode*)tmp, IN);
+    tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
-      dummyVarExpr[0] = (opNode*)tmp2->values[0];
-      sets[0] = (opNode*)tmp2->values[1];
+      dummyVarExpr[0] = tmp2->values[0];
+      sets[0] = tmp2->values[1];
     } else {
       /* just set, but no dummyVar given */
       dummyVarExpr[0] = NULL;
-      sets[0] = (opNode*)tmp;
+      sets[0] = tmp;
     }
     /* try to find model_comp of the set expression, 
        If it doesn't exist create */
@@ -1091,7 +1109,7 @@ opNodeIx::hasDummyVar
  *
  */
 
-opNode *opNodeIx::hasDummyVar(char *name)
+opNode *opNodeIx::hasDummyVar(const char *const name)
 {
   int i, j;
   opNode *ret = NULL;
@@ -1103,24 +1121,27 @@ opNode *opNodeIx::hasDummyVar(char *name)
 
     // this is either ID or (ID,   ,ID)
     if (tmp->opCode==ID){
-      if (logCreate) cout << "Found dummy variable: " << tmp->values[0] << "\n";
-      if (strcmp(name, (const char*)tmp->values[0])==0)
-        ret = (opNode*)tmp;
+      IDNode *tmpid = (IDNode *) tmp;
+      if (logCreate) cout << "Found dummy variable: " << tmpid->name << "\n";
+      if (strcmp(name, tmpid->name.c_str())==0)
+        ret = tmp;
     }else{
       /* This is a multidimensional dummy variable: */
       assert(tmp->opCode==LBRACKET);
-      tmp = (opNode*)tmp->values[0];
+      tmp = tmp->values[0];
       // and this should be a comma separated list
       assert(tmp->opCode==COMMA);
       for(j=0;j<tmp->nval;j++){
         // items on the list should be ID
         opNode *tmp2;
-        tmp2 = (opNode*)tmp->values[j];
+        tmp2 = tmp->values[j];
         assert(tmp2->opCode==ID);
         if (logCreate)
            cout << "Found dummy variable: " << tmp2->values[0] << "\n";
+        cerr << "Badness in hasDummyVar";
+        throw exception();
         if (strcmp(name, (const char*)tmp2->values[0])==0)
-          ret = (opNode*)tmp2;
+          ret = tmp2;
       }
     }
   }
@@ -1141,9 +1162,9 @@ opNodeIx::deep_copy()
   
   onix->opCode = opCode;
   onix->nval = nval;
-  onix->values = (void **)calloc(nval, sizeof(void *));
+  onix->values = (opNode **)calloc(nval, sizeof(opNode *));
   for(int i=0;i<nval;i++)
-    onix->values[i] = ((opNode*)values[i])->deep_copy();
+    onix->values[i] = values[i]->deep_copy();
   
   // deep_copy is a virtual function, so qualifier->deep_copy is not defined
   // when qualifier==NULL
@@ -1181,9 +1202,9 @@ opNodeIDREF::deep_copy()
   newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0){
-    newn->values = (void **)calloc(nval, sizeof(void *));
+    newn->values = (opNode **)calloc(nval, sizeof(opNode *));
     for(int i=0;i<nval;i++)
-      newn->values[i] = ((opNode*)values[i])->deep_copy();
+      newn->values[i] = values[i]->deep_copy();
   }
 
   // this is a model_comp that needs to be cloned as well
@@ -1204,7 +1225,7 @@ opNodeIDREF::clone()
   newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0){
-    newn->values = (void **)calloc(nval, sizeof(void *));
+    newn->values = (opNode **)calloc(nval, sizeof(opNode *));
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i];
   }
@@ -1215,7 +1236,7 @@ opNodeIDREF::clone()
   return newn;
 }
 
-IDNode::IDNode(char *new_name, opNode *indexing) :
-   opNode(ID, new_name, indexing), name(new_name) {}
+IDNode::IDNode(const char *const new_name, opNode *indexing) :
+   opNode(ID, indexing), name(new_name) {if(indexing) cerr << "WINNER" << endl;}
 IDNode::IDNode(const string new_name, opNode *indexing) :
-   opNode(ID, strdup(new_name.c_str()), indexing), name(new_name) {}
+   opNode(ID, indexing), name(new_name) {if(indexing) cerr << "WINNER" << endl;}

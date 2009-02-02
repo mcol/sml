@@ -198,8 +198,11 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
         assert(on->opCode==ID||on->opCode==-99);
         if (is_symbolic){
           if (on->opCode==ID){
-            symvalues[pos_in_array] = string((char*)on->values[0]);
+            symvalues[pos_in_array] = string(((IDNode *)on)->name);
+            //symvalues[pos_in_array] = string((char*)on->values[0]);
           }else{
+            cerr << "symbolic but not ID? help!" << endl;
+            throw exception();
             symvalues[pos_in_array] = to_string(on->values[0]);
           }            
         }else{ // not symbolic => numeric
@@ -342,12 +345,13 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
                  indices[ixcolset]->dim, ix->sets_mc[ixcolset]->id);
           exit(1);
         }
-        cl = (opNode*)*(cl->begin());
+        cl = *(cl->begin());
         assert(cl->opCode==COMMA);
-        colpos[jj] = indices[ixcolset]->findPos(SetElement(1, (char**)cl->values));
+        colpos[jj] = indices[ixcolset]->findPos(SetElement(1,
+          (IDNode **)cl->values));
       }else{
         // this is a set of dim 1
-        colpos[jj] = indices[ixcolset]->findPos(SetElement(1, (char**)cl->values));
+        colpos[jj] = indices[ixcolset]->findPos(SetElement(1,(IDNode **) &cl));
       }
       
     }
@@ -374,10 +378,10 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
         }
         rl = (opNode*)rl->values[0];
         assert(rl->opCode==COMMA);
-        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (char**)rl->values));
+        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (IDNode**)rl->values));
       }else{
         // this is a set of dim 1
-        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (char**)rl->values));
+        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (IDNode**)&rl));
       }
     }
     // OK, we now have the lists colpos/rowpos that tell us where the
@@ -389,7 +393,7 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
         opNode *entry = (opNode*)on_values->values[poslist];
         if (is_symbolic){
           assert(entry->opCode==ID);
-          symvalues[posparam] = string((char *)entry->values[0]);
+          symvalues[posparam] = string(((IDNode *)entry)->name);
         }else{
           values[posparam] = entry->getFloatVal();
         }

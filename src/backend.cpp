@@ -896,7 +896,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             /* newn is the new node, first copy the old one */
             newn->opCode = IDREF;
             newn->nval = setn->nval;
-            newn->values = (void **)calloc(setn->nval+1, sizeof(void *));
+            newn->values = (opNode **)calloc(setn->nval+1, sizeof(opNode *));
             for(j=0;j<setn->nval;j++) newn->values[j] = setn->values[j];
             // clone the model_comp that is referred to
             newn->ref = (model_comp *)calloc(1,sizeof(model_comp));

@@ -86,7 +86,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
     // (*p) is an opNodeIDREF
     opNodeIDREF *onr = dynamic_cast<opNodeIDREF*>(*p);
     if (onr==NULL){
-      printf("opNode should be opNodeIDREF but dynamic cast fails\n");
+      cerr << "opNode should be opNodeIDREF but dynamic cast fails" << endl;
       exit(1);
     }
     model_comp *mc = onr->ref;
@@ -101,8 +101,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
       for (int lvl=onr->stochparent;lvl>0;lvl--){
         model = model->parent;
         if (model==NULL){
-          printf("Trying to take the %d ancestor in a model that does not have %d ancestors\n",
-                 onr->stochparent, onr->stochparent);
+          cerr << "Trying to take the " << onr->stochparent << 
+             " ancestor in a model that does not have " << onr->stochparent <<
+             " ancestors" << endl;
           exit(1);
         }
       }
@@ -141,13 +142,13 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
   for(list<opNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
   {
     (*p)->nval = 1;
-    (*p)->values = (void**)calloc(1, sizeof(void*));
+    (*p)->values = (opNode**)calloc(1, sizeof(opNode*));
     if ((*p)->opCode==STAGE){
-      (*p)->values[0] = (void*)strdup(opNode::stage.c_str());
+      (*p)->values[0] = new IDNode(opNode::stage);
     }else{
-      (*p)->values[0] = (void*)strdup(opNode::node.c_str());
+      (*p)->values[0] = new IDNode(opNode::node);
     }
-    (*p)->opCode = ID;
+    (*p)->opCode = -100; // Was originally ID, but don't play well with others.
   }
 
   // ---------- (4) add probablilities to Exp components ---------------
@@ -236,8 +237,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           }
           opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
           oncp->nval = 1;
-          oncp->values = (void**)calloc(1, sizeof(void*));
-          oncp->values[0] = new opNode(ID, strdup((dv.front())->print().c_str()));
+          oncp->values = (opNode**)calloc(1, sizeof(opNode*));
+          oncp->values[0] = new IDNode((dv.front())->print());
           opNode *onmult = new opNode('*', oncp, up);
           up = onmult;
         }
@@ -281,8 +282,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           }
           opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
           oncp->nval = 1;
-          oncp->values = (void**)calloc(1, sizeof(void*));
-          oncp->values[0] = new opNode(ID, strdup(dv.front()->print().c_str()));
+          oncp->values = (opNode**)calloc(1, sizeof(opNode*));
+          oncp->values[0] = new IDNode(dv.front()->print());
           opNode *onmult = new opNode('*', oncp, up);
           up = onmult;
 
@@ -307,12 +308,12 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           printf("Expectation indexing expression *must* be present\n");
           exit(1);
         }
-        cslon->values = (void**)calloc(cslon->nval, sizeof(void*));
+        cslon->values = (opNode**)calloc(cslon->nval, sizeof(opNode*));
         cslon->opCode = COMMA;
         int cnt=0;
         for(list<opNode*>::iterator q = listofsum.begin();q!=listofsum.end();
             q++){
-          cslon->values[cnt] = (void*)(*q);
+          cslon->values[cnt] = *q;
           cnt++;
         }
         // and put braces around it

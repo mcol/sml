@@ -5,6 +5,7 @@
 #include "sml.tab.h"
 #include <typeinfo>
 #include <fstream>
+#include <sstream>
 
 static bool logSM = false;
 
@@ -359,7 +360,8 @@ StochModel::expandToFlatModel()
           out of the StochModel. 
        */
       if (smc->type==TMODEL){
-        printf("Not quite sure what to do for submodels within Stochastic Blocks\n");
+        cerr << "Not quite sure what to do for submodels within Stochastic "
+          "Blocks" << endl;
         exit(1);
       }
 
@@ -438,13 +440,12 @@ StochModel::expandToFlatModel()
            the root node */
         // set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
         // on_iinn: this_nd in NODES
-        on_iinN = new opNode(IN, new opNode(ID, strdup("this_nd")), 
-                          nodeset->clone());
+        on_iinN = new opNode(IN, new IDNode("this_nd"), nodeset->clone());
         // onai: A[this_nd]  
         onai= new opNode(LSBRACKET, anc->clone(), 
-                       new opNode(COMMA, new opNode(ID, strdup("this_nd"))));
+                       new opNode(COMMA, new IDNode("this_nd")));
         // on2: A[this_nd]=="null"
-        on2 =  new opNode(EQ, onai, new opNode(ID, strdup("\"null\"")));
+        on2 =  new opNode(EQ, onai, new IDNode("\"null\""));
         // on1: :={this_nd in NODES:Parent[this_nd] == "null"};
         on1 = new opNode(DEFINED, 
                          new opNode(LBRACE, new opNode(COLON, on_iinN, on2)));
@@ -463,7 +464,7 @@ StochModel::expandToFlatModel()
       
       on1 = nodeset->clone(); // does this work?
       // this is going to be the dummy variable i (just an ID node?)
-      on2 = new opNode(ID, strdup("this_nd"));
+      on2 = new IDNode("this_nd");
       /** @bug 'this_nd' is a reserved variables now */
       on_iinN = new opNode(IN, on2, on1);
       //printf("Test first part of expression: %s\n",on_iinN->print());
@@ -475,7 +476,7 @@ StochModel::expandToFlatModel()
       on1 = anc->clone();
       // this is the comma separated list
       /* I think that  dummy variable is just left as a ID */
-      on2 = new opNode(COMMA, new opNode(ID, strdup("this_nd")));
+      on2 = new opNode(COMMA, new IDNode("this_nd"));
       // this is A[i]
       onai= new opNode(LSBRACKET, on1, on2);
       // this is the A[i] in indSO
@@ -486,9 +487,9 @@ StochModel::expandToFlatModel()
          Trouble is that the model below has not been set up yet... */
       if (stgcnt>0){
         //on3 = new opNodeIDREF(indset[stgcnt-1]);
-        char buffer[5];
-        sprintf(buffer, "ix%d",stgcnt-1);
-        on3 = new opNode(ID, strdup(buffer));
+        ostringstream dummy_var;
+        dummy_var << "ix" << stgcnt-1;
+        on3 = new IDNode(dummy_var.str());
         on2 = new opNode(EQ, onai, on3);
       }else{
         /* No, the first indexing set is not over the nodes that have "root"
@@ -530,14 +531,14 @@ StochModel::expandToFlatModel()
 
       if (model_above){
         // create a dummy variable
-        char buffer[10];
-        sprintf(buffer, "ix%d",stgcnt);
+        ostringstream dummy_var;
+        dummy_var << "ix" << stgcnt;
 
         // add a submodel component that points to the model above 
         // need to create an indexing expression for the model above
         //on1 = new opNode(ID, strdup(buf)); //indset
         on1 = new opNodeIDREF(indset[stgcnt]); //indset
-        on_iinN = new opNode(IN, new opNode(ID, strdup(buffer)), on1); // i in N
+        on_iinN = new opNode(IN, new IDNode(dummy_var.str()), on1); // i in N
         on2 = new opNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 

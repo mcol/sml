@@ -661,14 +661,14 @@ AmplModel::addDummyObjective()
         }else{
           commasepon = new opNode(COMMA);
           commasepon->nval = ix->ncomp;
-          commasepon->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
+          commasepon->values = (opNode**)calloc(ix->ncomp, sizeof(opNode*));
           for(i=0;i<ix->ncomp;i++){
             commasepon->values[i] = commaseplist[i];
           }
         }
         opNodeIDREF *onref = new opNodeIDREF(comp);
         onref->nval = ix->ncomp;
-        onref->values = (void**)calloc(ix->ncomp, sizeof(opNode*));
+        onref->values = (opNode**)calloc(ix->ncomp, sizeof(opNode*));
         for(i=0;i<ix->ncomp;i++){
           // this is the dummy variable of the i-th indexing expression
           opNode *ondum = (opNode*)*(commaseplist[i]->begin());

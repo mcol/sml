@@ -666,7 +666,7 @@ iditem:  ID {                               /* simple identifier */
             if (idnode->opCode==LSBRACKET)
                idnode = (opNode*) *(idnode->begin());
             assert(idnode->opCode==ID);
-            assert(idnode->nchild()==1);
+            assert(idnode->nchild()==0);
             addItemToListNew(idnode, new ValueNode<long>(*$3));
             $$ = $6;
          }
@@ -1107,58 +1107,6 @@ add_param_to_model(char *id, opNode *indx, opNode *attrib){
 }
 
 /* ----------------------------------------------------------------------------
- makeListOfDependencies
----------------------------------------------------------------------------- */
-/* this routine makes a list of dependencies of one object on other 
-   objects:
-
-   it first scans through the indexing part identifying all dummy
-   variables.
-
-   all entities referenced in either the indexing part or attribute part are
-   identified (i.e. their entry_atom is found) and a list of them is generated
-
-
-*/
-
-void
-makeListOfDependencies(opNode *indx, opNode *attrib)
-{
-   /* identify all dummy variables from the indexing part */
-   /* => is it correct to assume that anything to the left of keyword 'IN'
-         is a dummy variable ? */
-
-   opNode *tmpnode;
-   int ndummy;
-   char **ldummy;
-   int nlist;     /* length of list */
-
-
-   tmpnode = findKeywordinTree(indx, IN);
-  
-   /* okay: count number of dummy variables */
-   ndummy = countKeywordinTree((opNode*)*(tmpnode->begin()), ID);
-   ldummy = (char **)calloc(ndummy, sizeof(char*));
-   /* and make a list of dummy variables */
-   findIDinTreeAndAddToList((opNode*)*(tmpnode->begin()), ldummy, &nlist);
-
-   /* and make a list of all variables */
-   findIDinTreeAndAddToList(indx, ldummy, &nlist);
-   findIDinTreeAndAddToList(attrib, ldummy, &nlist);
-  
-   /* FIXME: 
-      - add pointer to counter to argument list above 
-      - ldummy array needs to be allocated with enough space 
-      - the last two adding ID calls need to try to find the
-        added entity in the current hash table and add the atom_entry to the
-        list (rather than just the name as is at the moment)
-        => ldummy should be a var_entry *list
-      - the whole thing needs to be called from outside
-        with every c/s, var, etc definition statement
-   */
-}
-
-/* ----------------------------------------------------------------------------
 findKeywordinTree
 ---------------------------------------------------------------------------- */
 /* this routine traverses down the tree and returns the top most reference to 
@@ -1275,11 +1223,11 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    */
   
    /* returns: pointer */
-   opNode *tmp, *idNode, *argNode;
+   opNode *tmp, *argNode;
+   IDNode *idNode;
    opNodeIDREF *ret;
    int stochparent=0;
 
-   char *name;
    /* and now scan through the whole of the local context to see if we 
       find any matches */
    /* the local context is 
@@ -1297,13 +1245,13 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
       cout << "find_var_ref_in_context: " << ref << "\n";
 
    if (ref->opCode==ID){
-      idNode = ref;
+      idNode = (IDNode *)ref;
       argNode = NULL;
    }else{
       assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
       opNode::Iterator i = ref->begin();
-      idNode = (opNode*)*i;
-      argNode = (opNode*)*(++i);
+      idNode = (IDNode*)*i;
+      argNode = *(++i);
       assert(idNode->opCode==ID);
       assert(argNode->opCode==COMMA);
    }
@@ -1311,21 +1259,20 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    // Test if this ID node is actually of type opNodeID and if so remember
    // the value of stochparent
    {
-      if (idNode->nchild()==2){
+      if (idNode->nchild()==1){
          // there is an extra argument, which is the stochparent
-         stochparent = ((ValueNode<long>*)*(++(idNode->begin())))->value;
+         stochparent = ((ValueNode<long>*)*(idNode->begin()))->value;
       }
    }
 
-   name = (char*)*(idNode->begin());
    if (GlobalVariables::logParseModel) 
-      cout << "--> search for matches of " << name << "\n";
+      cout << "--> search for matches of " << idNode->name << "\n";
  
    // see if this matches a dummy variable
-   tmp = find_var_ref_in_indexing(name);
+   tmp = find_var_ref_in_indexing(idNode->name.c_str());
    if (tmp) {
       if (GlobalVariables::logParseModel) 
-         cout << name << " is matched by dummy var in " << *tmp << "\n";
+         cout << idNode->name << " is matched by dummy var in " << *tmp << "\n";
       return ref;
    }
 
@@ -1335,7 +1282,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    if (argNode){
       if (GlobalVariables::logParseModel)
          cout << "Adding argument list to node: " << *argNode << "\n";
-      free(idNode->values);
+      free(idNode->values); // jdh - what does this do?
       ret->values = argNode->values;
       ret->nval = argNode->nval;
       if (ref->opCode==LBRACKET){
@@ -1364,19 +1311,18 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
 }
 
 opNodeIDREF*
-find_var_ref_in_context_(AmplModel *context, opNode *ref)
+find_var_ref_in_context_(AmplModel *context, IDNode *ref)
 {
    model_comp *thismc;
-   char *name = (char*)*(ref->begin());
    opNodeIDREF *ret;
   
    for(list<model_comp*>::iterator p = context->comps.begin();
          p!=context->comps.end();p++){
       thismc = *p;
-      if (strcmp(name, thismc->id)==0){
+      if (strcmp(ref->name.c_str(), thismc->id)==0){
          /* this is a match */
          if (GlobalVariables::logParseModel){
-            cout << "Found Match: " << name << " refers to ";
+            cout << "Found Match: " << ref->name << " refers to ";
             cout << nameTypes[thismc->type] << "\n";
             cout << "    " << thismc->id << "\n";
             cout << "       " << *(thismc->indexing) << "\n";
@@ -1474,7 +1420,7 @@ find_var_ref_in_context_(AmplModel *context, opNode *ref)
 
    /* need also to look through list of local variables */
 
-   cerr << "Could not find ref " << name << " in context\n";
+   cerr << "Could not find ref " << ref->name << " in context\n";
    exit(1);
 }
 
@@ -1496,7 +1442,7 @@ find_var_ref_in_indexing
                                                                       */
 
 opNode *
-find_var_ref_in_indexing(char *name)
+find_var_ref_in_indexing(const char *const name)
 {
    int i;
    opNodeIx *tmp;

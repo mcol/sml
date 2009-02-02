@@ -114,7 +114,7 @@ Set::printToString()
     // iter is of type 'pair*'
     SetElement element = iter->first;
     int pos = iter->second;
-    str += (to_string(pos)+":"+string(element.val[0]));
+    str += (to_string(pos)+":"+element.val[0]);
   }
   return str;
 
