@@ -22,7 +22,7 @@
    /* global variables */
    char *GlobalVariables::modelfilename = NULL;
    char *GlobalVariables::datafilename = NULL;
-   char *GlobalVariables::amplcommand = "/usr/local/ilog/ampl10/ampl";
+   char *GlobalVariables::amplcommand = "ampl";
 
    bool GlobalVariables::logParseModel = false;
    int GlobalVariables::prtLvl = 1;
@@ -59,9 +59,6 @@
   char *string;
   opNode *opPtr;
   opNodeIx *opPtrIx;
-  //retType *ret;
-  //relNode *relPtr;
-  //indexNode *indexPtr;
 }
 
 %type <string> cnstr
@@ -253,8 +250,6 @@ stageblock: STAGE setexpression COLON {
 statement:  setdef SEMICOLON
          |  paramdef SEMICOLON
          |  vardef SEMICOLON
-         //| defn SEMICOLON
-         //| assignment SEMICOLON
          |  cnstr SEMICOLON
          |  command SEMICOLON
          |  block
@@ -270,18 +265,6 @@ command: SOLVE
        | LET indexing identifier DEFINED expr
        ;
 
-/* the first three items define a var/parameter */
-//assignment: defn ASSIGN expr
-//          | defn EQ expr
-//          | defn bd_list
-//          | equation
-//          ;
-
-/* this looks to be redundant: used from assignment */
-//bd_list: bd_list COMMA bound
-//       | bound
-//       ;
-
 relop:   LE {$$=LE;}
      |   GE {$$=GE;}
      |   LT {$$=LT;}
@@ -290,13 +273,6 @@ relop:   LE {$$=LE;}
      |   EQ {$$=EQ;}
      |   NE {$$=NE;}
      ;
-
-/* this looks to be redundant: used from bd_list */
-//bound: LE expr
-//     | LT expr
-//     | GE expr
-//     | GT expr
-//     ;
 
 equation: expr ASSIGN expr { $$ = new opNode(ASSIGN, $1, $3); }
         | expr LT expr { $$ = new opNode(LT, $1, $3); }
@@ -364,10 +340,6 @@ indexing:   LBRACE setexpr_list COLON lexpr RBRACE {
                $$=tmp;
             }
         ;
-
-//domain: /* empty */ { $$=NULL }
-//      | LBRACE setexpr_list RBRACE {/* $$ = $2*/ }
-//         ;
 
 /* FIXME: ID IN setexpression defines a dummy variable (?)
    -> have this as a separate construct
@@ -695,7 +667,7 @@ iditem:  ID {                               /* simple identifier */
                idnode = (opNode*) *(idnode->begin());
             assert(idnode->opCode==ID);
             assert(idnode->nchild()==1);
-            addItemToListNew(idnode, $3);
+            addItemToListNew(idnode, new ValueNode<long>(*$3));
             $$ = $6;
          }
       ;
@@ -707,8 +679,6 @@ iditem:  ID {                               /* simple identifier */
 */
 
 expr_list:  expr {
-               // indexNode *ixn = newIndexNode($1); 
-               // $$ = new opNode(COMMA, ixn, ixn); /* set up a list */
                $$ = new opNode(COMMA, $1);
             }
          |  expr_list COMMA expr {      /* add item to list */
@@ -720,18 +690,7 @@ expr_list:  expr {
                //printf("join nodes >%s< >%s<\n",
                //print_opNode($1),print_opNode($3));
                assert($1->opCode==COMMA);
-               //if ($1->opCode==COMMA){
-               /* is CSL already => add item to it */
                $$ = addItemToListNew($1, $3);
-               //}else{
-               /* start new CSL */
-               //printf("Start new CSL\n");
-               ////indexNode *ixn = newIndexNode($1); 
-               ////opNode *tmp = new opNode(COMMA, ixn, ixn); /*set up a list*/
-               ////tmp->nval = 1;
-               ////$$ = addItemToList(tmp, $3);
-               //$$ = new opNode(COMMA, $1, $3);
-               //}
             }
          ;
 
@@ -777,29 +736,13 @@ reduction_op:  SUM { $$=SUM; }
             ;
 
 value:   INT_VAL {
-            /* not entirly sure what is returned here as $1 */
-            // Aparently a pointer to long int
             $$=new ValueNode<long>(*$1);
-            //$$ = (opNode *) malloc(sizeof(opNode));
-            //$$->opCode = INT_VAL;
-            //$$->values = (void **) malloc(1*sizeof(void *));
-            //$$->values[0] = (int *) malloc(sizeof(int));
-            //*((int *) $$->values[0]) = $1;
          }
      |   FLOAT_VAL { 
             $$=new ValueNode<double>(*$1);
-            //$$ = (opNode *) malloc(sizeof(opNode));
-            //$$->opCode = FLOAT_VAL;
-            //$$->values = (void **) malloc(1*sizeof(void *));
-            //$$->values[0] = (double *) malloc(sizeof(double));
-            //*((double *) $$->values[0]) = $1;
          }
      |   identifier { 
             $$=new opNode(0, $1);
-            // $$ = (opNode *) malloc(sizeof(opNode));
-            // $$->opCode = ID;
-            // $$->values = (void **) malloc(1*sizeof(void *));
-            // $$->values[0] = (void *) $1;
          }
      |   INFINITY { 
             $$ = new opNode(INFINITY);
@@ -1370,7 +1313,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    {
       if (idNode->nchild()==2){
          // there is an extra argument, which is the stochparent
-         stochparent = *(int*)*(++(idNode->begin()));
+         stochparent = ((ValueNode<long>*)*(++(idNode->begin())))->value;
       }
    }
 
