@@ -29,7 +29,6 @@ void begin_model(char *name, opNode *indexing);
 void end_model();
 void add_set_to_model(char *id, opNode *indx, opNode *attrib);
 void add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib);
-void addCompToModel(AmplModel *model, model_comp *comp);
 
 
 #endif

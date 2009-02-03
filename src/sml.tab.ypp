@@ -931,7 +931,7 @@ begin_model(char *name, opNode *indexing) {
   newmc->other = new_mod;
 
   new_mod->node = newmc;            /* add pointer-to-node to the model */
-  addCompToModel(current_model, newmc);   
+  current_model->addComp(newmc);
  
   new_mod->setGlobalName();    
   /* and change current model */
@@ -968,7 +968,7 @@ begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
    newmc->other = new_mod;
 
    new_mod->node = newmc;            /* add pointer-to-node to the model */
-   addCompToModel(current_model, newmc);
+   current_model->addComp(newmc);
  
    new_mod->setGlobalName();    
    /* and change current model */
@@ -1019,7 +1019,7 @@ add_set_to_model(char *id, opNode *indx, opNode *attrib){
    }else{
       newmc = new model_comp(id, TSET, indx, attrib);
    }
-   addCompToModel(current_model, newmc);
+   current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
 }
 
@@ -1037,7 +1037,7 @@ add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib){
    if (token==MAXIMIZE) newmc->type = TMAX;
    //newmc->ismin = (token==MINIMIZE);
 
-   addCompToModel(current_model, newmc);
+   current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
 
 }
@@ -1053,7 +1053,7 @@ add_cons_to_model(char *id, opNode *indx, opNode *attrib){
    }else{
       newmc = new model_comp(id, TCON, indx, attrib)   ;
    }
-   addCompToModel(current_model, newmc);
+   current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
 
    /*
@@ -1079,7 +1079,7 @@ add_var_to_model(char *id, opNode *indx, opNode *attrib){
    }else{
       newmc = new model_comp(id, TVAR, indx, attrib);
    }
-   addCompToModel(current_model, newmc);
+   current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
 }
 
@@ -1095,7 +1095,7 @@ add_param_to_model(char *id, opNode *indx, opNode *attrib){
    }else{
       newmc = new model_comp(id, TPARAM, indx, attrib);
    }
-   addCompToModel(current_model, newmc);
+   current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
     
    /*

@@ -400,7 +400,7 @@ StochModel::expandToFlatModel()
         comp = (model_comp*)smc->clone();
         //comp = smc->transcribeToModelComp(am);
         
-        addCompToModel(am, comp);
+        am->addComp(comp);
         // this will change comp->model. If the original pointer to StochModel
         // needs to be retained, that should be stored in a stochmodel
         // entry in StochModelComp?
@@ -452,7 +452,7 @@ StochModel::expandToFlatModel()
         // and add this to the model
         smctmp = new StochModelComp("rootset", TSET, NULL, on1);
         smctmp->stochmodel = this;
-        addCompToModel(am, smctmp);
+        am->addComp(smctmp);
       }
       /* EITHER we can set this up as an ID node with name NODES and do a
          search for it by calling find_var_ref_in_context
@@ -526,7 +526,7 @@ StochModel::expandToFlatModel()
       sprintf(buf, "ind%s",(*st).c_str());
       (indset[stgcnt])->setTo(/*name*/ buf, /*type*/TSET, /*ix*/NULL, on1);
       indset[stgcnt]->stochmodel = this;
-      addCompToModel(am, indset[stgcnt]);
+      am->addComp(indset[stgcnt]);
 
 
       if (model_above){
@@ -547,7 +547,7 @@ StochModel::expandToFlatModel()
         //model_comp *newmc = new model_comp(strdup(((*st)++).c_str()), TMODEL, 
         //                                   new opNodeIx(on2), NULL);
         newmc->other = model_above;
-        addCompToModel(am, newmc);
+        am->addComp(newmc);
         model_above->node = newmc;
         model_above->ix = newmc->indexing;
       }

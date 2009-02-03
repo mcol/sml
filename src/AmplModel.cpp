@@ -21,12 +21,6 @@ extern void modified_write(ostream &fout, model_comp *comp);
 // Utility function
 bool is_int(const char *tok); // 'const' here means that tok is not modified
 
-void
-addCompToModel(AmplModel *model, model_comp *comp)
-{
-  model->addComp(comp);
-}
-
 /* ---------------------------------------------------------------------------
 AmplModel::AmplModel()
 ---------------------------------------------------------------------------- */
@@ -694,7 +688,7 @@ AmplModel::addDummyObjective()
     }
     
     newobj = new model_comp(strdup("dummy"), TMIN, NULL, attr);
-    addCompToModel(this, newobj);
+    this->addComp(newobj);
   }
 
   // and recursively do this for all AmplModels below this one
