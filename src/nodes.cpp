@@ -1210,10 +1210,10 @@ opNodeIDREF::clone()
   return newn;
 }
 
-IDNode::IDNode(const char *const new_name, opNode *stochparent) :
-   opNode(ID, stochparent), name(new_name) {}
-IDNode::IDNode(const string new_name, opNode *stochparent) :
-   opNode(ID, stochparent), name(new_name) {}
+IDNode::IDNode(const char *const new_name, long new_stochparent) :
+   opNode(ID), name(new_name), stochparent(stochparent) {}
+IDNode::IDNode(const string new_name, long new_stochparent) :
+   opNode(ID), name(new_name), stochparent(new_stochparent) {}
 
 ostream& ListNode::put(ostream& s) const {
    iterator i = list.begin();

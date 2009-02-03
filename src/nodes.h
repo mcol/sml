@@ -236,10 +236,11 @@ IDNode
 class IDNode : public opNode {
   public:
    const string name;
+   long stochparent;
   
   public:
-   IDNode(const char *const new_name, opNode *stochparent=NULL);
-   IDNode(const string name, opNode *stochparent=NULL);
+   IDNode(const char *const new_name, long stochparent=0);
+   IDNode(const string name, long stochparent=0);
    double getFloatVal() { return atof(name.c_str()); }
    char *getValue() { return strdup(name.c_str()); }
    void findIDREF(list<model_comp*> &lmc) { return; }
@@ -250,11 +251,7 @@ class IDNode : public opNode {
       return s << name;
    }
    opNode *deep_copy() { 
-      if(values) { // we have a ancestor index
-         return new IDNode(name, (*values)->deep_copy());
-      } else {
-         return new IDNode(name); 
-      }
+      return new IDNode(name, stochparent);
    }
    opNode *clone() { return deep_copy(); }
 };
