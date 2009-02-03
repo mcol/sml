@@ -14,8 +14,6 @@
 class model_comp;
 
 opNode *findKeywordinTree(opNode *root, int oc);
-int countKeywordinTree(opNode *root, int oc);
-void findIDinTreeAndAddToList(opNode *node, char  **list, int *nlist);
 opNode* find_var_ref_in_context(AmplModel *context, opNode *ref);
 opNodeIDREF* find_var_ref_in_context_(AmplModel *context, IDNode *ref);
 opNode* find_var_ref_in_indexing(const char *const name);
