@@ -879,7 +879,6 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           {
             //opNode *setn = l_addIndex[n_addIndex]->set;
             opNode *setn = ai->set;
-            opNodeIDREF *newn = new opNodeIDREF();
             model_comp *tmp;
             char *newname; 
             //fprintf(fout, "set %s_SUB within %s;\n", 
@@ -890,14 +889,8 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               cerr << "Indexing expression is " << setn->print() << "\n";
               exit(1);
             }
-            // FIXME: rewrite this code by
-            //  - using the opNodeIDREF subclass
-            //  - using the opNodeIDREF::clone() method
             /* newn is the new node, first copy the old one */
-            newn->opCode = IDREF;
-            newn->nval = setn->nval;
-            newn->values = (opNode **)calloc(setn->nval+1, sizeof(opNode *));
-            for(j=0;j<setn->nval;j++) newn->values[j] = setn->values[j];
+            opNodeIDREF *newn = ((opNodeIDREF *)setn)->clone();
             // clone the model_comp that is referred to
             newn->ref = (model_comp *)calloc(1,sizeof(model_comp));
             memcpy(newn->ref, ((opNodeIDREF*)setn)->ref, sizeof(model_comp));
