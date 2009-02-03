@@ -130,7 +130,7 @@ optionlist: /*empty */ {$$=NULL;}
 commasepoptions:  identifier {
                      $$ = new opNode(COMMA, $1);}
                |  commasepoptions COMMA identifier{
-                     $$ = addItemToListNew($1, $3);
+                     $$ = $1->push_back($3);
                   }
                ;
 /* -------------------------------------------------------------------- 
@@ -347,7 +347,7 @@ indexing:   LBRACE setexpr_list COLON lexpr RBRACE {
 setexpr_list:  setexpr_item
             |  setexpr_list COMMA setexpr_item{
                   if ($1->opCode==COMMA){
-                     $$ = addItemToListNew($1, $3);
+                     $$ = $1->push_back($3);
                   }else{
                      $$ = new opNode(COMMA, $1, $3);
                   }
@@ -432,7 +432,7 @@ setattributes: setattribute {$$=$1;}
                         $$ = new opNode(' ', $2);
                      }else{
                         if ($1->opCode==' '){
-                           $$ = addItemToListNew($1, $2);
+                           $$ = $1->push_back($2);
                         }else{
                            $$ = new opNode(' ', $1, $2);
                         }
@@ -471,7 +471,7 @@ paramattributes:  paramattribute {
                         if ($1==NULL){
                            $$ = new opNode(COMMA, $3);
                         }else{
-                           $$ = addItemToListNew($1, $3);
+                           $$ = $1->push_back($3);
                         }
                      }
                   }
@@ -667,7 +667,7 @@ iditem:  ID {                               /* simple identifier */
                idnode = (opNode*) *(idnode->begin());
             assert(idnode->opCode==ID);
             assert(idnode->nchild()==0);
-            addItemToListNew(idnode, new ValueNode<long>(*$3));
+            idnode->push_back(new ValueNode<long>(*$3));
             $$ = $6;
          }
       ;
@@ -690,7 +690,7 @@ expr_list:  expr {
                //printf("join nodes >%s< >%s<\n",
                //print_opNode($1),print_opNode($3));
                assert($1->opCode==COMMA);
-               $$ = addItemToListNew($1, $3);
+               $$ = $1->push_back($3);
             }
          ;
 

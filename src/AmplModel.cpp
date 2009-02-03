@@ -660,20 +660,16 @@ AmplModel::addDummyObjective()
           commasepon = commaseplist[0];
         }else{
           commasepon = new opNode(COMMA);
-          commasepon->nval = ix->ncomp;
-          commasepon->values = (opNode**)calloc(ix->ncomp, sizeof(opNode*));
           for(i=0;i<ix->ncomp;i++){
-            commasepon->values[i] = commaseplist[i];
+            commasepon->push_back(commaseplist[i]);
           }
         }
         opNodeIDREF *onref = new opNodeIDREF(comp);
-        onref->nval = ix->ncomp;
-        onref->values = (opNode**)calloc(ix->ncomp, sizeof(opNode*));
         for(i=0;i<ix->ncomp;i++){
           // this is the dummy variable of the i-th indexing expression
           opNode *ondum = (opNode*)*(commaseplist[i]->begin());
           if (ondum->opCode==LBRACKET) ondum=(opNode*)*(ondum->begin());
-          onref->values[i] = ondum;
+          onref->push_back(ondum);
         }
         // make the sum part
         commasepon = new opNode(LBRACE, commasepon);

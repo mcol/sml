@@ -231,7 +231,7 @@ value_list: /* empty */ {$$=NULL;}
                 $$ = new opNode(' ',$2);
               }else{
                 if ($1->opCode==' '){
-                  $$ = addItemToListNew($1, $2);
+                  $$ = $1->push_back($2);
                 }else{
                   $$ = new opNode(' ', $1, $2);
                 }
@@ -249,7 +249,7 @@ paramspec_list: /* empty */ {$$=NULL;}
                     $$ = new opNode(TOKPARAMSPECLIST, $2);
                   }else{
                     if ($1->opCode==TOKPARAMSPECLIST){
-                      $$ = addItemToListNew($1, $2);
+                      $$ = $1->push_back($2);
                     }else{        
                       $$ = new opNode(TOKPARAMSPECLIST, $1, $2);
                     }
@@ -264,7 +264,7 @@ paramspec:  param_template_opt value value_list {
               if ($3==NULL){
                 vl = new opNode(' ', $2);
               }else{
-                vl = addItemToListBeg($2, $3);
+                vl = $3->push_front($2);
               }
               if ($1!=NULL){
                 $$ = new opNode(TOKPARAMTEMPLATE, $1, vl);
@@ -283,7 +283,7 @@ value_table_list: value_table {
                     $$ = new opNode(TOKVALUETABLELIST, $1);
                   }
                 | value_table_list value_table {
-                    $$ = addItemToListNew($1, $2);
+                    $$ = $1->push_back($2);
                   }  
                 ;
 
@@ -320,7 +320,7 @@ col_label_list: col_label {
                 }
               | col_label_list col_label {
                   assert($1 && $1->opCode==' ');
-                  $$ = addItemToListNew($1, $2);
+                  $$ = $1->push_back($2);
                 }
               ;
 
