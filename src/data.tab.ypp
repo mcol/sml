@@ -299,11 +299,11 @@ value_table: TR COLON col_label_list DEFINED value_list
                opNode *vl = $4;
                assert(cll->opCode=' ');
                assert(vl->opCode=' ');
-               if (vl->nval%(cll->nval+1)!=0){
+               if (vl->nchild()%(cll->nchild()+1)!=0){
                  cerr << "DATA: error in line " << datalineno << ":\n";
-                 cerr << "Length of value table (" << vl->nval << ")";
-                 cerr << " not divisable by column labels +1 (" << cll->nval+1
-                    << ")\n";
+                 cerr << "Length of value table (" << vl->nchild() << ")";
+                 cerr << " not divisable by column labels +1 (" <<
+                   cll->nchild()+1 << ")\n";
                  exit(1);
                }
                $$ = new opNode(TOKVALUETABLE, $2, $4);

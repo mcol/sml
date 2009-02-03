@@ -152,9 +152,9 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
   // Some components of the indexing set(s) can be given by templates
   // in which case nobj is reduced
   int nobj = nix;
-  for(int i=0;i<desc->nval;i++){
+  for(opNode::Iterator i=desc->begin(); i!=desc->end(); ++i){
     opNode *templ = NULL;
-    paramspec = (opNode*)*(desc->begin());
+    paramspec = *i;
 
     // either of which can have a param_template
     if (paramspec->opCode==TOKPARAMTEMPLATE){
@@ -170,11 +170,11 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
       // this is a value list, i.e. a ' '-separated list of values
       // need to know the dimension of the parameter
       assert(paramspec->opCode==' ');
-      int nval = paramspec->nval/(nobj+1);
-      if (paramspec->nval%(nobj+1)!=0){
-        printf("Paramdef requires %d position specifiers.\n",nobj);
-        printf("Length of value list is %d which is not divisible by %d.\n",
-               paramspec->nval, nobj+1);
+      int nval = paramspec->nchild()/(nobj+1);
+      if (paramspec->nchild()%(nobj+1)!=0){
+        cerr << "Paramdef requires " << nobj << " position specifiers." << endl;
+        cerr << "Length of value list is " << paramspec->nchild() << 
+          " which is not divisible by " << nobj+1 << "." << endl;
         exit(1);
       }
       // loop through all parameter values that are given
@@ -306,13 +306,13 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
     assert(on_valtab->opCode==TOKVALUETABLE);
     
     // get the dimensions of the value_table_list
-    assert(on_valtab->nval==2);
+    assert(on_valtab->nchild()==2);
     opNode::Iterator ovti = on_valtab->begin();
     opNode *on_collabel = (opNode*)*ovti;
     opNode *on_values = (opNode*)*(++ovti);
     
-    int ncol = on_collabel->nval;
-    int nval = on_values->nval;
+    int ncol = on_collabel->nchild();
+    int nval = on_values->nchild();
     if (nval%(ncol+1)!=0){
       printf("Error in processing value_table:\n");
       printf("Number of values given (%d) is not divisable by",nval);
@@ -339,10 +339,11 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
           printf("col_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixcolset]->id);
           exit(1);
         }
-        if (cl->nval!=indices[ixcolset]->dim){
-          printf("Number of entries in bracketed expression used as col_label (%d)\n",cl->nval);
-          printf("does not match dimension (%d) of indexing set '%s'\n",
-                 indices[ixcolset]->dim, ix->sets_mc[ixcolset]->id);
+        if (cl->nchild()!=indices[ixcolset]->dim){
+          cerr << "Number of entries in bracketed expression used as "
+             "col_label (" << cl->nchild() << ")" << endl;
+          cerr << "does not match dimension (" << indices[ixcolset]->dim <<
+             ") of indexing set '" << ix->sets_mc[ixcolset]->id << "'" << endl;
           exit(1);
         }
         cl = *(cl->begin());
@@ -370,10 +371,11 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
           printf("row_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixrowset]->id);
           exit(1);
         }
-        if (rl->nval!=indices[ixrowset]->dim){
-          printf("Number of entries in bracketed expression used as row_label (%d)\n",rl->nval);
-          printf("does not match dimension (%d) of indexing set '%s'\n",
-                 indices[ixrowset]->dim, ix->sets_mc[ixrowset]->id);
+        if (rl->nchild()!=indices[ixrowset]->dim){
+          cerr << "Number of entries in bracketed expression used as "
+            "row_label (" << rl->nchild() << ")" << endl;
+          cerr << "does not match dimension (" << indices[ixrowset]->dim <<
+            ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'" << endl;
           exit(1);
         }
         rl = (opNode*)rl->values[0];
