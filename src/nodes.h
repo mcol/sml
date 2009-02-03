@@ -373,9 +373,9 @@ typedef struct _indexNode {
 //void freeOpNode(opNode *target);
 //indexNode *newIndexNode(opNode *node);
 //opNode *addItemToList(opNode *list, opNode *newitem);
-//opNode *addItemToListNew(opNode *list, opNode *newitem) {
+//opNode *addItemToListNew(opNode *list, opNode *newitem);
 opNode *addItemToListOrCreate(int oc, opNode *list, opNode *newitem);
-//opNode *addItemToListBeg(opNode *newitem, opNode *list) {
+//opNode *addItemToListBeg(opNode *newitem, opNode *list);
 //retType *newRetType(opNode *node, opNode *indexing, 
 //		    struct AmplModel_st *context);
 char *print_opNodesymb(opNode *node);
