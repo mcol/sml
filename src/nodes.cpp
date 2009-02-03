@@ -1138,9 +1138,8 @@ opNode *opNodeIx::hasDummyVar(const char *const name)
         assert(tmp2->opCode==ID);
         if (logCreate)
            cout << "Found dummy variable: " << tmp2->values[0] << "\n";
-        cerr << "Badness in hasDummyVar";
-        throw exception();
-        if (strcmp(name, (const char*)tmp2->values[0])==0)
+        IDNode *tmpid = (IDNode *) tmp2;
+        if (strcmp(name, tmpid->name.c_str())==0)
           ret = tmp2;
       }
     }
