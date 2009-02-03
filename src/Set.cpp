@@ -51,7 +51,7 @@ Set::Set(opNode *list):
     assert(item->opCode==LBRACKET);
     item = (opNode*)*(item->begin());
     assert(item->opCode==COMMA);
-    this->dim = item->nval;
+    this->dim = item->nchild();
   }
   
   // then place all the elements on the set
@@ -72,7 +72,7 @@ Set::Set(opNode *list):
       assert(item->opCode==LBRACKET);
       item = (opNode*)*(item->begin());
       assert(item->opCode==COMMA);
-      if (dim==item->nval){
+      if (dim==item->nchild()){
         int j = 0;
         for(opNode::Iterator k=item->begin(); k!=item->end(); ++k){
           opNode *idnd = (opNode*)*k;
@@ -83,7 +83,7 @@ Set::Set(opNode *list):
         //this->elements.push_back(array);
       }else{
         cerr << "First element in set has dim=" <<dim << " later element '"
-           << (opNode*)*i << "' has dim=" << item->nval << "\n";
+           << (opNode*)*i << "' has dim=" << item->nchild() << "\n";
         exit(1);
       }
     }
