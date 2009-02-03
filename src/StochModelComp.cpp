@@ -213,7 +213,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
     opNode *child = (opNode*)*((*p)->begin());
 
-    if (child->opCode!=COMMA||child->nval==1){
+    if (child->opCode!=COMMA||child->nchild()==1){
       // this is the "one argument" use if Exp within an objective function
       if (type==TMIN || type==TMAX){
         // set "up" to the argument of Exp(...)
@@ -302,24 +302,18 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
         // replace the EXP node?
 
         // create the sum expression: first build comma separated list
-        opNode *cslon = new opNode();
-        cslon->nval = listofsum.size();
-        if (cslon->nval==0){
+        if (listofsum.size()==0){
           printf("Expectation indexing expression *must* be present\n");
           exit(1);
         }
-        cslon->values = (opNode**)calloc(cslon->nval, sizeof(opNode*));
-        cslon->opCode = COMMA;
-        int cnt=0;
+        opNode *cslon = new opNode(COMMA);
         for(list<opNode*>::iterator q = listofsum.begin();q!=listofsum.end();
             q++){
-          cslon->values[cnt] = *q;
-          cnt++;
+          cslon->push_back(*q);
         }
         // and put braces around it
         cslon = new opNode(LBRACE, cslon);
         
-
         // now build the sum
         //printf("This is the sum: %s\n",cslon->print());
         cslon = new opNode(SUM, cslon, up);
@@ -343,7 +337,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
         
       }
     }
-    if (child->opCode==COMMA&&child->nval>1){
+    if (child->opCode==COMMA&&child->nchild()>1){
       // this is the two argument version of Exp(..., ...)
       // the second argument is the stage in which the expression should
       // be averaged
