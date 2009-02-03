@@ -792,11 +792,11 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
      if both are present we need to put a comma in beween 
   */
 
-  if (opn->nval+n_index>0){
+  if (opn->nchild()+n_index>0){
     if (n_index==0){
       arglist = opn->getArgumentList();
     }else{
-      if (opn->nval==0){
+      if (opn->nchild()==0){
         // arglistbuffer stays as it is
       }else{
         arglist += ",";
@@ -1021,11 +1021,11 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
      if both are present we need to put a comma in beween 
   */
 
-  if (opn->nval+n_index>0){
+  if (opn->nchild()+n_index>0){
     if (n_index==0){
       arglist = opn->getArgumentList();
     }else{
-      if (opn->nval==0){
+      if (opn->nchild()==0){
         // arglistbuffer stays as it is
       }else{
         arglist += ",";
@@ -1126,21 +1126,16 @@ model_comp::moveUp(int level){
       // one
       // => need to add indexing expressions between posm and level-1
       // starting with level-1
-      int shift = level-posm;
-      opNode **newval = (opNode**)calloc(onidr->nval+shift, sizeof(opNode*));
-      for(i=0;i<onidr->nval;i++) newval[i+shift] = onidr->values[i];
-      for(i=0;i<shift;i++){
-        opNodeIx *mix = mlist[level-1-i]->ix;
+      for(i=posm; i<level; ++i){
+        opNodeIx *mix = mlist[i]->ix;
         if (mix->ncomp!=1){
-          printf("model_comp::moveUp() does not support intermediate models with !=1 dummy Var\n");
+          cerr << "model_comp::moveUp() does not support intermediate models "
+            "with !=1 dummy Var" << endl;
           exit(1);
         }
-        newval[i] = mix->dummyVarExpr[0];
+        onidr->push_front(mix->dummyVarExpr[0]);
         /* indexing dummy var of mlist[level-1-i]*/
       }
-      onidr->nval+=shift;
-      free(onidr->values);
-      onidr->values = newval;
     }
   }
 
