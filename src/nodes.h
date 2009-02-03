@@ -36,9 +36,12 @@ class AmplModel;
  *       the opNode::values array with a C++ list.
  */
 class opNode {
+  friend opNode* find_var_ref_in_context(AmplModel *context, opNode *ref);
+  friend char *print_opNodesymb(opNode *node);
+ protected:
  public: 
-  int opCode;    //!< ID CODE of this node (a list can be found in ampl.tab.h 
   int nval;      //!< number of arguments 
+  int opCode;    //!< ID CODE of this node (a list can be found in ampl.tab.h 
   
   /** For opCode==ID, there is usually one argument, this is a (char*) to the
    *  name of the entity. If there are two arguments the second argument is
@@ -54,10 +57,13 @@ class opNode {
   static AmplModel *default_model;
   static string node;  //< current replacement string for the 'node' keyword
   static string stage; //< current replacement string for the 'stage' keyword
+
+ public:
   // ------------------------ methods -----------------------------------
   // Constructors
   opNode();
   opNode(int opCode, opNode *val1=NULL, opNode *val2=NULL, opNode *val3=NULL);
+  opNode(opNode &src);
   // Destructor
   virtual ~opNode();
 
@@ -140,8 +146,8 @@ class opNode {
       }
   };
 
-  Iterator begin() const { return Iterator(values); }
-  Iterator end() const { return Iterator(values+nval); }
+  virtual Iterator begin() const { return Iterator(values); }
+  virtual Iterator end() const { return Iterator(values+nval); }
   
   /** creates a deep_copy of the nodes: opNodes pointed to are recreated 
    *  as well. 
@@ -157,6 +163,8 @@ class opNode {
   //  virtual void foo();
 
   virtual ostream& put(ostream&s) const;
+  virtual opNode *push_back(opNode *newitem);
+  virtual opNode *push_front(opNode *newitem);
 };
 
 /** \brief A node on the operator tree representing an indexing expression. 
@@ -230,8 +238,8 @@ class IDNode : public opNode {
    const string name;
   
   public:
-   IDNode(const char *const new_name, opNode *indexing=NULL);
-   IDNode(const string name, opNode *indexing=NULL);
+   IDNode(const char *const new_name, opNode *stochparent=NULL);
+   IDNode(const string name, opNode *stochparent=NULL);
    double getFloatVal() { return atof(name.c_str()); }
    char *getValue() { return strdup(name.c_str()); }
    void findIDREF(list<model_comp*> &lmc) { return; }
@@ -312,6 +320,27 @@ template<class T> char *ValueNode<T>::getValue() {
    return strdup(ost.str().c_str());
 }
 
+/** @class ListNode
+ * represents a comma seperated list of opNodes
+ */
+class ListNode: public opNode {
+  public:
+   typedef list<opNode *>::const_iterator iterator;
+
+  private:
+   list<opNode *> list;
+
+  public:
+   ListNode();
+   iterator begin() { return list.begin(); }
+   iterator end() { return list.end(); }
+   ostream& put(ostream&s) const;
+   ListNode *deep_copy();
+   ListNode *clone();
+   opNode *push_front(opNode *node) { list.push_front(node); return this; }
+   opNode *push_back(opNode *node) { list.push_back(node); return this; }
+};
+
 // typedef struct {
 //   int relCode;
 //   opNode *lval;
@@ -344,9 +373,13 @@ typedef struct _indexNode {
 //void freeOpNode(opNode *target);
 //indexNode *newIndexNode(opNode *node);
 //opNode *addItemToList(opNode *list, opNode *newitem);
-opNode *addItemToListNew(opNode *list, opNode *newitem);
+inline opNode *addItemToListNew(opNode *list, opNode *newitem) {
+   return list->push_back(newitem);
+}
 opNode *addItemToListOrCreate(int oc, opNode *list, opNode *newitem);
-opNode *addItemToListBeg(opNode *newitem, opNode *list);
+inline opNode *addItemToListBeg(opNode *newitem, opNode *list) {
+   return list->push_front(newitem);
+}
 //retType *newRetType(opNode *node, opNode *indexing, 
 //		    struct AmplModel_st *context);
 char *print_opNodesymb(opNode *node);
