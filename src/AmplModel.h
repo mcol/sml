@@ -113,14 +113,10 @@ class AmplModel{
 
   /** set global name recursively for this and all submodels */
   void setGlobalNameRecursive();      
-
-  /** recursively write all out all tagged model components in this model and 
-   * submodels.          */
-  void writeTaggedComponents(); 
                                 //
   /** recursively write all out all tagged model components in this model and 
    * submodels to file          */
-  void writeTaggedComponents(ostream &fout);  
+  void writeTaggedComponents(ostream &fout=cout);  
                                 
   /** Recursively creates an ExpandedModel tree from the flat AmplModel */
   ExpandedModel* createExpandedModel(string smodelname, string sinstanceStub);

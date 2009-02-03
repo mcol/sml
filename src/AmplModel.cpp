@@ -93,11 +93,6 @@ AmplModel::setGlobalNameRecursive()
   }
 }
 
-/* ---------------------------------------------------------------------------
-AmplModel::writeTaggedComponents()
----------------------------------------------------------------------------- */
-void AmplModel::writeTaggedComponents(){writeTaggedComponents(cout);}
-
 /**
  *  Write all tagged model components in this model and submodels to a file.
  *
