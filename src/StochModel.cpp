@@ -58,13 +58,13 @@ void
 StochModel::expandStages()
 {
   char buffer[500];
-  list <model_comp*> dep;
+  list <ModelComp*> dep;
 
   /* analyze all dependencies of this expression */
-  model_comp::untagAll();
+  ModelComp::untagAll();
   
   stageset->findIDREF(dep);
-  for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
+  for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
     if (logSM) printf("dep: %s\n",(*q)->id);
     (*q)->tagDependencies();
   }
@@ -75,8 +75,8 @@ StochModel::expandStages()
     AmplModel *root = this;
     while (root->parent) root = root->parent;
     
-    for(list<model_comp*>::iterator p = root->comps.begin();p!=root->comps.end();p++){
-      model_comp *q = *p;
+    for(list<ModelComp*>::iterator p = root->comps.begin();p!=root->comps.end();p++){
+      ModelComp *q = *p;
       if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
     }
 
@@ -84,7 +84,7 @@ StochModel::expandStages()
   }
 
   ofstream out("tmp.mod");
-  model_comp::modifiedWriteAllTagged(out);
+  ModelComp::modifiedWriteAllTagged(out);
   out << "set settemp = " << stageset << ";\n";
   out.close();
   
@@ -159,17 +159,17 @@ void
 StochModel::expandStagesOfComp()
 {
   char buffer[500];
-  list <model_comp*> dep;
+  list <ModelComp*> dep;
   int cnt;
 
   /* analyze all dependencies of this expression */
-  model_comp::untagAll(AmplModel::root);
-  //model_comp::untagAll();
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  ModelComp::untagAll(AmplModel::root);
+  //ModelComp::untagAll();
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc = dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
       smc->stageset->findIDREF(dep);
-      for(list<model_comp*>::iterator q=dep.begin();q!=dep.end();q++){
+      for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
         if (logSM) printf("dep: %s\n",(*q)->id);
         (*q)->tagDependencies();
       }
@@ -182,8 +182,8 @@ StochModel::expandStagesOfComp()
     AmplModel *root = this;
     while (root->parent) root = root->parent;
     
-    for(list<model_comp*>::iterator p = root->comps.begin();p!=root->comps.end();p++){
-      model_comp *q = *p;
+    for(list<ModelComp*>::iterator p = root->comps.begin();p!=root->comps.end();p++){
+      ModelComp *q = *p;
       if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
     }
 
@@ -192,9 +192,9 @@ StochModel::expandStagesOfComp()
 
   
   ofstream out("tmp.mod");
-  model_comp::modifiedWriteAllTagged(out);
+  ModelComp::modifiedWriteAllTagged(out);
   cnt=0;
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
       out << "set settemp" << cnt << " = " << smc->stageset <<
@@ -209,7 +209,7 @@ StochModel::expandStagesOfComp()
   out << "model tmp.mod;\n";
   out << "data ../" << GlobalVariables::datafilename << ";\n";
   cnt=0;
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
       out << "display settemp" << cnt << " > (\"tmp" << cnt << ".out\");\n";
@@ -234,7 +234,7 @@ StochModel::expandStagesOfComp()
   }
 
   cnt=0;
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
     if (smc->stageset){
       char buf[20];
@@ -299,7 +299,7 @@ StochModel::expandToFlatModel()
       are not resolved with respect to the new model chain. 
       The chain of AmplModels is build from the leaves up
    2) In the second pass the StochModelComp components are transcribed into
-      model_comp's and their dependencies are resolved with respect to the
+      ModelComp's and their dependencies are resolved with respect to the
       new model chain. This passed is executed from root down to the leaves
 */
 
@@ -348,10 +348,10 @@ StochModel::expandToFlatModel()
       am->name = strdup((*st).c_str());
     }
 
-    model_comp *comp;
+    ModelComp *comp;
 
     // loop over all components of the StochModel 
-    for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+    for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
       StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
 
       /** @bug Submodel components within sblock's is not supported yet
@@ -383,9 +383,9 @@ StochModel::expandToFlatModel()
       // if this component should be included in the current stage
       if (inc){
         /* I presume this is all that is needed? */
-        /** @bug: NO! need to translate all references to model_comp (IDREF) 
-         * that will currently refer to model_comps of the StochModel
-         * into model_comps of the appropriate FlatModel on the FlatModel tree.
+        /** @bug: NO! need to translate all references to ModelComp (IDREF) 
+         * that will currently refer to ModelComps of the StochModel
+         * into ModelComps of the appropriate FlatModel on the FlatModel tree.
          * This might be modified by any (-1;...) expressions that refer
          * to parents in the FlatModel tree
          * I guess also need to do something with the Exp(...) expression
@@ -396,7 +396,7 @@ StochModel::expandToFlatModel()
 
         // need to clone so that pointers to ->model, ->next are setup 
         // correctly
-        comp = (model_comp*)smc->clone();
+        comp = (ModelComp*)smc->clone();
         //comp = smc->transcribeToModelComp(am);
         
         am->addComp(comp);
@@ -424,7 +424,7 @@ StochModel::expandToFlatModel()
 
     */
     
-      /* so this is a set definition model_comp with an opNode tree 
+      /* so this is a set definition ModelComp with an opNode tree 
          dscribing the indexing set
        */
       
@@ -541,9 +541,9 @@ StochModel::expandToFlatModel()
         on2 = new opNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 
-        model_comp *newmc = new model_comp(model_above->name, TMODEL, 
+        ModelComp *newmc = new ModelComp(model_above->name, TMODEL, 
                                            new opNodeIx(on2), NULL);
-        //model_comp *newmc = new model_comp(strdup(((*st)++).c_str()), TMODEL, 
+        //ModelComp *newmc = new ModelComp(strdup(((*st)++).c_str()), TMODEL, 
         //                                   new opNodeIx(on2), NULL);
         newmc->other = model_above;
         am->addComp(newmc);
@@ -571,7 +571,7 @@ StochModel::expandToFlatModel()
 
   /* =========================== PASS 2 ================================== */
      
-  /* recursively work on all the model_comps in the model tree and 
+  /* recursively work on all the ModelComps in the model tree and 
      convert them to version whose IDREF nodes are resolved with 
      respect to the new AmplModel tree */
 
@@ -613,7 +613,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 void
 StochModel::_transcribeComponents(AmplModel *current, int level)
 {
-  model_comp *mc;
+  ModelComp *mc;
   list<opNode*> dv;
   // need to set stage and node for the current model
   
@@ -634,10 +634,10 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
     opNode::node = (dv.front())->print();
   }
 
-  //list<model_comp*> newcomps(current->comps.size());
-  list<model_comp*> newcomps;
+  //list<ModelComp*> newcomps(current->comps.size());
+  list<ModelComp*> newcomps;
   // loop through all the entities in this model
-  for(list<model_comp*>::iterator p = current->comps.begin();
+  for(list<ModelComp*>::iterator p = current->comps.begin();
       p!=current->comps.end();p++){
     mc = *p;
     if (mc->type==TMODEL){
@@ -648,7 +648,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
          StochModelComp: need to resolve this with respect to the current 
          setting */
       StochModelComp *smc;
-      model_comp* mcnew;
+      ModelComp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
         mcnew = smc->transcribeToModelComp(current, level);
@@ -669,7 +669,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 void
 StochModel::_transcribeComponents(AmplModel *current, int level)
 {
-  model_comp *mc, *prev;
+  ModelComp *mc, *prev;
   list<char*>* dv;
   // need to set stage and node for the current model
   opNode::stage = "\""+stagenames->at(level)+"\"";
@@ -693,7 +693,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
          StochModelComp: need to resolve this with respect to the current 
          setting */
       StochModelComp *smc;
-      model_comp* mcnew;
+      ModelComp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
         mcnew = smc->transcribeToModelComp(current, level);

@@ -33,7 +33,7 @@ class CompDescrParam: public CompDescr{
   CompDescrParam(); //!< Default Constructor
 
   /** Construct given data file description and model component */
-  CompDescrParam(model_comp *mc, opNode *desc); //!< Construct from data
+  CompDescrParam(ModelComp *mc, opNode *desc); //!< Construct from data
 
   string printToString();
 

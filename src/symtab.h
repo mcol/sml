@@ -13,10 +13,10 @@ public:
      public:
       const string id;
       const symb_type type;
-      model_comp *mc;
+      ModelComp *mc;
 
      public:
-      Entry(const string new_id, const symb_type new_type, model_comp *new_mc) :
+      Entry(const string new_id, const symb_type new_type, ModelComp *new_mc) :
          id(new_id), type(new_type), mc(new_mc) {}
    };
 
@@ -26,7 +26,7 @@ private:
    list<Entry> table_[n_hash];
 
 public:
-   bool defineSymbol(symb_type, char *id, model_comp *mc);
+   bool defineSymbol(symb_type, char *id, ModelComp *mc);
 
 private:
    unsigned long hash_function(char *str);

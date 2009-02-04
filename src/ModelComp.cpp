@@ -8,21 +8,21 @@
 
 static bool prtAnaDep = false;
 
-int model_comp::tt_count=0;  // initialise static class member
+int ModelComp::tt_count=0;  // initialise static class member
 
-extern void modified_write(ostream &fout, model_comp *comp);
+extern void modified_write(ostream &fout, ModelComp *comp);
 
 /* This should be an IDREF (or IDREFM) node that needs to be converted
    into its global name 
    
-   The node is a pointer to a model_comp structure. Need to work out
+   The node is a pointer to a ModelComp structure. Need to work out
    which (if any) blocks it belongs to and pre-pend the name of any block to
    the global name
 
    Also need to work out which dummy variables need to be put on the
    argument list
 
-   IN: model_comp *node          : the model comp of which the name should
+   IN: ModelComp *node          : the model comp of which the name should
                                    be obtained
        int        witharg        : 1 if argument list should be printed 
        opNode     *opn           : the IDREF node that should be named
@@ -38,10 +38,10 @@ extern void modified_write(ostream &fout, model_comp *comp);
    model from which this object is referenced
 */
 
-list<model_comp*> model_comp::global_list;
+list<ModelComp*> ModelComp::global_list;
 
 /* --------------------------------------------------------------------------
-model_comp::model_comp(char* is, compType type, opNode *ix, opNode *attr)
+ModelComp::ModelComp(char* is, compType type, opNode *ix, opNode *attr)
 ---------------------------------------------------------------------------- */
 /** Construct a model component given its name, id, indexing and attribute
  *  sections.
@@ -54,10 +54,10 @@ model_comp::model_comp(char* is, compType type, opNode *ix, opNode *attr)
  *  @param attrib      root node of the attribute expression.
  *                     IDs should have been replaced by IDREFs 
  */
-model_comp::model_comp(char *id, compType type, 
+ModelComp::ModelComp(char *id, compType type, 
                        opNode *indexing, opNode *attrib)
 {
-  //model_comp *newmc = (model_comp*)calloc(1,sizeof(model_comp));
+  //ModelComp *newmc = (ModelComp*)calloc(1,sizeof(ModelComp));
   value = NULL;
   this->tag = false;
   this->id = strdup(id);
@@ -72,7 +72,7 @@ model_comp::model_comp(char *id, compType type,
   //delete(indexing);
   this->attributes = attrib;
 
-  this->count = model_comp::tt_count++;
+  this->count = ModelComp::tt_count++;
   if (GlobalVariables::prtLvl>0) 
     printf("Defining model component (%4d): %s\n",this->count, id);
 
@@ -81,12 +81,12 @@ model_comp::model_comp(char *id, compType type,
   /* now set up the dependency list for the component */
   //  printf("  dependencies in indexing: \n");
   //  if (indexing) {
-  //    list<model_comp*> lmc;
+  //    list<ModelComp*> lmc;
   //    indexing->findIDREF(&lmc);
-  //    for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
+  //    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
   //      // see if element already on dep list
   //      bool found=false;
-  //      for (list<model_comp*>::iterator q=dependencies.begin();
+  //      for (list<ModelComp*>::iterator q=dependencies.begin();
   //           q!=dependencies.end();q++)
   //        if (*p==*q) found = true;
   //      if (!found)
@@ -96,14 +96,14 @@ model_comp::model_comp(char *id, compType type,
   //  if (attrib){
   //    printf("  dependencies in attributes: %s\n", attrib->print());
   //    //attrib->findIDREF();
-  //    list<model_comp*> lmc;
+  //    list<ModelComp*> lmc;
   //    attributes->findIDREF(&lmc);
   //    // lmc should be a list of model components
   //    // how do I iterate through it?
-  //    for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
+  //    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
   //      // see if element already on dep list
   //      bool found=false;
-  //      for (list<model_comp*>::iterator q=dependencies.begin();
+  //      for (list<ModelComp*>::iterator q=dependencies.begin();
   //           q!=dependencies.end();q++)
   //        if (*p==*q) found = true;
   //     if (!found)
@@ -111,7 +111,7 @@ model_comp::model_comp(char *id, compType type,
   //    }
   //  }
   //  printf("--------------------------------\n");
-  //  for( list<model_comp*>::iterator p=dependencies.begin(); 
+  //  for( list<ModelComp*>::iterator p=dependencies.begin(); 
   //       p!=dependencies.end(); ++p)
   //    printf("%s\n",(*p)->id);
 
@@ -119,10 +119,10 @@ model_comp::model_comp(char *id, compType type,
 }
 
 /* --------------------------------------------------------------------------
-model_comp::setUpDependencies()
+ModelComp::setUpDependencies()
 ---------------------------------------------------------------------------- */
 void
-model_comp::setUpDependencies()
+ModelComp::setUpDependencies()
 {
   dependencies.clear();
   /* now set up the dependency list for this component */
@@ -132,12 +132,12 @@ model_comp::setUpDependencies()
   }
   if (indexing) {
     // get list of IDREF nodes in 'indexing'
-    list<model_comp*> lmc;
+    list<ModelComp*> lmc;
     indexing->findIDREF(lmc);
-    for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
+    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
-      for (list<model_comp*>::iterator q=dependencies.begin();
+      for (list<ModelComp*>::iterator q=dependencies.begin();
            q!=dependencies.end();q++)
         if (*p==*q) found = true;
       if (!found)
@@ -148,14 +148,14 @@ model_comp::setUpDependencies()
     if (prtAnaDep)
        cout << " dependencies in attributes: " << *attributes << "\n";
     //attrib->findIDREF();
-    list<model_comp*> lmc;
+    list<ModelComp*> lmc;
     attributes->findIDREF(lmc);
     // lmc should be a list of model components
     // how do I iterate through it?
-    for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
+    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
-      for (list<model_comp*>::iterator q=dependencies.begin();
+      for (list<ModelComp*>::iterator q=dependencies.begin();
            q!=dependencies.end();q++)
         if (*p==*q) found = true;
       if (!found)
@@ -163,7 +163,7 @@ model_comp::setUpDependencies()
     }
   }
   if (prtAnaDep){
-    for( list<model_comp*>::iterator p=dependencies.begin(); 
+    for( list<ModelComp*>::iterator p=dependencies.begin(); 
          p!=dependencies.end(); ++p)
       printf("  %s\n",(*p)->id);
     printf("--------------------------------\n");
@@ -171,10 +171,10 @@ model_comp::setUpDependencies()
 }
 
 /* --------------------------------------------------------------------------
-model_comp::model_comp()
+ModelComp::ModelComp()
 ---------------------------------------------------------------------------- */
 /** Default constructor: just sets all fields to -1/NULL/false               */
-model_comp::model_comp()
+ModelComp::ModelComp()
 {
   type = TNOTYPE;
   id = NULL;
@@ -189,7 +189,7 @@ model_comp::model_comp()
   value = NULL;
 }
 /* --------------------------------------------------------------------------
-model_comp::setTo()
+ModelComp::setTo()
 ---------------------------------------------------------------------------- */
 /** Set a model component to a given name, id, indexing and attribute
  *  sections.
@@ -204,11 +204,11 @@ model_comp::setTo()
  */
 
 void
-model_comp::setTo(char *id, compType type, 
+ModelComp::setTo(char *id, compType type, 
                        opNodeIx *indexing, opNode *attrib)
 {
   static int tt_count=0;
-  //model_comp *newmc = (model_comp*)calloc(1,sizeof(model_comp));
+  //ModelComp *newmc = (ModelComp*)calloc(1,sizeof(ModelComp));
   this->tag = false;
   this->id = strdup(id);
   this->type = type;
@@ -227,12 +227,12 @@ model_comp::setTo(char *id, compType type,
   this->count = tt_count++;
   if (prtAnaDep) printf(" dependencies in indexing: \n");
   if (indexing) {
-    list<model_comp*> lmc;
+    list<ModelComp*> lmc;
     indexing->findIDREF(lmc);
-    for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
+    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
-      for (list<model_comp*>::iterator q=dependencies.begin();
+      for (list<ModelComp*>::iterator q=dependencies.begin();
            q!=dependencies.end();q++)
         if (*p==*q) found = true;
       if (!found)
@@ -243,14 +243,14 @@ model_comp::setTo(char *id, compType type,
     if (prtAnaDep) 
       printf(" dependencies in attributes: %s\n", attrib->print().c_str());
     //attrib->findIDREF();
-    list<model_comp*> lmc;
+    list<ModelComp*> lmc;
     attrib->findIDREF(lmc);
     // lmc should be a list of model components
     // how do I iterate through it?
-    for( list<model_comp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
+    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
-      for (list<model_comp*>::iterator q=dependencies.begin();
+      for (list<ModelComp*>::iterator q=dependencies.begin();
            q!=dependencies.end();q++)
         if (*p==*q) found = true;
       if (!found)
@@ -258,7 +258,7 @@ model_comp::setTo(char *id, compType type,
     }
   }
   if (prtAnaDep){
-    for( list<model_comp*>::iterator p=dependencies.begin(); 
+    for( list<ModelComp*>::iterator p=dependencies.begin(); 
          p!=dependencies.end(); ++p)
       printf("  %s\n",(*p)->id);
     //return newmc;
@@ -269,48 +269,48 @@ model_comp::setTo(char *id, compType type,
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::untagAll()
+ModelComp::untagAll()
 ---------------------------------------------------------------------------- */
 /** Set tag=false for all model components */
 void 
-model_comp::untagAll()
+ModelComp::untagAll()
 {
   // iterate through the global list
-  for (list<model_comp*>::iterator p=global_list.begin();p!=global_list.end();
+  for (list<ModelComp*>::iterator p=global_list.begin();p!=global_list.end();
        p++){
     (*p)->tag = false;
   }
 }
 /* ---------------------------------------------------------------------------
-model_comp::untagAll(AmplModel *start)
+ModelComp::untagAll(AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively set tag=false for all model components 
  *  @param start The AmplModel where to start the recursion
  */
 
 void 
-model_comp::untagAll(AmplModel *start)
+ModelComp::untagAll(AmplModel *start)
 {
   // iterate through the local list
-  for (list<model_comp*>::iterator p=start->comps.begin();
+  for (list<ModelComp*>::iterator p=start->comps.begin();
        p!=start->comps.end();p++){
     (*p)->tag = false;
     if ((*p)->type==TMODEL){
-      model_comp::untagAll((AmplModel*)(*p)->other);
+      ModelComp::untagAll((AmplModel*)(*p)->other);
     }
   }
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::writeAllTagged()
+ModelComp::writeAllTagged()
 ---------------------------------------------------------------------------- */
 /** Write out a list of all model components that have the tag set           */
 void 
-model_comp::writeAllTagged()
+ModelComp::writeAllTagged()
 {
 
   // iterate through the global list
-  for (list<model_comp*>::iterator p=global_list.begin();p!=global_list.end();
+  for (list<ModelComp*>::iterator p=global_list.begin();p!=global_list.end();
        p++){
     if ((*p)->tag) {
       printf("%s\n",(*p)->id);
@@ -318,36 +318,36 @@ model_comp::writeAllTagged()
   }
 }
 /* ---------------------------------------------------------------------------
-model_comp::writeAllTagged(AmplModel *start)
+ModelComp::writeAllTagged(AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively write out a list of all model components that have the tag set 
  *  @param start The AmplModel where to start the recursion
  */
 void 
-model_comp::writeAllTagged(AmplModel *start)
+ModelComp::writeAllTagged(AmplModel *start)
 {
   // iterate through the global list
-  for (list<model_comp*>::iterator p=start->comps.begin();
+  for (list<ModelComp*>::iterator p=start->comps.begin();
        p!=start->comps.end();p++){
     if ((*p)->tag) {
       printf("%s::%s\n",start->name, (*p)->id);
     }
     if ((*p)->type==TMODEL){
-      model_comp::writeAllTagged((AmplModel*)(*p)->other);
+      ModelComp::writeAllTagged((AmplModel*)(*p)->other);
     }
   }
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::writeAllTagged()
+ModelComp::writeAllTagged()
 ---------------------------------------------------------------------------- */
 /** Write out a list of all model components that have the tag set:
  Just write a list of names */
 void 
-model_comp::writeAllTagged(ostream &fout)
+ModelComp::writeAllTagged(ostream &fout)
 {
   // iterate through the global list
-  for (list<model_comp*>::iterator p=global_list.begin();p!=global_list.end();
+  for (list<ModelComp*>::iterator p=global_list.begin();p!=global_list.end();
        p++){
     if ((*p)->tag) {
       fout << (*p)->id << "\n";
@@ -356,29 +356,29 @@ model_comp::writeAllTagged(ostream &fout)
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::writeAllTagged(ostream &fout, AmplModel *start)
+ModelComp::writeAllTagged(ostream &fout, AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively write out a list of all model components that have the tag set 
  *  @param start The AmplModel where to start the recursion
  *  @param fout File where to write to
  */
 void 
-model_comp::writeAllTagged(ostream &fout, AmplModel *start)
+ModelComp::writeAllTagged(ostream &fout, AmplModel *start)
 {
   // iterate through the global list
-  for (list<model_comp*>::iterator p=start->comps.begin();
+  for (list<ModelComp*>::iterator p=start->comps.begin();
        p!=start->comps.end();p++){
     if ((*p)->tag) {
       fout << (*p)->id << "\n";
     }
     if ((*p)->type==TMODEL){
-      model_comp::writeAllTagged(fout, (AmplModel*)(*p)->other);
+      ModelComp::writeAllTagged(fout, (AmplModel*)(*p)->other);
     }
   }
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::modifiedWriteAllTagged()
+ModelComp::modifiedWriteAllTagged()
 ---------------------------------------------------------------------------- */
 /** Write out a list of all model components that have the tag set:
  write every component how it would appear in the global model file 
@@ -388,10 +388,10 @@ model_comp::modifiedWriteAllTagged()
   model it is called 
 */
 void 
-model_comp::modifiedWriteAllTagged(ostream &fout)
+ModelComp::modifiedWriteAllTagged(ostream &fout)
 {
   // iterate through the global list
-  for (list<model_comp*>::iterator p=global_list.begin();p!=global_list.end();
+  for (list<ModelComp*>::iterator p=global_list.begin();p!=global_list.end();
        p++){
     if ((*p)->tag) {
       modified_write(fout, *p);
@@ -400,7 +400,7 @@ model_comp::modifiedWriteAllTagged(ostream &fout)
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
+ModelComp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively write out a list of all model components that have the tag set:
  * write every component how it would appear in the global model file 
@@ -413,39 +413,39 @@ model_comp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
  */
 
 void 
-model_comp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
+ModelComp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
 {
   // iterate through the global list
-  for (list<model_comp*>::iterator p=start->comps.begin();
+  for (list<ModelComp*>::iterator p=start->comps.begin();
        p!=start->comps.end();p++){
     if ((*p)->tag) {
       modified_write(fout, *p);
     }
     if ((*p)->type==TMODEL){
-      model_comp::modifiedWriteAllTagged(fout, (AmplModel*)(*p)->other);
+      ModelComp::modifiedWriteAllTagged(fout, (AmplModel*)(*p)->other);
     }
   }
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::getSetMembership()
+ModelComp::getSetMembership()
 ---------------------------------------------------------------------------- */
 /** Write out the members of a set */
 list <string>
-model_comp::getSetMembership()
+ModelComp::getSetMembership()
 {
   char buffer[500];
 
   if (type!=TSET){
-    printf("ERROR: Called getSetMembership() for model_comp not of type SET\n");
+    printf("ERROR: Called getSetMembership() for ModelComp not of type SET\n");
     exit(1);
   }
   
   ofstream out("tmp.mod");
 
-  model_comp::untagAll();
+  ModelComp::untagAll();
   tagDependencies();
-  model_comp::writeAllTagged(out);
+  ModelComp::writeAllTagged(out);
   out.close();
   
   out.open("tmp.scr");
@@ -474,15 +474,15 @@ model_comp::getSetMembership()
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::print()
+ModelComp::print()
 ---------------------------------------------------------------------------- */
 /** Print a detailed diagnostic description of this model component
  *  with the values of all its fields                                        */
 void
-model_comp::print()
+ModelComp::print()
 {
   cout << "------------------------------------------------------------\n";
-  cout << "model_comp: " << id << "\n";
+  cout << "ModelComp: " << id << "\n";
   cout << "  type: " << nameTypes[type] << "\n";
   //printf("   (ismin: %d)\n",ismin);
   cout << "  attributes: " << *attributes << "\n";
@@ -492,7 +492,7 @@ model_comp::print()
   //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
   cout << "  dependencies: " << dependencies.size() << ":\n";
   cout << "      ";
-  for(list<model_comp*>::iterator p = dependencies.begin();
+  for(list<ModelComp*>::iterator p = dependencies.begin();
       p!=dependencies.end();p++)
     cout << (*p)->model->name << "::" << (*p)->id << " ";
   cout << "  model: " << model->name<< "\n";
@@ -501,16 +501,16 @@ model_comp::print()
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::dump(ostream &fout)
+ModelComp::dump(ostream &fout)
 ---------------------------------------------------------------------------- */
 /** Print a detailed diagnostic description of this model component
  *  with the values of all its fields                                        */
 void
-model_comp::dump(ostream &fout)
+ModelComp::dump(ostream &fout)
 {
   fout << "MCDP  --------------------------------------------------------"
      "----\n";
-  fout << "MCDP model_comp: " << id << " ("<< (void *) this << ")\n";
+  fout << "MCDP ModelComp: " << id << " ("<< (void *) this << ")\n";
   fout << "MCDP  type: " << nameTypes[type] << "\n";
   //printf("   (ismin: %d)\n",ismin);
   fout << "MCDP  attributes: " << attributes << "\n";
@@ -522,7 +522,7 @@ model_comp::dump(ostream &fout)
   //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
   fout << "MCDP  dependencies: " << dependencies.size() << ":\n";
   fout << "      ";
-  for(list<model_comp*>::iterator p = dependencies.begin();
+  for(list<ModelComp*>::iterator p = dependencies.begin();
       p!=dependencies.end();p++)
     fout << (*p)->model->name << "::" << (*p)->id << " ";
   fout << "\nMCDP  model: " << model->name << "\n";
@@ -534,40 +534,40 @@ model_comp::dump(ostream &fout)
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::printBrief()
+ModelComp::printBrief()
 ---------------------------------------------------------------------------- */
 /** Print a one line description of the object: type and name                */
 void
-model_comp::printBrief()
+ModelComp::printBrief()
 {
   printf("%s %s\n",nameTypes[type], id);
 }
 /* ---------------------------------------------------------------------------
-model_comp::tagDependencies()
+ModelComp::tagDependencies()
 ---------------------------------------------------------------------------- */
 /** Recursively set tag=true for this model component and all components that  
  *  it depends on (i.e. everything listed in its dependency list           */
 void
-model_comp::tagDependencies()
+ModelComp::tagDependencies()
 {
   this->tag = true;
-  for(list<model_comp*>::iterator p = dependencies.begin();
+  for(list<ModelComp*>::iterator p = dependencies.begin();
       p!=dependencies.end();p++){
     (*p)->tagDependencies();
   }
 }
 
 /* ---------------------------------------------------------------------------
-model_comp::deep_copy()
+ModelComp::deep_copy()
 ---------------------------------------------------------------------------- */
-/** Create a deep-copy of the model_comp object: 
+/** Create a deep-copy of the ModelComp object: 
  *  The tree of attributes and indexing expressions is recreated using 
  *  entirely new objects.
  */
-model_comp *
-model_comp::deep_copy()
+ModelComp *
+ModelComp::deep_copy()
 {
-  model_comp *newm = new model_comp();
+  ModelComp *newm = new ModelComp();
 
   newm->type = type;
   newm->id = strdup(id);
@@ -585,15 +585,15 @@ model_comp::deep_copy()
   return newm;
 }
 /* ---------------------------------------------------------------------------
-model_comp::clone()
+ModelComp::clone()
 ---------------------------------------------------------------------------- */
 /** Create a shallow copy of the object: only the top level object is 
  *  copied, pointers below are reused 
  */
-model_comp *
-model_comp::clone()
+ModelComp *
+ModelComp::clone()
 {
-  model_comp *newm = new model_comp();
+  ModelComp *newm = new ModelComp();
 
   newm->type = type;
   newm->id = id;
@@ -624,12 +624,12 @@ getGlobalName
  *    + dummy variables of indexing expressions of block up to model_of_comp
  *    + original arguments of the component (as given in the SML file)
  *   The appropriate argument list depends on both the model of the component
- *   and in which model this instance of referal of the model_comp is 
+ *   and in which model this instance of referal of the ModelComp is 
  *   (the current_model)
  *   Basically we need to identify the common ancestor model of the 
  *   current_model and the model_of_comp. The arguments originating from 
  *   block indexing expressions between here and the model_of_comp are already 
- *   included in the argument list of the model_comp. Anything below needs to
+ *   included in the argument list of the ModelComp. Anything below needs to
  *   be prepended to the argument list
  *
  * @param[in] node           The model component in question 
@@ -657,10 +657,10 @@ getGlobalName
  */
 
 char *
-getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model, 
+getGlobalName(ModelComp *node, const opNode *opn, AmplModel *current_model, 
               int witharg)
 {
-  //model_comp *node = opn->values[0];  /* this is the model_component */
+  //ModelComp *node = opn->values[0];  /* this is the ModelComponent */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
   string globalName;
@@ -843,12 +843,12 @@ getGlobalName(model_comp *node, const opNode *opn, AmplModel *current_model,
 */
 
 /* ---------------------------------------------------------------------------
-getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model, 
+getGlobalNameNew(ModelComp *node, opNode *opn, AmplModel *current_model, 
               int witharg)
 ---------------------------------------------------------------------------- */
 /** New version of getGlobalName that does *not* use the addIndex stack
  *  but creates the modified argument list by looking at the indexing
- *  expressions of the submodel tree leading to this model_comp
+ *  expressions of the submodel tree leading to this ModelComp
  *
  * @param[in] node           The model component in question 
  * @param[in] opn            The node (IDREF) of the model component
@@ -871,21 +871,21 @@ getGlobalNameNew(model_comp *node, opNode *opn, AmplModel *current_model,
  *    + dummy variables of indexing expressions of block up to model_of_comp
  *    + original arguments of the component (as given in the SML file)
  *   The appropriate argument list depends on both the model of the component
- *   and in which model this instance of referal of the model_comp is 
+ *   and in which model this instance of referal of the ModelComp is 
  *   (the current_model)
  *   Basically we need to identify the common ancestor model of the 
  *   current_model and the model_of_comp. The arguments originating from 
  *   block indexing expressions between here and the model_of_comp are already 
- *   included in the argument list of the model_comp. Anything below needs to
+ *   included in the argument list of the ModelComp. Anything below needs to
  *   be prepended to the argument list
  *
  */
 
 char *
-getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model, 
+getGlobalNameNew(ModelComp *node, const opNode *opn, AmplModel *current_model, 
               int witharg)
 {
-  //model_comp *node = opn->values[0];  /* this is the model_component */
+  //ModelComp *node = opn->values[0];  /* this is the ModelComponent */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
   string arglist;
@@ -978,7 +978,7 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
     for(i=1;i<=clvl;i++){ //start from 1: 0 is the root which has no indexing
       /* FIXME: here the dv cannot be printed by opNode.print() if it is 
          a list like (i,j)! */
-      model_comp *node_model = path1[n_path1-1-i]->node;
+      ModelComp *node_model = path1[n_path1-1-i]->node;
       opNodeIx *indexing_model = node_model->indexing;
       
       if (indexing_model){
@@ -1052,13 +1052,13 @@ getGlobalNameNew(model_comp *node, const opNode *opn, AmplModel *current_model,
 }
 
 /* --------------------------------------------------------------------------
-model_comp::moveUp(int level)
+ModelComp::moveUp(int level)
 ---------------------------------------------------------------------------- */
-/** Queue the model_comp to be moved up by 'level' levels in the model tree:
+/** Queue the ModelComp to be moved up by 'level' levels in the model tree:
  *  Just removing the component from the current model and adding it to a
- *  parent is dangerous, since model_comp::moveUp is typically called from
- *  within a (nested) loop over all model_comps (->comps) in the AmplModels
- *  removing/adding items to list<model_comp*> comps while there is an
+ *  parent is dangerous, since ModelComp::moveUp is typically called from
+ *  within a (nested) loop over all ModelComps (->comps) in the AmplModels
+ *  removing/adding items to list<ModelComp*> comps while there is an
  *  iterator running over it will invalidate that iterator.
  *  => hence the request to move is scheduled to be executed by
  *     AmplModel::applyChanges() after the loop over all components
@@ -1068,12 +1068,12 @@ model_comp::moveUp(int level)
  *  local indexing expression expanded
  */
 void
-model_comp::moveUp(int level){
+ModelComp::moveUp(int level){
   AmplModel *current = model;
   int i, posm;
   
   // -------------------- Expand local indexing expression -----------------
-  /* This model_comp is written for the 'current' model and is now re-asigned
+  /* This ModelComp is written for the 'current' model and is now re-asigned
      to a different model. In order for that to work the indexing expressions
      in all IDREFs in its attribute/indexing section have got to be
      rewritten
@@ -1084,9 +1084,9 @@ model_comp::moveUp(int level){
      of the blocks up to the current model in the model tree. Both indexing 
      expression together need to combine to get the correct global indexing
 
-     When moving a model_comp up in the tree, we therefor need to do the 
+     When moving a ModelComp up in the tree, we therefor need to do the 
      following to have correct global indexing:
-       - all IDREFs to model_comp's in models below the new model 
+       - all IDREFs to ModelComp's in models below the new model 
          (current.parent(level)) need to have the block indexing expressions
          between their own model and current.parent(level) added
          to their local indexing
@@ -1110,7 +1110,7 @@ model_comp::moveUp(int level){
   for(list<opNode*>::iterator p = idrefnodes->begin();
       p!=idrefnodes->end();p++){
     opNodeIDREF *onidr = dynamic_cast<opNodeIDREF*>(*p);
-    model_comp *mc = onidr->ref;
+    ModelComp *mc = onidr->ref;
     AmplModel *model = mc->model;
     
     // need to check if this model is below the new assigned model
@@ -1122,7 +1122,7 @@ model_comp::moveUp(int level){
       }
     }
     if (found){
-      // this is a model between the old and new model for model_comp *this
+      // this is a model between the old and new model for ModelComp *this
       // posm gives the position: 0 is the old model, level is the new
       // one
       // => need to add indexing expressions between posm and level-1
@@ -1130,7 +1130,7 @@ model_comp::moveUp(int level){
       for(i=posm; i<level; ++i){
         opNodeIx *mix = mlist[i]->ix;
         if (mix->ncomp!=1){
-          cerr << "model_comp::moveUp() does not support intermediate models "
+          cerr << "ModelComp::moveUp() does not support intermediate models "
             "with !=1 dummy Var" << endl;
           exit(1);
         }
@@ -1158,7 +1158,7 @@ model_comp::moveUp(int level){
 }
 
 /* --------------------------------------------------------------------------
-model_comp::reassignDependencies()
+ModelComp::reassignDependencies()
 ---------------------------------------------------------------------------- */
 /** In the process of building the AmplModel tree from the StochModelTree
  *  some of the IDREF dependency nodes still point to the StochModelComp
@@ -1169,10 +1169,10 @@ model_comp::reassignDependencies()
  */
 
 void
-model_comp::reassignDependencies()
+ModelComp::reassignDependencies()
 {
   list<opNode*> *idrefnodes = new list<opNode*>;
-  list<model_comp*> newdep;
+  list<ModelComp*> newdep;
 
   if (indexing) indexing->findIDREF(idrefnodes);
   if (attributes) attributes->findIDREF(idrefnodes);
@@ -1180,12 +1180,12 @@ model_comp::reassignDependencies()
   for(list<opNode*>::iterator p = idrefnodes->begin();
       p!=idrefnodes->end();p++){
     opNodeIDREF *onidr = dynamic_cast<opNodeIDREF*>(*p);
-    model_comp *mc = onidr->ref;
+    ModelComp *mc = onidr->ref;
     AmplModel *model = mc->model;
     
-    //check that this model_comp belongs to this model
+    //check that this ModelComp belongs to this model
     bool found = false;
-    for(list<model_comp*>::iterator q = model->comps.begin();
+    for(list<ModelComp*>::iterator q = model->comps.begin();
         q!=model->comps.end();q++){
       if (strcmp((*q)->id, mc->id)==0){
         found = true;
@@ -1212,4 +1212,4 @@ model_comp::reassignDependencies()
 }
 
 void
-model_comp::foo(){}
+ModelComp::foo(){}

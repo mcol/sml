@@ -15,12 +15,12 @@ enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
  *  This is needed to treat expectation constraints that in the postprocessing
  *  need to be removed from the model in which they are defined and added
  *  to a different model. This action cannot be done by recursively working
- *  through all models and model_comps (since removing/adding comps 
+ *  through all models and ModelComps (since removing/adding comps 
  *  invalidates the iterators used in the recursion)
  */
 class changeitem{
  public:
-  model_comp *comp;   //< The component to be added or removed
+  ModelComp *comp;   //< The component to be added or removed
   AmplModel *model;   //< The model to which it should be added/removed
   int action;         //< the action (CHANGE_REM/CHANGE_ADD)
 };
@@ -49,7 +49,7 @@ class AmplModel{
    *             by name.
    *  @attention should have a global hash table of *all* defined model 
    *             components. Could be used in find_var_ref_in_context which
-   *             does the job of finding the model_component object reference
+   *             does the job of finding the ModelComponent object reference
    *             for components refered to in expressions.
    *             => Need a way to only look for a match in the current part
    *                of the model tree.
@@ -71,22 +71,22 @@ class AmplModel{
   int n_total;     //!< total number of declarations
   int level;       //!< level of this model on the flat model tree (root=0)
 
-  /** the model_comp node correspding to this model 
+  /** the ModelComp node correspding to this model 
    * (this is defined if this is not root) */
-  model_comp *node; 
+  ModelComp *node; 
 		       
 
   /** The list of components of this model 
    */
-  list<model_comp*> comps;
+  list<ModelComp*> comps;
 
-  //model_comp *first; /**< pointer to the first model component */
-  //model_comp *last;  /**< pointer to the last model component */
-  //model_comp *vars;
-  //model_comp *cons;
-  //model_comp *objs;
-  //model_comp *sets;
-  //model_comp *params;
+  //ModelComp *first; /**< pointer to the first model component */
+  //ModelComp *last;  /**< pointer to the last model component */
+  //ModelComp *vars;
+  //ModelComp *cons;
+  //ModelComp *objs;
+  //ModelComp *sets;
+  //ModelComp *params;
 
   AmplModel *parent; /**< the parent if this is a submodel of another model */
   // all models except root might have an indexing expression:
@@ -125,10 +125,10 @@ class AmplModel{
   void addDummyObjective();
 
   /** add a model component to the model */
-  void addComp(model_comp *comp);
+  void addComp(ModelComp *comp);
 
   /** remove a model component from the model */
-  void removeComp(model_comp *comp);
+  void removeComp(ModelComp *comp);
 
   /** recursively recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();

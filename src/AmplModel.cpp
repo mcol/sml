@@ -15,7 +15,7 @@
 list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
 
-extern void modified_write(ostream &fout, model_comp *comp);
+extern void modified_write(ostream &fout, ModelComp *comp);
 //extern int n_addIndex;
 //extern add_index *l_addIndex[];
 
@@ -80,11 +80,11 @@ AmplModel::setGlobalNameRecursive()
 void 
 AmplModel::setGlobalNameRecursive()
 {
-  model_comp *mc;
+  ModelComp *mc;
   setGlobalName();
   
   // loop through all model components
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     mc = *p;
     if (mc->type==TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
@@ -140,8 +140,8 @@ AmplModel::writeTaggedComponents(ostream &fout)
   l_addIndex.push_back(li);
 
   // loop through all model components
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
-    model_comp *c = *p;
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+    ModelComp *c = *p;
     //if (c->tag) printf("%s\n",c->id);
     if (c->tag) modified_write(fout, c);
     if (c->type==TMODEL) {
@@ -244,8 +244,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
   // I assume that *all* constraints declared in the *.nl file are part of 
   // the node
   
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
-    model_comp *mc = *p;
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+    ModelComp *mc = *p;
     if (mc->type == TVAR){
       // need to translate this into the global name of the variable, tgether
       // with any applicable indexing expression
@@ -472,7 +472,7 @@ AmplModel::print()
   printf("AM: Nb constraints: %d\n", n_cons);
   printf("AM: Nb objectives: %d\n", n_submodels);
   printf("AM: Entities declared:\n");
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     printf("AM:   ");
     (*p)->printBrief();
   }
@@ -480,8 +480,8 @@ AmplModel::print()
   if (n_submodels>0)
     printf("AM: now list the submodels:\n");
   
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
-    model_comp *mc = *p;
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+    ModelComp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
       am->print();
@@ -519,15 +519,15 @@ AmplModel::dump(ostream &fout)
   fout << "DP: Nb constraints: " <<  n_cons << "\n";
   fout << "DP: Nb objectives: " <<  n_submodels << "\n";
   fout << "DP: List components:";
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     (*p)->dump(fout);
   }
 
   if (n_submodels>0)
     fout << "DP: now list the submodels:\n";
   
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
-    model_comp *mc = *p;
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+    ModelComp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
       am->dump(fout);
@@ -551,7 +551,7 @@ AmplModel::check()
     exit(1);
   }
   if (node==NULL && strcmp(name,"root")!=0){
-    cerr << "AmplModel " << name << " is not root but has no model_comp "
+    cerr << "AmplModel " << name << " is not root but has no ModelComp "
        "node associated\n";
     exit(1);
   }
@@ -607,23 +607,23 @@ AmplModel::addDummyObjective()
 void
 AmplModel::addDummyObjective()
 {
-  model_comp *newobj;
+  ModelComp *newobj;
   vector<opNode*> list_on_sum;
   opNode *attr;
-  model_comp *comp;
+  ModelComp *comp;
   int i;
 
   // get list of all variable declarations in the model:
   /* build up list_on_sum which is a list of all variable definitions in this
      model:
       - for variables without indexing expression a opNodeIDREF pointing
-        to this model_comp is added
+        to this ModelComp is added
       - for variables with indexing expression an opNode tree that encodes
           sum {dumN in SET} var[dumN]
         is added
   */
 
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     comp = *p;
     if (comp->type==TVAR){
       // if there is no indexing expression, simply add this
@@ -683,12 +683,12 @@ AmplModel::addDummyObjective()
       }
     }
     
-    newobj = new model_comp(strdup("dummy"), TMIN, NULL, attr);
+    newobj = new ModelComp(strdup("dummy"), TMIN, NULL, attr);
     this->addComp(newobj);
   }
 
   // and recursively do this for all AmplModels below this one
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     comp = *p;
     if (comp->type==TMODEL){
       // might be that we need to add the indexing expression on the stack 
@@ -701,12 +701,12 @@ AmplModel::addDummyObjective()
 AmplModel::removeComp()
 ---------------------------------------------------------------------------- */
 void
-AmplModel::removeComp(model_comp *comp)
+AmplModel::removeComp(ModelComp *comp)
 {
   // FIXME: check of comp is indeed on the list
   
   bool found = false;
-  for(list<model_comp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     if (strcmp((*p)->id,comp->id)==0){
       comps.erase(p); // this invalidates the iterator => break from loop
       found = true;
@@ -749,10 +749,10 @@ AmplModel::removeComp(model_comp *comp)
 AmplModel::removeComp()
 ---------------------------------------------------------------------------- */
 void
-AmplModel::addComp(model_comp *comp)
+AmplModel::addComp(ModelComp *comp)
 {
   AmplModel *subm;
-  //model_comp *lastinmodel = model->last;
+  //ModelComp *lastinmodel = model->last;
   switch(comp->type)
   {
     case TVAR:
@@ -834,7 +834,7 @@ AmplModel::reassignDependencies()
 void
 AmplModel::reassignDependencies()
 {
-  for(list<model_comp*>::iterator p=comps.begin();p!=comps.end();p++){
+  for(list<ModelComp*>::iterator p=comps.begin();p!=comps.end();p++){
     if ((*p)->type==TMODEL){
       AmplModel *submodel = (AmplModel*)((*p)->other);
       submodel->reassignDependencies();

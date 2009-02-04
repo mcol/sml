@@ -130,7 +130,7 @@ data_setdef: SET ID DEFINED set_elements {
                 }
                 // reference has been found
                 opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
-                model_comp *mc = onidref->ref;
+                ModelComp *mc = onidref->ref;
                 mc->value = set;
               }
               
@@ -159,7 +159,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
                 // reference has been found
                 opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
                 CompDescrParam* param = new CompDescrParam(onidref->ref, $5); 
-                model_comp *mc = onidref->ref;
+                ModelComp *mc = onidref->ref;
                 mc->value = param;
               }
             | PARAM param_name paramdefault_opt value_table_list {
@@ -184,7 +184,7 @@ data_paramdef: PARAM param_name paramdefault_opt DEFINED paramspec_list {
                 // wrap the value_table_list in a single item paramspec_list
                 opNode *on = new opNode(TOKPARAMSPECLIST, $4);
                 CompDescrParam* param = new CompDescrParam(onidref->ref, on); 
-                model_comp *mc = onidref->ref;
+                ModelComp *mc = onidref->ref;
                 mc->value = param;
               }
             ;

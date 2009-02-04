@@ -516,7 +516,7 @@ print_opNodesymb(opNode *node)
       cerr << "Some IDREF node still not opNodeIDREF\n";
       exit(1);
     }
-    model_comp *mc = onir->ref;
+    ModelComp *mc = onir->ref;
     char buffer3[40]; 
     sprintf(buffer3, "IDREF(%p:%s(%p))",node, mc->id, mc);
     //return strdup(buffer3);
@@ -723,7 +723,7 @@ opNode::findIDREF()
   int i;
 
   if (opCode==IDREF){
-    cout << getGlobalName((model_comp*)this->values[0], NULL, NULL, NOARG) <<
+    cout << getGlobalName((ModelComp*)this->values[0], NULL, NULL, NOARG) <<
       endl;
   }else if (opCode==ID) {
     return;
@@ -736,16 +736,16 @@ opNode::findIDREF()
   }
 }
 /* --------------------------------------------------------------------------
-opNode::findIDREF(list<model_comp> *lmc)
+opNode::findIDREF(list<ModelComp> *lmc)
 ---------------------------------------------------------------------------- */
 /* find the list of all the IDREF nodes at or below the current node */
 void
-opNode::findIDREF(list<model_comp*> &lmc)
+opNode::findIDREF(list<ModelComp*> &lmc)
 {
   int i;
 
   if (opCode==IDREF){
-    //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
+    //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lmc.push_back(((opNodeIDREF*)this)->ref);
   }else if (opCode==ID) {
@@ -768,7 +768,7 @@ opNode::findIDREF(list<opNode*> *lnd)
   int i;
 
   if (opCode==IDREF){
-    //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
+    //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
   }else if (opCode==ID) {
@@ -795,7 +795,7 @@ opNode::findOpCode(int oc, list<opNode*> *lnd)
   int i;
 
   if (opCode==oc){
-    //printf("%s\n",getGlobalName((model_comp*)this->values[0], 
+    //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
   }else if (opCode==ID) {
@@ -813,12 +813,12 @@ opNode::findOpCode(int oc, list<opNode*> *lnd)
 /* --------------------------------------------------------------------------
 opNode::findModelComp()
 ---------------------------------------------------------------------------- */
-/* find the model_comp (if any) refered to by this opNode 
- * Only return the model_comp if the expression given by this opNode is an
- * immediate reference to a model_comp. Otherwise return NULL
+/* find the ModelComp (if any) refered to by this opNode 
+ * Only return the ModelComp if the expression given by this opNode is an
+ * immediate reference to a ModelComp. Otherwise return NULL
  */
 
-model_comp *opNode::findModelComp()
+ModelComp *opNode::findModelComp()
 {
   opNode *on = this;
   while ((on->opCode==LBRACKET || on->opCode==LBRACE) && on->nval==1){
@@ -1030,7 +1030,7 @@ void opNodeIx::splitExpression()
   if (tmp->opCode==COMMA){
     ncomp = tmp->nchild();
     this->sets = (opNode**)calloc(ncomp, sizeof(opNode*));
-    this->sets_mc = (model_comp**)calloc(ncomp, sizeof(model_comp*));
+    this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
     this->dummyVarExpr = (opNode**)calloc(ncomp, sizeof(opNode*));
     for(i=0;i<ncomp;i++){
       tmp2 = findKeywordinTree((opNode*)tmp->values[i], IN);
@@ -1043,18 +1043,18 @@ void opNodeIx::splitExpression()
 	     dummyVarExpr[i] = NULL;
 	     sets[i] = tmp->values[i];
       }
-      /* try to find model_comp of the set expression, 
+      /* try to find ModelComp of the set expression, 
 	 If it doesn't exist create */
-      if (model_comp *mc = sets[i]->findModelComp()){
+      if (ModelComp *mc = sets[i]->findModelComp()){
 	     sets_mc[i] = mc;
       }else{
-	     sets_mc[i] = new model_comp("dummy", TSET, NULL, sets[i]);
+	     sets_mc[i] = new ModelComp("dummy", TSET, NULL, sets[i]);
       }
     }
   }else{
     ncomp = 1;
     this->sets = (opNode**)calloc(1, sizeof(opNode*));
-    this->sets_mc = (model_comp**)calloc(1, sizeof(model_comp*));
+    this->sets_mc = (ModelComp**)calloc(1, sizeof(ModelComp*));
     this->dummyVarExpr = (opNode**)calloc(1, sizeof(opNode*));
     tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
@@ -1065,12 +1065,12 @@ void opNodeIx::splitExpression()
       dummyVarExpr[0] = NULL;
       sets[0] = tmp;
     }
-    /* try to find model_comp of the set expression, 
+    /* try to find ModelComp of the set expression, 
        If it doesn't exist create */
-    if (model_comp *mc = sets[0]->findModelComp()){
+    if (ModelComp *mc = sets[0]->findModelComp()){
       sets_mc[0] = mc;
     }else{
-      sets_mc[0] = new model_comp("dummy", TSET, NULL, sets[0]);
+      sets_mc[0] = new ModelComp("dummy", TSET, NULL, sets[0]);
     }
   }
 }
@@ -1128,7 +1128,7 @@ opNodeIx::deep_copy
 ---------------------------------------------------------------------------- */
 /** Makes a recursive copy of this node that uses all new data structures
  *  opNodeIDREF nodes will also be duplicated, however they will point
- *  to the original model_comp's (rather than duplicates of them)
+ *  to the original ModelComp's (rather than duplicates of them)
  */
 
 opNodeIx *
@@ -1162,9 +1162,9 @@ opNodeIx::deep_copy()
 opNodeIDREF methods
 ============================================================================ */
 /* --------------------------------------------------------------------------
-opNodeIDREF::opNodeIDREF(model_comp *r)
+opNodeIDREF::opNodeIDREF(ModelComp *r)
 ---------------------------------------------------------------------------- */
-opNodeIDREF::opNodeIDREF(model_comp *r) :
+opNodeIDREF::opNodeIDREF(ModelComp *r) :
   opNode(IDREF), ref(r), stochparent(0) {}
 
 /* --------------------------------------------------------------------------
@@ -1183,7 +1183,7 @@ opNodeIDREF::deep_copy()
       newn->values[i] = values[i]->deep_copy();
   }
 
-  // this is a model_comp that needs to be cloned as well
+  // this is a ModelComp that needs to be cloned as well
   //newn->ref = ref->clone();
   newn->ref = ref;
   newn->stochparent = stochparent;
@@ -1282,7 +1282,7 @@ find_var_ref_in_context
  *  of the dot'd expression parsed so far. 'ref' is the new part that
  *  should be added.
  *
- * @param ref A pointer to an expression that evaluates to a model_comp
+ * @param ref A pointer to an expression that evaluates to a ModelComp
  *            this can be given by an ID a dotted expression ID.ID
  *            or a reference to a parent stage (in StochProg) such as 
  *            ID(-1;...).
@@ -1290,7 +1290,7 @@ find_var_ref_in_context
  *            which case the indexing is attached to the returned IDREF node
  * @param context A pointer to the current AmplModel that defines the scope
  *                in which the ID expressions should be resolved
- * @return An opNode of type IDREF that points to the correct model_comp
+ * @return An opNode of type IDREF that points to the correct ModelComp
  * @bug Should return an opNodeIDREF* 
  *
  *  An opNode of type IDREF looks like this
@@ -1402,10 +1402,10 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
 opNodeIDREF*
 find_var_ref_in_context_(AmplModel *context, IDNode *ref)
 {
-   model_comp *thismc;
+   ModelComp *thismc;
    opNodeIDREF *ret;
   
-   for(list<model_comp*>::iterator p = context->comps.begin();
+   for(list<ModelComp*>::iterator p = context->comps.begin();
          p!=context->comps.end();p++){
       thismc = *p;
       if (strcmp(ref->name.c_str(), thismc->id)==0){

@@ -4,7 +4,7 @@
 /* Note: original symboltable also checked that this variable was not defined
  * in an enclosing scope, rather than just hiding the previously defined
  * variables as we do now. */
-bool SymbolTable::defineSymbol(symb_type type, char *id, model_comp *mc)
+bool SymbolTable::defineSymbol(symb_type type, char *id, ModelComp *mc)
 {
    /* Calculate hashcode */
    int hash = hash_function(id) % n_hash;

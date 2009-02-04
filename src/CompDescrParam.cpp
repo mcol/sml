@@ -20,7 +20,7 @@ CompDescrParam::CompDescrParam():
 {}
 
 /* ---------------------------------------------------------------------------
-CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc)
+CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc)
 ---------------------------------------------------------------------------- */
 /** Parses the parameter description given in a data file
  *  This routine constructs a CompDescrParam (the actual parameter values)
@@ -30,7 +30,7 @@ CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc)
  *  @param desc  The opNode tree giving the parameter value description as
  *               expressed in the data file
  */
-CompDescrParam::CompDescrParam(model_comp *mc, opNode *desc):
+CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc):
   nix(-1),
   indices(NULL),
   n(-1),

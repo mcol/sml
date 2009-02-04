@@ -85,7 +85,7 @@ expression is thus represented as a tree of opNodes.
 The grammar processor recognizes the start and end of a block/submodel
 and creates a AmplModel object for each of these. It classifies all
 other lines into set/parameter/variable/constraint/objective/submodel
-declarations - which are stored in a model_comp object - and attaches
+declarations - which are stored in a ModelComp object - and attaches
 them to the appropriate (current) model.
 
 \ref stochmodel "Stochastic Programming models" defined by sblock
@@ -94,7 +94,7 @@ object.
 
 Every declaration is further divided into a name, indexing and
 attribute (body) section. These are attached to the appropriate
-model_comp object. The indexing and attribute expressions are
+ModelComp object. The indexing and attribute expressions are
 represented as a tree of opNodes. The indexing expression is actually
 represented by the subobject opNodeIx, which has extra fields and
 methods that allow a quick recovery of the defined dummy variables and
@@ -105,16 +105,16 @@ scanned for name references. Every reference is compared with the
 names of model components that are currently in scope (this includes
 dummy variables that are used in the indexing expression), and if
 found the reference in the opNode tree is replaced by a pointer to the
-appropriate model_comp (done by find_var_ref_in_context()).
+appropriate ModelComp (done by find_var_ref_in_context()).
 \bug Currently no hashing is done in this search.
 
 Internally all names are represented by an opNode with
 opNode.opCode==ID. These are replaced by an object of subclass
 opNodeIDREF with opNodeIDREF.opCode==IDREF, which carry a pointer to
-the appropriate model_component.
+the appropriate ModelComponent.
 
 The output of the frontend is a tree of AmplModel objects (each
-representing a node of the model tree), consisting of model_comp
+representing a node of the model tree), consisting of ModelComp
 objects (each representing on AMPL declaration). These in turn consist
 of several opNode trees representing the indexing and attribute(body)
 section of the declaration
@@ -131,7 +131,7 @@ The difference is that StochModel carries information about the
 parameters of the sblock (STAGES, NODES, PROBABILITY, ANCENSTOR).
 
 The components of a StochModel are StochModelComp objects (rather than
-model_comp objects). The difference here is that a STochModelComp
+ModelComp objects). The difference here is that a STochModelComp
 carries information about which stages this component belongs to and
 if a component is "deterministic" (i.e. there is only one copy of it
 per stage, not one copy per node)
@@ -145,14 +145,14 @@ AmplModel objects.  This is done by StochModel::expandToFlatModel
 Expansion works in two passes. In the first pass the chain of
 AmplModel objects is build (whose components are still StochModelComp
 objects) In the second pass the StochModelComp objects are translated
-to model_comp objects (that is references to StochModelComp objects
-are resolved to references to model_comp objects and special
+to ModelComp objects (that is references to StochModelComp objects
+are resolved to references to ModelComp objects and special
 stochastic programming expressions such as Exp, node, stage are
 translated).
 
 The two passes are necessary since model components can refer to other
 components up or down the tree. Hence the re-resolving of references
-from StochModelComp to model_comp can only be done once the AmplModel
+from StochModelComp to ModelComp can only be done once the AmplModel
 tree is complete.
 
 In detail the steps in the expansion procedure are as follows
@@ -164,7 +164,7 @@ PASS 1:
    whose output is read in again
  - Create an AmplModel for each element in STAGES. Add a clone of all
    StochModelComp object that should be included in this stage to the model.
-   Also add a model_comp for the next stage down and its indexing expression
+   Also add a ModelComp for the next stage down and its indexing expression
    to the AmplModel. The indexing
    expression is of the form
    \code
@@ -174,8 +174,8 @@ PASS 1:
        set indS1 :={this_nd in NODES:A[this_nd]==ix0};
        block S2{ix1 in indS1}
    \endcode
-   Here indS0 is a new model_comp that is added to the AmplModel before the
-   model_comp representing the subblock of the next stage.
+   Here indS0 is a new ModelComp that is added to the AmplModel before the
+   ModelComp representing the subblock of the next stage.
 
 PASS2:
   - StochModel::_transcribeComponents: recursively call 
@@ -191,7 +191,7 @@ PASS2:
        Actually they are queued to be moved later to not mess up the recursion)
   - AmplModel::applyChanges
      Apply queued moves of model components (originating from Exp constraints)
-  - Finally the dependency lists model_comp::dependencies are rebuilt 
+  - Finally the dependency lists ModelComp::dependencies are rebuilt 
     (root->reassignDependencies)
 
 */
@@ -206,7 +206,7 @@ This is done in backend.cpp by process_model() and write_ampl_for_submodel() cal
 For every AmplModel object a separate *.mod file is generated. The
 name of the *.mod file is obtained by concatenating all the block
 names on the path from the root model down to this model. Every *.mod
-file contains the subset of all given model_comp declarations needed
+file contains the subset of all given ModelComp declarations needed
 for this block. They are obtained in the following manner:
 
 - All set and parameter declarations in nodes *above* and including
@@ -216,11 +216,11 @@ for this block. They are obtained in the following manner:
   node are included.
 
 - All entities referenced by any included model component are also
-included (there is a model_comp::dependencies list that helps this
+included (there is a ModelComp::dependencies list that helps this
 tasks. Also there is the possibility to recursively 'tag' all
-dependencies of a given model_comp object:
-model_comp::tagDependencies(), and to get a list of all tagged
-model_comp objects) 
+dependencies of a given ModelComp object:
+ModelComp::tagDependencies(), and to get a list of all tagged
+ModelComp objects) 
 
 - All included components are printed out in the order in which they appeared in the original AMPL/SML file. 
 

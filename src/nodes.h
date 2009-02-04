@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <list>
-class model_comp;
+class ModelComp;
 using namespace std;
 
 class AmplModel;
@@ -88,7 +88,7 @@ class opNode {
   void findIDREF();           
 
   /** find all IDREFs below current node */
-  virtual void findIDREF(list<model_comp*> &lmc);
+  virtual void findIDREF(list<ModelComp*> &lmc);
 
   /** find all IDREF nodes below current node */
   virtual void findIDREF(list<opNode*> *lnd);
@@ -96,11 +96,11 @@ class opNode {
   /** find all nodes of opCode oc below current node */
   virtual void findOpCode(int oc, list<opNode*> *lnd);
 
-  /** find model_comp (if it exitst) refered to by this opNode:
+  /** find ModelComp (if it exitst) refered to by this opNode:
    *  If the expression given by this opNode is an immediate reference to
-   *  a model_comp then return that. Otherwise return NULL
+   *  a ModelComp then return that. Otherwise return NULL
    */
-  model_comp *findModelComp();
+  ModelComp *findModelComp();
   
   //! returns the 'double' represented by this node (if of type INT/FLOAT_VAL)
   virtual double getFloatVal();
@@ -182,7 +182,7 @@ class opNodeIx : public opNode {
   opNode *qualifier;    //!< the stuff to the right of ':' (if present)
   int ncomp;            //!< number of 'dummy IN set'-type expressions
   opNode **sets;        //!< list of the set expressions
-  model_comp **sets_mc;  //!< list of model_comp for the indexing sets
+  ModelComp **sets_mc;  //!< list of ModelComp for the indexing sets
   opNode **dummyVarExpr;//!< list of the dummyVarExpressions
   // private:            
   int done_split; //!< indicates that extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
@@ -243,7 +243,7 @@ class IDNode : public opNode {
    IDNode(const string name, long stochparent=0);
    double getFloatVal() { return atof(name.c_str()); }
    char *getValue() { return strdup(name.c_str()); }
-   void findIDREF(list<model_comp*> &lmc) { return; }
+   void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<opNode*> &lnd) { return; }
    // We never search for ID:
    void findOpCode(int oc, list<opNode*> *lnd) { return; }
@@ -260,14 +260,14 @@ class IDNode : public opNode {
 /* ----------------------------------------------------------------------------
 opNodeIDREF 
 ---------------------------------------------------------------------------- */
-/** \brief A node on the tree representing a reference to a model_comp. 
+/** \brief A node on the tree representing a reference to a ModelComp. 
  *
- * IDREF is an opNode that represents a reference to a model_component
+ * IDREF is an opNode that represents a reference to a ModelComponent
  *
  */
 class opNodeIDREF : public opNode {
  public:
-  model_comp *ref; //!< pointer to the model_comp referred to by this node
+  ModelComp *ref; //!< pointer to the ModelComp referred to by this node
   /* stochrecourse was for the same purpose as stochparent, just that the
      recourse level was given as an opNode (i.e. expression to be 
      eveluated by AMPL rather than an explicit  INT_VAL */
@@ -280,7 +280,7 @@ class opNodeIDREF : public opNode {
   int stochparent; //!< levels above this one for which the reference is
   // ---------------------------- methods -----------------------------
   // constructor
-  opNodeIDREF(model_comp *r=NULL);
+  opNodeIDREF(ModelComp *r=NULL);
   
   //! creates a shallow copy: points to the same components as the original
   opNodeIDREF *clone();
@@ -303,7 +303,7 @@ template<class T> class ValueNode : public opNode {
       opNode(-99), value(new_value) {}
    double getFloatVal() { return value; }
    char *getValue();
-   void findIDREF(list<model_comp*> &lmc) { return; }
+   void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<opNode*> &lnd) { return; }
    // We never search for INT_VAL or FLOAT_VAL:
    void findOpCode(int oc, list<opNode*> *lnd) { return; }

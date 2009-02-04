@@ -78,7 +78,7 @@ void do_stuff(AmplModel *model)
 }
 
 static void
-print_entry(const model_comp *entry) {
+print_entry(const ModelComp *entry) {
   cout << "    " << entry->id << "\n";
   cout << "       " << *(entry->indexing) << "\n";
   cout << "       " << *(entry->attributes) << "\n";
@@ -87,14 +87,14 @@ print_entry(const model_comp *entry) {
 void
 print_model(AmplModel *model)
 {
-  model_comp *entry;
+  ModelComp *entry;
   AmplModel *submod;
   opNode::use_global_names=0;
   cout << "-------------------------- backend::print_model ----------------"
      "----------\n";
   cout << "Model: " << model->name << "\n";
   cout << "n_sets: " << model->n_sets << "\n";
-  for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     if (entry->type==TSET){
       print_entry(entry);
@@ -102,7 +102,7 @@ print_model(AmplModel *model)
     //entry = entry->next;
   }
   cout << "n_cons: " << model->n_cons << "\n";
-  for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //  entry = model->first;
     //while(entry!=NULL){
@@ -112,7 +112,7 @@ print_model(AmplModel *model)
     //entry = entry->next;
   }
   cout << "n_vars: " << model->n_vars << "\n";
-  for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //entry = model->first;
     //while(entry!=NULL){
@@ -122,7 +122,7 @@ print_model(AmplModel *model)
     //entry = entry->next;
   }
   cout << "n_params: " << model->n_params << "\n";
-  for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     // entry = model->first;
     //while(entry!=NULL){
@@ -133,7 +133,7 @@ print_model(AmplModel *model)
   }
 
   cout << "n_obj: "<< model->n_objs;
-  for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //  entry = model->first;
     //while(entry!=NULL){
@@ -146,7 +146,7 @@ print_model(AmplModel *model)
   }
   
   cout << "submodels: " << model->n_submodels << "\n";
-  for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
     //entry = model->first;
     //while(entry!=NULL){
@@ -292,7 +292,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 
     for(k=1;k<=this_model->level;k++){
       AmplModel *tmp_model = anc_list[k];
-      model_comp *node = tmp_model->node; /* the node corresponding to model */
+      ModelComp *node = tmp_model->node; /* the node corresponding to model */
       opNode *ix = node->indexing; /* the indexing expression */
       opNode *set; /* the set that is indexed over */
       opNode *dummyVar; /* the dummy var of the indexing expression */
@@ -381,11 +381,11 @@ process_model(AmplModel *model) /* should be called with model==root */
     /* If the current model (i) has children, then write out the size
        of its childrens indexing epression to disk */
     if (this_model->n_submodels>0){
-      for(list<model_comp*>::iterator p = this_model->comps.begin();
+      for(list<ModelComp*>::iterator p = this_model->comps.begin();
           p!=this_model->comps.end();p++){
         if ((*p)->type!=TMODEL) continue;
 
-        model_comp *mc = *p;
+        ModelComp *mc = *p;
 
         /* found a submodel */
         AmplModel *submodel = (AmplModel*)mc->other;
@@ -573,9 +573,9 @@ process_model(AmplModel *model) /* should be called with model==root */
 int count_models_(AmplModel *model)
 {
   int count = 0;
-  model_comp* comp;
+  ModelComp* comp;
   if (model->n_submodels>0){
-    for(list<model_comp*>::iterator p = model->comps.begin();
+    for(list<ModelComp*>::iterator p = model->comps.begin();
   p!=model->comps.end();p++){
       comp = *p;
       if (comp->type==TMODEL)
@@ -607,7 +607,7 @@ fill_model_list_(AmplModel *model, AmplModel **listam, int *pos)
        listam
        model->level
                                                                             */
-  model_comp *comp;
+  ModelComp *comp;
 
   /* this works by first adding the current model to the list and then
      all its submodels. 
@@ -619,7 +619,7 @@ fill_model_list_(AmplModel *model, AmplModel **listam, int *pos)
   (*pos)++;
 
   if (model->n_submodels>0){
-    for(list<model_comp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+    for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
       comp = *p;
       if (comp->type==TMODEL)
   fill_model_list_((AmplModel*)comp->other, listam, pos);
@@ -651,7 +651,7 @@ write_ampl_for_submodel
 */
 void write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel, 
             AmplModel **list, AmplModel *submodel);
-void modified_write(ostream &fout, model_comp *comp);
+void modified_write(ostream &fout, ModelComp *comp);
 
 void
 write_ampl_for_submodel(ostream &fout, AmplModel *root, AmplModel *submodel)
@@ -692,20 +692,20 @@ write_ampl_for_submodel(ostream &fout, AmplModel *root, AmplModel *submodel)
   }
 
   /* mark all model components that are needed by the current model */
-  //model_comp::untagAll();
-  model_comp::untagAll(AmplModel::root);
-  /* and loop through all model_components and mark it and its 
+  //ModelComp::untagAll();
+  ModelComp::untagAll(AmplModel::root);
+  /* and loop through all ModelComponents and mark it and its 
      dependencies as needed */
   
-  for(list<model_comp*>::iterator p = submodel->comps.begin();
+  for(list<ModelComp*>::iterator p = submodel->comps.begin();
       p!=submodel->comps.end();p++){
     (*p)->tagDependencies();
   }
   if (GlobalVariables::prtLvl>1){
     cout << "processing " <<  submodel->name << "\n";
     cout << "-------> tagged now\n";
-    //model_comp::writeAllTagged();
-    model_comp::writeAllTagged(AmplModel::root);
+    //ModelComp::writeAllTagged();
+    ModelComp::writeAllTagged(AmplModel::root);
   }
 
   /* now start reporting the modified model recursively */
@@ -774,12 +774,12 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
 {
   AmplModel *thism = listam[thislevel];
   int j;
-  model_comp *comp;
+  ModelComp *comp;
   
   opNode::default_model = thism;
   // loop through all entities in this model 
   fout << "\n# start of model " << thism->global_name << "\n\n";
-  for(list<model_comp*>::iterator p = thism->comps.begin();
+  for(list<ModelComp*>::iterator p = thism->comps.begin();
       p!=thism->comps.end();p++){
     comp = *p;
 
@@ -838,7 +838,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           */
           
           
-          /* 14/03/08: what we are trying to do is to create a model_comp
+          /* 14/03/08: what we are trying to do is to create a ModelComp
              that represents the expression
              set indset_SUB within indset;   
              and print this with modified_write. Then it should be
@@ -846,15 +846,15 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
              set indset_SUB{ix0 in indset0_SUB} within indset[ix0];
              
              
-             The model_comp is of type SET, with no indexing expression
+             The ModelComp is of type SET, with no indexing expression
           */
           {
-            model_comp *newmc = new model_comp();
+            ModelComp *newmc = new ModelComp();
             opNode *setn = ai->set;
             
             newmc->type = TSET;
             
-            // set name of the model_comp
+            // set name of the ModelComp
             if (setn->opCode!=IDREF){
               cerr << "At the moment can index blocks only with simple sets\n";
               cerr << "Indexing expression is " << setn->print() << "\n";
@@ -865,7 +865,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               cerr << "IDREF node should be of type opNodeIDREF\n";
               exit(1);
             }
-            model_comp *setmc = setnref->ref;
+            ModelComp *setmc = setnref->ref;
             newmc->id = strdup((setmc->id+string("_SUB")).c_str());
             
             // and build "within indset" as attribute tree
@@ -879,7 +879,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           {
             //opNode *setn = l_addIndex[n_addIndex]->set;
             opNode *setn = ai->set;
-            model_comp *tmp;
+            ModelComp *tmp;
             char *newname; 
             //fprintf(fout, "set %s_SUB within %s;\n", 
             //      print_opNode(setn), print_opNode(setn));
@@ -891,9 +891,9 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             }
             /* newn is the new node, first copy the old one */
             opNodeIDREF *newn = ((opNodeIDREF *)setn)->clone();
-            // clone the model_comp that is referred to
-            newn->ref = (model_comp *)calloc(1,sizeof(model_comp));
-            memcpy(newn->ref, ((opNodeIDREF*)setn)->ref, sizeof(model_comp));
+            // clone the ModelComp that is referred to
+            newn->ref = (ModelComp *)calloc(1,sizeof(ModelComp));
+            memcpy(newn->ref, ((opNodeIDREF*)setn)->ref, sizeof(ModelComp));
             // ???but associate this with the current model
             //newn->ref->model = thism;
 
@@ -957,9 +957,9 @@ write_columnfile_for_submodel
 void
 write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
 {
-  model_comp *comp;
+  ModelComp *comp;
 
-  for(list<model_comp*>::iterator p = submodel->comps.begin();
+  for(list<ModelComp*>::iterator p = submodel->comps.begin();
       p!=submodel->comps.end();p++){
     comp = *p;
     if (comp->type==TVAR){
@@ -1047,7 +1047,7 @@ modified_write
  * @param[in] comp  The component definition to write out
  * @pre depends on l_addIndex: currently applicable indexing expresssions
  *   
- *  prints the global definition of the given model_component to the given 
+ *  prints the global definition of the given ModelComponent to the given 
  *  file.
  *
  * - 1) get the global name of the model component
@@ -1061,11 +1061,11 @@ modified_write
  * part 3) is simply done by a call to (comp->attributes)->print() 
  * (opNode::print)
  * (with opNode::use_global_names set to true 
- *   => the argument list version of model_comp::getGlobalName is called)  
+ *   => the argument list version of ModelComp::getGlobalName is called)  
  *
  */
 void
-modified_write(ostream &fout, model_comp *comp)
+modified_write(ostream &fout, ModelComp *comp)
 {
   int i;
   opNode *ixsn;

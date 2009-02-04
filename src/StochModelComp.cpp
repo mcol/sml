@@ -5,12 +5,12 @@
 static bool prtSM = false;
 
 StochModelComp::StochModelComp():
-  model_comp()
+  ModelComp()
 {}
 
 StochModelComp::StochModelComp(char *id, compType type, 
                                opNode *indexing, opNode *attrib):
-  model_comp(id, type, indexing, attrib)
+  ModelComp(id, type, indexing, attrib)
 {}
 
 
@@ -24,7 +24,7 @@ StochModelComp::transcribeToModelComp()
  *   - Scanning for all IDREF references to entities defined in the StochModel
  *     and replacing this by references to entities in the FlatModel
  *     (i.e the pointer to a StochModelComp is replaced by a pointer to
- *      the corresponding model_comp)
+ *      the corresponding ModelComp)
  *     This also deals with references to StochModel entities in a diffent
  *     stage (i.e. through xh(-1;...))
  *   - Objective components have a term for the node probability added
@@ -39,7 +39,7 @@ StochModelComp::transcribeToModelComp()
  *  @pre opNode::stage and opNode::node need to be set.
  */
 
-model_comp *
+ModelComp *
 StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 {
   /* The routine works as follows:
@@ -56,7 +56,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
      (4a) replace them by path probabilities
      //(4)  if this is an OBJ component, then add probablilities to it
   */
-  model_comp *newmc;
+  ModelComp *newmc;
   list<opNode*> *idrefnodes = new list<opNode*>;
   StochModel *thissm = this->stochmodel;
   if (thissm==NULL){
@@ -89,7 +89,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
       cerr << "opNode should be opNodeIDREF but dynamic cast fails" << endl;
       exit(1);
     }
-    model_comp *mc = onr->ref;
+    ModelComp *mc = onr->ref;
     if (mc->model==thissm){
       // ok, component refered to belongs to StochModel
       // => change change the ->ref of this opNodeIDREF to point to
@@ -110,9 +110,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
       
       // search for this entity in the current model
       bool fnd = false;
-      for(list<model_comp*>::iterator p = model->comps.begin();
+      for(list<ModelComp*>::iterator p = model->comps.begin();
           p!=model->comps.end();p++){
-        model_comp *amc=*p;
+        ModelComp *amc=*p;
         // all we can do is judge by name
         if (strcmp(mc->id, amc->id)==0){
           onr->ref = amc;
@@ -363,8 +363,8 @@ StochModelComp::clone()
 StochModelComp*
 StochModelComp::clone()
 {
-  // can we call clone for the model_comp? 
-  //  => I guess no, since this would create a model_comp object and not a
+  // can we call clone for the ModelComp? 
+  //  => I guess no, since this would create a ModelComp object and not a
   //     StochModelComp
 
   StochModelComp *newsmc = new StochModelComp();

@@ -4,14 +4,14 @@
  *  @brief The class describes an entity in a stochastic model
  *
  *  The class stores information that is read in from a stochastic block
- *  It is equivalent to the model_comp class, the only difference is that
+ *  It is equivalent to the ModelComp class, the only difference is that
  *  is also stores an expression corresponding to the applicable stageset
  *  and a possible deterministic attribute
  */
 
-class StochModelComp: public model_comp {
+class StochModelComp: public ModelComp {
  public:
-  /* FIXME: No good idea, hides the AmplModel *model in model_comp */
+  /* FIXME: No good idea, hides the AmplModel *model in ModelComp */
   //StochModel *model; 
 
   /** The following field are only used for components in stochastic blocks
@@ -37,8 +37,8 @@ class StochModelComp: public model_comp {
   //! constructor
   StochModelComp(char *id, compType type, opNode *indexing, opNode *attrib);
 
-  //! transcribe a StochModelComp in a StochModel into a model_comp 
-  model_comp *transcribeToModelComp(AmplModel *current_model, int level);
+  //! transcribe a StochModelComp in a StochModel into a ModelComp 
+  ModelComp *transcribeToModelComp(AmplModel *current_model, int level);
 
   StochModelComp *clone(); //!< shallow copy. Only copy pointers.
 };

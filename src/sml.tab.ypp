@@ -21,8 +21,8 @@
    void rem_indexing(opNodeIx *indexing);
    void begin_model(char *name, opNode *indexing);
    void end_model();
-   model_comp *add_set_to_model(char *id, opNode *indx, opNode *attrib);
-   model_comp *add_obj_to_model(int token, char *id, opNode *indx,
+   ModelComp *add_set_to_model(char *id, opNode *indx, opNode *attrib);
+   ModelComp *add_obj_to_model(int token, char *id, opNode *indx,
       opNode *attrib);
 
    extern int yylineno;
@@ -53,9 +53,9 @@
    extern FILE *yyin;
    extern void parse_data(AmplModel *current_model, char *datafilename);
 
-   model_comp *add_cons_to_model(char *id, opNode *indx, opNode *attrib);
-   model_comp *add_param_to_model(char *id, opNode *indx, opNode *attrib);
-   model_comp *add_var_to_model(char *id, opNode *indx, opNode *attrib);
+   ModelComp *add_cons_to_model(char *id, opNode *indx, opNode *attrib);
+   ModelComp *add_param_to_model(char *id, opNode *indx, opNode *attrib);
+   ModelComp *add_var_to_model(char *id, opNode *indx, opNode *attrib);
    void addStochInfo(StochModelComp *newmc);
    void createSubdirTmpIfNotExist(void);
 %}
@@ -294,7 +294,7 @@ equation: expr ASSIGN expr { $$ = new opNode(ASSIGN, $1, $3); }
 cnstr:   MAXIMIZE ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON expr {
-            model_comp *newmc = add_obj_to_model(MAXIMIZE, $2, $3, $7);     
+            ModelComp *newmc = add_obj_to_model(MAXIMIZE, $2, $3, $7);     
             current_model->symbol_table.defineSymbol(SymbolTable::ST_OBJ, $2,
                newmc);
             if ($3) rem_indexing($3);
@@ -303,7 +303,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
      |   MINIMIZE ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON expr {
-            model_comp *newmc = add_obj_to_model(MINIMIZE, $2, $3, $7);
+            ModelComp *newmc = add_obj_to_model(MINIMIZE, $2, $3, $7);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_OBJ, $2,
                newmc); 
             if ($3) rem_indexing($3);
@@ -312,7 +312,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
      |   SUBJECTTO ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON equation { 
-            model_comp *newmc = add_cons_to_model($2, $3, $7);
+            ModelComp *newmc = add_cons_to_model($2, $3, $7);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_CONS, $2,
                newmc); 
             if ($3) rem_indexing($3);
@@ -389,7 +389,7 @@ lexpr:   expr
 setdef:  SET ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt setattributes_opt {
-            model_comp *newmc = add_set_to_model($2, $3, $6);
+            ModelComp *newmc = add_set_to_model($2, $3, $6);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_SET, $2,
                newmc); 
             if (GlobalVariables::logParseModel) 
@@ -405,7 +405,7 @@ setdef:  SET ID indexing_opt {
 paramdef:   qualifier PARAM ID indexing_opt {
                if ($4) add_indexing($4);
             } stochattr_opt paramattributes_opt {
-               model_comp *newmc = add_param_to_model($3, $4, $7);
+               ModelComp *newmc = add_param_to_model($3, $4, $7);
                current_model->symbol_table.defineSymbol(
                   SymbolTable::ST_PARAM, $3, newmc); 
                if ($4) rem_indexing($4);
@@ -416,7 +416,7 @@ paramdef:   qualifier PARAM ID indexing_opt {
 vardef:  VAR ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt varattributes_opt {
-            model_comp *newmc = add_var_to_model($2, $3, $6);
+            ModelComp *newmc = add_var_to_model($2, $3, $6);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_VAR, $2,
                newmc); 
             if ($3) rem_indexing($3);
@@ -823,13 +823,13 @@ begin_model
 void
 begin_model(char *name, opNode *indexing) {
   AmplModel *new_mod = new AmplModel;
-  model_comp *newmc;
+  ModelComp *newmc;
   
   cout << "Start Model: " << name << "\n";
   new_mod->name = strdup(name);
 
   /* FIXME: include attrib in definition */
-  newmc = new model_comp(name, TMODEL, indexing, NULL);
+  newmc = new ModelComp(name, TMODEL, indexing, NULL);
   newmc->other = new_mod;
 
   new_mod->node = newmc;            /* add pointer-to-node to the model */
@@ -846,7 +846,7 @@ begin_smodel
 void
 begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
    StochModel *new_mod;
-   model_comp *newmc;
+   ModelComp *newmc;
   
    if (stochsets->opCode!=COMMA || stochsets->nchild()!=4){
       cerr << "Syntax error in Stochastic Block definition: \n";
@@ -866,7 +866,7 @@ begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
    new_mod->name = strdup(name);
   
    /* Fixme: include attrib in definition */
-   newmc = new model_comp(name, TMODEL, indexing, NULL);
+   newmc = new ModelComp(name, TMODEL, indexing, NULL);
    newmc->other = new_mod;
 
    new_mod->node = newmc;            /* add pointer-to-node to the model */
@@ -893,13 +893,13 @@ void
 end_smodel(){
   // current_model is a StochModel -> convert this into a tree a FlatModels
 
-  // this is the model_comp pointing to the StochModel
-  model_comp *mc = current_model->node; 
+  // this is the ModelComp pointing to the StochModel
+  ModelComp *mc = current_model->node; 
   
   // point that to the expanded flat model tree
   mc->other = ((StochModel*)current_model)->expandToFlatModel();
 
-  // and change the name of the model_comp of this model to the name of the 
+  // and change the name of the ModelComp of this model to the name of the 
   // new (AmplModel) model. 
   // (this is a concatenation of the StochModel name and the name of the 
   // first stage)
@@ -913,13 +913,13 @@ end_smodel(){
 /* ----------------------------------------------------------------------------
 add_set_to_model
 ---------------------------------------------------------------------------- */
-model_comp *
+ModelComp *
 add_set_to_model(char *id, opNode *indx, opNode *attrib){
-   model_comp *newmc;
+   ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TSET, indx, attrib);
    }else{
-      newmc = new model_comp(id, TSET, indx, attrib);
+      newmc = new ModelComp(id, TSET, indx, attrib);
    }
    current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
@@ -930,13 +930,13 @@ add_set_to_model(char *id, opNode *indx, opNode *attrib){
 /* ----------------------------------------------------------------------------
 add_obj_to_model
 ---------------------------------------------------------------------------- */
-model_comp *
+ModelComp *
 add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib){
-   model_comp *newmc;
+   ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TMIN, indx, attrib);
    }else{
-      newmc = new model_comp(id, TMIN, indx, attrib);
+      newmc = new ModelComp(id, TMIN, indx, attrib);
    }
    if (token==MAXIMIZE) newmc->type = TMAX;
    //newmc->ismin = (token==MINIMIZE);
@@ -950,13 +950,13 @@ add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib){
 /* ----------------------------------------------------------------------------
 add_cons_to_model
 ---------------------------------------------------------------------------- */
-model_comp *
+ModelComp *
 add_cons_to_model(char *id, opNode *indx, opNode *attrib){
-   model_comp *newmc;
+   ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TCON, indx, attrib)   ;
    }else{
-      newmc = new model_comp(id, TCON, indx, attrib)   ;
+      newmc = new ModelComp(id, TCON, indx, attrib)   ;
    }
    current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
@@ -965,7 +965,7 @@ add_cons_to_model(char *id, opNode *indx, opNode *attrib){
    if (current_model->cons==NULL){
       current_model->cons = newmc;
    }else{
-      model_comp *last = current_model->cons;
+      ModelComp *last = current_model->cons;
       while(last->next!=NULL) last = last->next;
       last->next = newmc;
    }
@@ -978,13 +978,13 @@ add_cons_to_model(char *id, opNode *indx, opNode *attrib){
 /* ----------------------------------------------------------------------------
 add_var_to_model
 ---------------------------------------------------------------------------- */
-model_comp *
+ModelComp *
 add_var_to_model(char *id, opNode *indx, opNode *attrib){
-   model_comp *newmc;
+   ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TVAR, indx, attrib);
    }else{
-      newmc = new model_comp(id, TVAR, indx, attrib);
+      newmc = new ModelComp(id, TVAR, indx, attrib);
    }
    current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
@@ -996,13 +996,13 @@ add_var_to_model(char *id, opNode *indx, opNode *attrib){
 /* ----------------------------------------------------------------------------
 add_param_to_model
 ---------------------------------------------------------------------------- */
-model_comp *
+ModelComp *
 add_param_to_model(char *id, opNode *indx, opNode *attrib){
-   model_comp *newmc;
+   ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TPARAM, indx, attrib);
    }else{
-      newmc = new model_comp(id, TPARAM, indx, attrib);
+      newmc = new ModelComp(id, TPARAM, indx, attrib);
    }
    current_model->addComp(newmc);
    if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
@@ -1011,7 +1011,7 @@ add_param_to_model(char *id, opNode *indx, opNode *attrib){
    if (current_model->params==NULL){
       current_model->params = newmc;
    }else{
-      model_comp *last = current_model->params;
+      ModelComp *last = current_model->params;
       while(last->next!=NULL) last = last->next;
       last->next = newmc;
    }

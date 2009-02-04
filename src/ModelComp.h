@@ -14,7 +14,7 @@ typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 
 using namespace std;
 /* ------------------------------------------------------------------------ */
-/* model_comp describes a model component such as 
+/* ModelComp describes a model component such as 
    var/subject to/param/set/minimize 
    
    every such component is stored as
@@ -32,16 +32,16 @@ static char *nameTypes[7] = {"variable","constraint","parameter",
 static char *compTypes[7] = {"var","subject to","param",
 			     "set", "minimize","maximize","block"};
 /** 
- * @class model_comp
+ * @class ModelComp
  * @brief Object to represent a component of an AMPL/SML model/block.
  *
- * The model_comp object represents a component of an SML model/block.
+ * The ModelComp object represents a component of an SML model/block.
  * It usually represents one line of AMPL/SML which is a definition of a
  * variable/parameter/set/constraint/objective/block.
  * A model component is broken down into the following parts:
  * - \<TYPE\> \<name\>\<indexing\>_opt \<attributes\>_opt
  */
-class model_comp{
+class ModelComp{
  public:
   compType type;   //!< the type of the component
   char *id;        //!< the name of the component
@@ -53,24 +53,24 @@ class model_comp{
 			 
   opNodeIx *indexing; //!< indexing expression 
 
-  ///** model_comp is set up as a double linked list 
+  ///** ModelComp is set up as a double linked list 
   // *  @attention This should be implemented in the AmplModel as a 
-  // *             list<model_comp>, rather than the linked list here */
-  //model_comp *next;    //!< next component in a double linked list 
-  //model_comp *prev;    //!< previous component in a double linked list 
+  // *             list<ModelComp>, rather than the linked list here */
+  //ModelComp *next;    //!< next component in a double linked list 
+  //ModelComp *prev;    //!< previous component in a double linked list 
   
   /** List of all entities that this model component depends on:
    *  Basically a list of all model components used in the definition of
    *  this component                                                  */
-  list<model_comp*> dependencies;     //!< list of dependecies:
+  list<ModelComp*> dependencies;     //!< list of dependecies:
 
   AmplModel *model;    //!< The model this belongs to 
 
   /** A pointer to an AmplModel structure for components of type MODEL
-   *  @attention Better implemented as a subclass of model_comp  */
+   *  @attention Better implemented as a subclass of ModelComp  */
   void *other;      
 
-  int count;           //!< instance number of model_comp
+  int count;           //!< instance number of ModelComp
 
   /** Components can be tagged by the tagDependencies method which sets
    *  this tag for this components and everything that it depends on 
@@ -81,12 +81,12 @@ class model_comp{
    *  values and further specific information (Set for sets)
    */
   CompDescr *value;   //!< value (for sets and parameters)
-  static list<model_comp*> global_list; //!< global list of all defined comps
-  static int tt_count;    //!< number of model_comps defined
+  static list<ModelComp*> global_list; //!< global list of all defined comps
+  static int tt_count;    //!< number of ModelComps defined
   // ------------------------- METHODS ----------------------------------
   // constructor
-  model_comp(char *id, compType type, opNode *indexing, opNode *attrib);
-  model_comp();  //< constructor that sets everything to default values
+  ModelComp(char *id, compType type, opNode *indexing, opNode *attrib);
+  ModelComp();  //< constructor that sets everything to default values
 
   /** set up an existing model comp to specified values   */
   void setTo(char *id, compType type, opNodeIx *indexing, opNode *attrib); 
@@ -128,8 +128,8 @@ class model_comp{
   static void modifiedWriteAllTagged(ostream &fout, AmplModel *start); 
 
   void moveUp(int level);  //< move this model comp up in the model tree 
-  virtual model_comp *clone();     //< duplicate the object: shallow copy
-  model_comp *deep_copy(); //< duplicate the object: deep copy
+  virtual ModelComp *clone();     //< duplicate the object: shallow copy
+  ModelComp *deep_copy(); //< duplicate the object: deep copy
 
   virtual void foo();
 
@@ -140,15 +140,15 @@ class model_comp{
  * 
  *  The class describes properties of a model component particular to sets
  */
-class ModelCompSet: public model_comp {
+class ModelCompSet: public ModelComp {
  public:
   bool is_symbolic; //!< indicates whether or not this set is symbolic
 };
 
 char *
-getGlobalName(model_comp *node, const opNode *opn, 
+getGlobalName(ModelComp *node, const opNode *opn, 
 	      AmplModel *current_model, int witharg);
 char *
-getGlobalNameNew(model_comp *node, const opNode *opn, 
+getGlobalNameNew(ModelComp *node, const opNode *opn, 
 	      AmplModel *current_model, int witharg);
 #endif
