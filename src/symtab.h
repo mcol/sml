@@ -3,6 +3,7 @@
 
 #include<string>
 #include<list>
+#include "model_comp.h"
 using namespace std;
 
 class SymbolTable {
@@ -12,10 +13,11 @@ public:
      public:
       const string id;
       const symb_type type;
+      model_comp *mc;
 
      public:
-      Entry(const string new_id, const symb_type new_type) :
-         id(new_id), type(new_type) {}
+      Entry(const string new_id, const symb_type new_type, model_comp *new_mc) :
+         id(new_id), type(new_type), mc(new_mc) {}
    };
 
 private:
@@ -24,7 +26,7 @@ private:
    list<Entry> table_[n_hash];
 
 public:
-   bool defineSymbol(symb_type, char *id);
+   bool defineSymbol(symb_type, char *id, model_comp *mc);
 
 private:
    unsigned long hash_function(char *str);

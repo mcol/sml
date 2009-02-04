@@ -4,7 +4,7 @@
 /* Note: original symboltable also checked that this variable was not defined
  * in an enclosing scope, rather than just hiding the previously defined
  * variables as we do now. */
-bool SymbolTable::defineSymbol(symb_type type, char *id)
+bool SymbolTable::defineSymbol(symb_type type, char *id, model_comp *mc)
 {
    /* Calculate hashcode */
    int hash = hash_function(id) % n_hash;
@@ -14,7 +14,7 @@ bool SymbolTable::defineSymbol(symb_type type, char *id)
       if((*i).id == id) return false;
 
    /* Otherwise insert at the start of the list */
-   table_[hash].push_back(Entry(id,type));
+   table_[hash].push_back(Entry(id,type,mc));
    if (logSymtab)
       cout << "SYMTAB: defined " << id << " of type " << type << "\n";
 
