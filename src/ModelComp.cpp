@@ -428,52 +428,6 @@ ModelComp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
 }
 
 /* ---------------------------------------------------------------------------
-ModelComp::getSetMembership()
----------------------------------------------------------------------------- */
-/** Write out the members of a set */
-list <string>
-ModelComp::getSetMembership()
-{
-  char buffer[500];
-
-  if (type!=TSET){
-    printf("ERROR: Called getSetMembership() for ModelComp not of type SET\n");
-    exit(1);
-  }
-  
-  ofstream out("tmp.mod");
-
-  ModelComp::untagAll();
-  tagDependencies();
-  ModelComp::writeAllTagged(out);
-  out.close();
-  
-  out.open("tmp.scr");
-  out << "reset;\n";
-  out << "model tmp.mod;\n";
-  out << "data ../" << GlobalVariables::datafilename << ";\n";
-  out << "display " << id << " > (\"tmp.out\");\n";
-  out.close();
-  
-  if(strlen(GlobalVariables::amplcommand)+9>500) {
-     // Avoid buffer overflow
-     cerr << "buffer too short to accomodate amplcommand length.\n";
-     exit(1);
-  }
-  strcpy(buffer, GlobalVariables::amplcommand);
-  strcat(buffer, " tmp.scr");
-  system(buffer);
-
-  ifstream in("tmp.out");
-  string setmem;
-  in >> setmem;
-  in.close();
-  cout << "Set " << id << " members: " << setmem << "\n";
-  exit(1);
-
-}
-
-/* ---------------------------------------------------------------------------
 ModelComp::print()
 ---------------------------------------------------------------------------- */
 /** Print a detailed diagnostic description of this model component

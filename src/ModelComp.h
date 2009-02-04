@@ -98,7 +98,6 @@ class ModelComp{
   void printBrief();   //!< prints one liner
   void tagDependencies();  //!< tag this components and all its dependencies
                            // recuresively
-  list<string> getSetMembership(); //!< get a list of members of the set
 
   /** recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();
