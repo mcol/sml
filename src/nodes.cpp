@@ -6,11 +6,13 @@
 #include <sstream>
 #include "nodes.h"
 #include "sml.tab.h"
-#include "ampl.h"   // for findKeywordinTree
 #include "AmplModel.h"
 #include "model_comp.h"    // for WITHARG
+#include "GlobalVariables.h"
 
 static bool logCreate = false;
+extern int n_indexing;
+extern opNodeIx *list_of_indexing[20];
 
 int opNode::use_global_names=0;
 AmplModel *opNode::default_model =NULL;
@@ -1246,3 +1248,346 @@ ListNode *ListNode::clone() {
 
 ListNode::ListNode() :
    opNode(COMMA) {}
+
+
+/* ----------------------------------------------------------------------------
+findKeywordinTree
+---------------------------------------------------------------------------- */
+/* this routine traverses down the tree and returns the top most reference to 
+   the keyword in the Tree */
+
+opNode *
+findKeywordinTree(opNode *root, int oc)
+{
+   if (root->opCode==oc) return root;
+
+   opNode *found, *res;
+   found = NULL;
+   for(opNode::Iterator i=root->begin(); i!=root->end(); ++i) {
+      res = findKeywordinTree((opNode*)*i, oc);
+      if(res && found) {
+         cerr << "Found keyword " << oc << "at least twice in " << root << "\n";
+         exit(1);
+      }
+      found = res;
+   }
+   return found;
+}
+
+/* ---------------------------------------------------------------------------
+find_var_ref_in_context
+---------------------------------------------------------------------------- */
+/** This routine does the work of putting together dot'd variable names
+ *  'root' is a opNode of type ID that points to the left hand part
+ *  of the dot'd expression parsed so far. 'ref' is the new part that
+ *  should be added.
+ *
+ * @param ref A pointer to an expression that evaluates to a model_comp
+ *            this can be given by an ID a dotted expression ID.ID
+ *            or a reference to a parent stage (in StochProg) such as 
+ *            ID(-1;...).
+ *            It can also carry an indexing expressinon ID[.,.,.] in
+ *            which case the indexing is attached to the returned IDREF node
+ * @param context A pointer to the current AmplModel that defines the scope
+ *                in which the ID expressions should be resolved
+ * @return An opNode of type IDREF that points to the correct model_comp
+ * @bug Should return an opNodeIDREF* 
+ *
+ *  An opNode of type IDREF looks like this
+ *       ->opCode = IDREF;
+ *       ->nval = # of arguments
+ *       ->values[0] = pointer to entity in model list
+ *       ->values[1 - n] = arguments 
+ */
+opNode*
+find_var_ref_in_context(AmplModel *context, opNode *ref)
+{
+   /* 'ref' is an opNode representing an iditem. 
+      This can be either
+      - a ID node where values[0] simply points to a name
+      - an ID node which is actually opNodeID and has stochparent set
+      - a LSBRACKET node, where values[0] is ID and values[1] is CSL
+      in the second case the CSL should be added as further arguments
+      to the resulting IDREF node
+
+   */
+  
+   /* returns: pointer */
+   opNode *tmp, *argNode;
+   IDNode *idNode;
+   opNodeIDREF *ret;
+   int stochparent=0;
+
+   /* and now scan through the whole of the local context to see if we 
+      find any matches */
+   /* the local context is 
+       - all vars
+       - all constraints
+       - all objectives
+       - all sets
+       - all parameters
+       - all submodels
+       - all temporary variables (this list needs to be set up somewhere)
+   */
+  
+   // split the expression 'ref' into an id part and an argument list
+   if (GlobalVariables::logParseModel)
+      cout << "find_var_ref_in_context: " << ref << "\n";
+
+   if (ref->opCode==ID){
+      idNode = (IDNode *)ref;
+      argNode = NULL;
+   }else{
+      assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
+      opNode::Iterator i = ref->begin();
+      idNode = (IDNode*)*i;
+      argNode = *(++i);
+      assert(idNode->opCode==ID);
+      assert(argNode->opCode==COMMA);
+   }
+
+   // Test if this ID node is actually of type opNodeID and if so remember
+   // the value of stochparent
+   {
+      if (idNode->stochparent!=0){
+         // there is an extra argument, which is the stochparent
+         stochparent = idNode->stochparent;
+      }
+   }
+
+   if (GlobalVariables::logParseModel) 
+      cout << "--> search for matches of " << idNode->name << "\n";
+ 
+   // see if this matches a dummy variable
+   tmp = find_var_ref_in_indexing(idNode->name.c_str());
+   if (tmp) {
+      if (GlobalVariables::logParseModel) 
+         cout << idNode->name << " is matched by dummy var in " << *tmp << "\n";
+      return ref;
+   }
+
+   // try to find a match in the local context
+   ret = find_var_ref_in_context_(context, idNode);
+
+   if (argNode){
+      if (GlobalVariables::logParseModel)
+         cout << "Adding argument list to node: " << *argNode << "\n";
+      free(idNode->values); // jdh - what does this do?
+      ret->values = argNode->values;
+      ret->nval = argNode->nval;
+      if (ref->opCode==LBRACKET){
+         // this is old code to deal with ancestor(1).ID declarations. To go
+         cerr << "Executing old code to deal with ancestor(1).ID "
+            "declarations\n";
+         exit(1);
+
+         // This is a reference indexed by '(..)'. In this case we are in
+         // a stoch block and the first argument refers to the stage
+         //      ret->stochrecourse = (opNode*)ret->values[0];
+         //for(int i=1;i<ret->nval;i++){
+         //ret->values[i-1] = ret->values[i];
+         //}
+         //ret->nval--;
+      }
+      argNode->values=NULL;
+      argNode->nval = 0;
+   } else {
+      ret->nval = 0;
+   }
+  
+   ret->stochparent = stochparent;
+   return ret;
+}
+
+opNodeIDREF*
+find_var_ref_in_context_(AmplModel *context, IDNode *ref)
+{
+   model_comp *thismc;
+   opNodeIDREF *ret;
+  
+   for(list<model_comp*>::iterator p = context->comps.begin();
+         p!=context->comps.end();p++){
+      thismc = *p;
+      if (strcmp(ref->name.c_str(), thismc->id)==0){
+         /* this is a match */
+         if (GlobalVariables::logParseModel){
+            cout << "Found Match: " << ref->name << " refers to ";
+            cout << nameTypes[thismc->type] << "\n";
+            cout << "    " << thismc->id << "\n";
+            cout << "       " << *(thismc->indexing) << "\n";
+            cout << "       " << *(thismc->attributes) << "\n";
+         }
+
+         ret = new opNodeIDREF();
+         ret->ref = thismc;
+         ret->opCode = IDREF;
+         if (thismc->type==TMODEL){
+            ret->opCode = IDREFM;
+         }
+         return ret;
+      }
+      //thismc = thismc->next;
+   }
+
+  
+   //thismc = context->vars;
+   //for(i=0;i<context->n_vars;i++){
+   //  if (strcmp(name, thismc->id)==0){
+   //    /* this is a match */
+   //    printf("Found Match: %s refers to variable\n",name);
+   //    printf("    %s\n",thismc->id);
+   //    printf("       %s\n",print_opNode(thismc->indexing));
+   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    ref->values[0] = (void*)thismc;
+   //    ref->opCode = IDREF;
+   //    return ref;
+   //  }
+   //  thismc = thismc->next;
+   //}
+   //thismc = context->cons;
+   //for(i=0;i<context->n_cons;i++){
+   //  if (strcmp(name, thismc->id)==0){
+   //    /* thismc is a match */
+   //    printf("Found Match: %s refers to constraint\n",name);
+   //    printf("    %s\n",thismc->id);
+   //    printf("       %s\n",print_opNode(thismc->indexing));
+   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    ref->values[0] = (void*)thismc;
+   //    ref->opCode = IDREF;
+   //    return ref;
+   //  }
+   //  thismc = thismc->next;
+   //}
+   //thismc = context->sets;
+   //for(i=0;i<context->n_sets;i++){
+   //  if (strcmp(name, thismc->id)==0){
+   //    /* this is a match */
+   //    printf("Found Match: %s refers to set\n",name);
+   //    printf("    %s\n",thismc->id);
+   //    printf("       %s\n",print_opNode(thismc->indexing));
+   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    ref->values[0] = (void*)thismc;
+   //    ref->opCode = IDREF;
+   //    return ref;
+   //  }
+   //  thismc = thismc->next;
+   //}
+   //thismc = context->params;
+   //for(i=0;i<context->n_params;i++){
+   //  if (strcmp(name, thismc->id)==0){
+   //    /* this is a match */
+   //    printf("Found Match: %s refers to parameter\n",name);
+   //    printf("    %s\n",thismc->id);
+   //    printf("       %s\n",print_opNode(thismc->indexing));
+   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    ref->values[0] = (void*)thismc;
+   //    ref->opCode = IDREF;
+   //    return ref;
+   //  }
+   //  thismc = thismc->next;
+   //}
+   //thism = context->submodels;
+   //for(i=0;i<context->n_submodels;i++){
+   //  if (strcmp(name, thism->name)==0){
+   //    /* this is a match */
+   //    printf("Found Match: %s refers to submodel\n",name);
+   //    printf("    %s\n",thism->name);
+   //    //printf("       %s\n",print_opNode(thism->indexing));
+   //    //printf("       %s\n",print_opNode(this->attributes));
+   //    ref->values[0] = (void*)thism;
+   //    ref->opCode = IDREFM;
+   //    return ref;
+   //  }
+   //  thism = thism->next;
+   //}
+
+   /* need also to look through parent model */
+   if (context->parent){
+      opNodeIDREF *match = find_var_ref_in_context_(context->parent, ref);
+      return match;
+   }
+
+   /* need also to look through list of local variables */
+
+   cerr << "Could not find ref " << ref->name << " in context\n";
+   exit(1);
+}
+
+
+/* ---------------------------------------------------------------------------
+find_var_ref_in_indexing
+---------------------------------------------------------------------------- */
+/* scan through the current set of active indexing expressions and see if
+   any of them define the dummy variable  given by 'name' 
+
+   IN: 
+    char *name                 the name of identifier to look for
+    
+    int n_indexing             the currently active indexing expressions
+    opNode *list_of_indexing
+   RETURN:
+    The Indexing expression in which the name occurs 
+    (or NULL if there is no match)
+                                                                      */
+
+opNode *
+find_var_ref_in_indexing(const char *const name)
+{
+   int i;
+   opNodeIx *tmp;
+   opNode *ret = NULL;
+
+   for(i=0;i<n_indexing;i++){
+      /* have a look at all the indexing expressions */
+      /* an indexing expression is a '{' node followed by a 'Comma' node */
+      tmp = list_of_indexing[i];
+      if (tmp!=NULL){
+         tmp->splitExpression();
+         ret = tmp->hasDummyVar(name);
+         if (ret) return ret;
+       
+#if 0
+         assert(tmp->opCode==LBRACE);
+         tmp = (opNode*)tmp->values[0];
+         if (tmp->opCode==COLON) tmp = (opNode*)tmp->values[0];
+         /* this should now be a comma separated list */
+         if (tmp->opCode==COMMA){
+            for(j=0;j<tmp->nval;j++){
+               tmp2 = findKeywordinTree((opNode*)tmp->values[j], IN);
+               /* everything to the left of IN is a dummy variables */
+               if (tmp2){
+                  tmp2 = (opNode*)tmp2->values[0];
+                  assert(tmp2->opCode==ID);
+                  if (GlobalVariables::logParseModel)
+                     printf("Found dummy variable: %s\n",tmp2->values[0]);
+                  if (strcmp(name, (const char*)tmp2->values[0])==0)
+                     ret = (opNode*)tmp->values[j];
+     
+               }
+            }
+         }else{
+            /* if this is not a comma separated list, then look directly */
+            char *tmpbuf1 = print_opNode(tmp);
+            char *tmpbuf2 = print_opNodesymb(tmp);
+            if (GlobalVariables::logParseModel){
+               printf(">%s\n", tmpbuf1);
+               printf(">%s\n", tmpbuf2);
+            }
+            free(tmpbuf1);
+            free(tmpbuf2);
+            tmp2 = findKeywordinTree(tmp, IN);
+            /* everything to the left of IN is a dummy variables */
+            if (tmp2){
+               tmp2 = (opNode*)tmp2->values[0];
+               assert(tmp2->opCode==ID||tmp2->opCode==COMMA);
+               if (GlobalVariables::logParseModel)
+                  printf("Found dummy variable: %s\n",tmp2->values[0]);
+               if (strcmp(name, (const char*)tmp2->values[0])==0)
+                  ret = tmp;
+            }
+         }
+#endif
+      }
+   }
+   return ret;
+}

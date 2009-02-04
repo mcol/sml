@@ -10,7 +10,6 @@ typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 #include <list>
 #include "nodes.h"
 #include "CompDescr.h"
-#include "ampl.h"
 
 
 using namespace std;

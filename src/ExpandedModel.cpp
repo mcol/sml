@@ -1,10 +1,10 @@
+#include <list>
+#include <iostream>
+#include <fstream>
 #include "ExpandedModel.h"
 #include "GlobalVariables.h"
 #include "AmplsolverCalls.h"
-#include <list>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include "AmplModel.h"
 
 
 list<string> ExpandedModel::pathToNodeStack;

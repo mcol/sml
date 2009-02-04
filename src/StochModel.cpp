@@ -1,4 +1,3 @@
-#include "ampl.h"
 #include "GlobalVariables.h"
 #include "StochModel.h"
 #include "StochModelComp.h"

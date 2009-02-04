@@ -2,7 +2,6 @@
 #define BACKEND_H
 
 #include "nodes.h"
-#include "ampl.h"
 #include <list>
 #include <vector>
 /* this struct stores an indexing expression in an easy to modify form:

@@ -16,12 +16,14 @@ variables/constraints belong to off-diagonal subblocks)
 This would still be in the Benders view.
 
 */
+#include <string>
 #include <list>
 #include <vector>
-#include <string>
-class ExpandedModel;
+
+using namespace std;
+
+class AmplModel;
 class NlFile;
-#include "ampl.h"
 
 /** 
  * @class ExpandedModel 

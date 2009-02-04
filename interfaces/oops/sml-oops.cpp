@@ -1,5 +1,6 @@
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
+#include <iostream>
 #include <cassert>
 #include "GlobalVariables.h"
 #include "ExpandedModel.h"

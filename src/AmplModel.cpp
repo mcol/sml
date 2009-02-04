@@ -1,5 +1,3 @@
-#include "ampl.h"
-#include "sml.tab.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,9 +5,12 @@
 #include <sstream>
 #include <fstream>
 #include <cassert>
+#include "AmplModel.h"
 #include "backend.h"
 #include "ExpandedModel.h"
 #include "AmplsolverCalls.h"
+#include "nodes.h"
+#include "sml.tab.h"
 
 list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL

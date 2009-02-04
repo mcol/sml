@@ -5,8 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include "backend.h"
-#include "ampl.h"
 #include "GlobalVariables.h"
+#include "AmplModel.h"
 #include "nodes.h"
 #include "sml.tab.h"
 #include "sml-oops.h"

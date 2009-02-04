@@ -4,6 +4,7 @@
 #include "Set.h"
 #include "backend.h"
 #include "GlobalVariables.h" //for GlobalVariables class
+#include "AmplModel.h"
 
 static bool prtAnaDep = false;
 

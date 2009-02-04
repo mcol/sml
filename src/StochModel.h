@@ -1,12 +1,7 @@
 #ifndef STOCHMODEL_H
 #define STOCHMODEL_H
 
-//#include "model_comp.h"
-//#include "nodes.h"
-//#include "symtab.h"
-//#include "ExpandedModel.h"
-//#include <string>
-
+#include "AmplModel.h"
 
 /* ------------------------------------------------------------------------ */
 /** @class StochModel
