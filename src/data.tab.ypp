@@ -117,21 +117,14 @@ data_statement: data_paramdef SEMICOLON
 data_setdef: SET ID DEFINED set_elements {
                 //$2 is the set being defined
                 //$4 are the set elements given as a ' ' node with list         
-                Set *set = new Set($4); 
-                opNode *ref;
-                // try to find the correct set definition 
-                // unclear what context to use: global at the moment
-                ref = find_var_ref_in_context(root, new IDNode($2));
-                if (ref==NULL){
+                SymbolTable::Entry *entry =
+                  root->symbol_table.findSymbol($2);
+                if (entry==NULL){
                   cerr << "Data given for set " << $2 << " which has not been"
-                    "declared!\n",
+                    "declared at top level!" << endl;
                   exit(1);
-                  
                 }
-                // reference has been found
-                opNodeIDREF *onidref = dynamic_cast<opNodeIDREF*>(ref);
-                ModelComp *mc = onidref->ref;
-                mc->value = set;
+                entry->mc->value = new Set($4);
               }
               
 

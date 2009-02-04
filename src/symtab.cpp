@@ -22,6 +22,19 @@ bool SymbolTable::defineSymbol(symb_type type, char *id, ModelComp *mc)
    return true;
 }
 
+SymbolTable::Entry* SymbolTable::findSymbol(string id) {
+   /* Calculate hashcode */
+   int hash = hash_function(id.c_str()) % n_hash;
+
+   list<Entry>::iterator i;
+   for(i=table_[hash].begin(); i!=table_[hash].end(); ++i)
+      if((*i).id == id) break;
+
+   if(i==table_[hash].end()) return NULL;
+
+   return &(*i);
+}
+
 /* ----------------------------------------------------------------------------
 hash function:
 ---------------------------------------------------------------------------- */
@@ -29,7 +42,7 @@ hash function:
    http://www.cse.yorku.ca/~oz/hash.html
 */
 
-unsigned long SymbolTable::hash_function(char *str)
+unsigned long SymbolTable::hash_function(const char *str)
 {
   unsigned long hash = 5381;
   int c;

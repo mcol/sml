@@ -27,9 +27,10 @@ private:
 
 public:
    bool defineSymbol(symb_type, char *id, ModelComp *mc);
+   Entry* findSymbol(string id);
 
 private:
-   unsigned long hash_function(char *str);
+   unsigned long hash_function(const char *str);
 };
 
 #endif
