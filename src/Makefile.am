@@ -16,7 +16,7 @@ AM_CXXFLAGS = -g -I$(AMPLSOLVER) -I$(OOPSHOME)/include -gstabs
 bin_PROGRAMS = sml
 
 sml_SOURCES = sml.tab.ypp sml.yy.lpp symtab.cpp nodes.cpp backend.cpp \
-				  AmplModel.cpp model_comp.cpp ExpandedModel.cpp sml.cpp \
+				  AmplModel.cpp ModelComp.cpp ExpandedModel.cpp sml.cpp \
 				  AmplsolverCalls.cpp sml-oops.cpp OOPSBlock.cpp StochModel.cpp \
 				  StochModelComp.cpp data.tab.ypp data.yy.lpp Set.cpp \
 				  CompDescrParam.cpp SetElement.cpp SetNode.cpp

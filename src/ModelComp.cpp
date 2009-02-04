@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "model_comp.h"
+#include "ModelComp.h"
 #include "Set.h"
 #include "backend.h"
 #include "GlobalVariables.h" //for GlobalVariables class

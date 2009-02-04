@@ -7,7 +7,7 @@
 #include "nodes.h"
 #include "sml.tab.h"
 #include "AmplModel.h"
-#include "model_comp.h"    // for WITHARG
+#include "ModelComp.h"    // for WITHARG
 #include "GlobalVariables.h"
 
 static bool logCreate = false;

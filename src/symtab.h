@@ -1,9 +1,9 @@
 #ifndef SYMTAB_H
 #define SYMTAB_H
 
-#include<string>
-#include<list>
-#include "model_comp.h"
+#include <string>
+#include <list>
+#include "ModelComp.h"
 using namespace std;
 
 class SymbolTable {

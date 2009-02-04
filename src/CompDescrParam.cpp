@@ -1,6 +1,6 @@
 #include "CompDescrParam.h"
 #include "GlobalVariables.h"
-#include "model_comp.h"
+#include "ModelComp.h"
 #include "nodes.h"
 #include <assert.h>
 #include "data.tab.h"

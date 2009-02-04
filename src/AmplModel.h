@@ -1,7 +1,7 @@
 #ifndef AMPLMODEL_H
 #define AMPLMODEL_H
 
-#include "model_comp.h"
+#include "ModelComp.h"
 #include "nodes.h"
 #include "symtab.h"
 #include "ExpandedModel.h"

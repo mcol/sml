@@ -1,4 +1,4 @@
-#include "model_comp.h"
+#include "ModelComp.h"
 #include "StochModel.h"
 /** @class StochModelComp
  *  @brief The class describes an entity in a stochastic model
