@@ -1,3 +1,42 @@
+01/02/09:
+ - Seems the correct way is that lvar becomes a vector. This way it
+   carries information on both the size and content of the array.
+   we can change the call to findIxOfLocalVarsInNlFile to
+
+   vector *findIxOfLocalVarsInNlFile(NlFile *nlf, ExpandedModel *em);
+   
+   The routine would then either just return the vector stored on the
+   map in the NlFile class, or create a new vector, place it on the
+   map and return it. 
+   The calling routine *must not* free/delete the vector that it is passed.
+ 
+ - Tidy up OOPSBlock: 
+   Now that lvar is not setup in the constructor anymore, OOPSBlock
+   can be "downgraded" to a struct. Should probably be named Id or
+   something like that, since it is now only the position information
+   for the OOPS Callback cbi.
+
+ - Think about how to do Hessians. Make sure that the current layout
+   still works. 
+   + This would to make the rest of NlFile private. 
+	
+30/01/09: 
+ - need to remove some debugging printing in
+   findIxOfLocalVarsInNlFile. 
+ - Change findIxOfLocalVarsInNlFile so that just a pointer to the
+   stored lvar can be returned (rather than it being copied).
+ - Document IndexListValue and the map in NlFile.
+ - lvar should not be needed in OOPSBlock anymore. Probably
+   OOPSBlock should be changed to just have emcol/emrow.
+   Make the other call-back routines in sml-oops consistent, so that
+   they do not need to access NlFile directly.
+ - The way that the lvar lists are generated in the cross-sections of
+   NlFile with various ExpandedModels probably needs some better documentation
+  
+
+20/01/09: 
+ - working for alm_xi.mod/dat
+
 07/01/09:
  - In ExpandedModel::setLocalVarInfo for model root_alm0_1_1:
     root_alm0_1_1.col list vars as "alm0_1_risk[1,..."
