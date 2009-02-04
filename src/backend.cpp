@@ -17,8 +17,6 @@ static bool prt_modwrite = false;
 
 void print_model(AmplModel *model);
 void process_model(AmplModel *model);
-void add_to_index_stack(opNode *ix);
-void rem_from_index_stack();
 
 void write_ampl_for_submodel(ostream &fout, AmplModel *root, 
            AmplModel *submodel);
@@ -330,8 +328,10 @@ process_model(AmplModel *model) /* should be called with model==root */
       //        => for now simply use the original dummy variable
       //        => REQUIRE a dummy variable in block indexing
       if (!dummyVar){
-        cerr << "Indexing expressions for block's need dummy variables!\n";
-        cerr << "   " << node->indexing;
+        cerr << "Indexing expressions for block's need dummy variables!" <<endl;
+        cerr << "Model: " << this_model->name << " level " << k << endl;
+        cerr << "Indexing: " << node->indexing << "(" <<
+           (void*) node->indexing << ")" << endl;
         exit(1);
       }
       //for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
@@ -973,65 +973,6 @@ write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
     }
     //comp = comp->next;
   }
-}
-
-/* --------------------------------------------------------------------------
-add_to_index_stack
---------------------------------------------------------------------------- */
-/**
- * This routine takes an indexing expression given by its opNode, splits
- * it into the dummy variable/set expression (by the IN keyword)
- * and adds both items to the l_addIndex list
- *
- * \param ix The indexing expression to add to the stack
- * \return  modifies l_addIndex and n_addIndex
- * \deprecated Is never used. Adding expressions on the stack is done in 
- *      write_ampl_for_submodel_() directly
- */
-void
-add_to_index_stack(opNode *ix){
-  add_index *ai = (add_index*)calloc(1, sizeof(add_index));
-  //  }
-  //  if (l_addIndex[n_addIndex]==NULL){
-  //    l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
-  //  }
-  //  /* remove outside braces from indexing expression */
-  if (ix->opCode==LBRACE) ix = (opNode*)*(ix->begin());
-  /* assumes that the next level is the 'IN' keyword (if present) */
-  if (ix->opCode==IN){
-    //    l_addIndex[n_addIndex]->dummyVar = (opNode*)ix->values[0];
-    //    l_addIndex[n_addIndex]->set = (opNode*)ix->values[1];
-    opNode::Iterator ixi = ix->begin();
-    ai->dummyVar = (opNode*)*ixi;
-    ai->set = (opNode*)*(++ixi);
-  }else{
-    ai->dummyVar = NULL;
-    ai->set = ix;
-    //    l_addIndex[n_addIndex]->dummyVar = NULL;
-    //    l_addIndex[n_addIndex]->set = ix;
-  }
-  // and put this onto the stack
-  list <add_index*> *li = new list<add_index*>;
-  li->push_back(ai);
-  l_addIndex.push_back(li);
-  //  n_addIndex++;
-}
-
-void 
-rem_from_index_stack(){
-  if (l_addIndex.size()==0){
-    printf("Attempting to remove item from l_addIndex list when the list is empty\n");
-    exit(1);
-  }else{
-    l_addIndex.pop_back();
-  }
-
-  //  if (n_addIndex>0){
-  //    n_addIndex--;
-  //  }else{
-  //    printf("Attempting to remove item from l_addIndex list when the list is emply\n");
-  //    exit(1);
-  //  }
 }
 
 /* ---------------------------------------------------------------------------

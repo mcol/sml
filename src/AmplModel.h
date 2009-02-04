@@ -143,6 +143,8 @@ class AmplModel{
   void dump(ostream &fout);
 
   static void applyChanges(); //< apply the model changes stored in Q
+
+  SymbolTable::Entry *findComponent(string id);
 };
 
 

@@ -40,7 +40,6 @@ class Set: public CompDescr{
   int size(); //!< return size of Set
   int findPos(SetElement);  //!<find position of element in set
   void add(SetElement);     //!< add element to set
-  string *getAt(int i);   //!< get a certain element of the set
 
   // virtal printToString inherited from CompDescr
   string printToString(); //!< print to string  

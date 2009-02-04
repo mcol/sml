@@ -94,9 +94,7 @@ int main(int argc, char **argv) {
    }
    
    parse_model(GlobalVariables::modelfilename);
-   cerr << "WIN1" << endl;
    parse_data(AmplModel::root, GlobalVariables::datafilename);
-   cerr << "WIN" << endl;
 
    // change working directory back to tmp/ for processing model
    errcode = chdir("tmp");

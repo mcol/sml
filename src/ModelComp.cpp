@@ -302,22 +302,6 @@ ModelComp::untagAll(AmplModel *start)
 }
 
 /* ---------------------------------------------------------------------------
-ModelComp::writeAllTagged()
----------------------------------------------------------------------------- */
-/** Write out a list of all model components that have the tag set           */
-void 
-ModelComp::writeAllTagged()
-{
-
-  // iterate through the global list
-  for (list<ModelComp*>::iterator p=global_list.begin();p!=global_list.end();
-       p++){
-    if ((*p)->tag) {
-      printf("%s\n",(*p)->id);
-    }
-  }
-}
-/* ---------------------------------------------------------------------------
 ModelComp::writeAllTagged(AmplModel *start)
 ---------------------------------------------------------------------------- */
 /** Recursively write out a list of all model components that have the tag set 
@@ -334,45 +318,6 @@ ModelComp::writeAllTagged(AmplModel *start)
     }
     if ((*p)->type==TMODEL){
       ModelComp::writeAllTagged((AmplModel*)(*p)->other);
-    }
-  }
-}
-
-/* ---------------------------------------------------------------------------
-ModelComp::writeAllTagged()
----------------------------------------------------------------------------- */
-/** Write out a list of all model components that have the tag set:
- Just write a list of names */
-void 
-ModelComp::writeAllTagged(ostream &fout)
-{
-  // iterate through the global list
-  for (list<ModelComp*>::iterator p=global_list.begin();p!=global_list.end();
-       p++){
-    if ((*p)->tag) {
-      fout << (*p)->id << "\n";
-    }
-  }
-}
-
-/* ---------------------------------------------------------------------------
-ModelComp::writeAllTagged(ostream &fout, AmplModel *start)
----------------------------------------------------------------------------- */
-/** Recursively write out a list of all model components that have the tag set 
- *  @param start The AmplModel where to start the recursion
- *  @param fout File where to write to
- */
-void 
-ModelComp::writeAllTagged(ostream &fout, AmplModel *start)
-{
-  // iterate through the global list
-  for (list<ModelComp*>::iterator p=start->comps.begin();
-       p!=start->comps.end();p++){
-    if ((*p)->tag) {
-      fout << (*p)->id << "\n";
-    }
-    if ((*p)->type==TMODEL){
-      ModelComp::writeAllTagged(fout, (AmplModel*)(*p)->other);
     }
   }
 }
@@ -395,34 +340,6 @@ ModelComp::modifiedWriteAllTagged(ostream &fout)
        p++){
     if ((*p)->tag) {
       modified_write(fout, *p);
-    }
-  }
-}
-
-/* ---------------------------------------------------------------------------
-ModelComp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
----------------------------------------------------------------------------- */
-/** Recursively write out a list of all model components that have the tag set:
- * write every component how it would appear in the global model file 
- * @bug modified_write should be called within the model writing process:
- *  it depends on addIndex/l_addIndex, i.e. some indexing expressions (and
- *  submodel names) should be added to entity names depending on where in the
- *  model it is called 
- *  @param start The AmplModel where to start the recursion
- *  @param fout File where to write to
- */
-
-void 
-ModelComp::modifiedWriteAllTagged(ostream &fout, AmplModel *start)
-{
-  // iterate through the global list
-  for (list<ModelComp*>::iterator p=start->comps.begin();
-       p!=start->comps.end();p++){
-    if ((*p)->tag) {
-      modified_write(fout, *p);
-    }
-    if ((*p)->type==TMODEL){
-      ModelComp::modifiedWriteAllTagged(fout, (AmplModel*)(*p)->other);
     }
   }
 }

@@ -86,17 +86,6 @@ string opNode::stage = "";
 }*/
 
 /* --------------------------------------------------------------------------
-newIndexNode
---------------------------------------------------------------------------- */
-indexNode *
-newIndexNode(opNode *node){
-  indexNode *ixn = (indexNode *)calloc(1, sizeof(indexNode));
-  ixn->next = NULL;
-  ixn->value = node;
-  return ixn;
-}
-
-/* --------------------------------------------------------------------------
 addItemToListNew
 -------------------------------------------------------------------------- */
 opNode *opNode::push_back(opNode *newitem)

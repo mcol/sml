@@ -842,9 +842,21 @@ AmplModel::reassignDependencies()
       (*p)->reassignDependencies();
     }
   }
-
 }
 
+/* --------------------------------------------------------------------------
+AmplModel::findComponent(string id)
+---------------------------------------------------------------------------- */
+/** Finds a component with name id in correct scoping order.
+ * That is to say it will first search this model's SymbolTable, and if it
+ * cannot find the component it will recurse to its parental node and so on
+ * up to the root.
+ */
+SymbolTable::Entry *AmplModel::findComponent(string id) {
+   SymbolTable::Entry *ent = symbol_table.findSymbol(id);
+   if(!ent && parent) parent->findComponent(id);
+   return ent;
+}
 
 /* ---------------------------------------------------------------------------
 bool is_int(char *tok)

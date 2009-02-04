@@ -108,23 +108,11 @@ class ModelComp{
   /** recursively set the tag to false for all models */
   static void untagAll(AmplModel *start);  
 
-  /** write name of all tagged components: using global_list */
-  static void writeAllTagged();
-
   /** recursively write name of all tagged components */
   static void writeAllTagged(AmplModel *start);
 
-  /** write name of all tagged components to file: using global_list */
-  static void writeAllTagged(ostream &fout); 
-
-  /** recursively write name of all tagged components to file */
-  static void writeAllTagged(ostream &fout, AmplModel *start); 
-
   /** write definition of all tagged components to file, using global_list */
   static void modifiedWriteAllTagged(ostream &fout); 
-
-  /** recursively write definition of all tagged components to file */
-  static void modifiedWriteAllTagged(ostream &fout, AmplModel *start); 
 
   void moveUp(int level);  //< move this model comp up in the model tree 
   virtual ModelComp *clone();     //< duplicate the object: shallow copy
