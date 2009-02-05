@@ -12,32 +12,32 @@
 
 static bool logCreate = false;
 extern int n_indexing;
-extern opNodeIx *list_of_indexing[20];
+extern SyntaxNodeIx *list_of_indexing[20];
 
-int opNode::use_global_names=0;
-AmplModel *opNode::default_model =NULL;
-string opNode::node = "";
-string opNode::stage = "";
+int SyntaxNode::use_global_names=0;
+AmplModel *SyntaxNode::default_model =NULL;
+string SyntaxNode::node = "";
+string SyntaxNode::stage = "";
 
 /* ==========================================================================
- opNode
+ SyntaxNode
 =========================================================================== */
-/* this defines an object opNode :
-   opNode is a node in an expression tree. 
+/* this defines an object SyntaxNode :
+   SyntaxNode is a node in an expression tree. 
    
    FIXME: 
-   Should the opNode structure carry a flag that indicates what meaning is 
+   Should the SyntaxNode structure carry a flag that indicates what meaning is 
    has within the grammar?
    That way we could have routines like "isIndexing", "isSimpleSet" that
    may be helpful for error detection
 
 */
 
-//opNodeID *new opNodeID(void *val) {
-//   opNodeID *newOp;
+//SyntaxNodeID *new SyntaxNodeID(void *val) {
+//   SyntaxNodeID *newOp;
 //   
 //   printf("creating unary opID:\n");
-//   newOp = new opNodeID();
+//   newOp = new SyntaxNodeID();
 //   newOp->opCode = ID;
 //   newOp->values = (void **) malloc(1*sizeof(void *));
 //   newOp->values[0] = (void *) val;
@@ -46,7 +46,7 @@ string opNode::stage = "";
 //   return newOp;
 //}
 
-/*relNode *newRel(int relCode, opNode *lval, opNode *rval) {
+/*relNode *newRel(int relCode, SyntaxNode *lval, SyntaxNode *rval) {
    relNode *newRel;
 
    newRel = (relNode *) malloc(sizeof(relNode));
@@ -57,9 +57,9 @@ string opNode::stage = "";
    return newRel;
    }*/
 
-/*void freeOpNode(opNode *target) {
+/*void freeOpNode(SyntaxNode *target) {
    if(target == NULL) {
-      fprintf(stderr, "Attepted to free a NULL opNode\n");
+      fprintf(stderr, "Attepted to free a NULL SyntaxNode\n");
       return;
    }
 
@@ -72,9 +72,9 @@ string opNode::stage = "";
       case '-':
       case '*':
       case '/':
-	freeOpNode((opNode*)target->values[1]);
+	freeOpNode((SyntaxNode*)target->values[1]);
       case '!':
-	freeOpNode((opNode*)target->values[0]);
+	freeOpNode((SyntaxNode*)target->values[0]);
          break;
       default:
          fprintf(stderr, "Unknown opCode %i. Possible Memory leak.\n", 
@@ -88,10 +88,10 @@ string opNode::stage = "";
 /* --------------------------------------------------------------------------
 addItemToListNew
 -------------------------------------------------------------------------- */
-opNode *opNode::push_back(opNode *newitem)
+SyntaxNode *SyntaxNode::push_back(SyntaxNode *newitem)
 {
   /* extend the size of the node by one */
-  opNode **newvalues = (opNode **)calloc(nval+1, sizeof(opNode *));
+  SyntaxNode **newvalues = (SyntaxNode **)calloc(nval+1, sizeof(SyntaxNode *));
   int i;
 
   for (i=0;i<nval;i++){
@@ -106,10 +106,10 @@ opNode *opNode::push_back(opNode *newitem)
 /* --------------------------------------------------------------------------
 addItemToListBeg
 -------------------------------------------------------------------------- */
-opNode *opNode::push_front(opNode *newitem)
+SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
 {
   /* extend the size of the node by one */
-  opNode **newvalues = (opNode **)calloc(nval+1, sizeof(opNode *));
+  SyntaxNode **newvalues = (SyntaxNode **)calloc(nval+1, sizeof(SyntaxNode *));
   int i;
 
   for (i=0;i<nval;i++){
@@ -125,7 +125,7 @@ opNode *opNode::push_front(opNode *newitem)
 /* --------------------------------------------------------------------------
 addItemToListOrCreate
 -------------------------------------------------------------------------- */
-/** A 'List' is an opNode of opCode COMMA or ' ' with a variable number
+/** A 'List' is an SyntaxNode of opCode COMMA or ' ' with a variable number
  *  of arguments. 
  *  This function takes (a possibly existing) list and adds an item to it
  *  Both the list and the item can be NULL:
@@ -134,8 +134,8 @@ addItemToListOrCreate
  *    single item that is passed
  */
 
-opNode *
-addItemToListOrCreate(int oc, opNode *list, opNode *newitem)
+SyntaxNode *
+addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem)
 {
   if(!newitem) return list;
 
@@ -143,7 +143,7 @@ addItemToListOrCreate(int oc, opNode *list, opNode *newitem)
     assert(oc==list->opCode);
     return list->push_back(newitem);
   }else{
-    return new opNode(oc, newitem);
+    return new SyntaxNode(oc, newitem);
   }
 }
 
@@ -152,7 +152,7 @@ addItemToListOrCreate(int oc, opNode *list, opNode *newitem)
 /* --------------------------------------------------------------------------
 addItemToList
 -------------------------------------------------------------------------- */
-/* a list of values is given by an opNode with 
+/* a list of values is given by an SyntaxNode with 
     ->opCode one of {COMMA, }
     ->nval   #of items on the list
    the items on the list are given as a linked list of indexNode items
@@ -164,8 +164,8 @@ addItemToList
  */
 
 
-opNode *
-addItemToList(opNode *list, opNode *newitem)
+SyntaxNode *
+addItemToList(SyntaxNode *list, SyntaxNode *newitem)
 {
   indexNode *last = (indexNode *)list->values[1];
   indexNode *newnode = newIndexNode(newitem);
@@ -176,7 +176,7 @@ addItemToList(opNode *list, opNode *newitem)
   printf("Current list: opCode= %d, nval = %d\n",list->opCode, list->nval);
   tmp = (indexNode *)(list->values[0]);
   for(i=0;i<list->nval;i++){
-    char *tmpbuf = print_opNodesymb(tmp->value);
+    char *tmpbuf = print_SyntaxNodesymb(tmp->value);
     printf("> %s\n", tmpbuf);
     free(tmpbuf);
     tmp = tmp->next;
@@ -186,13 +186,13 @@ addItemToList(opNode *list, opNode *newitem)
   last->next = newnode;
   list->values[1]=newnode;
 
-  //printf("In addItemToList: %s\n",print_opNodesymb(list));
+  //printf("In addItemToList: %s\n",print_SyntaxNodesymb(list));
   return list;
 }
 #endif
 
 //retType *
-//newRetType(opNode *node, opNode *indexing, AmplModel *context)
+//newRetType(SyntaxNode *node, SyntaxNode *indexing, AmplModel *context)
 //{
 // retType *ret = (retType*)calloc(1, sizeof(retType));
 //  
@@ -202,7 +202,7 @@ addItemToList(opNode *list, opNode *newitem)
 //}
 
 /* --------------------------------------------------------------------------
-opNode::print()
+SyntaxNode::print()
 --------------------------------------------------------------------------- */
 /* Thie routine recursively prints the expression routed at the current
    node in the expression tree.
@@ -212,23 +212,23 @@ opNode::print()
 */
 
 ostream&
-operator<<(ostream&s, const opNode *node) {
+operator<<(ostream&s, const SyntaxNode *node) {
    if(node == NULL) return s;
    return node->put(s);
 }
 
 ostream&
-operator<<(ostream&s, const opNode &node) {
+operator<<(ostream&s, const SyntaxNode &node) {
    return node.put(s);
 }
 
-ostream& opNode::put(ostream&s) const {
-  const opNodeIDREF *onidref;
+ostream& SyntaxNode::put(ostream&s) const {
+  const SyntaxNodeIDREF *onidref;
   static int level=0;
 
   if(this == NULL) return s;
 
-  opNode::Iterator i = this->begin();
+  SyntaxNode::Iterator i = this->begin();
   /*if(s!=cout) {
      for(int j=0; j<level; ++j) cout << " ";
      if(level!=0) cout << "-";
@@ -244,10 +244,10 @@ ostream& opNode::put(ostream&s) const {
       s << *i;
       break;
     case NODE:
-      s << opNode::node;
+      s << SyntaxNode::node;
       break;
     case STAGE:
-      s << opNode::stage;
+      s << SyntaxNode::stage;
       break;
     case ID:
                      //s << (const char*)*i;               break;
@@ -371,7 +371,7 @@ ostream& opNode::put(ostream&s) const {
       if (this->nval==1){
          s << "=" << **i;
       }else{
-         s << *(opNode*)*i;
+         s << *(SyntaxNode*)*i;
          s << "=" << **(++i);
       }
       break;
@@ -393,8 +393,8 @@ ostream& opNode::put(ostream&s) const {
       break;
     case IDREF:
     case IDREFM:
-      if(!(onidref = (const opNodeIDREF*)(this))) {
-         cerr << "Cast of node to opNodeIDREF failed!\n";
+      if(!(onidref = (const SyntaxNodeIDREF*)(this))) {
+         cerr << "Cast of node to SyntaxNodeIDREF failed!\n";
          exit(1);
       }
       s << onidref;
@@ -417,21 +417,21 @@ ostream& opNode::put(ostream&s) const {
   return s;
 }
 
-ostream& opNodeIDREF::put(ostream& s) const {
+ostream& SyntaxNodeIDREF::put(ostream& s) const {
 
    switch(opCode) {
    case IDREF:
       if (nval<0) {
 	      // as yet unset IDREF
          s << "IDREF";
-      } else if (opNode::use_global_names) {
+      } else if (SyntaxNode::use_global_names) {
 	      s << getGlobalNameNew(ref, this, default_model, WITHARG);
       } else {
          /* this is the new ID processor */
          if(nval==0) {
             s << ref->id;
          } else {
-            opNode::Iterator i=begin();
+            SyntaxNode::Iterator i=begin();
             s << ref->id << "[" << **i;
             for(++i; i!=end(); ++i){
                s << "," << **i;
@@ -446,7 +446,7 @@ ostream& opNodeIDREF::put(ostream& s) const {
       s << ref->id;
       break;
    default:
-      cerr << "In fn opNodeIDREF::put bu not an IDREF or IDREFM\n";
+      cerr << "In fn SyntaxNodeIDREF::put bu not an IDREF or IDREFM\n";
       exit(1);
    }
 
@@ -454,7 +454,7 @@ ostream& opNodeIDREF::put(ostream& s) const {
 }
 
 string
-opNode::print()
+SyntaxNode::print()
 {
    ostringstream ost;
    ost << (*this);
@@ -462,13 +462,13 @@ opNode::print()
 }
 
 void 
-opNode::dump(ostream &fout)
+SyntaxNode::dump(ostream &fout)
 {
-  fout << print_opNodesymb(this) << "\n";
+  fout << print_SyntaxNodesymb(this) << "\n";
 }
 
 char *
-print_opNodesymb(opNode *node)
+print_SyntaxNodesymb(SyntaxNode *node)
 {
   int i;
   ValueNode<long> *inode;
@@ -500,9 +500,9 @@ print_opNodesymb(opNode *node)
   switch (node->opCode)
   {
   case IDREF: {
-    opNodeIDREF *onir= dynamic_cast<opNodeIDREF*>(node);
+    SyntaxNodeIDREF *onir= dynamic_cast<SyntaxNodeIDREF*>(node);
     if (onir==NULL) {
-      cerr << "Some IDREF node still not opNodeIDREF\n";
+      cerr << "Some IDREF node still not SyntaxNodeIDREF\n";
       exit(1);
     }
     ModelComp *mc = onir->ref;
@@ -529,7 +529,7 @@ print_opNodesymb(opNode *node)
   if (node->nval>0)
     arg = (char**)calloc(node->nval, sizeof(char*));
   for(i=0;i<node->nval;i++){
-    arg[i] = print_opNodesymb(node->values[i]);
+    arg[i] = print_SyntaxNodesymb(node->values[i]);
     retsize += strlen(arg[i])+2;
   }
   
@@ -549,28 +549,28 @@ print_opNodesymb(opNode *node)
 	 
 }
 /* ==========================================================================
-opNode Methods to follow
+SyntaxNode Methods to follow
 ============================================================================*/
 // constructors:
 
-opNode::opNode()
+SyntaxNode::SyntaxNode()
 {
   opCode = -1;
   nval = -1;
   values = NULL;
 }
 
-opNode::opNode(opNode &src) :
+SyntaxNode::SyntaxNode(SyntaxNode &src) :
    nval(src.nval), opCode(src.opCode), values(src.values) {}
 
-opNode::opNode (int code, opNode *val1, opNode *val2, opNode* val3) :
+SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode* val3) :
    opCode(code), nval(0), values(NULL)
 {
    if(val1) nval++;
    if(val2) nval++;
    if(val3) nval++;
 
-   if(nval) values = (opNode **) malloc(nval*sizeof(opNode *));
+   if(nval) values = (SyntaxNode **) malloc(nval*sizeof(SyntaxNode *));
 
    int i = 0;
    if(val1) values[i++] = val1;
@@ -580,29 +580,29 @@ opNode::opNode (int code, opNode *val1, opNode *val2, opNode* val3) :
    if (logCreate) cout << "created " << nval << "-ary op: " << opCode << "\n";
 }
 
-opNode::~opNode() {
+SyntaxNode::~SyntaxNode() {
    if(values) free(values);
 }
 
 
 /* --------------------------------------------------------------------------
-opNode *opNode::deep_copy()
+SyntaxNode *SyntaxNode::deep_copy()
 ---------------------------------------------------------------------------- */
-opNode *
-opNode::deep_copy()
+SyntaxNode *
+SyntaxNode::deep_copy()
 {
-  opNode *newn = new opNode();
+  SyntaxNode *newn = new SyntaxNode();
 
   if (opCode==IDREF || opCode==IDREFM){
-    cerr << "IDREF opNodes need to be cloned differently\n";
+    cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
   newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0)
-    newn->values = (opNode **)calloc(nval, sizeof(opNode *));
+    newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
 
-  /* Values are copied depending on the type of the opNode */
+  /* Values are copied depending on the type of the SyntaxNode */
   /* ID/IDREF/INT_VAL/FLOAT_VAL/IDREFM are treated differently */
   if (opCode==ID){
     cerr << "Called deep_copy for ID" << endl;
@@ -617,36 +617,36 @@ opNode::deep_copy()
   return newn;
 }
 /* --------------------------------------------------------------------------
-opNode *opNode::clone()
+SyntaxNode *SyntaxNode::clone()
 ---------------------------------------------------------------------------- */
-opNode *
-opNode::clone()
+SyntaxNode *
+SyntaxNode::clone()
 {
-  opNode *newn = new opNode();
+  SyntaxNode *newn = new SyntaxNode();
 
   if (opCode==IDREF){
-    cerr << "IDREF opNodes need to be cloned differently\n";
+    cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
   newn->opCode = opCode;
   newn->nval = nval;
-  newn->values = (opNode **)calloc(nval, sizeof(opNode *));
+  newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
   for(int i=0;i<nval;i++)
     newn->values[i] = values[i];
   return newn;
 }
 
 /* --------------------------------------------------------------------------
-char *opNode::getFloatVal()
+char *SyntaxNode::getFloatVal()
 ---------------------------------------------------------------------------- */
-/* Returns the double value represented by this opNode
-   Assumes that the current opNode is either INT_VAL or FLOAT_VAL */
+/* Returns the double value represented by this SyntaxNode
+   Assumes that the current SyntaxNode is either INT_VAL or FLOAT_VAL */
 
 double 
-opNode::getFloatVal()
+SyntaxNode::getFloatVal()
 {
   if (opCode!=ID){
-    cerr << "Attempting to call getFloatVal for an opNode not of type"
+    cerr << "Attempting to call getFloatVal for an SyntaxNode not of type"
        "INT_VAL/FLOAT_VAL/ID\n";
     exit(1);
   }
@@ -656,42 +656,42 @@ opNode::getFloatVal()
 }
 
 /* --------------------------------------------------------------------------
-opNode *opNode::getValue()
+SyntaxNode *SyntaxNode::getValue()
 ---------------------------------------------------------------------------- */
-/* Returns the value of the opNode as a c_string
-   Assumes that the opNode in question is ID, INT_VAL, FLOAT_VAL */
+/* Returns the value of the SyntaxNode as a c_string
+   Assumes that the SyntaxNode in question is ID, INT_VAL, FLOAT_VAL */
 char *
-opNode::getValue()
+SyntaxNode::getValue()
 {
   cerr << "Attempting to call getValue on something funny." << endl;
   throw exception();
   if (opCode!=ID){
-    cerr << "Attempting to call getValue for an opNode not of type ID/INT_VAL/FLOAT_VAL\n";
+    cerr << "Attempting to call getValue for an SyntaxNode not of type ID/INT_VAL/FLOAT_VAL\n";
     exit(1);
   }
   return (char*)values[0];
 }
 
 /* --------------------------------------------------------------------------
-char *opNode::printDummyVar()
+char *SyntaxNode::printDummyVar()
 ---------------------------------------------------------------------------- */
-/* Assumes that the current opNode is the dummy variable in an indexing 
+/* Assumes that the current SyntaxNode is the dummy variable in an indexing 
    expression: that is it, is either ID or LBRACKET (COMMA (ID1 .. IDn)) */
 
 string
-opNode::printDummyVar()
+SyntaxNode::printDummyVar()
 {
   if (opCode==ID){
     return this->print();
   }else{
-    opNode *list;
+    SyntaxNode *list;
     // this must be LBRACKET
     if (opCode!=LBRACKET){
       cerr << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
       cerr << "current opCode is "+opCode;
       exit(1);
     }
-    list = (opNode*)values[0];
+    list = (SyntaxNode*)values[0];
     if (list->opCode==ID) return list->print();
     if (list->opCode!=COMMA){
       cerr << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
@@ -703,11 +703,11 @@ opNode::printDummyVar()
 }
 
 /* --------------------------------------------------------------------------
-opNode::findIDREF()
+SyntaxNode::findIDREF()
 ---------------------------------------------------------------------------- */
 /* find the list of all the IDREF nodes at or below the current node */
 void
-opNode::findIDREF()
+SyntaxNode::findIDREF()
 {
   int i;
 
@@ -725,34 +725,34 @@ opNode::findIDREF()
   }
 }
 /* --------------------------------------------------------------------------
-opNode::findIDREF(list<ModelComp> *lmc)
+SyntaxNode::findIDREF(list<ModelComp> *lmc)
 ---------------------------------------------------------------------------- */
 /* find the list of all the IDREF nodes at or below the current node */
 void
-opNode::findIDREF(list<ModelComp*> &lmc)
+SyntaxNode::findIDREF(list<ModelComp*> &lmc)
 {
   int i;
 
   if (opCode==IDREF){
     //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
-    lmc.push_back(((opNodeIDREF*)this)->ref);
+    lmc.push_back(((SyntaxNodeIDREF*)this)->ref);
   }else if (opCode==ID) {
     return;
   }else{
     for(i=0;i<nval;i++){
       if (values[i]){
-	     ((opNode*)values[i])->findIDREF(lmc);
+	     ((SyntaxNode*)values[i])->findIDREF(lmc);
       }
     }
   }
 }
 /* --------------------------------------------------------------------------
-opNode::findIDREF(list<opNode *> *lnd)
+SyntaxNode::findIDREF(list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
 /* find the list of all the IDREF nodes at or below the current node */
 void
-opNode::findIDREF(list<opNode*> *lnd)
+SyntaxNode::findIDREF(list<SyntaxNode*> *lnd)
 {
   int i;
 
@@ -775,11 +775,11 @@ opNode::findIDREF(list<opNode*> *lnd)
   }
 }
 /* --------------------------------------------------------------------------
-opNode::findOpCode(int oc, list<opNode *> *lnd)
+SyntaxNode::findOpCode(int oc, list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
 /* find the list of all nodes with opCode==oc at or below the current node */
 void
-opNode::findOpCode(int oc, list<opNode*> *lnd)
+SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd)
 {
   int i;
 
@@ -800,22 +800,22 @@ opNode::findOpCode(int oc, list<opNode*> *lnd)
 }
 
 /* --------------------------------------------------------------------------
-opNode::findModelComp()
+SyntaxNode::findModelComp()
 ---------------------------------------------------------------------------- */
-/* find the ModelComp (if any) refered to by this opNode 
- * Only return the ModelComp if the expression given by this opNode is an
+/* find the ModelComp (if any) refered to by this SyntaxNode 
+ * Only return the ModelComp if the expression given by this SyntaxNode is an
  * immediate reference to a ModelComp. Otherwise return NULL
  */
 
-ModelComp *opNode::findModelComp()
+ModelComp *SyntaxNode::findModelComp()
 {
-  opNode *on = this;
+  SyntaxNode *on = this;
   while ((on->opCode==LBRACKET || on->opCode==LBRACE) && on->nval==1){
     on = on->values[0];
   }
 
   if (opCode==IDREF){
-    opNodeIDREF *onref = dynamic_cast<opNodeIDREF*>(this);
+    SyntaxNodeIDREF *onref = dynamic_cast<SyntaxNodeIDREF*>(this);
     return onref->ref;
   }
   return NULL;
@@ -823,17 +823,17 @@ ModelComp *opNode::findModelComp()
 
 
 /* --------------------------------------------------------------------------
-opNode::getIndexingSet()
+SyntaxNode::getIndexingSet()
 ---------------------------------------------------------------------------- */
-opNode *opNode::getIndexingSet()
+SyntaxNode *SyntaxNode::getIndexingSet()
 {
-  opNode *ix = this;
-  opNode *set;
-  opNode *dummyVar;
+  SyntaxNode *ix = this;
+  SyntaxNode *set;
+  SyntaxNode *dummyVar;
 
   if (ix==NULL) return NULL;
   /* remove outside braces from indexing expression */
-  if (ix->opCode==LBRACE) ix = (opNode*)ix->values[0];
+  if (ix->opCode==LBRACE) ix = (SyntaxNode*)ix->values[0];
   /* assumes that the next level is the 'IN' keyword (if present) */
   if (ix->opCode==IN){
     dummyVar = ix->values[0];
@@ -847,28 +847,28 @@ opNode *opNode::getIndexingSet()
 }
 
 /* --------------------------------------------------------------------------
-opNode::getArgumentList()
+SyntaxNode::getArgumentList()
 ---------------------------------------------------------------------------- */
-/** This is for an opNode of type IDREF (and should eventually be moved
- *  to opNodeIDREF:getArgumentList()):
+/** This is for an SyntaxNode of type IDREF (and should eventually be moved
+ *  to SyntaxNodeIDREF:getArgumentList()):
  *  returns a comma separated list of the arguments (the bit in [..] brackets)
  *
  */
 
 string
-opNode::getArgumentList() const
+SyntaxNode::getArgumentList() const
 {
-   const opNodeIDREF *on;
+   const SyntaxNodeIDREF *on;
    string arglist = "";
    if (opCode!=IDREF){
-      cerr << "Can only call getArgumentList for opNodes of type IDREF\n";
+      cerr << "Can only call getArgumentList for SyntaxNodes of type IDREF\n";
       exit(1);
    }
 
    // see if this is actually an IDREF node
-   on = dynamic_cast<const opNodeIDREF*>(this);
+   on = dynamic_cast<const SyntaxNodeIDREF*>(this);
    if (on==NULL){
-      cout << "WARNING: This is an IDREF opNode not of type opNodeIDREF\n";
+      cout << "WARNING: This is an IDREF SyntaxNode not of type SyntaxNodeIDREF\n";
       if (nval>0){
          arglist += values[1]->print();
          for(int i=1;i<nval;i++){
@@ -878,7 +878,7 @@ opNode::getArgumentList() const
       }
    }else{
       if (nval>0){
-         opNode::Iterator i = begin();
+         SyntaxNode::Iterator i = begin();
          arglist += (*i)->print();
          for(++i;i!=end();++i){
             arglist += ",";
@@ -894,10 +894,10 @@ opNode::getArgumentList() const
  *
  * The items from src are prepended to this object's values
  */
-opNode &opNode::merge(const opNode &src) {
-   opNode **newvalues = (opNode **)calloc(src.nval+nval,sizeof(opNode *));
+SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
+   SyntaxNode **newvalues = (SyntaxNode **)calloc(src.nval+nval,sizeof(SyntaxNode *));
 
-   opNode **ptr = newvalues;
+   SyntaxNode **ptr = newvalues;
    for(int i=0;i<src.nval;i++)
       *(ptr++) = src.values[i];
    for(int i=0;i<nval;i++)
@@ -910,12 +910,12 @@ opNode &opNode::merge(const opNode &src) {
 }
 
 
-//void opNode::foo(){}
+//void SyntaxNode::foo(){}
 
 /* ==========================================================================
-opNodeix Methods to follow
+SyntaxNodeix Methods to follow
 ============================================================================*/
-opNodeIx::opNodeIx()
+SyntaxNodeIx::SyntaxNodeIx()
 {
   qualifier = NULL;
   ncomp = 0;
@@ -925,8 +925,8 @@ opNodeIx::opNodeIx()
   done_split = 0;
 }
 
-opNodeIx::opNodeIx(opNode *on) :
-   opNode(*on)
+SyntaxNodeIx::SyntaxNodeIx(SyntaxNode *on) :
+   SyntaxNode(*on)
 {
   qualifier = NULL;
   ncomp = 0;
@@ -938,10 +938,10 @@ opNodeIx::opNodeIx(opNode *on) :
 }
 
 /* ---------------------------------------------------------------------------
-opNodeIx::printDiagnostic
+SyntaxNodeIx::printDiagnostic
 -----------------------------------------------------------------------------*/
 void
-opNodeIx::printDiagnostic(ostream &fout)
+SyntaxNodeIx::printDiagnostic(ostream &fout)
 {
   if (!done_split) splitExpression();
   fout << "qualifier: " << qualifier << "\n";
@@ -953,15 +953,15 @@ opNodeIx::printDiagnostic(ostream &fout)
 }
 
 /* ---------------------------------------------------------------------------
-opNodeIx::getListDummyVars
+SyntaxNodeIx::getListDummyVars
 -----------------------------------------------------------------------------*/
-list<opNode *>
-opNodeIx::getListDummyVars()
+list<SyntaxNode *>
+SyntaxNodeIx::getListDummyVars()
 {
-  list<opNode *> l;
+  list<SyntaxNode *> l;
   
   for(int i=0;i<ncomp;i++){
-    opNode *dv = dummyVarExpr[i];
+    SyntaxNode *dv = dummyVarExpr[i];
     // a dummy var expression is either ID/IDREF or (ID1,...IDn)
     if (dv->opCode==ID||dv->opCode==IDREF){
       l.push_back(dv);
@@ -972,7 +972,7 @@ opNodeIx::getListDummyVars()
 	     cerr << "Given expression: " << dv << "\n";
 	     exit(1);
       }
-      for(opNode::Iterator j=dv->begin(); j!=dv->end(); ++j){
+      for(SyntaxNode::Iterator j=dv->begin(); j!=dv->end(); ++j){
 	     l.push_back(*j);
       }
     }else{
@@ -985,7 +985,7 @@ opNodeIx::getListDummyVars()
 }
 
 /* ---------------------------------------------------------------------------
-opNodeIx::splitExpression
+SyntaxNodeIx::splitExpression
 -----------------------------------------------------------------------------*/
 /* sets up the ->set, ->dummyVar components of the class 
 
@@ -993,9 +993,9 @@ opNodeIx::splitExpression
 
     {(i,j) in ARCS, k in SET: i>k} 
 */
-void opNodeIx::splitExpression()
+void SyntaxNodeIx::splitExpression()
 {
-  opNode *tmp, *tmp2;
+  SyntaxNode *tmp, *tmp2;
   int i;
 
   if (done_split) return;
@@ -1018,11 +1018,11 @@ void opNodeIx::splitExpression()
   /* this should now be a comma separated list */
   if (tmp->opCode==COMMA){
     ncomp = tmp->nchild();
-    this->sets = (opNode**)calloc(ncomp, sizeof(opNode*));
+    this->sets = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
-    this->dummyVarExpr = (opNode**)calloc(ncomp, sizeof(opNode*));
+    this->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
     for(i=0;i<ncomp;i++){
-      tmp2 = findKeywordinTree((opNode*)tmp->values[i], IN);
+      tmp2 = findKeywordinTree((SyntaxNode*)tmp->values[i], IN);
       /* everything to the left of IN is a dummy variables */
       if (tmp2){
 	     dummyVarExpr[i] = tmp2->values[0];
@@ -1042,9 +1042,9 @@ void opNodeIx::splitExpression()
     }
   }else{
     ncomp = 1;
-    this->sets = (opNode**)calloc(1, sizeof(opNode*));
+    this->sets = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
     this->sets_mc = (ModelComp**)calloc(1, sizeof(ModelComp*));
-    this->dummyVarExpr = (opNode**)calloc(1, sizeof(opNode*));
+    this->dummyVarExpr = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
     tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
       dummyVarExpr[0] = tmp2->values[0];
@@ -1066,22 +1066,22 @@ void opNodeIx::splitExpression()
 
 
 /*----------------------------------------------------------------------------
-opNodeIx::hasDummyVar
+SyntaxNodeIx::hasDummyVar
 ---------------------------------------------------------------------------- */
-/** Sees if the indexing Expression given by opNodeIx defines the 
+/** Sees if the indexing Expression given by SyntaxNodeIx defines the 
  *  dummy variable given by name 
  *
  *  @param name The name of the dummy variable to look for
- *  @return The ("ID") opNode representing the dummy Variable (if found) or
+ *  @return The ("ID") SyntaxNode representing the dummy Variable (if found) or
  *          NULL (if not found)
  *
  */
 
-opNode *opNodeIx::hasDummyVar(const char *const name)
+SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
 {
   int i;
-  opNode *ret = NULL;
-  opNode *tmp;
+  SyntaxNode *ret = NULL;
+  SyntaxNode *tmp;
 
   for(i=0;i<ncomp;i++){
     tmp = dummyVarExpr[i];
@@ -1099,7 +1099,7 @@ opNode *opNodeIx::hasDummyVar(const char *const name)
       tmp = tmp->values[0];
       // and this should be a comma separated list
       assert(tmp->opCode==COMMA);
-      for(opNode::Iterator j=tmp->begin(); j!=tmp->end(); ++j){
+      for(SyntaxNode::Iterator j=tmp->begin(); j!=tmp->end(); ++j){
         // items on the list should be ID
         assert((*j)->opCode==ID);
         IDNode *tmp2 = (IDNode *) *j;
@@ -1113,21 +1113,21 @@ opNode *opNodeIx::hasDummyVar(const char *const name)
   return ret;
 }
 /*----------------------------------------------------------------------------
-opNodeIx::deep_copy
+SyntaxNodeIx::deep_copy
 ---------------------------------------------------------------------------- */
 /** Makes a recursive copy of this node that uses all new data structures
- *  opNodeIDREF nodes will also be duplicated, however they will point
+ *  SyntaxNodeIDREF nodes will also be duplicated, however they will point
  *  to the original ModelComp's (rather than duplicates of them)
  */
 
-opNodeIx *
-opNodeIx::deep_copy()
+SyntaxNodeIx *
+SyntaxNodeIx::deep_copy()
 {
-  opNodeIx *onix = new opNodeIx();
+  SyntaxNodeIx *onix = new SyntaxNodeIx();
   
   onix->opCode = opCode;
   onix->nval = nval;
-  onix->values = (opNode **)calloc(nval, sizeof(opNode *));
+  onix->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
   for(int i=0;i<nval;i++)
     onix->values[i] = values[i]->deep_copy();
   
@@ -1136,8 +1136,8 @@ opNodeIx::deep_copy()
   if (qualifier) onix->qualifier = qualifier->deep_copy();
     
   onix->ncomp = ncomp;
-  onix->sets = (opNode**)calloc(ncomp, sizeof(opNode*));
-  onix->dummyVarExpr = (opNode**)calloc(ncomp, sizeof(opNode*));
+  onix->sets = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
+  onix->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
   
   for(int i=0;i<ncomp;i++){
     onix->sets[i] = sets[i]->deep_copy();
@@ -1148,26 +1148,26 @@ opNodeIx::deep_copy()
 
 
 /* ===========================================================================
-opNodeIDREF methods
+SyntaxNodeIDREF methods
 ============================================================================ */
 /* --------------------------------------------------------------------------
-opNodeIDREF::opNodeIDREF(ModelComp *r)
+SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r)
 ---------------------------------------------------------------------------- */
-opNodeIDREF::opNodeIDREF(ModelComp *r) :
-  opNode(IDREF), ref(r), stochparent(0) {}
+SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r) :
+  SyntaxNode(IDREF), ref(r), stochparent(0) {}
 
 /* --------------------------------------------------------------------------
-opNodeIDREF *opNodeIDREF::deep_copy()
+SyntaxNodeIDREF *SyntaxNodeIDREF::deep_copy()
 ---------------------------------------------------------------------------- */
-opNodeIDREF*
-opNodeIDREF::deep_copy()
+SyntaxNodeIDREF*
+SyntaxNodeIDREF::deep_copy()
 {
-  opNodeIDREF *newn = new opNodeIDREF();
+  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF();
 
   newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0){
-    newn->values = (opNode **)calloc(nval, sizeof(opNode *));
+    newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i]->deep_copy();
   }
@@ -1180,17 +1180,17 @@ opNodeIDREF::deep_copy()
   return newn;
 }
 /* --------------------------------------------------------------------------
-opNodeIDREF *opNodeIDREF::clone()
+SyntaxNodeIDREF *SyntaxNodeIDREF::clone()
 ---------------------------------------------------------------------------- */
-opNodeIDREF *
-opNodeIDREF::clone()
+SyntaxNodeIDREF *
+SyntaxNodeIDREF::clone()
 {
-  opNodeIDREF *newn = new opNodeIDREF();
+  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF();
 
   newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0){
-    newn->values = (opNode **)calloc(nval, sizeof(opNode *));
+    newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i];
   }
@@ -1202,9 +1202,9 @@ opNodeIDREF::clone()
 }
 
 IDNode::IDNode(const char *const new_name, long new_stochparent) :
-   opNode(ID), name(new_name), stochparent(stochparent) {}
+   SyntaxNode(ID), name(new_name), stochparent(stochparent) {}
 IDNode::IDNode(const string new_name, long new_stochparent) :
-   opNode(ID), name(new_name), stochparent(new_stochparent) {}
+   SyntaxNode(ID), name(new_name), stochparent(new_stochparent) {}
 
 ostream& ListNode::put(ostream& s) const {
    iterator i = list.begin();
@@ -1235,8 +1235,8 @@ ListNode *ListNode::clone() {
    return copy;
 }
 
-ListNode::ListNode(opNode *val1, opNode *val2) :
-   opNode(COMMA, val1, val2) 
+ListNode::ListNode(SyntaxNode *val1, SyntaxNode *val2) :
+   SyntaxNode(COMMA, val1, val2) 
 {
    if(val1) push_back(val1);
    if(val2) push_back(val2);
@@ -1249,15 +1249,15 @@ findKeywordinTree
 /* this routine traverses down the tree and returns the top most reference to 
    the keyword in the Tree */
 
-opNode *
-findKeywordinTree(opNode *root, int oc)
+SyntaxNode *
+findKeywordinTree(SyntaxNode *root, int oc)
 {
    if (root->opCode==oc) return root;
 
-   opNode *found, *res;
+   SyntaxNode *found, *res;
    found = NULL;
-   for(opNode::Iterator i=root->begin(); i!=root->end(); ++i) {
-      res = findKeywordinTree((opNode*)*i, oc);
+   for(SyntaxNode::Iterator i=root->begin(); i!=root->end(); ++i) {
+      res = findKeywordinTree((SyntaxNode*)*i, oc);
       if(res && found) {
          cerr << "Found keyword " << oc << "at least twice in " << root << "\n";
          exit(1);
@@ -1271,7 +1271,7 @@ findKeywordinTree(opNode *root, int oc)
 find_var_ref_in_context
 ---------------------------------------------------------------------------- */
 /** This routine does the work of putting together dot'd variable names
- *  'root' is a opNode of type ID that points to the left hand part
+ *  'root' is a SyntaxNode of type ID that points to the left hand part
  *  of the dot'd expression parsed so far. 'ref' is the new part that
  *  should be added.
  *
@@ -1283,22 +1283,22 @@ find_var_ref_in_context
  *            which case the indexing is attached to the returned IDREF node
  * @param context A pointer to the current AmplModel that defines the scope
  *                in which the ID expressions should be resolved
- * @return An opNode of type IDREF that points to the correct ModelComp
- * @bug Should return an opNodeIDREF* 
+ * @return An SyntaxNode of type IDREF that points to the correct ModelComp
+ * @bug Should return an SyntaxNodeIDREF* 
  *
- *  An opNode of type IDREF looks like this
+ *  An SyntaxNode of type IDREF looks like this
  *       ->opCode = IDREF;
  *       ->nval = # of arguments
  *       ->values[0] = pointer to entity in model list
  *       ->values[1 - n] = arguments 
  */
-opNode*
-find_var_ref_in_context(AmplModel *context, opNode *ref)
+SyntaxNode*
+find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
 {
-   /* 'ref' is an opNode representing an iditem. 
+   /* 'ref' is an SyntaxNode representing an iditem. 
       This can be either
       - a ID node where values[0] simply points to a name
-      - an ID node which is actually opNodeID and has stochparent set
+      - an ID node which is actually SyntaxNodeID and has stochparent set
       - a LSBRACKET node, where values[0] is ID and values[1] is CSL
       in the second case the CSL should be added as further arguments
       to the resulting IDREF node
@@ -1306,9 +1306,9 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    */
   
    /* returns: pointer */
-   opNode *tmp, *argNode;
+   SyntaxNode *tmp, *argNode;
    IDNode *idNode;
-   opNodeIDREF *ret;
+   SyntaxNodeIDREF *ret;
    int stochparent=0;
 
    /* and now scan through the whole of the local context to see if we 
@@ -1332,14 +1332,14 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
       argNode = NULL;
    }else{
       assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
-      opNode::Iterator i = ref->begin();
+      SyntaxNode::Iterator i = ref->begin();
       idNode = (IDNode*)*i;
       argNode = *(++i);
       assert(idNode->opCode==ID);
       assert(argNode->opCode==COMMA);
    }
 
-   // Test if this ID node is actually of type opNodeID and if so remember
+   // Test if this ID node is actually of type SyntaxNodeID and if so remember
    // the value of stochparent
    {
       if (idNode->stochparent!=0){
@@ -1376,7 +1376,7 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
 
          // This is a reference indexed by '(..)'. In this case we are in
          // a stoch block and the first argument refers to the stage
-         //      ret->stochrecourse = (opNode*)ret->values[0];
+         //      ret->stochrecourse = (SyntaxNode*)ret->values[0];
          //for(int i=1;i<ret->nval;i++){
          //ret->values[i-1] = ret->values[i];
          //}
@@ -1392,11 +1392,11 @@ find_var_ref_in_context(AmplModel *context, opNode *ref)
    return ret;
 }
 
-opNodeIDREF*
+SyntaxNodeIDREF*
 find_var_ref_in_context_(AmplModel *context, IDNode *ref)
 {
    ModelComp *thismc;
-   opNodeIDREF *ret;
+   SyntaxNodeIDREF *ret;
   
    for(list<ModelComp*>::iterator p = context->comps.begin();
          p!=context->comps.end();p++){
@@ -1411,7 +1411,7 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
             cout << "       " << *(thismc->attributes) << "\n";
          }
 
-         ret = new opNodeIDREF();
+         ret = new SyntaxNodeIDREF();
          ret->ref = thismc;
          ret->opCode = IDREF;
          if (thismc->type==TMODEL){
@@ -1429,8 +1429,8 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
    //    /* this is a match */
    //    printf("Found Match: %s refers to variable\n",name);
    //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_opNode(thismc->indexing));
-   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
+   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
    //    ref->values[0] = (void*)thismc;
    //    ref->opCode = IDREF;
    //    return ref;
@@ -1443,8 +1443,8 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
    //    /* thismc is a match */
    //    printf("Found Match: %s refers to constraint\n",name);
    //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_opNode(thismc->indexing));
-   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
+   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
    //    ref->values[0] = (void*)thismc;
    //    ref->opCode = IDREF;
    //    return ref;
@@ -1457,8 +1457,8 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
    //    /* this is a match */
    //    printf("Found Match: %s refers to set\n",name);
    //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_opNode(thismc->indexing));
-   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
+   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
    //    ref->values[0] = (void*)thismc;
    //    ref->opCode = IDREF;
    //    return ref;
@@ -1471,8 +1471,8 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
    //    /* this is a match */
    //    printf("Found Match: %s refers to parameter\n",name);
    //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_opNode(thismc->indexing));
-   //    printf("       %s\n",print_opNode(thismc->attributes));
+   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
+   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
    //    ref->values[0] = (void*)thismc;
    //    ref->opCode = IDREF;
    //    return ref;
@@ -1485,8 +1485,8 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
    //    /* this is a match */
    //    printf("Found Match: %s refers to submodel\n",name);
    //    printf("    %s\n",thism->name);
-   //    //printf("       %s\n",print_opNode(thism->indexing));
-   //    //printf("       %s\n",print_opNode(this->attributes));
+   //    //printf("       %s\n",print_SyntaxNode(thism->indexing));
+   //    //printf("       %s\n",print_SyntaxNode(this->attributes));
    //    ref->values[0] = (void*)thism;
    //    ref->opCode = IDREFM;
    //    return ref;
@@ -1496,7 +1496,7 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
 
    /* need also to look through parent model */
    if (context->parent){
-      opNodeIDREF *match = find_var_ref_in_context_(context->parent, ref);
+      SyntaxNodeIDREF *match = find_var_ref_in_context_(context->parent, ref);
       return match;
    }
 
@@ -1517,18 +1517,18 @@ find_var_ref_in_indexing
     char *name                 the name of identifier to look for
     
     int n_indexing             the currently active indexing expressions
-    opNode *list_of_indexing
+    SyntaxNode *list_of_indexing
    RETURN:
     The Indexing expression in which the name occurs 
     (or NULL if there is no match)
                                                                       */
 
-opNode *
+SyntaxNode *
 find_var_ref_in_indexing(const char *const name)
 {
    int i;
-   opNodeIx *tmp;
-   opNode *ret = NULL;
+   SyntaxNodeIx *tmp;
+   SyntaxNode *ret = NULL;
 
    for(i=0;i<n_indexing;i++){
       /* have a look at all the indexing expressions */
@@ -1541,27 +1541,27 @@ find_var_ref_in_indexing(const char *const name)
        
 #if 0
          assert(tmp->opCode==LBRACE);
-         tmp = (opNode*)tmp->values[0];
-         if (tmp->opCode==COLON) tmp = (opNode*)tmp->values[0];
+         tmp = (SyntaxNode*)tmp->values[0];
+         if (tmp->opCode==COLON) tmp = (SyntaxNode*)tmp->values[0];
          /* this should now be a comma separated list */
          if (tmp->opCode==COMMA){
             for(j=0;j<tmp->nval;j++){
-               tmp2 = findKeywordinTree((opNode*)tmp->values[j], IN);
+               tmp2 = findKeywordinTree((SyntaxNode*)tmp->values[j], IN);
                /* everything to the left of IN is a dummy variables */
                if (tmp2){
-                  tmp2 = (opNode*)tmp2->values[0];
+                  tmp2 = (SyntaxNode*)tmp2->values[0];
                   assert(tmp2->opCode==ID);
                   if (GlobalVariables::logParseModel)
                      printf("Found dummy variable: %s\n",tmp2->values[0]);
                   if (strcmp(name, (const char*)tmp2->values[0])==0)
-                     ret = (opNode*)tmp->values[j];
+                     ret = (SyntaxNode*)tmp->values[j];
      
                }
             }
          }else{
             /* if this is not a comma separated list, then look directly */
-            char *tmpbuf1 = print_opNode(tmp);
-            char *tmpbuf2 = print_opNodesymb(tmp);
+            char *tmpbuf1 = print_SyntaxNode(tmp);
+            char *tmpbuf2 = print_SyntaxNodesymb(tmp);
             if (GlobalVariables::logParseModel){
                printf(">%s\n", tmpbuf1);
                printf(">%s\n", tmpbuf2);
@@ -1571,7 +1571,7 @@ find_var_ref_in_indexing(const char *const name)
             tmp2 = findKeywordinTree(tmp, IN);
             /* everything to the left of IN is a dummy variables */
             if (tmp2){
-               tmp2 = (opNode*)tmp2->values[0];
+               tmp2 = (SyntaxNode*)tmp2->values[0];
                assert(tmp2->opCode==ID||tmp2->opCode==COMMA);
                if (GlobalVariables::logParseModel)
                   printf("Found dummy variable: %s\n",tmp2->values[0]);

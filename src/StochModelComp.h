@@ -22,8 +22,8 @@ class StochModelComp: public ModelComp {
 
   /** This component is repeated over all nodes belonging to stages that 
    *  are listed in the stageset
-   *  stageset is a opNode giving a set expression (to be expanded by AMPL) */
-  opNode *stageset;       //!< set of stages in which component is present
+   *  stageset is a SyntaxNode giving a set expression (to be expanded by AMPL) */
+  SyntaxNode *stageset;       //!< set of stages in which component is present
 
   /** This component is repeated over all nodes belonging to stages that 
    *  are listed in the stageset
@@ -35,7 +35,7 @@ class StochModelComp: public ModelComp {
   StochModelComp();  //!< constructor that sets everything to default values
 
   //! constructor
-  StochModelComp(char *id, compType type, opNode *indexing, opNode *attrib);
+  StochModelComp(char *id, compType type, SyntaxNode *indexing, SyntaxNode *attrib);
 
   //! transcribe a StochModelComp in a StochModel into a ModelComp 
   ModelComp *transcribeToModelComp(AmplModel *current_model, int level);

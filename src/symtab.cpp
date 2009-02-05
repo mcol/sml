@@ -56,7 +56,7 @@ unsigned long SymbolTable::hash_function(const char *str)
 
 #if 0
 // OLD defineSymbol
-void defineSymbol(int type, char *id, opNode *domain, AmplModel *model)
+void defineSymbol(int type, char *id, SyntaxNode *domain, AmplModel *model)
 {
   char *nametype;
   int hash;

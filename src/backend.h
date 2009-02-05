@@ -29,12 +29,12 @@
           - SET valued expressions: {i in SET1 cross SET2} 
           - conditions:    {(i,j) in SET1:i<j}
           .
-         opNodeIx does provide all these. Should replace the stack of
-	 add_index objects by a stack of opNodeIx objects
+         SyntaxNodeIx does provide all these. Should replace the stack of
+	 add_index objects by a stack of SyntaxNodeIx objects
 */
 typedef struct add_index_st { 
-  opNode *dummyVar;     //!< an opNode representing the dummy variable expr */
-  opNode *set;          //!< an opNode representing the set */
+  SyntaxNode *dummyVar;     //!< an SyntaxNode representing the dummy variable expr */
+  SyntaxNode *set;          //!< an SyntaxNode representing the set */
 } add_index;
 
 /* some global variables that change the behaviour of some printing routines */

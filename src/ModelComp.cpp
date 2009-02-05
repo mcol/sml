@@ -25,7 +25,7 @@ extern void modified_write(ostream &fout, ModelComp *comp);
    IN: ModelComp *node          : the model comp of which the name should
                                    be obtained
        int        witharg        : 1 if argument list should be printed 
-       opNode     *opn           : the IDREF node that should be named
+       SyntaxNode     *opn           : the IDREF node that should be named
        AmplModel *current_model : the model in which this is referenced
 
    arguments opn, current_model are only needed if the argument list should
@@ -41,7 +41,7 @@ extern void modified_write(ostream &fout, ModelComp *comp);
 list<ModelComp*> ModelComp::global_list;
 
 /* --------------------------------------------------------------------------
-ModelComp::ModelComp(char* is, compType type, opNode *ix, opNode *attr)
+ModelComp::ModelComp(char* is, compType type, SyntaxNode *ix, SyntaxNode *attr)
 ---------------------------------------------------------------------------- */
 /** Construct a model component given its name, id, indexing and attribute
  *  sections.
@@ -55,17 +55,17 @@ ModelComp::ModelComp(char* is, compType type, opNode *ix, opNode *attr)
  *                     IDs should have been replaced by IDREFs 
  */
 ModelComp::ModelComp(char *id, compType type, 
-                       opNode *indexing, opNode *attrib)
+                       SyntaxNode *indexing, SyntaxNode *attrib)
 {
   //ModelComp *newmc = (ModelComp*)calloc(1,sizeof(ModelComp));
   value = NULL;
   this->tag = false;
   this->id = strdup(id);
   this->type = type;
-  this->indexing = dynamic_cast<opNodeIx*>(indexing);
+  this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing);
   if (indexing) (this->indexing)->splitExpression();
   //  if (indexing){
-  //  this->indexing = new opNodeIx(indexing);
+  //  this->indexing = new SyntaxNodeIx(indexing);
   //}else{
   //  this->indexing = NULL;
   //}
@@ -205,7 +205,7 @@ ModelComp::setTo()
 
 void
 ModelComp::setTo(char *id, compType type, 
-                       opNodeIx *indexing, opNode *attrib)
+                       SyntaxNodeIx *indexing, SyntaxNode *attrib)
 {
   static int tt_count=0;
   //ModelComp *newmc = (ModelComp*)calloc(1,sizeof(ModelComp));
@@ -215,7 +215,7 @@ ModelComp::setTo(char *id, compType type,
   this->indexing = indexing;
   if (indexing) (this->indexing)->splitExpression();
   //  if (indexing){
-  //  this->indexing = new opNodeIx(indexing);
+  //  this->indexing = new SyntaxNodeIx(indexing);
   //}else{
   //  this->indexing = NULL;
   //}
@@ -515,7 +515,7 @@ getGlobalName
  *             will be given relative to the current_model. 
  *             However the local indexing is lost(?) in the node representation
  *             => I don't think so, it is still encoded in the rest of the
- *                opNode structure
+ *                SyntaxNode structure
  * @param[in] witharg    WITHARG if the argument list should be processed, 
  *                       NOARG   only the global name
  *                       ONLYARG only the argument list
@@ -528,7 +528,7 @@ getGlobalName
  */
 
 char *
-getGlobalName(ModelComp *node, const opNode *opn, AmplModel *current_model, 
+getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 {
   //ModelComp *node = opn->values[0];  /* this is the ModelComponent */
@@ -622,26 +622,26 @@ getGlobalName(ModelComp *node, const opNode *opn, AmplModel *current_model,
     /* for every level above 0 there should be a dummy variable on the stack 
        => go up the path and add dummy varables to arglist */
     for(i=0;i<clvl;i++){
-      /* FIXME: here the dv cannot be printed by opNode.print() if it is 
+      /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */
       list <add_index *> *li = l_addIndex.at(i);
       for(list<add_index*>::iterator p = li->begin();p!=li->end();p++){
         if (n_index==0){
-          //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-          opNode *dv = (*p)->dummyVar;
+          //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+          SyntaxNode *dv = (*p)->dummyVar;
           if (dv) {
             arglist = dv->printDummyVar();
-            //printf("add dummy variable: %s\n",print_opNode(dv));
+            //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
             n_index++;
           }
         }else{
           /* need to put subscript before the current list */
-          //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-          opNode *dv = (*p)->dummyVar;
+          //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+          SyntaxNode *dv = (*p)->dummyVar;
           if (dv){
             arglist += ",";
             arglist += dv->printDummyVar();
-            //printf("add dummy variable: %s\n",print_opNode(dv));
+            //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
             n_index++;
           }
         }
@@ -677,11 +677,11 @@ getGlobalName(ModelComp *node, const opNode *opn, AmplModel *current_model,
     }
     //for(i=0;i<opn->nval;i++){
     //  if (n_index==0){
-    //sprintf(arglistbuffer, "%s", print_opNode((opNode*)opn->values[i+1]));
+    //sprintf(arglistbuffer, "%s", print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
     //        n_index++;
     //  }else{
     //        char *tmpc = strdup(arglistbuffer);
-    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_opNode((opNode*)opn->values[i+1]));
+    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
     //        free(tmpc);
     //n_index++;
     //}
@@ -699,7 +699,7 @@ getGlobalName(ModelComp *node, const opNode *opn, AmplModel *current_model,
 
  I don't think this is going to work though: components might be refered to
  from below the model in which they are defined in which case some of the
- indexing is already part of the opNode structure (and different from just 
+ indexing is already part of the SyntaxNode structure (and different from just 
  using the submodel indexing)
 
  Could get around this by making indexing dependend on the
@@ -707,14 +707,14 @@ getGlobalName(ModelComp *node, const opNode *opn, AmplModel *current_model,
     (to be able to follow down submodels to get indexing expressions)
   - model from which the component was refered to 
     (indexing expressions between these two models are already part of
-    the opNode structure)
+    the SyntaxNode structure)
  Indeed this is done in the old getGlobalName method.
 
  Latest thought (01/04/08:11:50) is that this *might* indeed work
 */
 
 /* ---------------------------------------------------------------------------
-getGlobalNameNew(ModelComp *node, opNode *opn, AmplModel *current_model, 
+getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 ---------------------------------------------------------------------------- */
 /** New version of getGlobalName that does *not* use the addIndex stack
@@ -753,7 +753,7 @@ getGlobalNameNew(ModelComp *node, opNode *opn, AmplModel *current_model,
  */
 
 char *
-getGlobalNameNew(ModelComp *node, const opNode *opn, AmplModel *current_model, 
+getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 {
   //ModelComp *node = opn->values[0];  /* this is the ModelComponent */
@@ -847,29 +847,29 @@ getGlobalNameNew(ModelComp *node, const opNode *opn, AmplModel *current_model,
     /* for every level above 0 there should be a dummy variable on the stack 
        => go up the path and add dummy varables to arglist */
     for(i=1;i<=clvl;i++){ //start from 1: 0 is the root which has no indexing
-      /* FIXME: here the dv cannot be printed by opNode.print() if it is 
+      /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */
       ModelComp *node_model = path1[n_path1-1-i]->node;
-      opNodeIx *indexing_model = node_model->indexing;
+      SyntaxNodeIx *indexing_model = node_model->indexing;
       
       if (indexing_model){
         for(int p=0;p<indexing_model->ncomp;p++){
           if (n_index==0){
-            //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-            opNode *dv = indexing_model->dummyVarExpr[p];
+            //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+            SyntaxNode *dv = indexing_model->dummyVarExpr[p];
             if (dv) {
               arglist = dv->printDummyVar();
-              //printf("add dummy variable: %s\n",print_opNode(dv));
+              //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
               n_index++;
             }
           }else{
             /* need to put subscript before the current list */
-            //opNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-            opNode *dv = indexing_model->dummyVarExpr[p];
+            //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+            SyntaxNode *dv = indexing_model->dummyVarExpr[p];
             if (dv){
               arglist += ",";
               arglist += dv->printDummyVar();
-              //printf("add dummy variable: %s\n",print_opNode(dv));
+              //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
               n_index++;
             }
           }
@@ -906,11 +906,11 @@ getGlobalNameNew(ModelComp *node, const opNode *opn, AmplModel *current_model,
     }
     //for(i=0;i<opn->nval;i++){
     //  if (n_index==0){
-    //sprintf(arglistbuffer, "%s", print_opNode((opNode*)opn->values[i+1]));
+    //sprintf(arglistbuffer, "%s", print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
     //        n_index++;
     //  }else{
     //        char *tmpc = strdup(arglistbuffer);
-    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_opNode((opNode*)opn->values[i+1]));
+    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
     //        free(tmpc);
     //n_index++;
     //}
@@ -971,16 +971,16 @@ ModelComp::moveUp(int level){
   }
   
 
-  list<opNode*> *idrefnodes = new list<opNode*>;
+  list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
 
   // get list of all IDREF nodes in dependencies
   if (indexing) indexing->findIDREF(idrefnodes); 
   if (attributes) attributes->findIDREF(idrefnodes);
 
   // loop over all IDREF nodes
-  for(list<opNode*>::iterator p = idrefnodes->begin();
+  for(list<SyntaxNode*>::iterator p = idrefnodes->begin();
       p!=idrefnodes->end();p++){
-    opNodeIDREF *onidr = dynamic_cast<opNodeIDREF*>(*p);
+    SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
     AmplModel *model = mc->model;
     
@@ -999,7 +999,7 @@ ModelComp::moveUp(int level){
       // => need to add indexing expressions between posm and level-1
       // starting with level-1
       for(i=posm; i<level; ++i){
-        opNodeIx *mix = mlist[i]->ix;
+        SyntaxNodeIx *mix = mlist[i]->ix;
         if (mix->ncomp!=1){
           cerr << "ModelComp::moveUp() does not support intermediate models "
             "with !=1 dummy Var" << endl;
@@ -1042,15 +1042,15 @@ ModelComp::reassignDependencies()
 void
 ModelComp::reassignDependencies()
 {
-  list<opNode*> *idrefnodes = new list<opNode*>;
+  list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
   list<ModelComp*> newdep;
 
   if (indexing) indexing->findIDREF(idrefnodes);
   if (attributes) attributes->findIDREF(idrefnodes);
 
-  for(list<opNode*>::iterator p = idrefnodes->begin();
+  for(list<SyntaxNode*>::iterator p = idrefnodes->begin();
       p!=idrefnodes->end();p++){
-    opNodeIDREF *onidr = dynamic_cast<opNodeIDREF*>(*p);
+    SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
     AmplModel *model = mc->model;
     

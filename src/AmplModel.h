@@ -92,7 +92,7 @@ class AmplModel{
   // all models except root might have an indexing expression:
   // block name{i in SET}:
   // this is taken apart and stored in the next two variables
-  opNodeIx *ix;       ///< indexing expression
+  SyntaxNodeIx *ix;       ///< indexing expression
     
   /** list of changes that should be applied to the models */
   static list<changeitem*> changes;

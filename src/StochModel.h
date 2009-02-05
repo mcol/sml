@@ -25,19 +25,19 @@
 class StochModel: public AmplModel{
  public:
   // FIXME: stage should be replaced by a Set (decribing the elements)
-  opNode *stageset;  //!< The set of STAGES
+  SyntaxNode *stageset;  //!< The set of STAGES
   vector <string> *stagenames; //!< explicit set of STAGES 
   bool is_symbolic_stages; //!< if stage names are symbolic or numeric
-  opNode *nodeset;   //!< The set of NODES 
-  opNode *anc;       //!< The parameter array of ancestors
-  opNode *prob;      //!< The parameter array of probabilities
+  SyntaxNode *nodeset;   //!< The set of NODES 
+  SyntaxNode *anc;       //!< The parameter array of ancestors
+  SyntaxNode *prob;      //!< The parameter array of probabilities
 
   // -------------------------- methods ----------------------------------
   //! default constructor 
   StochModel();
   //! Constructor 
-  StochModel(opNode *onStages, opNode *onNodes, opNode *onAncs, 
-	     opNode *onProb, AmplModel *parent);
+  StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
+	     SyntaxNode *onProb, AmplModel *parent);
 
   //! Expand the StochModel to a nested set of FlatModels 
   AmplModel *expandToFlatModel();
@@ -58,7 +58,7 @@ class StochModel: public AmplModel{
 
 /* ----------------- stub for methods in ampl.y ------------------------- */
 
-void begin_smodel(char *name, opNode *indexing, opNode *stochsets);
+void begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets);
 void end_smodel();
 
 #endif

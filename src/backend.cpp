@@ -30,8 +30,8 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
      if dummyVar is NULL
 */
 //typedef struct add_index_st {
-//  opNode *dummyVar;     /* an opNode representing the dummy variable expr */
-//  opNode *set;          /* an opNode representing the set */
+//  SyntaxNode *dummyVar;     /* an SyntaxNode representing the dummy variable expr */
+//  SyntaxNode *set;          /* an SyntaxNode representing the set */
 //} add_index;
 
 
@@ -87,7 +87,7 @@ print_model(AmplModel *model)
 {
   ModelComp *entry;
   AmplModel *submod;
-  opNode::use_global_names=0;
+  SyntaxNode::use_global_names=0;
   cout << "-------------------------- backend::print_model ----------------"
      "----------\n";
   cout << "Model: " << model->name << "\n";
@@ -291,12 +291,12 @@ process_model(AmplModel *model) /* should be called with model==root */
     for(k=1;k<=this_model->level;k++){
       AmplModel *tmp_model = anc_list[k];
       ModelComp *node = tmp_model->node; /* the node corresponding to model */
-      opNode *ix = node->indexing; /* the indexing expression */
-      opNode *set; /* the set that is indexed over */
-      opNode *dummyVar; /* the dummy var of the indexing expression */
+      SyntaxNode *ix = node->indexing; /* the indexing expression */
+      SyntaxNode *set; /* the set that is indexed over */
+      SyntaxNode *dummyVar; /* the dummy var of the indexing expression */
 
-      // need to set opNode::default_model for component printing routines
-      opNode::default_model = tmp_model; 
+      // need to set SyntaxNode::default_model for component printing routines
+      SyntaxNode::default_model = tmp_model; 
       
       /* Need to analyse the indexing expression to get the set that is
         indexed over 
@@ -307,12 +307,12 @@ process_model(AmplModel *model) /* should be called with model==root */
       if (ix){
         add_index *ai = (add_index*)calloc(1, sizeof(add_index));
         li->push_back(ai);
-        if (ix->opCode==LBRACE) ix = (opNode*)*(ix->begin());
+        if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin());
         /* assumes that the next level is the 'IN' keyword (if present) */
         if (ix->opCode==IN){
-          opNode::Iterator ixi = ix->begin();
-          dummyVar = (opNode*)*ixi;
-          set = (opNode*)*(++ixi);
+          SyntaxNode::Iterator ixi = ix->begin();
+          dummyVar = (SyntaxNode*)*ixi;
+          set = (SyntaxNode*)*(++ixi);
         }else{
           dummyVar = NULL;
           set = ix;
@@ -335,13 +335,13 @@ process_model(AmplModel *model) /* should be called with model==root */
         exit(1);
       }
       //for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
-      //fprintf(fscript, "for {i%d in %s }{\n", k, print_opNode(set));
+      //fprintf(fscript, "for {i%d in %s }{\n", k, print_SyntaxNode(set));
       //for(j=1;j<=k;j++) fprintf(fscript,"  ");
-      //fprintf(fscript, "let %s_SUB := {i%d};\n", print_opNode(set), k);
+      //fprintf(fscript, "let %s_SUB := {i%d};\n", print_SyntaxNode(set), k);
       if (set){
-        opNodeIDREF *set_ref = dynamic_cast<opNodeIDREF*>(set);
+        SyntaxNodeIDREF *set_ref = dynamic_cast<SyntaxNodeIDREF*>(set);
         if (set_ref==NULL){
-          cerr << "ERROR: set reference must be opNodeIDREF\n";
+          cerr << "ERROR: set reference must be SyntaxNodeIDREF\n";
           exit(1);
         }
         for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
@@ -352,12 +352,12 @@ process_model(AmplModel *model) /* should be called with model==root */
         // error
         for(j=1;j<=k;j++) fscript << "  ";
         fscript << "reset data " << getGlobalName(set_ref->ref, set,
-            opNode::default_model, NOARG) << "_SUB;\n";
+            SyntaxNode::default_model, NOARG) << "_SUB;\n";
         for(j=1;j<=k;j++) fscript << "  ";
         fscript << "let " << 
-          getGlobalName(set_ref->ref, set, opNode::default_model, NOARG) <<
+          getGlobalName(set_ref->ref, set, SyntaxNode::default_model, NOARG) <<
           "_SUB" <<
-          getGlobalName(set_ref->ref, set, opNode::default_model, ONLYARG) <<
+          getGlobalName(set_ref->ref, set, SyntaxNode::default_model, ONLYARG) <<
           " := {" << dummyVar << "};\n";
       }else{
         for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
@@ -389,8 +389,8 @@ process_model(AmplModel *model) /* should be called with model==root */
 
         /* found a submodel */
         AmplModel *submodel = (AmplModel*)mc->other;
-        opNode *ix = mc->indexing;
-        opNode *set;
+        SyntaxNode *ix = mc->indexing;
+        SyntaxNode *set;
     
         set = ix->getIndexingSet(); // set is NULL if ix is NULL
   
@@ -409,11 +409,11 @@ process_model(AmplModel *model) /* should be called with model==root */
         filename+= "\"";
         for(k=1;k<=this_model->level;k++){
           // get all the indexing variables and add them together (joined by &)
-          opNodeIx *ixn = (anc_list[k]->node)->indexing;
+          SyntaxNodeIx *ixn = (anc_list[k]->node)->indexing;
           if (ixn){
-            list<opNode *> dvl = ixn->getListDummyVars();
+            list<SyntaxNode *> dvl = ixn->getListDummyVars();
             string innerp = "";
-            for(list<opNode *>::iterator q=dvl.begin();q!=dvl.end();q++){
+            for(list<SyntaxNode *>::iterator q=dvl.begin();q!=dvl.end();q++){
               innerp += (*q)->print() + "&";
             }
             innerp.erase(innerp.size()-1); // delete the last '&'
@@ -455,11 +455,11 @@ process_model(AmplModel *model) /* should be called with model==root */
     fscript << "write (\"b" << filename << "\"";
     for(k=1;k<=this_model->level;k++) {
       // get all the indexing variables and add them together (joined by &)
-      opNodeIx *ixn = (anc_list[k]->node)->indexing;
+      SyntaxNodeIx *ixn = (anc_list[k]->node)->indexing;
       if (ixn){
-        list<opNode *> dvl = ixn->getListDummyVars();
+        list<SyntaxNode *> dvl = ixn->getListDummyVars();
         string textrep = "";
-        for(list<opNode *>::iterator q=dvl.begin();q!=dvl.end();q++){
+        for(list<SyntaxNode *>::iterator q=dvl.begin();q!=dvl.end();q++){
           textrep += (*q)->print() + "&";
         }
         textrep.erase(textrep.size()-1); // delete the last '&'
@@ -660,7 +660,7 @@ write_ampl_for_submodel(ostream &fout, AmplModel *root, AmplModel *submodel)
          5 levels */
   int i, level;
   
-  opNode::use_global_names = 1;
+  SyntaxNode::use_global_names = 1;
   //n_addIndex = 0; // clear addIndex stack
   l_addIndex.clear();
 
@@ -776,7 +776,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
   int j;
   ModelComp *comp;
   
-  opNode::default_model = thism;
+  SyntaxNode::default_model = thism;
   // loop through all entities in this model 
   fout << "\n# start of model " << thism->global_name << "\n\n";
   for(list<ModelComp*>::iterator p = thism->comps.begin();
@@ -789,14 +789,14 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
       // objectives and constraints in submodels
       if (comp->type==TVAR || comp->type==TSET || comp->type==TPARAM 
           || thism==submodel){
-        //opNode::default_model = comp->model;
+        //SyntaxNode::default_model = comp->model;
         modified_write(fout, comp);
       }
     }else{ // if (comp->type!=TMODEL)
       /* this is a model declaration */
       /* check that it needs to be followed */
       if (thism!=submodel && listam[thislevel-1]==comp->other){
-        opNode *ix;
+        SyntaxNode *ix;
         list <add_index*>* li = new list<add_index*>();
         /* ok, looks like this needs to be followed */
         /* add the indexing expression */
@@ -816,13 +816,13 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           // and place the indexing expression of this BLOCK onto the stack
           // the stack stores the dummy variable and the SET separately, 
           // so take them to bits here
-          if (ix->opCode==LBRACE) ix = (opNode*)*(ix->begin()); // rem {..}
+          if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin()); // rem {..}
           if (ix->opCode==IN){
-            //l_addIndex[n_addIndex]->dummyVar = (opNode*)ix->values[0];
-            //l_addIndex[n_addIndex]->set = (opNode*)ix->values[1];
-             opNode::Iterator ixi = ix->begin();
-            ai->dummyVar = (opNode*)*ixi;
-            ai->set = (opNode*)*(++ixi);
+            //l_addIndex[n_addIndex]->dummyVar = (SyntaxNode*)ix->values[0];
+            //l_addIndex[n_addIndex]->set = (SyntaxNode*)ix->values[1];
+             SyntaxNode::Iterator ixi = ix->begin();
+            ai->dummyVar = (SyntaxNode*)*ixi;
+            ai->set = (SyntaxNode*)*(++ixi);
           }else{ // no dummy variable, just a set
             //l_addIndex[n_addIndex]->dummyVar = NULL;
             //l_addIndex[n_addIndex]->set = ix;
@@ -850,7 +850,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           */
           {
             ModelComp *newmc = new ModelComp();
-            opNode *setn = ai->set;
+            SyntaxNode *setn = ai->set;
             
             newmc->type = TSET;
             
@@ -860,16 +860,16 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               cerr << "Indexing expression is " << setn->print() << "\n";
               exit(1);
             }
-            opNodeIDREF *setnref = dynamic_cast<opNodeIDREF*>(setn);
+            SyntaxNodeIDREF *setnref = dynamic_cast<SyntaxNodeIDREF*>(setn);
             if (setnref==NULL){
-              cerr << "IDREF node should be of type opNodeIDREF\n";
+              cerr << "IDREF node should be of type SyntaxNodeIDREF\n";
               exit(1);
             }
             ModelComp *setmc = setnref->ref;
             newmc->id = strdup((setmc->id+string("_SUB")).c_str());
             
             // and build "within indset" as attribute tree
-            newmc->attributes = new opNode(WITHIN, setn);
+            newmc->attributes = new SyntaxNode(WITHIN, setn);
             //newmc->model = comp->model;
             newmc->model = setmc->model;
             modified_write(fout, newmc);
@@ -877,12 +877,12 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           
           if (true)
           {
-            //opNode *setn = l_addIndex[n_addIndex]->set;
-            opNode *setn = ai->set;
+            //SyntaxNode *setn = l_addIndex[n_addIndex]->set;
+            SyntaxNode *setn = ai->set;
             ModelComp *tmp;
             char *newname; 
             //fprintf(fout, "set %s_SUB within %s;\n", 
-            //      print_opNode(setn), print_opNode(setn));
+            //      print_SyntaxNode(setn), print_SyntaxNode(setn));
             /* and now modify the set declaration */
             if (setn->opCode!=IDREF){
               cerr << "At the moment can index blocks only with simple sets\n";
@@ -890,10 +890,10 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               exit(1);
             }
             /* newn is the new node, first copy the old one */
-            opNodeIDREF *newn = ((opNodeIDREF *)setn)->clone();
+            SyntaxNodeIDREF *newn = ((SyntaxNodeIDREF *)setn)->clone();
             // clone the ModelComp that is referred to
             newn->ref = (ModelComp *)calloc(1,sizeof(ModelComp));
-            memcpy(newn->ref, ((opNodeIDREF*)setn)->ref, sizeof(ModelComp));
+            memcpy(newn->ref, ((SyntaxNodeIDREF*)setn)->ref, sizeof(ModelComp));
             // ???but associate this with the current model
             //newn->ref->model = thism;
 
@@ -912,7 +912,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         l_addIndex.push_back(li);
         write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, 
                submodel);
-        opNode::default_model = thism;
+        SyntaxNode::default_model = thism;
         //if (ix) n_addIndex--;
         l_addIndex.pop_back();
       } /* end of (model on the current list branch) */
@@ -926,7 +926,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         //printf("  current model: %s\n",submodel->name);
         //printf("  these are the components needed from children:\n");
         childm->writeTaggedComponents(fout);
-        opNode::default_model = thism;
+        SyntaxNode::default_model = thism;
         //printf("-----------------------------------------------\n\n");
         
         // For normal model components we simply call modified_write
@@ -1000,8 +1000,8 @@ modified_write
  *        to the argument list
  *
  * part 3) is simply done by a call to (comp->attributes)->print() 
- * (opNode::print)
- * (with opNode::use_global_names set to true 
+ * (SyntaxNode::print)
+ * (with SyntaxNode::use_global_names set to true 
  *   => the argument list version of ModelComp::getGlobalName is called)  
  *
  */
@@ -1009,7 +1009,7 @@ void
 modified_write(ostream &fout, ModelComp *comp)
 {
   int i;
-  opNode *ixsn;
+  SyntaxNode *ixsn;
   int c_addIndex;
 
   // we should check that the level of the model the component is attached to
@@ -1058,7 +1058,7 @@ modified_write(ostream &fout, ModelComp *comp)
           fout << ix->dummyVar << " in ";
         }
         ixsn = ix->set;
-        if (ixsn->opCode==LBRACE) ixsn=(opNode*)*ixsn->begin(); 
+        if (ixsn->opCode==LBRACE) ixsn=(SyntaxNode*)*ixsn->begin(); 
         fout << ixsn;
       }
     }
@@ -1066,7 +1066,7 @@ modified_write(ostream &fout, ModelComp *comp)
     if (comp->indexing) {
       if (first) {first = 0;} else {fout << ",";}
       ixsn = comp->indexing;
-      if (ixsn->opCode==LBRACE) ixsn=(opNode*)*(ixsn->begin()); 
+      if (ixsn->opCode==LBRACE) ixsn=(SyntaxNode*)*(ixsn->begin()); 
       fout << ixsn;
     }
     //if (n_addIndex>0 || comp->indexing)
@@ -1079,7 +1079,7 @@ modified_write(ostream &fout, ModelComp *comp)
     
     /* write out the rest of the expression */
     fout << comp->attributes << ";\n";
-    //fprintf(fout, "%s;\n",print_opNode(comp->attributes));
-    //fprintf(fout, "%s;\n", print_opNodesymb(comp->attributes));
+    //fprintf(fout, "%s;\n",print_SyntaxNode(comp->attributes));
+    //fprintf(fout, "%s;\n", print_SyntaxNodesymb(comp->attributes));
   }
 }

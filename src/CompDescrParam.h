@@ -33,13 +33,13 @@ class CompDescrParam: public CompDescr{
   CompDescrParam(); //!< Default Constructor
 
   /** Construct given data file description and model component */
-  CompDescrParam(ModelComp *mc, opNode *desc); //!< Construct from data
+  CompDescrParam(ModelComp *mc, SyntaxNode *desc); //!< Construct from data
 
   string printToString();
 
  private:
   /** Service routine that processes a tree below a TOKVALUETABLELIST node */
-  void processValueTableList(opNode *node, opNodeIx *ix);
+  void processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix);
 
 };
 #endif

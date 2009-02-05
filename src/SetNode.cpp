@@ -2,7 +2,7 @@
 #include <sstream>
 #include "SetNode.h"
 
-SimpleSet::SimpleSet(opNode *bnd1, opNode *bnd2) :
+SimpleSet::SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2) :
    SetNode(DOTDOT, bnd1, bnd2),
    interval_(1),
    parsed_(false)

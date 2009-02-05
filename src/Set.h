@@ -36,7 +36,7 @@ class Set: public CompDescr{
   // virtal printToString inherited from CompDescr
   string printToString(); //!< print to string  
  public:
-  Set(opNode *list_of_els); //!< construct a set from a list of elements in an opNode
+  Set(SyntaxNode *list_of_els); //!< construct a set from a list of elements in an SyntaxNode
   int size(); //!< return size of Set
   int findPos(SetElement);  //!<find position of element in set
 };

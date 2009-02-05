@@ -79,8 +79,8 @@ SML in Backus-Naur form (BNF). Large parts of it follow the
 specification of the AMPL grammar in the appendix of the AMPL book. In
 YACC/BISON every "rule" returns a "value" that is computed from the
 values of its components. In SML most rules return a pointer to
-opNode. An opNode represents an AMPL/SML operator, and AMPL/SML
-expression is thus represented as a tree of opNodes. 
+SyntaxNode. An SyntaxNode represents an AMPL/SML operator, and AMPL/SML
+expression is thus represented as a tree of SyntaxNodes. 
 
 The grammar processor recognizes the start and end of a block/submodel
 and creates a AmplModel object for each of these. It classifies all
@@ -95,8 +95,8 @@ object.
 Every declaration is further divided into a name, indexing and
 attribute (body) section. These are attached to the appropriate
 ModelComp object. The indexing and attribute expressions are
-represented as a tree of opNodes. The indexing expression is actually
-represented by the subobject opNodeIx, which has extra fields and
+represented as a tree of SyntaxNodes. The indexing expression is actually
+represented by the subobject SyntaxNodeIx, which has extra fields and
 methods that allow a quick recovery of the defined dummy variables and
 their dimension.
 
@@ -104,19 +104,19 @@ The indexing and attributes trees are postprocessed: they are
 scanned for name references. Every reference is compared with the
 names of model components that are currently in scope (this includes
 dummy variables that are used in the indexing expression), and if
-found the reference in the opNode tree is replaced by a pointer to the
+found the reference in the SyntaxNode tree is replaced by a pointer to the
 appropriate ModelComp (done by find_var_ref_in_context()).
 \bug Currently no hashing is done in this search.
 
-Internally all names are represented by an opNode with
-opNode.opCode==ID. These are replaced by an object of subclass
-opNodeIDREF with opNodeIDREF.opCode==IDREF, which carry a pointer to
+Internally all names are represented by an SyntaxNode with
+SyntaxNode.opCode==ID. These are replaced by an object of subclass
+SyntaxNodeIDREF with SyntaxNodeIDREF.opCode==IDREF, which carry a pointer to
 the appropriate ModelComponent.
 
 The output of the frontend is a tree of AmplModel objects (each
 representing a node of the model tree), consisting of ModelComp
 objects (each representing on AMPL declaration). These in turn consist
-of several opNode trees representing the indexing and attribute(body)
+of several SyntaxNode trees representing the indexing and attribute(body)
 section of the declaration
 
 \note Also need to describe the data file parser and its classes
@@ -235,9 +235,9 @@ be changed from Flow[i] to Flow[j,i]
 
 The writing out of one component of the *.mod file is done by
 modified_write() Translating of local names into global names is done
-by a static variable opNode::use_global_names. opNode has a
-opNode::print() method that prints out the AMPL expression represented
-by the tree. If opNode::use_global_names is set then all names of
+by a static variable SyntaxNode::use_global_names. SyntaxNode has a
+SyntaxNode::print() method that prints out the AMPL expression represented
+by the tree. If SyntaxNode::use_global_names is set then all names of
 IDREF nodes are replaced by their global name with the proper indexing
 expression. 
 

@@ -15,48 +15,48 @@ Set::Set():
 {}
 
 /* ---------------------------------------------------------------------------
-Set::Set(opNode *list)
+Set::Set(SyntaxNode *list)
 ---------------------------------------------------------------------------- */
-/*! Constructs the Set from a list of set elements given as a tree of opNodes
+/*! Constructs the Set from a list of set elements given as a tree of SyntaxNodes
  *
  *  @param list a description of the set elements as read in from the data file
  *
  * This constructor assumes that the parameter list describes the set elements
  * in the following format:
- * - The top node is of type opNode.opCode=' ', 
- *    opNode::nval=[\#items in the list]
+ * - The top node is of type SyntaxNode.opCode=' ', 
+ *    SyntaxNode::nval=[\#items in the list]
  * - Each child describes one element of the set and is of either of the 
  *   forms
- *   + opNode.opCode=ID|INT_VAL|FLOAT_VAL, opNode.values[0] = 
- *   + (...,...,..) represented as opNode.opCode=LBRACKET with one
+ *   + SyntaxNode.opCode=ID|INT_VAL|FLOAT_VAL, SyntaxNode.values[0] = 
+ *   + (...,...,..) represented as SyntaxNode.opCode=LBRACKET with one
  *     child of type COMMA. 
- *     The COMMA opNode is a list, with number of entries equal to the 
+ *     The COMMA SyntaxNode is a list, with number of entries equal to the 
  *     dimension of the set and each element of type opCode=ID 
  *     (carrying the actual dscription of the set element).
  */
-Set::Set(opNode *list):
+Set::Set(SyntaxNode *list):
   elements()
 {
-  opNode *item;
+  SyntaxNode *item;
 
   assert(list->opCode=' ');
   //this->n = list->nval;
   
   // have a look at the first item to get the dimension of the set
-  item = (opNode *)*(list->begin());
+  item = (SyntaxNode *)*(list->begin());
   if (item->opCode==ID||item->opCode==-99){
     this->dim = 1;
   }else{
     // otherwise this needs to be an element of form (.., .., ..)
     assert(item->opCode==LBRACKET);
-    item = (opNode*)*(item->begin());
+    item = (SyntaxNode*)*(item->begin());
     assert(item->opCode==COMMA);
     this->dim = item->nchild();
   }
   
   // then place all the elements on the set
-  for(opNode::Iterator i=list->begin(); i!=list->end(); ++i){
-    item = (opNode*) *i;
+  for(SyntaxNode::Iterator i=list->begin(); i!=list->end(); ++i){
+    item = (SyntaxNode*) *i;
     // and do some checking that all elements have the same dimension
     //    this->elements.push_back(item);
     if (dim==1) {
@@ -70,12 +70,12 @@ Set::Set(opNode *list):
       //string* array = new string[dim];
       char **array = (char**)calloc(dim, sizeof(char*));
       assert(item->opCode==LBRACKET);
-      item = (opNode*)*(item->begin());
+      item = (SyntaxNode*)*(item->begin());
       assert(item->opCode==COMMA);
       if (dim==item->nchild()){
         int j = 0;
-        for(opNode::Iterator k=item->begin(); k!=item->end(); ++k){
-          opNode *idnd = (opNode*)*k;
+        for(SyntaxNode::Iterator k=item->begin(); k!=item->end(); ++k){
+          SyntaxNode *idnd = (SyntaxNode*)*k;
           assert(idnd->opCode==ID);
           array[j++] = (char*)*(idnd->begin());
         }
@@ -83,7 +83,7 @@ Set::Set(opNode *list):
         //this->elements.push_back(array);
       }else{
         cerr << "First element in set has dim=" <<dim << " later element '"
-           << (opNode*)*i << "' has dim=" << item->nchild() << "\n";
+           << (SyntaxNode*)*i << "' has dim=" << item->nchild() << "\n";
         exit(1);
       }
     }

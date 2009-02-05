@@ -26,8 +26,8 @@ StochModel::StochModel() :
 StochModel::StochModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
-StochModel::StochModel(opNode *onStages, opNode *onNodes, opNode *onAncs, 
-                       opNode *onProb, AmplModel *prnt) :
+StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
+                       SyntaxNode *onProb, AmplModel *prnt) :
   AmplModel(),
   stageset(onStages),
   stagenames(NULL),
@@ -415,7 +415,7 @@ StochModel::expandToFlatModel()
        
        {i in NODES: A[i]==nd}
 
-       where nd is the current node. I guess we have to build the opNode
+       where nd is the current node. I guess we have to build the SyntaxNode
        representation of this expression by hand.
 
        so this should really read
@@ -424,12 +424,12 @@ StochModel::expandToFlatModel()
 
     */
     
-      /* so this is a set definition ModelComp with an opNode tree 
+      /* so this is a set definition ModelComp with an SyntaxNode tree 
          dscribing the indexing set
        */
       
       // start with the "i in NODES" bit
-      opNode *on1, *on2, *on_iinN, *onai, *on3;
+      SyntaxNode *on1, *on2, *on_iinN, *onai, *on3;
       StochModelComp *smctmp;
       // NODES is a reference to the NODES set that is part of the 
       // smodel description
@@ -439,15 +439,15 @@ StochModel::expandToFlatModel()
            the root node */
         // set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
         // on_iinn: this_nd in NODES
-        on_iinN = new opNode(IN, new IDNode("this_nd"), nodeset->clone());
+        on_iinN = new SyntaxNode(IN, new IDNode("this_nd"), nodeset->clone());
         // onai: A[this_nd]  
-        onai= new opNode(LSBRACKET, anc->clone(), 
-                       new opNode(COMMA, new IDNode("this_nd")));
+        onai= new SyntaxNode(LSBRACKET, anc->clone(), 
+                       new SyntaxNode(COMMA, new IDNode("this_nd")));
         // on2: A[this_nd]=="null"
-        on2 =  new opNode(EQ, onai, new IDNode("\"null\""));
+        on2 =  new SyntaxNode(EQ, onai, new IDNode("\"null\""));
         // on1: :={this_nd in NODES:Parent[this_nd] == "null"};
-        on1 = new opNode(DEFINED, 
-                         new opNode(LBRACE, new opNode(COLON, on_iinN, on2)));
+        on1 = new SyntaxNode(DEFINED, 
+                         new SyntaxNode(LBRACE, new SyntaxNode(COLON, on_iinN, on2)));
         // and add this to the model
         smctmp = new StochModelComp("rootset", TSET, NULL, on1);
         smctmp->stochmodel = this;
@@ -465,7 +465,7 @@ StochModel::expandToFlatModel()
       // this is going to be the dummy variable i (just an ID node?)
       on2 = new IDNode("this_nd");
       /** @bug 'this_nd' is a reserved variables now */
-      on_iinN = new opNode(IN, on2, on1);
+      on_iinN = new SyntaxNode(IN, on2, on1);
       //printf("Test first part of expression: %s\n",on_iinN->print());
       // set up the 'A[i] in indS0' part now
 
@@ -475,9 +475,9 @@ StochModel::expandToFlatModel()
       on1 = anc->clone();
       // this is the comma separated list
       /* I think that  dummy variable is just left as a ID */
-      on2 = new opNode(COMMA, new IDNode("this_nd"));
+      on2 = new SyntaxNode(COMMA, new IDNode("this_nd"));
       // this is A[i]
-      onai= new opNode(LSBRACKET, on1, on2);
+      onai= new SyntaxNode(LSBRACKET, on1, on2);
       // this is the A[i] in indSO
       //printf("Test second part of expression: %s\n",onai->print());
 
@@ -485,11 +485,11 @@ StochModel::expandToFlatModel()
          model below (or root if there is none below)
          Trouble is that the model below has not been set up yet... */
       if (stgcnt>0){
-        //on3 = new opNodeIDREF(indset[stgcnt-1]);
+        //on3 = new SyntaxNodeIDREF(indset[stgcnt-1]);
         ostringstream dummy_var;
         dummy_var << "ix" << stgcnt-1;
         on3 = new IDNode(dummy_var.str());
-        on2 = new opNode(EQ, onai, on3);
+        on2 = new SyntaxNode(EQ, onai, on3);
       }else{
         /* No, the first indexing set is not over the nodes that have "root"
            as parent (this would require the root node to be always named 
@@ -501,24 +501,24 @@ StochModel::expandToFlatModel()
            set alm0_ind0 := {this_nd in NODES: Parent[this_nd] in rootset};
         */
 
-        //on3 = new opNode(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
-        //on3 = new opNode(ID, strdup("rootset"));
-        on3 = new opNodeIDREF(smctmp);
-        on2 = new opNode(IN, onai, on3);
+        //on3 = new SyntaxNode(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
+        //on3 = new SyntaxNode(ID, strdup("rootset"));
+        on3 = new SyntaxNodeIDREF(smctmp);
+        on2 = new SyntaxNode(IN, onai, on3);
       }
       // problem: Since indset[stgct-1] is not set up it, the expression 
       // cannot be printed here
       //printf("Test third part of expression: %s\n",on2->print());
 
       // and build everything
-      on1 = new opNode(COLON, on_iinN, on2);
+      on1 = new SyntaxNode(COLON, on_iinN, on2);
       // and add curly brackets to it
-      on3 = new opNode(LBRACE, on1);
+      on3 = new SyntaxNode(LBRACE, on1);
       // and the :=
-      on1 = new opNode(DEFINED, on3);
+      on1 = new SyntaxNode(DEFINED, on3);
       //printf("Test all of expression: %s\n",on1->print());
       
-      // so we've got an opNode to '{i in NODES:A[i] in indS0}'
+      // so we've got an SyntaxNode to '{i in NODES:A[i] in indS0}'
       
       /* Add this as a model component defining a set? */
       char buf[20];
@@ -535,16 +535,16 @@ StochModel::expandToFlatModel()
 
         // add a submodel component that points to the model above 
         // need to create an indexing expression for the model above
-        //on1 = new opNode(ID, strdup(buf)); //indset
-        on1 = new opNodeIDREF(indset[stgcnt]); //indset
-        on_iinN = new opNode(IN, new IDNode(dummy_var.str()), on1); // i in N
-        on2 = new opNode(LBRACE, on_iinN);    // {i in N}
+        //on1 = new SyntaxNode(ID, strdup(buf)); //indset
+        on1 = new SyntaxNodeIDREF(indset[stgcnt]); //indset
+        on_iinN = new SyntaxNode(IN, new IDNode(dummy_var.str()), on1); // i in N
+        on2 = new SyntaxNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 
         ModelComp *newmc = new ModelComp(model_above->name, TMODEL, 
-                                           new opNodeIx(on2), NULL);
+                                           new SyntaxNodeIx(on2), NULL);
         //ModelComp *newmc = new ModelComp(strdup(((*st)++).c_str()), TMODEL, 
-        //                                   new opNodeIx(on2), NULL);
+        //                                   new SyntaxNodeIx(on2), NULL);
         newmc->other = model_above;
         am->addComp(newmc);
         model_above->node = newmc;
@@ -600,7 +600,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 /** This routine recursively calls StochModelComp::transcribeToModelComp
  *  for all components of this StochModel
  *
- *  It sets opNode::stage and opNode::node to the correct values for each
+ *  It sets SyntaxNode::stage and SyntaxNode::node to the correct values for each
  *  new AmplModel encountered in the recursion
  *
  *  @param current The AmplModel that is currently worked on. I.e. in
@@ -614,24 +614,24 @@ void
 StochModel::_transcribeComponents(AmplModel *current, int level)
 {
   ModelComp *mc;
-  list<opNode*> dv;
+  list<SyntaxNode*> dv;
   // need to set stage and node for the current model
   
   /* What should we do here: I think use quotation marks if the set of stages
      is symbolic. otherwise don't use quotation marks */
 
   if (is_symbolic_stages){
-    opNode::stage = "\""+stagenames->at(level)+"\"";
+    SyntaxNode::stage = "\""+stagenames->at(level)+"\"";
   } else {
-    opNode::stage = stagenames->at(level);
+    SyntaxNode::stage = stagenames->at(level);
   }
 
   if (level==0){
-    opNode::node = "\"root\"";
+    SyntaxNode::node = "\"root\"";
   }else{
-    opNodeIx *cnix = current->node->indexing;
+    SyntaxNodeIx *cnix = current->node->indexing;
     dv = cnix->getListDummyVars();
-    opNode::node = (dv.front())->print();
+    SyntaxNode::node = (dv.front())->print();
   }
 
   //list<ModelComp*> newcomps(current->comps.size());
@@ -672,13 +672,13 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
   ModelComp *mc, *prev;
   list<char*>* dv;
   // need to set stage and node for the current model
-  opNode::stage = "\""+stagenames->at(level)+"\"";
+  SyntaxNode::stage = "\""+stagenames->at(level)+"\"";
   if (level==0){
-    opNode::node = "\"root\"";
+    SyntaxNode::node = "\"root\"";
   }else{
-    opNodeIx *cnix = current->node->indexing;
+    SyntaxNodeIx *cnix = current->node->indexing;
     dv = cnix->getListDummyVars();
-    opNode::node = (dv->front());
+    SyntaxNode::node = (dv->front());
   }
   // loop through all the entities in this model
   for(mc=current->first;mc!=NULL;mc = mc->next){

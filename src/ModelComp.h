@@ -49,9 +49,9 @@ class ModelComp{
 
   /** this is a tree of specifications, this includes
    * :=, within, default, >=                                               */
-  opNode *attributes;   
+  SyntaxNode *attributes;   
 			 
-  opNodeIx *indexing; //!< indexing expression 
+  SyntaxNodeIx *indexing; //!< indexing expression 
 
   ///** ModelComp is set up as a double linked list 
   // *  @attention This should be implemented in the AmplModel as a 
@@ -85,11 +85,11 @@ class ModelComp{
   static int tt_count;    //!< number of ModelComps defined
   // ------------------------- METHODS ----------------------------------
   // constructor
-  ModelComp(char *id, compType type, opNode *indexing, opNode *attrib);
+  ModelComp(char *id, compType type, SyntaxNode *indexing, SyntaxNode *attrib);
   ModelComp();  //< constructor that sets everything to default values
 
   /** set up an existing model comp to specified values   */
-  void setTo(char *id, compType type, opNodeIx *indexing, opNode *attrib); 
+  void setTo(char *id, compType type, SyntaxNodeIx *indexing, SyntaxNode *attrib); 
 
   /** set up list of dependencies for this component */
   void setUpDependencies();
@@ -133,9 +133,9 @@ class ModelCompSet: public ModelComp {
 };
 
 char *
-getGlobalName(ModelComp *node, const opNode *opn, 
+getGlobalName(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
 char *
-getGlobalNameNew(ModelComp *node, const opNode *opn, 
+getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
 #endif

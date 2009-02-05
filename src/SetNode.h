@@ -10,10 +10,10 @@
 /** @class SetNode
  * This class represents a set in the the syntax tree.
  */
-class SetNode: public opNode, public CompDescr {
+class SetNode: public SyntaxNode, public CompDescr {
 public:
-   SetNode(int opCode, opNode *node1=NULL, opNode *node2=NULL) :
-      opNode(opCode, node1, node2) {}
+   SetNode(int opCode, SyntaxNode *node1=NULL, SyntaxNode *node2=NULL) :
+      SyntaxNode(opCode, node1, node2) {}
 };
 
 /** @class SimpleSet
@@ -27,7 +27,7 @@ private:
 
 public:
    bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
-   SimpleSet(opNode *bnd1, opNode *bnd2);
+   SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2);
    vector<string> members();
 };
 
@@ -36,7 +36,7 @@ public:
  */
 class ListSet: public SetNode {
 public:
-   ListSet(opNode *list) :
+   ListSet(SyntaxNode *list) :
       SetNode(LBRACE, list)
    {
    }
@@ -47,7 +47,7 @@ public:
  */
 class CompositeSet: public SetNode {
 public:
-   CompositeSet(int opCode, opNode *set1, opNode *set2) :
+   CompositeSet(int opCode, SyntaxNode *set1, SyntaxNode *set2) :
       SetNode(opCode, set1, set2)
    {
       assert((opCode==CROSS) || (opCode==DIFF));

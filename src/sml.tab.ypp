@@ -17,13 +17,13 @@
    #include "SetNode.h"
    #include "AmplModel.h"
 
-   void add_indexing(opNodeIx *indexing);
-   void rem_indexing(opNodeIx *indexing);
-   void begin_model(char *name, opNode *indexing);
+   void add_indexing(SyntaxNodeIx *indexing);
+   void rem_indexing(SyntaxNodeIx *indexing);
+   void begin_model(char *name, SyntaxNode *indexing);
    void end_model();
-   ModelComp *add_set_to_model(char *id, opNode *indx, opNode *attrib);
-   ModelComp *add_obj_to_model(int token, char *id, opNode *indx,
-      opNode *attrib);
+   ModelComp *add_set_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
+   ModelComp *add_obj_to_model(int token, char *id, SyntaxNode *indx,
+      SyntaxNode *attrib);
 
    extern int yylineno;
    int yylex(void);
@@ -39,23 +39,23 @@
    static AmplModel *current_model;    /* this is the model currently active */
                                        /* this is the GLOBAL context */
    static AmplModel *local_context;    /* this is the LOCAL context */
-   opNodeIx *list_of_indexing[20];    /* list of currently applicable 
+   SyntaxNodeIx *list_of_indexing[20];    /* list of currently applicable 
                                                 indexing expressions */
    int n_indexing;
    /* ---------------- stochastic global variables:------------------------ */
    static bool is_stoch_model;      /* true if inside stochastic model def */
    /* these are set within entity definitions and reset at the end of them */
    static bool is_deterministic_loc;
-   static opNode *stages_loc;
+   static SyntaxNode *stages_loc;
    /* these are set by global stocastic modifier commands */
    static bool is_deterministic_glo;
-   static opNode *stages_glo;
+   static SyntaxNode *stages_glo;
    extern FILE *yyin;
    extern void parse_data(AmplModel *current_model, char *datafilename);
 
-   ModelComp *add_cons_to_model(char *id, opNode *indx, opNode *attrib);
-   ModelComp *add_param_to_model(char *id, opNode *indx, opNode *attrib);
-   ModelComp *add_var_to_model(char *id, opNode *indx, opNode *attrib);
+   ModelComp *add_cons_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
+   ModelComp *add_param_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
+   ModelComp *add_var_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
    void addStochInfo(StochModelComp *newmc);
    void createSubdirTmpIfNotExist(void);
 %}
@@ -66,8 +66,8 @@
   long *ival;
   double *fval;
   char *string;
-  opNode *opPtr;
-  opNodeIx *opPtrIx;
+  SyntaxNode *opPtr;
+  SyntaxNodeIx *opPtrIx;
 }
 
 %type <string> cnstr
@@ -137,7 +137,7 @@ optionlist: /*empty */ {$$=NULL;}
           ;
 
 commasepoptions:  identifier {
-                     $$ = new opNode(COMMA, $1);}
+                     $$ = new SyntaxNode(COMMA, $1);}
                |  commasepoptions COMMA identifier{
                      $$ = $1->push_back($3);
                   }
@@ -205,7 +205,7 @@ stochblock: sblockbegin statements sblockend
           ;
     
 /* FIXME: optionlist is of form '(ID COMMA ID ...)'
-     need to call new opNode and addToListItem functions in the 
+     need to call new SyntaxNode and addToListItem functions in the 
      processing of optionlist and its children */
 stochblockbegin:  STOCHASTIC BLOCK ID indexing_opt USING optionlist COLON {
                      add_indexing($4);
@@ -283,12 +283,12 @@ relop:   LE {$$=LE;}
      |   NE {$$=NE;}
      ;
 
-equation: expr ASSIGN expr { $$ = new opNode(ASSIGN, $1, $3); }
-        | expr LT expr { $$ = new opNode(LT, $1, $3); }
-        | expr LE expr { $$ = new opNode(LE, $1, $3); }
-        | expr GT expr { $$ = new opNode(GT, $1, $3); }
-        | expr GE expr { $$ = new opNode(GE, $1, $3); }
-        | expr EQ expr { $$ = new opNode(EQ, $1, $3); }
+equation: expr ASSIGN expr { $$ = new SyntaxNode(ASSIGN, $1, $3); }
+        | expr LT expr { $$ = new SyntaxNode(LT, $1, $3); }
+        | expr LE expr { $$ = new SyntaxNode(LE, $1, $3); }
+        | expr GT expr { $$ = new SyntaxNode(GT, $1, $3); }
+        | expr GE expr { $$ = new SyntaxNode(GE, $1, $3); }
+        | expr EQ expr { $$ = new SyntaxNode(EQ, $1, $3); }
         ;
 
 cnstr:   MAXIMIZE ID indexing_opt {
@@ -343,12 +343,12 @@ indexing_opt: /* empty */ {$$=NULL;}
             ;
 
 indexing:   LBRACE setexpr_list COLON lexpr RBRACE {
-               opNode *tmp = new opNode(LBRACE, new opNode(COLON, $2, $4));
-               $$ = new opNodeIx(tmp);
+               SyntaxNode *tmp = new SyntaxNode(LBRACE, new SyntaxNode(COLON, $2, $4));
+               $$ = new SyntaxNodeIx(tmp);
                delete tmp;
             }
         |   LBRACE setexpr_list RBRACE {
-               opNodeIx *tmp = new opNodeIx(new opNode(LBRACE, $2));
+               SyntaxNodeIx *tmp = new SyntaxNodeIx(new SyntaxNode(LBRACE, $2));
                $$=tmp;
             }
         ;
@@ -368,21 +368,21 @@ setexpr_list:  setexpr_item
 
 setexpr_item : setexpression
              | dummy_member IN setexpression{
-                  $$ = new opNode(IN, $1,$3);
+                  $$ = new SyntaxNode(IN, $1,$3);
                }
              ;
 
 dummy_member : ID {$$=new IDNode($1);}
              | LBRACKET ID COMMA ID RBRACKET {
-                  opNode *tmp = new opNode(LBRACKET, 
-                     new opNode(COMMA, new IDNode($2), new IDNode($4)));
+                  SyntaxNode *tmp = new SyntaxNode(LBRACKET, 
+                     new SyntaxNode(COMMA, new IDNode($2), new IDNode($4)));
                   $$ = tmp;
                }
              ;
 
 lexpr:   expr
      |   LBRACKET lexpr RBRACKET {
-            $$ = new opNode(LBRACKET, $2); }
+            $$ = new SyntaxNode(LBRACKET, $2); }
      |   equation
      ;
 
@@ -443,12 +443,12 @@ setattributes: setattribute {$$=$1;}
                      $$ = $1;
                   }else{
                      if ($1==NULL){
-                        $$ = new opNode(' ', $2);
+                        $$ = new SyntaxNode(' ', $2);
                      }else{
                         if ($1->opCode==' '){
                            $$ = $1->push_back($2);
                         }else{
-                           $$ = new opNode(' ', $1, $2);
+                           $$ = new SyntaxNode(' ', $1, $2);
                         }
                      }
                   }
@@ -456,18 +456,18 @@ setattributes: setattribute {$$=$1;}
              ;
 
 setattribute:  DIMEN INT_VAL {
-                  $$ = new opNode(DIMEN, new ValueNode<long>(*$2));
+                  $$ = new SyntaxNode(DIMEN, new ValueNode<long>(*$2));
                }
             |  WITHIN setexpression {
-                  $$ = new opNode(WITHIN, $2);
+                  $$ = new SyntaxNode(WITHIN, $2);
                }
             | DEFINED setexpression {
-                  $$ = new opNode(DEFINED, $2);
+                  $$ = new SyntaxNode(DEFINED, $2);
                }
             |  DEFAULT setexpression {
-                  $$ = new opNode(DEFAULT, $2);
+                  $$ = new SyntaxNode(DEFAULT, $2);
                }
-            |  ORDERED { $$ = new opNode(ORDERED); }
+            |  ORDERED { $$ = new SyntaxNode(ORDERED); }
             ;
 
 paramattributes_opt: /* empty */ { $$ = NULL; }
@@ -476,14 +476,14 @@ paramattributes_opt: /* empty */ { $$ = NULL; }
 
 paramattributes:  paramattribute {
                      if ($1==NULL) {$$ = NULL;}
-                     else{$$ = new opNode(COMMA, $1);}
+                     else{$$ = new SyntaxNode(COMMA, $1);}
                   }
                |  paramattributes COMMA paramattribute {
                      if ($3==NULL){
                         $$ = $1;
                      }else{
                         if ($1==NULL){
-                           $$ = new opNode(COMMA, $3);
+                           $$ = new SyntaxNode(COMMA, $3);
                         }else{
                            $$ = $1->push_back($3);
                         }
@@ -491,13 +491,13 @@ paramattributes:  paramattribute {
                   }
                ;
 
-paramattribute:   BINARY {$$ = new opNode(BINARY);}
-              |   INTEGER {$$ = new opNode(INTEGER);}
-              |   SYMBOLIC {$$ = new opNode(SYMBOLIC);}
-              |   relop expr {$$ = new opNode($1, $2);}
-              |   IN setexpression {$$ = new opNode(IN, $2);}
-              |   ASSIGN expr {$$ = new opNode(ASSIGN, $2);}
-              |   DEFAULT expr {$$ = new opNode(DEFAULT, $2);}
+paramattribute:   BINARY {$$ = new SyntaxNode(BINARY);}
+              |   INTEGER {$$ = new SyntaxNode(INTEGER);}
+              |   SYMBOLIC {$$ = new SyntaxNode(SYMBOLIC);}
+              |   relop expr {$$ = new SyntaxNode($1, $2);}
+              |   IN setexpression {$$ = new SyntaxNode(IN, $2);}
+              |   ASSIGN expr {$$ = new SyntaxNode(ASSIGN, $2);}
+              |   DEFAULT expr {$$ = new SyntaxNode(DEFAULT, $2);}
               ;
 
 stochattr_opt: /* empty */ {$$ = NULL;}
@@ -536,19 +536,19 @@ varattributes: varattribute {
              ;
 
 /* FIXME: what to do about the ID in the last rule ? */
-varattribute:  BINARY {$$ = new opNode(BINARY);}
-            |  INTEGER {$$ = new opNode(INTEGER);}
-            |  SYMBOLIC {$$ = new opNode(SYMBOLIC);}
-            |  LE expr {$$ = new opNode(LE, $2);}
-            |  GE expr {$$ = new opNode(GE, $2);}
-            |  DEFINED expr {$$ = new opNode(DEFINED, $2);}
-            |  ASSIGN expr {$$ = new opNode(ASSIGN, $2);}
-            |  DEFAULT expr {$$ = new opNode(DEFAULT, $2);}
+varattribute:  BINARY {$$ = new SyntaxNode(BINARY);}
+            |  INTEGER {$$ = new SyntaxNode(INTEGER);}
+            |  SYMBOLIC {$$ = new SyntaxNode(SYMBOLIC);}
+            |  LE expr {$$ = new SyntaxNode(LE, $2);}
+            |  GE expr {$$ = new SyntaxNode(GE, $2);}
+            |  DEFINED expr {$$ = new SyntaxNode(DEFINED, $2);}
+            |  ASSIGN expr {$$ = new SyntaxNode(ASSIGN, $2);}
+            |  DEFAULT expr {$$ = new SyntaxNode(DEFAULT, $2);}
          //| COEFF indexing_opt constraint expr
          //| COVER indexing_opt constraint expr
          //| OBJ indexing_opt objective expr
-            |  IN setexpression {$$ = new opNode(IN, $2);}
-            |  SUFFIX ID expr {$$ = new opNode(SUFFIX, $3);}
+            |  IN setexpression {$$ = new SyntaxNode(IN, $2);}
+            |  SUFFIX ID expr {$$ = new SyntaxNode(SUFFIX, $3);}
             ;
 
 /* this is anything that evaluates to a set */
@@ -592,8 +592,8 @@ ubsetop: UNION    { $$ = UNION; }
 
 /* Identifier is any quotation of a predefined object:
     RoutComm[j].Flow[k-3*j, k]#
-   An iditem is simply a tree of opNodes that serve as an identifier.
-   An 'identifer' is an opNode of type IDREF or IDREFM
+   An iditem is simply a tree of SyntaxNodes that serve as an identifier.
+   An 'identifer' is an SyntaxNode of type IDREF or IDREFM
 */
 identifier: iditem {
                /* this is a simple identifier in global context */
@@ -610,7 +610,7 @@ identifier: iditem {
                   pointer to the referenced object in the model list
                   and a pointer to the list of arguments
 
-                  This can be represented as a opNode with
+                  This can be represented as a SyntaxNode with
                   ->opCode = ID;
                   ->nval = # of arguments
                   ->values[0] = pointer to entity in model list
@@ -636,7 +636,7 @@ identifier: iditem {
                      "not an object:\n " << *($1) << "\n";
                   exit(1);
                }
-               local_context = (AmplModel*)(((opNodeIDREF*)$1)->ref)->other;
+               local_context = (AmplModel*)(((SyntaxNodeIDREF*)$1)->ref)->other;
 
                if (GlobalVariables::logParseModel) {
                   cout << "Trying to merge \n identifier "<< *($1);
@@ -657,18 +657,18 @@ iditem:  ID {                               /* simple identifier */
          }
       |  ID LSBRACKET expr_list RSBRACKET { /* subscripted id'fier */
             if (GlobalVariables::logParseModel) 
-               cout << print_opNodesymb($3) << "\n";
-            $$ = new opNode(LSBRACKET, new IDNode($1), $3);
-            //printf("%s\n", print_opNodesymb($$));
+               cout << print_SyntaxNodesymb($3) << "\n";
+            $$ = new SyntaxNode(LSBRACKET, new IDNode($1), $3);
+            //printf("%s\n", print_SyntaxNodesymb($$));
          }
       |  ID LBRACKET INT_VAL SEMICOLON expr_list RBRACKET {
             // This is of the type xh(-1,i) which is xh[i] at a previous stage
-            // the ancestor information is conveyed by an ID opNode with 
+            // the ancestor information is conveyed by an ID SyntaxNode with 
             // two arguments, where the second argument is the ancestor
             // $3 is (long int*) => change its sign
             *$3 = -(*$3);
-            opNode *nd = new IDNode($1, *$3);
-            $$ = new opNode(LSBRACKET, nd, $5);
+            SyntaxNode *nd = new IDNode($1, *$3);
+            $$ = new SyntaxNode(LSBRACKET, nd, $5);
          }      
       |  ANCESTOR LBRACKET INT_VAL RBRACKET DOT iditem {
             // the same as above, just different syntax "ancestor(1).xh[i]"
@@ -676,7 +676,7 @@ iditem:  ID {                               /* simple identifier */
             //    with INT_VAL ($3) as the second argument
    
             // iditem is either an ID or a LSBRACKET node
-            opNode *node = $6;
+            SyntaxNode *node = $6;
             IDNode *idnode;
             if (node->opCode==LSBRACKET) {
                idnode = (IDNode*) *(node->begin());
@@ -693,11 +693,11 @@ iditem:  ID {                               /* simple identifier */
 /* expr_list: is a comma separated list of expr's */
 /* used as argument list to functions 
    RETURNS: 
-   *opNode of type COMMA representing a linked list of items
+   *SyntaxNode of type COMMA representing a linked list of items
 */
 
 expr_list:  expr {
-               $$ = new opNode(COMMA, $1);
+               $$ = new SyntaxNode(COMMA, $1);
             }
          |  expr_list COMMA expr {      /* add item to list */
                /* epxr_list could be a simple node or a comma separated
@@ -706,40 +706,40 @@ expr_list:  expr {
                   - if it is a CSL need to add an item to it
                */
                //printf("join nodes >%s< >%s<\n",
-               //print_opNode($1),print_opNode($3));
+               //print_SyntaxNode($1),print_SyntaxNode($3));
                assert($1->opCode==COMMA);
                $$ = $1->push_back($3);
             }
          ;
 
 expr: value
-    | LBRACKET expr_list RBRACKET { $$ = new opNode(LBRACKET, $2); }
-    | expr '+' expr { $$ = new opNode('+', $1, $3); }
-    | expr '-' expr { $$ = new opNode('-', $1, $3); }
-    | '-' expr { $$ = new opNode('-', $2); }
-    | expr '*' expr { $$ = new opNode('*', $1, $3); }
-    | expr '/' expr { $$ = new opNode('/', $1, $3); }
-    | expr POWER expr { $$ = new opNode(POWER, $1, $3); }
-    | expr ELLIPSE expr { $$ = new opNode(ELLIPSE, $1, $3); }
-    | expr LOGICAL_OR expr { $$ = new opNode(LOGICAL_OR, $1, $3); }
-    | expr LOGICAL_AND expr { $$ = new opNode(LOGICAL_AND, $1, $3); }
-    | '!' expr { $$ = new opNode('!', $2); }
+    | LBRACKET expr_list RBRACKET { $$ = new SyntaxNode(LBRACKET, $2); }
+    | expr '+' expr { $$ = new SyntaxNode('+', $1, $3); }
+    | expr '-' expr { $$ = new SyntaxNode('-', $1, $3); }
+    | '-' expr { $$ = new SyntaxNode('-', $2); }
+    | expr '*' expr { $$ = new SyntaxNode('*', $1, $3); }
+    | expr '/' expr { $$ = new SyntaxNode('/', $1, $3); }
+    | expr POWER expr { $$ = new SyntaxNode(POWER, $1, $3); }
+    | expr ELLIPSE expr { $$ = new SyntaxNode(ELLIPSE, $1, $3); }
+    | expr LOGICAL_OR expr { $$ = new SyntaxNode(LOGICAL_OR, $1, $3); }
+    | expr LOGICAL_AND expr { $$ = new SyntaxNode(LOGICAL_AND, $1, $3); }
+    | '!' expr { $$ = new SyntaxNode('!', $2); }
     | reduction_op indexing {add_indexing($2);} expr { 
          /* reduction operator: do we need to keep track of the ID of the
             dummy variable(s)? */
-         $$ = new opNode((int)$1, $2, $4);
+         $$ = new SyntaxNode((int)$1, $2, $4);
          rem_indexing($2);
       }
-    | IF lexpr THEN expr { $$ = new opNode(IF, $2, $4); }
-    | IF lexpr THEN expr ELSE expr { $$ = new opNode(IF, $2, $4, $6); }
-    | FIRST LBRACKET setexpression RBRACKET { $$ = new opNode(FIRST, $3); }
-    | LAST LBRACKET setexpression RBRACKET { $$ = new opNode(LAST, $3); }
+    | IF lexpr THEN expr { $$ = new SyntaxNode(IF, $2, $4); }
+    | IF lexpr THEN expr ELSE expr { $$ = new SyntaxNode(IF, $2, $4, $6); }
+    | FIRST LBRACKET setexpression RBRACKET { $$ = new SyntaxNode(FIRST, $3); }
+    | LAST LBRACKET setexpression RBRACKET { $$ = new SyntaxNode(LAST, $3); }
     | EXPECTATION LBRACKET expr_list RBRACKET { 
-         //$$ = new opNode(EXPECTATION, new opNode(LBRACKET, $3));}
-         $$ = new opNode(EXPECTATION, $3);
+         //$$ = new SyntaxNode(EXPECTATION, new SyntaxNode(LBRACKET, $3));}
+         $$ = new SyntaxNode(EXPECTATION, $3);
       }
     | func LBRACKET expr_list RBRACKET { /* function definition */
-         $$ = new opNode($1, new opNode(LBRACKET, $3));
+         $$ = new SyntaxNode($1, new SyntaxNode(LBRACKET, $3));
       }
     ;
 
@@ -760,16 +760,16 @@ value:   INT_VAL {
             $$=new ValueNode<double>(*$1);
          }
      |   identifier { 
-            $$=new opNode(0, $1);
+            $$=new SyntaxNode(0, $1);
          }
      |   INFINITY { 
-            $$ = new opNode(INFINITY);
+            $$ = new SyntaxNode(INFINITY);
          }
      |   STAGE { 
-            $$ = new opNode(STAGE);
+            $$ = new SyntaxNode(STAGE);
          }
      |   NODE { 
-            $$ = new opNode(NODE);
+            $$ = new SyntaxNode(NODE);
          }
      ;
 
@@ -821,7 +821,7 @@ int yywrap(void) {
 begin_model
 ---------------------------------------------------------------------------- */
 void
-begin_model(char *name, opNode *indexing) {
+begin_model(char *name, SyntaxNode *indexing) {
   AmplModel *new_mod = new AmplModel;
   ModelComp *newmc;
   
@@ -844,7 +844,7 @@ begin_model(char *name, opNode *indexing) {
 begin_smodel
 ---------------------------------------------------------------------------- */
 void
-begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
+begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    StochModel *new_mod;
    ModelComp *newmc;
   
@@ -857,10 +857,10 @@ begin_smodel(char *name, opNode *indexing, opNode *stochsets) {
    if (GlobalVariables::logParseModel)
       cout << "Start Stochastic Model: " << name << "\n";
 
-   new_mod = new StochModel((opNode*)stochsets->values[0], // stages
-      (opNode*)stochsets->values[1], // nodes
-      (opNode*)stochsets->values[2], // anc
-      (opNode*)stochsets->values[3], // prob
+   new_mod = new StochModel((SyntaxNode*)stochsets->values[0], // stages
+      (SyntaxNode*)stochsets->values[1], // nodes
+      (SyntaxNode*)stochsets->values[2], // anc
+      (SyntaxNode*)stochsets->values[3], // prob
       current_model); 
 
    new_mod->name = strdup(name);
@@ -914,7 +914,7 @@ end_smodel(){
 add_set_to_model
 ---------------------------------------------------------------------------- */
 ModelComp *
-add_set_to_model(char *id, opNode *indx, opNode *attrib){
+add_set_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
    ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TSET, indx, attrib);
@@ -931,7 +931,7 @@ add_set_to_model(char *id, opNode *indx, opNode *attrib){
 add_obj_to_model
 ---------------------------------------------------------------------------- */
 ModelComp *
-add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib){
+add_obj_to_model(int token, char *id, SyntaxNode *indx, SyntaxNode *attrib){
    ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TMIN, indx, attrib);
@@ -951,7 +951,7 @@ add_obj_to_model(int token, char *id, opNode *indx, opNode *attrib){
 add_cons_to_model
 ---------------------------------------------------------------------------- */
 ModelComp *
-add_cons_to_model(char *id, opNode *indx, opNode *attrib){
+add_cons_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
    ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TCON, indx, attrib)   ;
@@ -979,7 +979,7 @@ add_cons_to_model(char *id, opNode *indx, opNode *attrib){
 add_var_to_model
 ---------------------------------------------------------------------------- */
 ModelComp *
-add_var_to_model(char *id, opNode *indx, opNode *attrib){
+add_var_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
    ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TVAR, indx, attrib);
@@ -997,7 +997,7 @@ add_var_to_model(char *id, opNode *indx, opNode *attrib){
 add_param_to_model
 ---------------------------------------------------------------------------- */
 ModelComp *
-add_param_to_model(char *id, opNode *indx, opNode *attrib){
+add_param_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
    ModelComp *newmc;
    if (is_stoch_model){
       newmc = new StochModelComp(id, TPARAM, indx, attrib);
@@ -1026,10 +1026,10 @@ add_param_to_model(char *id, opNode *indx, opNode *attrib){
 add_indexing/rem_indexing
 -------------------------------------------------------------------------- */
 void 
-add_indexing(opNodeIx *indexing){
+add_indexing(SyntaxNodeIx *indexing){
    list_of_indexing[n_indexing] = indexing;
    if (GlobalVariables::logParseModel){
-      char *tmp2 = print_opNodesymb(indexing);
+      char *tmp2 = print_SyntaxNodesymb(indexing);
       cout << "add indexing expression to list: " << *indexing << "\n";
       cout << "Symbolic indexing: " << tmp2 << "\n";
       cout << "length of indexing now: " << n_indexing+1 << "\n";
@@ -1039,7 +1039,7 @@ add_indexing(opNodeIx *indexing){
 }
 
 void
-rem_indexing(opNodeIx *indexing){
+rem_indexing(SyntaxNodeIx *indexing){
    if (indexing){
       assert(indexing==list_of_indexing[n_indexing-1]);
       if (GlobalVariables::logParseModel) 

@@ -10,14 +10,14 @@ using namespace std;
 class AmplModel;
 
 
-/** @class opNode
+/** @class SyntaxNode
  *  @brief This is a node in the operator tree. 
  *
  *  All AMPL/SML expressions are broken down into a tree of operators. 
- *  The nodes of this tree are objects of type opNode.
+ *  The nodes of this tree are objects of type SyntaxNode.
  *
  *  Note that values[] is a list of untyped pointers. Normally these
- *  would point to further opNode structure (children of the current
+ *  would point to further SyntaxNode structure (children of the current
  *  node). For an ID it is simply a pointer to the string containing
  *  the name
  *
@@ -27,17 +27,17 @@ class AmplModel;
  *       an attempt for ID nodes resulted in problems with dynamic_casts
  *
  *
- *  \bug A comma separated list is currently represented by an opNode with
+ *  \bug A comma separated list is currently represented by an SyntaxNode with
  *       opCode==COMMA and values[0/1] pointing to the first and last member
- *       in a linked list of opNodes. This linked list is implemented using
- *       _indexNode objects (which is a opNode plus a pointer to next). 
+ *       in a linked list of SyntaxNodes. This linked list is implemented using
+ *       _indexNode objects (which is a SyntaxNode plus a pointer to next). 
  *       This is done to facilitate adding members to the list without 
  *       knowing the dimension beforehand. Better implemented by replacing
- *       the opNode::values array with a C++ list.
+ *       the SyntaxNode::values array with a C++ list.
  */
-class opNode {
-  friend opNode* find_var_ref_in_context(AmplModel *context, opNode *ref);
-  friend char *print_opNodesymb(opNode *node);
+class SyntaxNode {
+  friend SyntaxNode* find_var_ref_in_context(AmplModel *context, SyntaxNode *ref);
+  friend char *print_SyntaxNodesymb(SyntaxNode *node);
  protected:
  public: 
   int nval;      //!< number of arguments 
@@ -47,7 +47,7 @@ class opNode {
    *  name of the entity. If there are two arguments the second argument is
    *  an (int*) stating the ancestor information as set by ancestor(1).ID in
    *  stochastic programming */
-  opNode **values; //!< list of arguments 
+  SyntaxNode **values; //!< list of arguments 
 
   /* FIXME: not sure if these two should be part of the class. They are 
      global variables that affect the print() method */
@@ -61,15 +61,15 @@ class opNode {
  public:
   // ------------------------ methods -----------------------------------
   // Constructors
-  opNode();
-  opNode(int opCode, opNode *val1=NULL, opNode *val2=NULL, opNode *val3=NULL);
-  opNode(opNode &src);
+  SyntaxNode();
+  SyntaxNode(int opCode, SyntaxNode *val1=NULL, SyntaxNode *val2=NULL, SyntaxNode *val3=NULL);
+  SyntaxNode(SyntaxNode &src);
   // Destructor
-  virtual ~opNode();
+  virtual ~SyntaxNode();
 
   /** for nodes that are indexing expressions, get the set that is indexed over
-   * FIXME: move this to opNodeIx, also indexing expressions are more compl. */
-  opNode *getIndexingSet();
+   * FIXME: move this to SyntaxNodeIx, also indexing expressions are more compl. */
+  SyntaxNode *getIndexingSet();
 
   string print();              // recursive printing of expression
 
@@ -91,13 +91,13 @@ class opNode {
   virtual void findIDREF(list<ModelComp*> &lmc);
 
   /** find all IDREF nodes below current node */
-  virtual void findIDREF(list<opNode*> *lnd);
+  virtual void findIDREF(list<SyntaxNode*> *lnd);
 
   /** find all nodes of opCode oc below current node */
-  virtual void findOpCode(int oc, list<opNode*> *lnd);
+  virtual void findOpCode(int oc, list<SyntaxNode*> *lnd);
 
-  /** find ModelComp (if it exitst) refered to by this opNode:
-   *  If the expression given by this opNode is an immediate reference to
+  /** find ModelComp (if it exitst) refered to by this SyntaxNode:
+   *  If the expression given by this SyntaxNode is an immediate reference to
    *  a ModelComp then return that. Otherwise return NULL
    */
   ModelComp *findModelComp();
@@ -105,16 +105,16 @@ class opNode {
   //! returns the 'double' represented by this node (if of type INT/FLOAT_VAL)
   virtual double getFloatVal();
 
-  opNode &merge(const opNode &src);
+  SyntaxNode &merge(const SyntaxNode &src);
 
   virtual int nchild() const { return nval; }
 
   class Iterator {
      private:
-      opNode **ptr;
+      SyntaxNode **ptr;
 
      public:
-      Iterator(opNode **p) { ptr=p; }
+      Iterator(SyntaxNode **p) { ptr=p; }
       ~Iterator() {}
 
       Iterator& operator=(const Iterator &other) {
@@ -137,11 +137,11 @@ class opNode {
          return tmp;
       }
 
-      opNode* operator*() const {
+      SyntaxNode* operator*() const {
          return *ptr;
       }
 
-      opNode** operator&() const {
+      SyntaxNode** operator&() const {
          return ptr;
       }
   };
@@ -149,22 +149,22 @@ class opNode {
   virtual Iterator begin() const { return Iterator(values); }
   virtual Iterator end() const { return Iterator(values+nval); }
   
-  /** creates a deep_copy of the nodes: opNodes pointed to are recreated 
+  /** creates a deep_copy of the nodes: SyntaxNodes pointed to are recreated 
    *  as well. 
-   *  Non-opNode objects pointed to are not recreated, here just pointers
-   *  are copied (->ref in the case of an opNodeIDREF object)
-   *  The int/double entries pointed to by INT_VAL/FLOAT_VAL opNodes *are*
+   *  Non-SyntaxNode objects pointed to are not recreated, here just pointers
+   *  are copied (->ref in the case of an SyntaxNodeIDREF object)
+   *  The int/double entries pointed to by INT_VAL/FLOAT_VAL SyntaxNodes *are*
    *  recreated
    */
-  virtual opNode *deep_copy();
+  virtual SyntaxNode *deep_copy();
 
   /** creates a copy of the node, reusing the pointer in the current node */
-  virtual opNode *clone();
+  virtual SyntaxNode *clone();
   //  virtual void foo();
 
   virtual ostream& put(ostream&s) const;
-  virtual opNode *push_back(opNode *newitem);
-  virtual opNode *push_front(opNode *newitem);
+  virtual SyntaxNode *push_back(SyntaxNode *newitem);
+  virtual SyntaxNode *push_front(SyntaxNode *newitem);
 };
 
 /** \brief A node on the operator tree representing an indexing expression. 
@@ -177,54 +177,54 @@ class opNode {
  * it will be broken down into a list of 'dummy IN set' expressions plus an
  * optional qualifier (the condition to the right of COLON)
  */
-class opNodeIx : public opNode {
+class SyntaxNodeIx : public SyntaxNode {
  public:
-  opNode *qualifier;    //!< the stuff to the right of ':' (if present)
+  SyntaxNode *qualifier;    //!< the stuff to the right of ':' (if present)
   int ncomp;            //!< number of 'dummy IN set'-type expressions
-  opNode **sets;        //!< list of the set expressions
+  SyntaxNode **sets;        //!< list of the set expressions
   ModelComp **sets_mc;  //!< list of ModelComp for the indexing sets
-  opNode **dummyVarExpr;//!< list of the dummyVarExpressions
+  SyntaxNode **dummyVarExpr;//!< list of the dummyVarExpressions
   // private:            
   int done_split; //!< indicates that extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
   // --------------------------- methods ----------------------------------
-  opNodeIx();  //!< default constructor: sets everything to 0/NULL
-  opNodeIx(opNode *on); //!< initialise values from an opNode
+  SyntaxNodeIx();  //!< default constructor: sets everything to 0/NULL
+  SyntaxNodeIx(SyntaxNode *on); //!< initialise values from an SyntaxNode
 
   //! Finds if the indexing expression defines a given dummy variable 
-  opNode *hasDummyVar(const char *const name); 
+  SyntaxNode *hasDummyVar(const char *const name); 
 
   //! returns list of all dummy variables defined by this index'g expression 
-  list<opNode *> getListDummyVars(); 
+  list<SyntaxNode *> getListDummyVars(); 
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
   
   //! copies node and all its subnodes into new datastructures 
-  opNodeIx *deep_copy();    
+  SyntaxNodeIx *deep_copy();    
 
   void printDiagnostic(ostream &fout);   //!< diagnostic print of class variables
 };
 
 
-// FIXME: opNodeID was an attempt at a subclass for ID opNodes, this should
+// FIXME: SyntaxNodeID was an attempt at a subclass for ID SyntaxNodes, this should
 //        directly carry information about possible ancestor settings
 //        => lead to a problem with dynamic_cast, hence abondoned
 //* ----------------------------------------------------------------------------
-//opNodeID 
+//SyntaxNodeID 
 //---------------------------------------------------------------------------- */
-///** opNodeID is an opNode that represents an ID. The only reason to have
+///** SyntaxNodeID is an SyntaxNode that represents an ID. The only reason to have
 // *  it separate is so that it can carry extra information (such as how
 // *  many levels further up it should refer to for stoch programming)
 // *  @bug: at the moment only if the "parent" information in a StochModel
-// *        is set is this generated, possibly all opNode's with code ID
+// *        is set is this generated, possibly all SyntaxNode's with code ID
 // *         should be of this type
 // */
 //
-//class opNodeID : public opNode {
+//class SyntaxNodeID : public SyntaxNode {
 // public:
 //  int stochparent; //< levels above this one for which the reference is
 //
-//  opNodeID *clone();
+//  SyntaxNodeID *clone();
 //};
 
 /* ----------------------------------------------------------------------------
@@ -233,7 +233,7 @@ IDNode
 /** \brief A node on the tree representing a user identifier [ie variable name]
  */
 
-class IDNode : public opNode {
+class IDNode : public SyntaxNode {
   public:
    const string name;
    long stochparent;
@@ -244,34 +244,34 @@ class IDNode : public opNode {
    double getFloatVal() { return atof(name.c_str()); }
    char *getValue() { return strdup(name.c_str()); }
    void findIDREF(list<ModelComp*> &lmc) { return; }
-   void findIDREF(list<opNode*> &lnd) { return; }
+   void findIDREF(list<SyntaxNode*> &lnd) { return; }
    // We never search for ID:
-   void findOpCode(int oc, list<opNode*> *lnd) { return; }
+   void findOpCode(int oc, list<SyntaxNode*> *lnd) { return; }
    ostream& put(ostream&s) const { 
       return s << name;
    }
-   opNode *deep_copy() { 
+   SyntaxNode *deep_copy() { 
       return new IDNode(name, stochparent);
    }
-   opNode *clone() { return deep_copy(); }
+   SyntaxNode *clone() { return deep_copy(); }
 };
 
 
 /* ----------------------------------------------------------------------------
-opNodeIDREF 
+SyntaxNodeIDREF 
 ---------------------------------------------------------------------------- */
 /** \brief A node on the tree representing a reference to a ModelComp. 
  *
- * IDREF is an opNode that represents a reference to a ModelComponent
+ * IDREF is an SyntaxNode that represents a reference to a ModelComponent
  *
  */
-class opNodeIDREF : public opNode {
+class SyntaxNodeIDREF : public SyntaxNode {
  public:
   ModelComp *ref; //!< pointer to the ModelComp referred to by this node
   /* stochrecourse was for the same purpose as stochparent, just that the
-     recourse level was given as an opNode (i.e. expression to be 
+     recourse level was given as an SyntaxNode (i.e. expression to be 
      eveluated by AMPL rather than an explicit  INT_VAL */
-  //?opNode *stochrecourse; //!< resourse level in stoch programming
+  //?SyntaxNode *stochrecourse; //!< resourse level in stoch programming
   /** This field is only meaningful if the node represents a component
    *  in a stochastic program. In that case stochparent gives the recourse
    *  level of the component. This is the first argument in expressions
@@ -280,13 +280,13 @@ class opNodeIDREF : public opNode {
   int stochparent; //!< levels above this one for which the reference is
   // ---------------------------- methods -----------------------------
   // constructor
-  opNodeIDREF(ModelComp *r=NULL);
+  SyntaxNodeIDREF(ModelComp *r=NULL);
   
   //! creates a shallow copy: points to the same components as the original
-  opNodeIDREF *clone();
+  SyntaxNodeIDREF *clone();
   
   //! creates a copy using all new datastrutures (does not duplicate ->ref)
-  opNodeIDREF *deep_copy();
+  SyntaxNodeIDREF *deep_copy();
 
   ostream& put(ostream&s) const;
 };
@@ -294,22 +294,22 @@ class opNodeIDREF : public opNode {
 /** @class ValueNode
  * represents a value.
  */
-template<class T> class ValueNode : public opNode {
+template<class T> class ValueNode : public SyntaxNode {
   public:
    const T value;
 
   public:
    ValueNode(const T new_value) :
-      opNode(-99), value(new_value) {}
+      SyntaxNode(-99), value(new_value) {}
    double getFloatVal() { return value; }
    char *getValue();
    void findIDREF(list<ModelComp*> &lmc) { return; }
-   void findIDREF(list<opNode*> &lnd) { return; }
+   void findIDREF(list<SyntaxNode*> &lnd) { return; }
    // We never search for INT_VAL or FLOAT_VAL:
-   void findOpCode(int oc, list<opNode*> *lnd) { return; }
+   void findOpCode(int oc, list<SyntaxNode*> *lnd) { return; }
    ostream& put(ostream&s) const { return s << this->value; }
-   opNode *deep_copy() { return new ValueNode<T>(value); }
-   opNode *clone() { return deep_copy(); }
+   SyntaxNode *deep_copy() { return new ValueNode<T>(value); }
+   SyntaxNode *clone() { return deep_copy(); }
 };
 template<class T> char *ValueNode<T>::getValue() {
    ostringstream ost;
@@ -318,73 +318,73 @@ template<class T> char *ValueNode<T>::getValue() {
 }
 
 /** @class ListNode
- * represents a comma seperated list of opNodes
+ * represents a comma seperated list of SyntaxNodes
  */
-class ListNode: public opNode {
+class ListNode: public SyntaxNode {
   public:
-   typedef list<opNode *>::const_iterator iterator;
+   typedef list<SyntaxNode *>::const_iterator iterator;
 
   private:
-   list<opNode *> list;
+   list<SyntaxNode *> list;
 
   public:
-   ListNode(opNode *val1=NULL, opNode *val2=NULL);
+   ListNode(SyntaxNode *val1=NULL, SyntaxNode *val2=NULL);
    iterator begin() { return list.begin(); }
    iterator end() { return list.end(); }
    ostream& put(ostream&s) const;
    ListNode *deep_copy();
    ListNode *clone();
-   opNode *push_front(opNode *node) { list.push_front(node); return this; }
-   opNode *push_back(opNode *node) { list.push_back(node); return this; }
+   SyntaxNode *push_front(SyntaxNode *node) { list.push_front(node); return this; }
+   SyntaxNode *push_back(SyntaxNode *node) { list.push_back(node); return this; }
    int nchild() { return list.size(); }
 };
 
 // typedef struct {
 //   int relCode;
-//   opNode *lval;
-//   opNode *rval;
+//   SyntaxNode *lval;
+//   SyntaxNode *rval;
 //} relNode;
 
 //typedef struct {
-// opNode *node;
-//  opNode *indexing;
+// SyntaxNode *node;
+//  SyntaxNode *indexing;
 //  struct AmplModel_st *context;
 //} retType;
 
 
-/** \brief Linked list of opNode.
+/** \brief Linked list of SyntaxNode.
 
     This is a list of arguments. A comma separated list of arguments is
-    represented by an opNode with 
+    represented by an SyntaxNode with 
      - opCode=COMMA, 
      - nval=\#items on list
      - values[0]=first item on list (of type _indexNode)
      - values[1]=last item on list (of type _indexNode)
 */
 typedef struct _indexNode {
-  opNode *value;          //!< item on the linked list
+  SyntaxNode *value;          //!< item on the linked list
   struct _indexNode *next; //!< next item on the linked list
 } indexNode;
 
-//opNodeID *newUnaryOpID(void *val);
-//relNode *newRel(int opCode, opNode *lval, opNode *rval);
-//void freeOpNode(opNode *target);
-//indexNode *newIndexNode(opNode *node);
-//opNode *addItemToList(opNode *list, opNode *newitem);
-//opNode *addItemToListNew(opNode *list, opNode *newitem);
-opNode *addItemToListOrCreate(int oc, opNode *list, opNode *newitem);
-//opNode *addItemToListBeg(opNode *newitem, opNode *list);
-//retType *newRetType(opNode *node, opNode *indexing, 
+//SyntaxNodeID *newUnaryOpID(void *val);
+//relNode *newRel(int opCode, SyntaxNode *lval, SyntaxNode *rval);
+//void freeOpNode(SyntaxNode *target);
+//indexNode *newIndexNode(SyntaxNode *node);
+//SyntaxNode *addItemToList(SyntaxNode *list, SyntaxNode *newitem);
+//SyntaxNode *addItemToListNew(SyntaxNode *list, SyntaxNode *newitem);
+SyntaxNode *addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem);
+//SyntaxNode *addItemToListBeg(SyntaxNode *newitem, SyntaxNode *list);
+//retType *newRetType(SyntaxNode *node, SyntaxNode *indexing, 
 //		    struct AmplModel_st *context);
-char *print_opNodesymb(opNode *node);
+char *print_SyntaxNodesymb(SyntaxNode *node);
 
-ostream& operator<<(ostream& s, const opNode &node);
-ostream& operator<<(ostream& s, const opNode *node);
+ostream& operator<<(ostream& s, const SyntaxNode &node);
+ostream& operator<<(ostream& s, const SyntaxNode *node);
 
 // Routines taken from ampl.h
-opNode *findKeywordinTree(opNode *root, int oc);
-opNode* find_var_ref_in_context(AmplModel *context, opNode *ref);
-opNodeIDREF* find_var_ref_in_context_(AmplModel *context, IDNode *ref);
-opNode* find_var_ref_in_indexing(const char *const name);
+SyntaxNode *findKeywordinTree(SyntaxNode *root, int oc);
+SyntaxNode* find_var_ref_in_context(AmplModel *context, SyntaxNode *ref);
+SyntaxNodeIDREF* find_var_ref_in_context_(AmplModel *context, IDNode *ref);
+SyntaxNode* find_var_ref_in_indexing(const char *const name);
 
 #endif

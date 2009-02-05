@@ -20,17 +20,17 @@ CompDescrParam::CompDescrParam():
 {}
 
 /* ---------------------------------------------------------------------------
-CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc)
+CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc)
 ---------------------------------------------------------------------------- */
 /** Parses the parameter description given in a data file
  *  This routine constructs a CompDescrParam (the actual parameter values)
- *  from a tree of opNodes originating from the data file
+ *  from a tree of SyntaxNodes originating from the data file
  *  @param mc   Reference to the Component in the model file
  *               (so we can get indexing sets and dimension)
- *  @param desc  The opNode tree giving the parameter value description as
+ *  @param desc  The SyntaxNode tree giving the parameter value description as
  *               expressed in the data file
  */
-CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc):
+CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   nix(-1),
   indices(NULL),
   n(-1),
@@ -44,25 +44,25 @@ CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc):
      1) Match the parameter with a description in the model file and work
         out the dimension of the parameter (scalar?, vector?, array?) and
         how many parameter values to expect
-     2) Parse the opNode-tree and fill in the corresponding entries of
+     2) Parse the SyntaxNode-tree and fill in the corresponding entries of
         this object
   */
 
 
   /* ------------- 1) Work out dimension of parameter --------------------- */
 
-  opNode *paramspec;
+  SyntaxNode *paramspec;
 
   /* First work out the dimension and cardinality of this parameter: 
      for this analyse the indexing expression given in the corresponding
      model component */
-  opNodeIx *ix = mc->indexing;
+  SyntaxNodeIx *ix = mc->indexing;
 
  /* this should just be a comma separated list of sets */
-  /* opNodeIx has components: 
+  /* SyntaxNodeIx has components: 
      - int ncomp
-     - opNode **sets
-     - opNode *qualifier (if any ":" expression is given) */
+     - SyntaxNode **sets
+     - SyntaxNode *qualifier (if any ":" expression is given) */
 
   if (ix){
     /* if an indexing set is given, then the parameter is a vector (matrix) */
@@ -152,15 +152,15 @@ CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc):
   // Some components of the indexing set(s) can be given by templates
   // in which case nobj is reduced
   int nobj = nix;
-  for(opNode::Iterator i=desc->begin(); i!=desc->end(); ++i){
-    opNode *templ = NULL;
+  for(SyntaxNode::Iterator i=desc->begin(); i!=desc->end(); ++i){
+    SyntaxNode *templ = NULL;
     paramspec = *i;
 
     // either of which can have a param_template
     if (paramspec->opCode==TOKPARAMTEMPLATE){
-      opNode::Iterator psi = paramspec->begin();
-      templ = (opNode*)*psi;
-      paramspec = (opNode*)*(++psi);
+      SyntaxNode::Iterator psi = paramspec->begin();
+      templ = (SyntaxNode*)*psi;
+      paramspec = (SyntaxNode*)*(++psi);
     }
 
     // now this can be either a "value list" or a "value table list"
@@ -186,7 +186,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc):
         int pos_in_array = 0;
         for(int k=0;k<nobj;k++){
           pos_in_array*= indices[k]->size();
-          opNode *onid = (opNode *)(paramspec->values[pos_in_paramspec+k]);
+          SyntaxNode *onid = (SyntaxNode *)(paramspec->values[pos_in_paramspec+k]);
           char *obj = onid->getValue();
           // FIXME: if we want to allow multidimensional indexing sets we
           //        need to gather indices[k]->dim entries together and 
@@ -194,7 +194,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, opNode *desc):
           //        findPos
           pos_in_array += indices[k]->findPos(SetElement(1,&obj));
         }          
-        opNode *on = (opNode *)paramspec->values[pos_in_paramspec+nobj];
+        SyntaxNode *on = (SyntaxNode *)paramspec->values[pos_in_paramspec+nobj];
         assert(on->opCode==ID||on->opCode==-99);
         if (is_symbolic){
           if (on->opCode==ID){
@@ -249,17 +249,17 @@ CompDescrParam::printToString()
 /* ---------------------------------------------------------------------------
 CompDescrParam::processValueTableList
 ---------------------------------------------------------------------------- */
-/** processes a part of a opNode-tree representing a value_table_list 
- *  @param node  The opNode of type TOKVALUETABLELIST that describes the
+/** processes a part of a SyntaxNode-tree representing a value_table_list 
+ *  @param node  The SyntaxNode of type TOKVALUETABLELIST that describes the
  *               values
  *  @param ix    The indexing expression of the ModelComp that represents the
  *               parameter (to get ix->sets_mc).
  */
 void
-CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
+CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
   // this is a value_table_list
   
-  /* An opNode of type TOKVALUETABLELIST can have the following structure:
+  /* An SyntaxNode of type TOKVALUETABLELIST can have the following structure:
      - TOKVALUETABLELIST has ->nval children of type TOKVALUETABLE
      - TOKVALUETABLE has 2 children:
        + col_label_list
@@ -301,15 +301,15 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
   
 
   // loop through all value_table's
-  for(opNode::Iterator i=node->begin(); i!=node->end(); ++i){
-    opNode *on_valtab = (opNode*)*i;
+  for(SyntaxNode::Iterator i=node->begin(); i!=node->end(); ++i){
+    SyntaxNode *on_valtab = (SyntaxNode*)*i;
     assert(on_valtab->opCode==TOKVALUETABLE);
     
     // get the dimensions of the value_table_list
     assert(on_valtab->nchild()==2);
-    opNode::Iterator ovti = on_valtab->begin();
-    opNode *on_collabel = (opNode*)*ovti;
-    opNode *on_values = (opNode*)*(++ovti);
+    SyntaxNode::Iterator ovti = on_valtab->begin();
+    SyntaxNode *on_collabel = (SyntaxNode*)*ovti;
+    SyntaxNode *on_values = (SyntaxNode*)*(++ovti);
     
     int ncol = on_collabel->nchild();
     int nval = on_values->nchild();
@@ -327,8 +327,8 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
     // process the col_label list first
     
     int jj=0;
-    for(opNode::Iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
-      opNode *cl = (opNode*)*j;
+    for(SyntaxNode::Iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
+      SyntaxNode *cl = (SyntaxNode*)*j;
       assert(cl->opCode==ID || cl->opCode==LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label
@@ -360,7 +360,7 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
     // also do the same loop for row_labels
     for(int j=0;j<nrow;j++){
       int pos = j*(ncol+1); // get position of next row label
-      opNode *rl = (opNode*)on_values->values[pos];
+      SyntaxNode *rl = (SyntaxNode*)on_values->values[pos];
       assert(rl->opCode==ID || rl->opCode==LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label
@@ -378,7 +378,7 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
             ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'" << endl;
           exit(1);
         }
-        rl = (opNode*)rl->values[0];
+        rl = (SyntaxNode*)rl->values[0];
         assert(rl->opCode==COMMA);
         rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (IDNode**)rl->values));
       }else{
@@ -392,7 +392,7 @@ CompDescrParam::processValueTableList(opNode *node, opNodeIx *ix){
       for (int k=0;k<nrow;k++){
         int poslist = (j+1)+k*(ncol+1);
         int posparam = colpos[j]+rowpos[k]*indices[ixcolset]->size();
-        opNode *entry = (opNode*)on_values->values[poslist];
+        SyntaxNode *entry = (SyntaxNode*)on_values->values[poslist];
         if (is_symbolic){
           assert(entry->opCode==ID);
           symvalues[posparam] = string(((IDNode *)entry)->name);

@@ -105,14 +105,14 @@ void
 AmplModel::writeTaggedComponents(ostream &fout)
 {
   
-  opNode::default_model = this;
-  opNodeIx *ix = node->indexing;
+  SyntaxNode::default_model = this;
+  SyntaxNodeIx *ix = node->indexing;
 
   list <add_index*>*li = new list<add_index*>;
   if (ix){
 
     if (!ix->done_split) {
-      cerr << "All opNodeIx should have the expression split done!\n";
+      cerr << "All SyntaxNodeIx should have the expression split done!\n";
       exit(1);
     }
     
@@ -271,7 +271,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
         // if a simple expression (no '(') just put it to the end of 
         // globname quoted
         // otherwise, need to break this down into tokens
-        // this is conceptually the same as done in breaking down the opNodeIx
+        // this is conceptually the same as done in breaking down the SyntaxNodeIx
         // indexing nodes for the blocks. However this time it is actual
         // instances of the dummyVariables rather than the dummy variables 
         // themselves. The expressions come from AMPL output so they have not
@@ -608,17 +608,17 @@ void
 AmplModel::addDummyObjective()
 {
   ModelComp *newobj;
-  vector<opNode*> list_on_sum;
-  opNode *attr;
+  vector<SyntaxNode*> list_on_sum;
+  SyntaxNode *attr;
   ModelComp *comp;
   int i;
 
   // get list of all variable declarations in the model:
   /* build up list_on_sum which is a list of all variable definitions in this
      model:
-      - for variables without indexing expression a opNodeIDREF pointing
+      - for variables without indexing expression a SyntaxNodeIDREF pointing
         to this ModelComp is added
-      - for variables with indexing expression an opNode tree that encodes
+      - for variables with indexing expression an SyntaxNode tree that encodes
           sum {dumN in SET} var[dumN]
         is added
   */
@@ -628,20 +628,20 @@ AmplModel::addDummyObjective()
     if (comp->type==TVAR){
       // if there is no indexing expression, simply add this
       if (comp->indexing){
-        opNodeIx *ix = comp->indexing;
+        SyntaxNodeIx *ix = comp->indexing;
         // Need to create "sum{dummy in set} var[dummy]":
         // 1) create "dummy in set"
-        vector<opNode*> commaseplist;
-        opNode *commasepon;
+        vector<SyntaxNode*> commaseplist;
+        SyntaxNode *commasepon;
         for(i=0;i<ix->ncomp;i++){
           if (ix->dummyVarExpr[i]){
-            opNode *newon = new opNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
+            SyntaxNode *newon = new SyntaxNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
             commaseplist.push_back(newon);
           }else{
             // need to make up a dummy variable
             ostringstream ost;
             ost << "dum" << i;
-            opNode *newon = new opNode(IN, new IDNode(ost.str()), ix->sets[i]);
+            SyntaxNode *newon = new SyntaxNode(IN, new IDNode(ost.str()), ix->sets[i]);
             commaseplist.push_back(newon);
           }
         } // end for
@@ -649,37 +649,37 @@ AmplModel::addDummyObjective()
         if (ix->ncomp==1){
           commasepon = commaseplist[0];
         }else{
-          commasepon = new opNode(COMMA);
+          commasepon = new SyntaxNode(COMMA);
           for(i=0;i<ix->ncomp;i++){
             commasepon->push_back(commaseplist[i]);
           }
         }
-        opNodeIDREF *onref = new opNodeIDREF(comp);
+        SyntaxNodeIDREF *onref = new SyntaxNodeIDREF(comp);
         for(i=0;i<ix->ncomp;i++){
           // this is the dummy variable of the i-th indexing expression
-          opNode *ondum = (opNode*)*(commaseplist[i]->begin());
-          if (ondum->opCode==LBRACKET) ondum=(opNode*)*(ondum->begin());
+          SyntaxNode *ondum = (SyntaxNode*)*(commaseplist[i]->begin());
+          if (ondum->opCode==LBRACKET) ondum=(SyntaxNode*)*(ondum->begin());
           onref->push_back(ondum);
         }
         // make the sum part
-        commasepon = new opNode(LBRACE, commasepon);
-        list_on_sum.push_back(new opNode(SUM, commasepon, onref));
+        commasepon = new SyntaxNode(LBRACE, commasepon);
+        list_on_sum.push_back(new SyntaxNode(SUM, commasepon, onref));
 
       }else{ // no indexing expression, simply add this node
-        list_on_sum.push_back(new opNodeIDREF(comp));
+        list_on_sum.push_back(new SyntaxNodeIDREF(comp));
       } // end if (indexing)
     }
   }
 
-  // we have now build a list of opNodes representing the components:
-  // build the attribute opNode as a sum of them all
+  // we have now build a list of SyntaxNodes representing the components:
+  // build the attribute SyntaxNode as a sum of them all
   if (list_on_sum.size()>0){
     if (list_on_sum.size()==1){
       attr = list_on_sum[0];
     }else{
-      attr = new opNode('+', list_on_sum[0],list_on_sum[1]);
+      attr = new SyntaxNode('+', list_on_sum[0],list_on_sum[1]);
       for(i=2;i<(int) list_on_sum.size();i++){
-        attr = new opNode('+', attr, list_on_sum[i]);
+        attr = new SyntaxNode('+', attr, list_on_sum[i]);
       }
     }
     

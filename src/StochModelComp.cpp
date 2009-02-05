@@ -9,7 +9,7 @@ StochModelComp::StochModelComp():
 {}
 
 StochModelComp::StochModelComp(char *id, compType type, 
-                               opNode *indexing, opNode *attrib):
+                               SyntaxNode *indexing, SyntaxNode *attrib):
   ModelComp(id, type, indexing, attrib)
 {}
 
@@ -34,9 +34,9 @@ StochModelComp::transcribeToModelComp()
  *         be resolved to
  *  @param[in] level The level of this AmplModel within the StochModel
                      (root is 0).
- *  @remarks the gloabl variables opNode::stage and opNode::node are used to 
+ *  @remarks the gloabl variables SyntaxNode::stage and SyntaxNode::node are used to 
  *           replace all NODE and STAGE nodes in the attribute list
- *  @pre opNode::stage and opNode::node need to be set.
+ *  @pre SyntaxNode::stage and SyntaxNode::node need to be set.
  */
 
 ModelComp *
@@ -51,13 +51,13 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
             indicates the IDREF should be resolved with respect to AmplModel 
             nodes higher up in the tree
      (3)  find all STAGE and NODE nodes in the attribute section
-     (3a) replace them with the values in opNode::stage and opNode::node
+     (3a) replace them with the values in SyntaxNode::stage and SyntaxNode::node
      (4)  find all EXP nodes in tbe attribute section
      (4a) replace them by path probabilities
      //(4)  if this is an OBJ component, then add probablilities to it
   */
   ModelComp *newmc;
-  list<opNode*> *idrefnodes = new list<opNode*>;
+  list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
   StochModel *thissm = this->stochmodel;
   if (thissm==NULL){
     printf("SMC.transcribeToModelComp: this->stochmodel not set\n");
@@ -80,19 +80,19 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
   // ---------- (2a) resolve IDREF nodes w.r.t AmplModel tree ----------------
 
   // loop through all IDREFs that are in dependency list
-  for(list<opNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
+  for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
   {
     // check if this is a reference within the current StochModel
-    // (*p) is an opNodeIDREF
-    opNodeIDREF *onr = dynamic_cast<opNodeIDREF*>(*p);
+    // (*p) is an SyntaxNodeIDREF
+    SyntaxNodeIDREF *onr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     if (onr==NULL){
-      cerr << "opNode should be opNodeIDREF but dynamic cast fails" << endl;
+      cerr << "SyntaxNode should be SyntaxNodeIDREF but dynamic cast fails" << endl;
       exit(1);
     }
     ModelComp *mc = onr->ref;
     if (mc->model==thissm){
       // ok, component refered to belongs to StochModel
-      // => change change the ->ref of this opNodeIDREF to point to
+      // => change change the ->ref of this SyntaxNodeIDREF to point to
       //    a model comp in the ModelComp model
 
       // set the correct model w.r.t which this should be resolved
@@ -139,14 +139,14 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
   // ---------- (3a) and replace them by text -------------------------------
 
-  for(list<opNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
+  for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
   {
     (*p)->nval = 1;
-    (*p)->values = (opNode**)calloc(1, sizeof(opNode*));
+    (*p)->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
     if ((*p)->opCode==STAGE){
-      (*p)->values[0] = new IDNode(opNode::stage);
+      (*p)->values[0] = new IDNode(SyntaxNode::stage);
     }else{
-      (*p)->values[0] = new IDNode(opNode::node);
+      (*p)->values[0] = new IDNode(SyntaxNode::node);
     }
     (*p)->opCode = -100; // Was originally ID, but don't play well with others.
   }
@@ -196,9 +196,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
   
   AmplModel *thisam = current_model;
 
-  for(list<opNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
+  for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
   {
-    // use "(*p)->..." to access the EXP-opNode
+    // use "(*p)->..." to access the EXP-SyntaxNode
     /* need to build a tree of OpNodes that represent
          CP[ix0]*CP[ix1]*
        for this we need to know
@@ -211,35 +211,35 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
     // (*p) is the EXPECTATION node, it should have one child
 
-    opNode *child = (opNode*)*((*p)->begin());
+    SyntaxNode *child = (SyntaxNode*)*((*p)->begin());
 
     if (child->opCode!=COMMA||child->nchild()==1){
       // this is the "one argument" use if Exp within an objective function
       if (type==TMIN || type==TMAX){
         // set "up" to the argument of Exp(...)
         // FIXME: need to put brackets around this?
-        opNode *up = (opNode*)*((*p)->begin());
+        SyntaxNode *up = (SyntaxNode*)*((*p)->begin());
         for (int i=level;i>0;i--){
           
           // find the dummy variable expression
-          opNodeIx *cnix = thisam->node->indexing;
-          list<opNode *> dv = cnix->getListDummyVars();
+          SyntaxNodeIx *cnix = thisam->node->indexing;
+          list<SyntaxNode *> dv = cnix->getListDummyVars();
           //dv->front() is a string giving name of dummy var
           thisam = thisam->parent;
         
-          // thissm->prob is an ID opNode giving path probabilities
+          // thissm->prob is an ID SyntaxNode giving path probabilities
           
           // create the *CP[ix0] term
-          opNodeIDREF *opn_prob = dynamic_cast<opNodeIDREF*>(thissm->prob);
+          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
           if (opn_prob==NULL){
             printf("Probabilities parameter in sblock nust be given as IDREF\n");
             exit(1);
           }
-          opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
+          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref);
           oncp->nval = 1;
-          oncp->values = (opNode**)calloc(1, sizeof(opNode*));
+          oncp->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
           oncp->values[0] = new IDNode((dv.front())->print());
-          opNode *onmult = new opNode('*', oncp, up);
+          SyntaxNode *onmult = new SyntaxNode('*', oncp, up);
           up = onmult;
         }
         // up/onmult is now a pointer into the expression, this should
@@ -259,32 +259,32 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
         //            CP[ix0]*CP[ix1]*(sum{i in ASSETS}xh[ix0, ix1, i])
         // set "up" to the argument of Exp(...)
         // FIXME: need to put brackets around this?
-        list<opNode*> listofsum; // expressions in the sum{..}
+        list<SyntaxNode*> listofsum; // expressions in the sum{..}
 
 
-        opNode *up = (opNode*)*((*p)->begin());
+        SyntaxNode *up = (SyntaxNode*)*((*p)->begin());
         // put brackets around this
-        up = new opNode(LBRACKET, up);
+        up = new SyntaxNode(LBRACKET, up);
         for (int i=level;i>0;i--){
           
           // find the dummy variable expression
-          opNodeIx *cnix = thisam->node->indexing;
-          list<opNode *> dv = cnix->getListDummyVars();
+          SyntaxNodeIx *cnix = thisam->node->indexing;
+          list<SyntaxNode *> dv = cnix->getListDummyVars();
           //dv->front() is a string giving name of dummy var
         
-          // thissm->prob is an ID opNode giving path probabilities
+          // thissm->prob is an ID SyntaxNode giving path probabilities
           
           // create the *CP[ix0] term
-          opNodeIDREF *opn_prob = dynamic_cast<opNodeIDREF*>(thissm->prob);
+          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
           if (opn_prob==NULL){
             printf("Probabilities parameter in sblock nust be given as IDREF\n");
             exit(1);
           }
-          opNodeIDREF *oncp = new opNodeIDREF(opn_prob->ref);
+          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref);
           oncp->nval = 1;
-          oncp->values = (opNode**)calloc(1, sizeof(opNode*));
+          oncp->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
           oncp->values[0] = new IDNode(dv.front()->print());
-          opNode *onmult = new opNode('*', oncp, up);
+          SyntaxNode *onmult = new SyntaxNode('*', oncp, up);
           up = onmult;
 
           // put together the sum expression 
@@ -292,8 +292,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           //    used for this model)
 
           // cnix might contain a '{' => strip it if present
-          opNode *cnixon = cnix;
-          if (cnixon->opCode==LBRACE) cnixon = (opNode*)*(cnixon->begin());
+          SyntaxNode *cnixon = cnix;
+          if (cnixon->opCode==LBRACE) cnixon = (SyntaxNode*)*(cnixon->begin());
           listofsum.push_front(cnixon->deep_copy());
           
           thisam = thisam->parent;
@@ -306,17 +306,17 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           printf("Expectation indexing expression *must* be present\n");
           exit(1);
         }
-        opNode *cslon = new opNode(COMMA);
-        for(list<opNode*>::iterator q = listofsum.begin();q!=listofsum.end();
+        SyntaxNode *cslon = new SyntaxNode(COMMA);
+        for(list<SyntaxNode*>::iterator q = listofsum.begin();q!=listofsum.end();
             q++){
           cslon->push_back(*q);
         }
         // and put braces around it
-        cslon = new opNode(LBRACE, cslon);
+        cslon = new SyntaxNode(LBRACE, cslon);
         
         // now build the sum
         //printf("This is the sum: %s\n",cslon->print());
-        cslon = new opNode(SUM, cslon, up);
+        cslon = new SyntaxNode(SUM, cslon, up);
         //printf("This is the sum: %s\n",cslon->print());
 
         (*p)->values[0] = cslon;
