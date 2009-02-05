@@ -334,48 +334,16 @@ class ListNode: public SyntaxNode {
    ostream& put(ostream&s) const;
    ListNode *deep_copy();
    ListNode *clone();
-   SyntaxNode *push_front(SyntaxNode *node) { list.push_front(node); return this; }
-   SyntaxNode *push_back(SyntaxNode *node) { list.push_back(node); return this; }
+   SyntaxNode *push_front(SyntaxNode *node) { 
+      list.push_front(node); return this; 
+   }
+   SyntaxNode *push_back(SyntaxNode *node) { 
+      list.push_back(node); return this; 
+   }
    int nchild() { return list.size(); }
 };
 
-// typedef struct {
-//   int relCode;
-//   SyntaxNode *lval;
-//   SyntaxNode *rval;
-//} relNode;
-
-//typedef struct {
-// SyntaxNode *node;
-//  SyntaxNode *indexing;
-//  struct AmplModel_st *context;
-//} retType;
-
-
-/** \brief Linked list of SyntaxNode.
-
-    This is a list of arguments. A comma separated list of arguments is
-    represented by an SyntaxNode with 
-     - opCode=COMMA, 
-     - nval=\#items on list
-     - values[0]=first item on list (of type _indexNode)
-     - values[1]=last item on list (of type _indexNode)
-*/
-typedef struct _indexNode {
-  SyntaxNode *value;          //!< item on the linked list
-  struct _indexNode *next; //!< next item on the linked list
-} indexNode;
-
-//SyntaxNodeID *newUnaryOpID(void *val);
-//relNode *newRel(int opCode, SyntaxNode *lval, SyntaxNode *rval);
-//void freeOpNode(SyntaxNode *target);
-//indexNode *newIndexNode(SyntaxNode *node);
-//SyntaxNode *addItemToList(SyntaxNode *list, SyntaxNode *newitem);
-//SyntaxNode *addItemToListNew(SyntaxNode *list, SyntaxNode *newitem);
 SyntaxNode *addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem);
-//SyntaxNode *addItemToListBeg(SyntaxNode *newitem, SyntaxNode *list);
-//retType *newRetType(SyntaxNode *node, SyntaxNode *indexing, 
-//		    struct AmplModel_st *context);
 char *print_SyntaxNodesymb(SyntaxNode *node);
 
 ostream& operator<<(ostream& s, const SyntaxNode &node);
