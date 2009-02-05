@@ -107,7 +107,7 @@ class opNode {
 
   opNode &merge(const opNode &src);
 
-  int nchild() const { return nval; }
+  virtual int nchild() const { return nval; }
 
   class Iterator {
      private:
@@ -328,7 +328,7 @@ class ListNode: public opNode {
    list<opNode *> list;
 
   public:
-   ListNode();
+   ListNode(opNode *val1=NULL, opNode *val2=NULL);
    iterator begin() { return list.begin(); }
    iterator end() { return list.end(); }
    ostream& put(ostream&s) const;
@@ -336,6 +336,7 @@ class ListNode: public opNode {
    ListNode *clone();
    opNode *push_front(opNode *node) { list.push_front(node); return this; }
    opNode *push_back(opNode *node) { list.push_back(node); return this; }
+   int nchild() { return list.size(); }
 };
 
 // typedef struct {

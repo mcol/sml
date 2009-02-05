@@ -1007,7 +1007,7 @@ void opNodeIx::splitExpression()
     exit(1);
   }
   
-  tmp = (opNode*)this->values[0];
+  tmp = this->values[0];
   // discard the colon (if there is one present: only interested in lhs) 
   if (tmp->opCode==COLON) {
     qualifier = tmp->values[1];
@@ -1235,8 +1235,12 @@ ListNode *ListNode::clone() {
    return copy;
 }
 
-ListNode::ListNode() :
-   opNode(COMMA) {}
+ListNode::ListNode(opNode *val1, opNode *val2) :
+   opNode(COMMA, val1, val2) 
+{
+   if(val1) push_back(val1);
+   if(val2) push_back(val2);
+}
 
 
 /* ----------------------------------------------------------------------------
