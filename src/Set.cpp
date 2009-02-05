@@ -62,7 +62,6 @@ Set::Set(SyntaxNode *list):
     if (dim==1) {
       char** array = (char**)calloc(1, sizeof(char*));
       //string *array = (string*)calloc(1, sizeof(string));
-      assert(item->opCode==ID || item->opCode==-99);
       array[0] = item->getValue();
       //this->elements.push_back(array);
       add(SetElement(1,array));

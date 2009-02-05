@@ -206,7 +206,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
             symvalues[pos_in_array] = to_string(on->values[0]);
           }            
         }else{ // not symbolic => numeric
-          values[pos_in_array] = on->getFloatVal();
+          values[pos_in_array] = ((ValueNodeBase*)on)->getFloatVal();
         }
         nread++;
       }// end loop over j
@@ -397,7 +397,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
           assert(entry->opCode==ID);
           symvalues[posparam] = string(((IDNode *)entry)->name);
         }else{
-          values[posparam] = entry->getFloatVal();
+          values[posparam] = ((ValueNodeBase *) entry)->getFloatVal();
         }
         nread++;
       }

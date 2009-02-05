@@ -77,7 +77,7 @@ class SyntaxNode {
 
   /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
       the value of this node as a c_string */
-  virtual char *getValue();  //!< Returns value of ID, INT_VAL and FLOAT_VAL node
+  virtual char *getValue() const { throw exception(); return strdup("(fail)"); }
 
   void dump(ostream &fout); //!< diagnostic printing
 
@@ -103,9 +103,6 @@ class SyntaxNode {
    *  a ModelComp then return that. Otherwise return NULL
    */
   ModelComp *findModelComp();
-  
-  //! returns the 'double' represented by this node (if of type INT/FLOAT_VAL)
-  virtual double getFloatVal();
 
   SyntaxNode &merge(const SyntaxNode &src);
 
@@ -210,14 +207,18 @@ class SyntaxNodeIx : public SyntaxNode {
   void printDiagnostic(ostream &fout);   //!< diagnostic print of class variables
 };
 
+class ValueNodeBase {
+  public:
+   virtual double getFloatVal() const { throw exception(); return 0.0; }
+};
+
 
 /* ----------------------------------------------------------------------------
 IDNode
 ---------------------------------------------------------------------------- */
 /** \brief A node on the tree representing a user identifier [ie variable name]
  */
-
-class IDNode : public SyntaxNode {
+class IDNode : public SyntaxNode, virtual ValueNodeBase {
   public:
    const string name;
    long stochparent;
@@ -225,8 +226,7 @@ class IDNode : public SyntaxNode {
   public:
    IDNode(const char *const new_name, long stochparent=0);
    IDNode(const string name, long stochparent=0);
-   double getFloatVal() { return atof(name.c_str()); }
-   char *getValue() { return strdup(name.c_str()); }
+   char *getValue() const { return strdup(name.c_str()); }
    void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for ID:
@@ -279,15 +279,15 @@ class SyntaxNodeIDREF : public SyntaxNode {
 /** @class ValueNode
  * represents a value.
  */
-template<class T> class ValueNode : public SyntaxNode {
+template<class T> class ValueNode : public SyntaxNode, virtual ValueNodeBase {
   public:
    const T value;
 
   public:
    ValueNode(const T new_value) :
       SyntaxNode(-99), value(new_value) {}
-   double getFloatVal() { return value; }
-   char *getValue();
+   double getFloatVal() const { return value; }
+   char *getValue() const ;
    void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for INT_VAL or FLOAT_VAL:
@@ -296,7 +296,7 @@ template<class T> class ValueNode : public SyntaxNode {
    SyntaxNode *deep_copy() { return new ValueNode<T>(value); }
    SyntaxNode *clone() { return deep_copy(); }
 };
-template<class T> char *ValueNode<T>::getValue() {
+template<class T> char *ValueNode<T>::getValue() const {
    ostringstream ost;
    ost << value;
    return strdup(ost.str().c_str());

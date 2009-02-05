@@ -500,42 +500,6 @@ SyntaxNode::clone()
 }
 
 /* --------------------------------------------------------------------------
-char *SyntaxNode::getFloatVal()
----------------------------------------------------------------------------- */
-/* Returns the double value represented by this SyntaxNode
-   Assumes that the current SyntaxNode is either INT_VAL or FLOAT_VAL */
-
-double 
-SyntaxNode::getFloatVal()
-{
-  if (opCode!=ID){
-    cerr << "Attempting to call getFloatVal for an SyntaxNode not of type"
-       "INT_VAL/FLOAT_VAL/ID\n";
-    exit(1);
-  }
-  cerr << "Badness IDNode::getFloatVal?" << endl;
-  throw exception();
-  return atof((char*)values[0]);
-}
-
-/* --------------------------------------------------------------------------
-SyntaxNode *SyntaxNode::getValue()
----------------------------------------------------------------------------- */
-/* Returns the value of the SyntaxNode as a c_string
-   Assumes that the SyntaxNode in question is ID, INT_VAL, FLOAT_VAL */
-char *
-SyntaxNode::getValue()
-{
-  cerr << "Attempting to call getValue on something funny." << endl;
-  throw exception();
-  if (opCode!=ID){
-    cerr << "Attempting to call getValue for an SyntaxNode not of type ID/INT_VAL/FLOAT_VAL\n";
-    exit(1);
-  }
-  return (char*)values[0];
-}
-
-/* --------------------------------------------------------------------------
 char *SyntaxNode::printDummyVar()
 ---------------------------------------------------------------------------- */
 /* Assumes that the current SyntaxNode is the dummy variable in an indexing 
@@ -1123,12 +1087,10 @@ OpNode *OpNode::deep_copy() {
    for(int i=0; i<nval; ++i)
       temp[i] = operand[i]->deep_copy();
 
-   cerr << "IWIN DC" << endl;
    return new OpNode(opCode, temp[0], temp[1], temp[2]);
 }
 
 OpNode *OpNode::clone() {
-   cerr << "IWIN CLONE" << endl;
    return new OpNode(opCode, operand[0], operand[1], operand[2]);
 }
 
