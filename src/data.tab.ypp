@@ -298,8 +298,8 @@ value_table: TR COLON col_label_list DEFINED value_list
            | COLON col_label_list DEFINED value_list {
                SyntaxNode *cll = $2;
                SyntaxNode *vl = $4;
-               assert(cll->opCode=' ');
-               assert(vl->opCode=' ');
+               assert(cll->opCode==' ');
+               assert(vl->opCode==' ');
                if (vl->nchild()%(cll->nchild()+1)!=0){
                  cerr << "DATA: error in line " << datalineno << ":\n";
                  cerr << "Length of value table (" << vl->nchild() << ")";
