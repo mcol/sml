@@ -17,10 +17,7 @@
  *
  */
 class Set: public CompDescr{
- public:
-  //int n; //!< number of elements in set
-  int dim; //!< A set can be mutidimensional
-
+ private:
   /** The actual elements: each element is 
    *   - string* for a one dimensional set, 
    *   - string[] for a multidimensional set 
@@ -28,21 +25,20 @@ class Set: public CompDescr{
 
    */
   map<SetElement, int, SetElement> elements; //!< The elements of the set
-
-  // ---------------- constructors -----------------
+ public:
+  int dim; //!< A set can be mutidimensional
+ private:
   Set(); //!< default constructor
 
-  Set(opNode *list_of_els); //!< construct a set from a list of elements in an opNode
-
   // ---------------- methods -----------------
-
-  /** print a list of set elements to a string */
-  int size(); //!< return size of Set
-  int findPos(SetElement);  //!<find position of element in set
   void add(SetElement);     //!< add element to set
 
   // virtal printToString inherited from CompDescr
   string printToString(); //!< print to string  
+ public:
+  Set(opNode *list_of_els); //!< construct a set from a list of elements in an opNode
+  int size(); //!< return size of Set
+  int findPos(SetElement);  //!<find position of element in set
 };
 
 #endif

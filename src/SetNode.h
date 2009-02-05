@@ -4,17 +4,16 @@
 #include <cassert>
 #include <vector>
 #include "nodes.h"
+#include "CompDescr.h"
 #include "sml.tab.h"
 
 /** @class SetNode
  * This class represents a set in the the syntax tree.
  */
-class SetNode: public opNode {
+class SetNode: public opNode, public CompDescr {
 public:
    SetNode(int opCode, opNode *node1=NULL, opNode *node2=NULL) :
-      opNode(opCode, node1, node2)
-   {
-   }
+      opNode(opCode, node1, node2) {}
 };
 
 /** @class SimpleSet
