@@ -283,12 +283,12 @@ relop:   LE {$$=LE;}
      |   NE {$$=NE;}
      ;
 
-equation: expr ASSIGN expr { $$ = new SyntaxNode(ASSIGN, $1, $3); }
-        | expr LT expr { $$ = new SyntaxNode(LT, $1, $3); }
-        | expr LE expr { $$ = new SyntaxNode(LE, $1, $3); }
-        | expr GT expr { $$ = new SyntaxNode(GT, $1, $3); }
-        | expr GE expr { $$ = new SyntaxNode(GE, $1, $3); }
-        | expr EQ expr { $$ = new SyntaxNode(EQ, $1, $3); }
+equation: expr ASSIGN expr { $$ = new OpNode(ASSIGN, $1, $3); }
+        | expr LT expr { $$ = new OpNode(LT, $1, $3); }
+        | expr LE expr { $$ = new OpNode(LE, $1, $3); }
+        | expr GT expr { $$ = new OpNode(GT, $1, $3); }
+        | expr GE expr { $$ = new OpNode(GE, $1, $3); }
+        | expr EQ expr { $$ = new OpNode(EQ, $1, $3); }
         ;
 
 cnstr:   MAXIMIZE ID indexing_opt {
@@ -494,9 +494,9 @@ paramattributes:  paramattribute {
 paramattribute:   BINARY {$$ = new SyntaxNode(BINARY);}
               |   INTEGER {$$ = new SyntaxNode(INTEGER);}
               |   SYMBOLIC {$$ = new SyntaxNode(SYMBOLIC);}
-              |   relop expr {$$ = new SyntaxNode($1, $2);}
+              |   relop expr {$$ = new OpNode($1, $2);}
               |   IN setexpression {$$ = new SyntaxNode(IN, $2);}
-              |   ASSIGN expr {$$ = new SyntaxNode(ASSIGN, $2);}
+              |   ASSIGN expr {$$ = new OpNode(ASSIGN, $2);}
               |   DEFAULT expr {$$ = new SyntaxNode(DEFAULT, $2);}
               ;
 
@@ -539,10 +539,10 @@ varattributes: varattribute {
 varattribute:  BINARY {$$ = new SyntaxNode(BINARY);}
             |  INTEGER {$$ = new SyntaxNode(INTEGER);}
             |  SYMBOLIC {$$ = new SyntaxNode(SYMBOLIC);}
-            |  LE expr {$$ = new SyntaxNode(LE, $2);}
-            |  GE expr {$$ = new SyntaxNode(GE, $2);}
+            |  LE expr {$$ = new OpNode(LE, $2);}
+            |  GE expr {$$ = new OpNode(GE, $2);}
             |  DEFINED expr {$$ = new SyntaxNode(DEFINED, $2);}
-            |  ASSIGN expr {$$ = new SyntaxNode(ASSIGN, $2);}
+            |  ASSIGN expr {$$ = new OpNode(ASSIGN, $2);}
             |  DEFAULT expr {$$ = new SyntaxNode(DEFAULT, $2);}
          //| COEFF indexing_opt constraint expr
          //| COVER indexing_opt constraint expr
@@ -714,11 +714,11 @@ expr_list:  expr {
 
 expr: value
     | LBRACKET expr_list RBRACKET { $$ = new SyntaxNode(LBRACKET, $2); }
-    | expr '+' expr { $$ = new SyntaxNode('+', $1, $3); }
-    | expr '-' expr { $$ = new SyntaxNode('-', $1, $3); }
-    | '-' expr { $$ = new SyntaxNode('-', $2); }
-    | expr '*' expr { $$ = new SyntaxNode('*', $1, $3); }
-    | expr '/' expr { $$ = new SyntaxNode('/', $1, $3); }
+    | expr '+' expr { $$ = new OpNode('+', $1, $3); }
+    | expr '-' expr { $$ = new OpNode('-', $1, $3); }
+    | '-' expr { $$ = new OpNode('-', $2); }
+    | expr '*' expr { $$ = new OpNode('*', $1, $3); }
+    | expr '/' expr { $$ = new OpNode('/', $1, $3); }
     | expr POWER expr { $$ = new SyntaxNode(POWER, $1, $3); }
     | expr ELLIPSE expr { $$ = new SyntaxNode(ELLIPSE, $1, $3); }
     | expr LOGICAL_OR expr { $$ = new SyntaxNode(LOGICAL_OR, $1, $3); }

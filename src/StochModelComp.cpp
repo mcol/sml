@@ -239,7 +239,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           oncp->nval = 1;
           oncp->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
           oncp->values[0] = new IDNode((dv.front())->print());
-          SyntaxNode *onmult = new SyntaxNode('*', oncp, up);
+          SyntaxNode *onmult = new OpNode('*', oncp, up);
           up = onmult;
         }
         // up/onmult is now a pointer into the expression, this should
@@ -284,7 +284,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           oncp->nval = 1;
           oncp->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
           oncp->values[0] = new IDNode(dv.front()->print());
-          SyntaxNode *onmult = new SyntaxNode('*', oncp, up);
+          SyntaxNode *onmult = new OpNode('*', oncp, up);
           up = onmult;
 
           // put together the sum expression 

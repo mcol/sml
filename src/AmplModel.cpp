@@ -677,9 +677,9 @@ AmplModel::addDummyObjective()
     if (list_on_sum.size()==1){
       attr = list_on_sum[0];
     }else{
-      attr = new SyntaxNode('+', list_on_sum[0],list_on_sum[1]);
+      attr = new OpNode('+', list_on_sum[0], list_on_sum[1]);
       for(i=2;i<(int) list_on_sum.size();i++){
-        attr = new SyntaxNode('+', attr, list_on_sum[i]);
+        attr = new OpNode('+', attr, list_on_sum[i]);
       }
     }
     

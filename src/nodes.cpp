@@ -19,72 +19,6 @@ AmplModel *SyntaxNode::default_model =NULL;
 string SyntaxNode::node = "";
 string SyntaxNode::stage = "";
 
-/* ==========================================================================
- SyntaxNode
-=========================================================================== */
-/* this defines an object SyntaxNode :
-   SyntaxNode is a node in an expression tree. 
-   
-   FIXME: 
-   Should the SyntaxNode structure carry a flag that indicates what meaning is 
-   has within the grammar?
-   That way we could have routines like "isIndexing", "isSimpleSet" that
-   may be helpful for error detection
-
-*/
-
-//SyntaxNodeID *new SyntaxNodeID(void *val) {
-//   SyntaxNodeID *newOp;
-//   
-//   printf("creating unary opID:\n");
-//   newOp = new SyntaxNodeID();
-//   newOp->opCode = ID;
-//   newOp->values = (void **) malloc(1*sizeof(void *));
-//   newOp->values[0] = (void *) val;
-//   newOp->nval = 1;
-//
-//   return newOp;
-//}
-
-/*relNode *newRel(int relCode, SyntaxNode *lval, SyntaxNode *rval) {
-   relNode *newRel;
-
-   newRel = (relNode *) malloc(sizeof(relNode));
-   newRel->relCode = relCode;
-   newRel->lval = lval;
-   newRel->rval = rval;
-
-   return newRel;
-   }*/
-
-/*void freeOpNode(SyntaxNode *target) {
-   if(target == NULL) {
-      fprintf(stderr, "Attepted to free a NULL SyntaxNode\n");
-      return;
-   }
-
-   switch(target->opCode) {
-      case POWER:
-      case ELLIPSE:
-      case LOGICAL_OR:
-      case LOGICAL_AND:
-      case '+':
-      case '-':
-      case '*':
-      case '/':
-	freeOpNode((SyntaxNode*)target->values[1]);
-      case '!':
-	freeOpNode((SyntaxNode*)target->values[0]);
-         break;
-      default:
-         fprintf(stderr, "Unknown opCode %i. Possible Memory leak.\n", 
-               target->opCode);
-         target->values = NULL;
-   }
-   if(target->values != NULL) free(target->values);
-   free(target);
-}*/
-
 /* --------------------------------------------------------------------------
 addItemToListNew
 -------------------------------------------------------------------------- */
@@ -147,59 +81,6 @@ addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem)
   }
 }
 
-
-#if 0
-/* --------------------------------------------------------------------------
-addItemToList
--------------------------------------------------------------------------- */
-/* a list of values is given by an SyntaxNode with 
-    ->opCode one of {COMMA, }
-    ->nval   #of items on the list
-   the items on the list are given as a linked list of indexNode items
-    ->values[0]   first item on list
-    ->values[1]   last item on list
- 
-  'addItemToList' wraps newitem up in an indexNode object and adds that
-  to the list represented by list
- */
-
-
-SyntaxNode *
-addItemToList(SyntaxNode *list, SyntaxNode *newitem)
-{
-  indexNode *last = (indexNode *)list->values[1];
-  indexNode *newnode = newIndexNode(newitem);
-  int i;
-  indexNode *tmp;
-
-  printf("Add to list: \n");
-  printf("Current list: opCode= %d, nval = %d\n",list->opCode, list->nval);
-  tmp = (indexNode *)(list->values[0]);
-  for(i=0;i<list->nval;i++){
-    char *tmpbuf = print_SyntaxNodesymb(tmp->value);
-    printf("> %s\n", tmpbuf);
-    free(tmpbuf);
-    tmp = tmp->next;
-  }
-
-  list->nval++;
-  last->next = newnode;
-  list->values[1]=newnode;
-
-  //printf("In addItemToList: %s\n",print_SyntaxNodesymb(list));
-  return list;
-}
-#endif
-
-//retType *
-//newRetType(SyntaxNode *node, SyntaxNode *indexing, AmplModel *context)
-//{
-// retType *ret = (retType*)calloc(1, sizeof(retType));
-//  
-//  ret->node = node;
-//  ret->indexing = indexing;
-//  ret->context = context;
-//}
 
 /* --------------------------------------------------------------------------
 SyntaxNode::print()
@@ -272,26 +153,6 @@ ostream& SyntaxNode::put(ostream&s) const {
       s << **i << " in ";
       s << **(++i);
       break;
-    case GE:
-      if(this->nval>1) s << **(i++);
-      s << ">=" <<  **i;
-      break;
-    case GT:
-      if(this->nval>1) s << **(i++);
-      s << ">" <<  **i;
-      break;
-    case LE:
-      if(this->nval>1) s << **(i++);
-      s << "<=" <<  **i;
-      break;
-    case LT:
-      if(this->nval>1) s << **(i++);
-      s << "<" <<  **i;
-      break;
-    case EQ:
-      if(this->nval>1) s << **(i++);
-      s << "==" <<  **i;
-      break;
     case DIFF:
       if(this->nval>1) s << **(i++);
       s << " diff " <<  **i;
@@ -303,22 +164,6 @@ ostream& SyntaxNode::put(ostream&s) const {
     case DOTDOT:
       if(this->nval>1) s << **(i++);
       s << " .. " <<  **i;
-      break;
-    case '+':
-      s << **i;
-      s << "+" << **(++i);
-      break;
-    case '-':
-      if(this->nval>1) s << **(i++);
-      s << "-" <<  **i;
-      break;
-    case '*':
-      s << **i << "*";
-      s << **(++i);
-      break;
-    case '/':
-      s << **i << "/";
-      s << **(++i);
       break;
     case SUM:
       s << "sum " << **i;
@@ -367,14 +212,6 @@ ostream& SyntaxNode::put(ostream&s) const {
     case LBRACKET:
       s << "(" << **i << ")";
       break;
-    case ASSIGN:
-      if (this->nval==1){
-         s << "=" << **i;
-      }else{
-         s << *(SyntaxNode*)*i;
-         s << "=" << **(++i);
-      }
-      break;
     case DEFINED:
       if(this->nval!=1) {
          cerr << "':=' used as binary operator?\n";
@@ -414,6 +251,38 @@ ostream& SyntaxNode::put(ostream&s) const {
       exit(1);
     }
   if(s!=cout) level--;
+  return s;
+}
+
+ostream& OpNode::put(ostream &s) const {
+  int op = 0;
+  if(nval>1) s << operand[op++];
+  
+  switch(opCode) {
+    case '+':
+    case '-':
+    case '*':
+    case '/':
+       s << (char) opCode;
+       break;
+    case ASSIGN:  s << "=";   break;
+    case GE:      s << ">=";  break;
+    case GT:      s << ">";   break;
+    case LE:      s << "<=";  break;
+    case LT:      s << "<";   break;
+    case EQ:      s << "==";  break;
+    case NE:      s << "!=";  break;
+    default:
+      cerr << "Unknown opCode for OpNode: " << opCode << endl;
+      exit(1);
+  }
+
+  s << operand[op++];
+  if(nval<3) return s;
+
+  cerr << "Unknown ternary opCode for opNode" << opCode << endl;
+  exit(1);
+
   return s;
 }
 
@@ -553,12 +422,8 @@ SyntaxNode Methods to follow
 ============================================================================*/
 // constructors:
 
-SyntaxNode::SyntaxNode()
-{
-  opCode = -1;
-  nval = -1;
-  values = NULL;
-}
+SyntaxNode::SyntaxNode() :
+  opCode(-1), nval(-1), values(NULL) {}
 
 SyntaxNode::SyntaxNode(SyntaxNode &src) :
    nval(src.nval), opCode(src.opCode), values(src.values) {}
@@ -591,13 +456,12 @@ SyntaxNode *SyntaxNode::deep_copy()
 SyntaxNode *
 SyntaxNode::deep_copy()
 {
-  SyntaxNode *newn = new SyntaxNode();
+  SyntaxNode *newn = new SyntaxNode(opCode);
 
   if (opCode==IDREF || opCode==IDREFM){
     cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
-  newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0)
     newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
@@ -622,13 +486,12 @@ SyntaxNode *SyntaxNode::clone()
 SyntaxNode *
 SyntaxNode::clone()
 {
-  SyntaxNode *newn = new SyntaxNode();
+  SyntaxNode *newn = new SyntaxNode(opCode);
 
   if (opCode==IDREF){
     cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
-  newn->opCode = opCode;
   newn->nval = nval;
   newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
   for(int i=0;i<nval;i++)
@@ -1123,9 +986,8 @@ SyntaxNodeIx::deep_copy
 SyntaxNodeIx *
 SyntaxNodeIx::deep_copy()
 {
-  SyntaxNodeIx *onix = new SyntaxNodeIx();
+  SyntaxNodeIx *onix = new SyntaxNodeIx(opCode);
   
-  onix->opCode = opCode;
   onix->nval = nval;
   onix->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
   for(int i=0;i<nval;i++)
@@ -1156,15 +1018,20 @@ SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r)
 SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r) :
   SyntaxNode(IDREF), ref(r), stochparent(0) {}
 
+SyntaxNodeIDREF::SyntaxNodeIDREF(int opCode, ModelComp *r) :
+  SyntaxNode(opCode), ref(r), stochparent(0) 
+{
+   assert(opCode==IDREF||opCode==IDREFM);
+}
+
 /* --------------------------------------------------------------------------
 SyntaxNodeIDREF *SyntaxNodeIDREF::deep_copy()
 ---------------------------------------------------------------------------- */
 SyntaxNodeIDREF*
 SyntaxNodeIDREF::deep_copy()
 {
-  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF();
+  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode);
 
-  newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0){
     newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
@@ -1185,9 +1052,8 @@ SyntaxNodeIDREF *SyntaxNodeIDREF::clone()
 SyntaxNodeIDREF *
 SyntaxNodeIDREF::clone()
 {
-  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF();
+  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode);
 
-  newn->opCode = opCode;
   newn->nval = nval;
   if (nval>0){
     newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
@@ -1240,6 +1106,30 @@ ListNode::ListNode(SyntaxNode *val1, SyntaxNode *val2) :
 {
    if(val1) push_back(val1);
    if(val2) push_back(val2);
+}
+
+OpNode::OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2, SyntaxNode *op3) :
+   SyntaxNode(opCode, op1, op2, op3)
+{
+   operand[0] = op1;
+   operand[1] = op2;
+   operand[2] = op3;
+}
+
+OpNode *OpNode::deep_copy() {
+   SyntaxNode *temp[3];
+
+   for(int i=0; i<3; ++i) temp[i] = NULL;
+   for(int i=0; i<nval; ++i)
+      temp[i] = operand[i]->deep_copy();
+
+   cerr << "IWIN DC" << endl;
+   return new OpNode(opCode, temp[0], temp[1], temp[2]);
+}
+
+OpNode *OpNode::clone() {
+   cerr << "IWIN CLONE" << endl;
+   return new OpNode(opCode, operand[0], operand[1], operand[2]);
 }
 
 
@@ -1411,12 +1301,12 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
             cout << "       " << *(thismc->attributes) << "\n";
          }
 
-         ret = new SyntaxNodeIDREF();
-         ret->ref = thismc;
-         ret->opCode = IDREF;
-         if (thismc->type==TMODEL){
-            ret->opCode = IDREFM;
+         if(thismc->type==TMODEL) {
+           ret = new SyntaxNodeIDREF(IDREFM);
+         } else {
+           ret = new SyntaxNodeIDREF(IDREF);
          }
+         ret->ref = thismc;
          return ret;
       }
       //thismc = thismc->next;

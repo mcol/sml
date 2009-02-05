@@ -444,7 +444,7 @@ StochModel::expandToFlatModel()
         onai= new SyntaxNode(LSBRACKET, anc->clone(), 
                        new SyntaxNode(COMMA, new IDNode("this_nd")));
         // on2: A[this_nd]=="null"
-        on2 =  new SyntaxNode(EQ, onai, new IDNode("\"null\""));
+        on2 =  new OpNode(EQ, onai, new IDNode("\"null\""));
         // on1: :={this_nd in NODES:Parent[this_nd] == "null"};
         on1 = new SyntaxNode(DEFINED, 
                          new SyntaxNode(LBRACE, new SyntaxNode(COLON, on_iinN, on2)));
@@ -489,7 +489,7 @@ StochModel::expandToFlatModel()
         ostringstream dummy_var;
         dummy_var << "ix" << stgcnt-1;
         on3 = new IDNode(dummy_var.str());
-        on2 = new SyntaxNode(EQ, onai, on3);
+        on2 = new OpNode(EQ, onai, on3);
       }else{
         /* No, the first indexing set is not over the nodes that have "root"
            as parent (this would require the root node to be always named 

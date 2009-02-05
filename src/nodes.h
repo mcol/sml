@@ -36,12 +36,14 @@ class AmplModel;
  *       the SyntaxNode::values array with a C++ list.
  */
 class SyntaxNode {
-  friend SyntaxNode* find_var_ref_in_context(AmplModel *context, SyntaxNode *ref);
+  friend SyntaxNode* find_var_ref_in_context(AmplModel *context,
+    SyntaxNode *ref);
   friend char *print_SyntaxNodesymb(SyntaxNode *node);
  protected:
  public: 
   int nval;      //!< number of arguments 
-  int opCode;    //!< ID CODE of this node (a list can be found in ampl.tab.h 
+  int opCode;    //!< ID CODE of this node 
+                 // (a list can be found in ampl.tab.h)
   
   /** For opCode==ID, there is usually one argument, this is a (char*) to the
    *  name of the entity. If there are two arguments the second argument is
@@ -178,6 +180,9 @@ class SyntaxNode {
  * optional qualifier (the condition to the right of COLON)
  */
 class SyntaxNodeIx : public SyntaxNode {
+ private:
+  SyntaxNodeIx(const int opCode) :
+    SyntaxNode(opCode) {}
  public:
   SyntaxNode *qualifier;    //!< the stuff to the right of ':' (if present)
   int ncomp;            //!< number of 'dummy IN set'-type expressions
@@ -206,27 +211,6 @@ class SyntaxNodeIx : public SyntaxNode {
 };
 
 
-// FIXME: SyntaxNodeID was an attempt at a subclass for ID SyntaxNodes, this should
-//        directly carry information about possible ancestor settings
-//        => lead to a problem with dynamic_cast, hence abondoned
-//* ----------------------------------------------------------------------------
-//SyntaxNodeID 
-//---------------------------------------------------------------------------- */
-///** SyntaxNodeID is an SyntaxNode that represents an ID. The only reason to have
-// *  it separate is so that it can carry extra information (such as how
-// *  many levels further up it should refer to for stoch programming)
-// *  @bug: at the moment only if the "parent" information in a StochModel
-// *        is set is this generated, possibly all SyntaxNode's with code ID
-// *         should be of this type
-// */
-//
-//class SyntaxNodeID : public SyntaxNode {
-// public:
-//  int stochparent; //< levels above this one for which the reference is
-//
-//  SyntaxNodeID *clone();
-//};
-
 /* ----------------------------------------------------------------------------
 IDNode
 ---------------------------------------------------------------------------- */
@@ -244,7 +228,7 @@ class IDNode : public SyntaxNode {
    double getFloatVal() { return atof(name.c_str()); }
    char *getValue() { return strdup(name.c_str()); }
    void findIDREF(list<ModelComp*> &lmc) { return; }
-   void findIDREF(list<SyntaxNode*> &lnd) { return; }
+   void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for ID:
    void findOpCode(int oc, list<SyntaxNode*> *lnd) { return; }
    ostream& put(ostream&s) const { 
@@ -281,6 +265,7 @@ class SyntaxNodeIDREF : public SyntaxNode {
   // ---------------------------- methods -----------------------------
   // constructor
   SyntaxNodeIDREF(ModelComp *r=NULL);
+  SyntaxNodeIDREF(int opCode, ModelComp *r=NULL);
   
   //! creates a shallow copy: points to the same components as the original
   SyntaxNodeIDREF *clone();
@@ -304,7 +289,7 @@ template<class T> class ValueNode : public SyntaxNode {
    double getFloatVal() { return value; }
    char *getValue();
    void findIDREF(list<ModelComp*> &lmc) { return; }
-   void findIDREF(list<SyntaxNode*> &lnd) { return; }
+   void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for INT_VAL or FLOAT_VAL:
    void findOpCode(int oc, list<SyntaxNode*> *lnd) { return; }
    ostream& put(ostream&s) const { return s << this->value; }
@@ -341,6 +326,27 @@ class ListNode: public SyntaxNode {
       list.push_back(node); return this; 
    }
    int nchild() { return list.size(); }
+};
+
+class OpNode : public SyntaxNode {
+  public:
+   SyntaxNode *operand[3];
+
+  public:
+   OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2=NULL, 
+      SyntaxNode *op3=NULL);
+   ostream& put(ostream& s) const;
+   OpNode *deep_copy();
+   OpNode *clone();
+   void findIDREF(list<ModelComp*> &lmc) { 
+      for(int i=0; i<nval; ++i) operand[i]->findIDREF(lmc);
+   }
+   void findIDREF(list<SyntaxNode*> *lnd) { 
+      for(int i=0; i<nval; ++i) operand[i]->findIDREF(lnd);
+   }
+   void findOpCode(int oc, list<SyntaxNode*> *lnd) {
+      for(int i=0; i<nval; ++i) operand[i]->findOpCode(oc, lnd);
+   }
 };
 
 SyntaxNode *addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem);
