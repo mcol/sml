@@ -141,14 +141,11 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
   for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
   {
-    (*p)->nval = 1;
-    (*p)->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
     if ((*p)->opCode==STAGE){
-      (*p)->values[0] = new IDNode(SyntaxNode::stage);
+      ((StageNodeNode *)*p)->setValue(StageNodeNode::stage);
     }else{
-      (*p)->values[0] = new IDNode(SyntaxNode::node);
+      ((StageNodeNode *)*p)->setValue(StageNodeNode::node);
     }
-    (*p)->opCode = -100; // Was originally ID, but don't play well with others.
   }
 
   // ---------- (4) add probablilities to Exp components ---------------

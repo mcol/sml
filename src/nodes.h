@@ -39,17 +39,58 @@ class SyntaxNode {
   friend SyntaxNode* find_var_ref_in_context(AmplModel *context,
     SyntaxNode *ref);
   friend char *print_SyntaxNodesymb(SyntaxNode *node);
+ public:
+  virtual int nchild() const { return nval; }
+  class Iterator {
+     private:
+      SyntaxNode **ptr;
+
+     public:
+      Iterator(SyntaxNode **p) { ptr=p; }
+      ~Iterator() {}
+
+      Iterator& operator=(const Iterator &other) {
+         ptr = other.ptr;
+         return (*this);
+      }
+      bool operator==(const Iterator &other) {
+         return (other.ptr == ptr);
+      }
+      bool operator!=(const Iterator &other) {
+         return (other.ptr != ptr);
+      }
+      Iterator& operator++() {
+         ptr++;
+         return(*this);
+      }
+      Iterator operator++(int) {
+         Iterator tmp = *this;
+         ++(*this);
+         return tmp;
+      }
+
+      SyntaxNode* operator*() const {
+         return *ptr;
+      }
+
+      SyntaxNode** operator&() const {
+         return ptr;
+      }
+  };
+
+  virtual Iterator begin() const { return Iterator(values); }
+  virtual Iterator end() const { return Iterator(values+nval); }
  protected:
- public: 
-  int nval;      //!< number of arguments 
-  int opCode;    //!< ID CODE of this node 
-                 // (a list can be found in ampl.tab.h)
-  
   /** For opCode==ID, there is usually one argument, this is a (char*) to the
    *  name of the entity. If there are two arguments the second argument is
    *  an (int*) stating the ancestor information as set by ancestor(1).ID in
    *  stochastic programming */
+ public: 
   SyntaxNode **values; //!< list of arguments 
+  int nval;      //!< number of arguments 
+  int opCode;    //!< ID CODE of this node 
+                 // (a list can be found in ampl.tab.h)
+  
 
   /* FIXME: not sure if these two should be part of the class. They are 
      global variables that affect the print() method */
@@ -57,8 +98,6 @@ class SyntaxNode {
    *  model component names as global names                               */
   static int use_global_names; 
   static AmplModel *default_model;
-  static string node;  //< current replacement string for the 'node' keyword
-  static string stage; //< current replacement string for the 'stage' keyword
 
  public:
   // ------------------------ methods -----------------------------------
@@ -106,47 +145,6 @@ class SyntaxNode {
 
   SyntaxNode &merge(const SyntaxNode &src);
 
-  virtual int nchild() const { return nval; }
-
-  class Iterator {
-     private:
-      SyntaxNode **ptr;
-
-     public:
-      Iterator(SyntaxNode **p) { ptr=p; }
-      ~Iterator() {}
-
-      Iterator& operator=(const Iterator &other) {
-         ptr = other.ptr;
-         return (*this);
-      }
-      bool operator==(const Iterator &other) {
-         return (other.ptr == ptr);
-      }
-      bool operator!=(const Iterator &other) {
-         return (other.ptr != ptr);
-      }
-      Iterator& operator++() {
-         ptr++;
-         return(*this);
-      }
-      Iterator operator++(int) {
-         Iterator tmp = *this;
-         ++(*this);
-         return tmp;
-      }
-
-      SyntaxNode* operator*() const {
-         return *ptr;
-      }
-
-      SyntaxNode** operator&() const {
-         return ptr;
-      }
-  };
-
-  virtual Iterator begin() const { return Iterator(values); }
-  virtual Iterator end() const { return Iterator(values+nval); }
   
   /** creates a deep_copy of the nodes: SyntaxNodes pointed to are recreated 
    *  as well. 
@@ -164,6 +162,23 @@ class SyntaxNode {
   virtual ostream& put(ostream&s) const;
   virtual SyntaxNode *push_back(SyntaxNode *newitem);
   virtual SyntaxNode *push_front(SyntaxNode *newitem);
+};
+
+class StageNodeNode : public SyntaxNode {
+ private:
+  string value_;
+
+ public:
+  static string node;  //< current replacement string for the 'node' keyword
+  static string stage; //< current replacement string for the 'stage' keyword
+
+  StageNodeNode(int opCode, string value="") :
+     SyntaxNode(opCode), value_(value) {}
+
+  ostream& put(ostream&s) const;
+  SyntaxNode *clone() { return new StageNodeNode(opCode, value_); }
+  SyntaxNode *deep_copy() { return clone(); }
+  void setValue(string value) { value_ = value; }
 };
 
 /** \brief A node on the operator tree representing an indexing expression. 

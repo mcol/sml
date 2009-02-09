@@ -766,10 +766,10 @@ value:   INT_VAL {
             $$ = new SyntaxNode(INFINITY);
          }
      |   STAGE { 
-            $$ = new SyntaxNode(STAGE);
+            $$ = new StageNodeNode(STAGE);
          }
      |   NODE { 
-            $$ = new SyntaxNode(NODE);
+            $$ = new StageNodeNode(NODE);
          }
      ;
 
@@ -857,12 +857,12 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    if (GlobalVariables::logParseModel)
       cout << "Start Stochastic Model: " << name << "\n";
 
-   new_mod = new StochModel((SyntaxNode*)stochsets->values[0], // stages
-      (SyntaxNode*)stochsets->values[1], // nodes
-      (SyntaxNode*)stochsets->values[2], // anc
-      (SyntaxNode*)stochsets->values[3], // prob
-      current_model); 
-
+   SyntaxNode::Iterator i = stochsets->begin();
+   SyntaxNode *stages = *i;
+   SyntaxNode *nodes = *(++i);
+   SyntaxNode *anc = *(++i);
+   SyntaxNode *prob = *(++i);
+   new_mod = new StochModel(stages, nodes, anc, prob, current_model);
    new_mod->name = strdup(name);
   
    /* Fixme: include attrib in definition */

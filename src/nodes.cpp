@@ -16,8 +16,8 @@ extern SyntaxNodeIx *list_of_indexing[20];
 
 int SyntaxNode::use_global_names=0;
 AmplModel *SyntaxNode::default_model =NULL;
-string SyntaxNode::node = "";
-string SyntaxNode::stage = "";
+string StageNodeNode::node = "";
+string StageNodeNode::stage = "";
 
 /* --------------------------------------------------------------------------
 addItemToListNew
@@ -121,15 +121,6 @@ ostream& SyntaxNode::put(ostream&s) const {
     {
     case 0:          s << **i;                           break;
       /* these are lots of simple binary operators */
-    case -100: // FIXME: was originally a NODE or STAGE but now contains an ID.
-      s << *i;
-      break;
-    case NODE:
-      s << SyntaxNode::node;
-      break;
-    case STAGE:
-      s << SyntaxNode::stage;
-      break;
     case ID:
                      //s << (const char*)*i;               break;
       cerr << "ID put bad." << endl;
@@ -253,6 +244,20 @@ ostream& SyntaxNode::put(ostream&s) const {
   if(s!=cout) level--;
   return s;
 }
+
+ostream& StageNodeNode::put(ostream &s) const {
+   if(value_!="") return s << value_;
+
+   switch(opCode) {
+      case STAGE: s << StageNodeNode::stage;    break;
+      case NODE:  s << StageNodeNode::node;     break;
+      default:
+         cerr << "StageNodeNode::put called badly!" << endl;
+         throw exception();
+   }
+   return s;
+}
+
 
 ostream& OpNode::put(ostream &s) const {
   int op = 0;
@@ -834,11 +839,12 @@ void SyntaxNodeIx::splitExpression()
     exit(1);
   }
   
-  tmp = this->values[0];
+  tmp = *(this->begin());
   // discard the colon (if there is one present: only interested in lhs) 
   if (tmp->opCode==COLON) {
-    qualifier = tmp->values[1];
-    tmp = tmp->values[0];
+    SyntaxNode::Iterator tj = tmp->begin();
+    tmp = *tj; // step down tree
+    qualifier = *(++tj); // qualifier from previous node
   }else{
     qualifier = NULL;
   }
@@ -848,16 +854,18 @@ void SyntaxNodeIx::splitExpression()
     this->sets = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
     this->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
-    for(i=0;i<ncomp;i++){
-      tmp2 = findKeywordinTree((SyntaxNode*)tmp->values[i], IN);
+    i=0;
+    for(SyntaxNode::Iterator ti=tmp->begin(); ti!=tmp->end(); ++ti, ++i){
+      tmp2 = findKeywordinTree(*ti, IN);
       /* everything to the left of IN is a dummy variables */
       if (tmp2){
-	     dummyVarExpr[i] = tmp2->values[0];
-	     sets[i] = tmp2->values[1];
+        SyntaxNode::Iterator j = tmp2->begin();
+	     dummyVarExpr[i] = *j;
+	     sets[i] = *(++j);
       } else {
 	/* just set, but no dummyVar given */
 	     dummyVarExpr[i] = NULL;
-	     sets[i] = tmp->values[i];
+	     sets[i] = *ti;
       }
       /* try to find ModelComp of the set expression, 
 	 If it doesn't exist create */
@@ -874,8 +882,9 @@ void SyntaxNodeIx::splitExpression()
     this->dummyVarExpr = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
     tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
-      dummyVarExpr[0] = tmp2->values[0];
-      sets[0] = tmp2->values[1];
+      SyntaxNode::Iterator tj = tmp2->begin();
+      dummyVarExpr[0] = *tj;
+      sets[0] = *(++tj);
     } else {
       /* just set, but no dummyVar given */
       dummyVarExpr[0] = NULL;
@@ -923,7 +932,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
     }else{
       /* This is a multidimensional dummy variable: */
       assert(tmp->opCode==LBRACKET);
-      tmp = tmp->values[0];
+      tmp = *(tmp->begin());
       // and this should be a comma separated list
       assert(tmp->opCode==COMMA);
       for(SyntaxNode::Iterator j=tmp->begin(); j!=tmp->end(); ++j){

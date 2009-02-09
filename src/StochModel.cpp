@@ -621,17 +621,17 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
      is symbolic. otherwise don't use quotation marks */
 
   if (is_symbolic_stages){
-    SyntaxNode::stage = "\""+stagenames->at(level)+"\"";
+    StageNodeNode::stage = "\""+stagenames->at(level)+"\"";
   } else {
-    SyntaxNode::stage = stagenames->at(level);
+    StageNodeNode::stage = stagenames->at(level);
   }
 
   if (level==0){
-    SyntaxNode::node = "\"root\"";
+    StageNodeNode::node = "\"root\"";
   }else{
     SyntaxNodeIx *cnix = current->node->indexing;
     dv = cnix->getListDummyVars();
-    SyntaxNode::node = (dv.front())->print();
+    StageNodeNode::node = (dv.front())->print();
   }
 
   //list<ModelComp*> newcomps(current->comps.size());
