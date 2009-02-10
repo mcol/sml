@@ -375,7 +375,7 @@ setexpr_item : setexpression
 dummy_member : ID {$$=new IDNode($1);}
              | LBRACKET ID COMMA ID RBRACKET {
                   SyntaxNode *tmp = new SyntaxNode(LBRACKET, 
-                     new SyntaxNode(COMMA, new IDNode($2), new IDNode($4)));
+                     new ListNode(COMMA, new IDNode($2), new IDNode($4)));
                   $$ = tmp;
                }
              ;
@@ -476,14 +476,14 @@ paramattributes_opt: /* empty */ { $$ = NULL; }
 
 paramattributes:  paramattribute {
                      if ($1==NULL) {$$ = NULL;}
-                     else{$$ = new SyntaxNode(COMMA, $1);}
+                     else{$$ = new ListNode(COMMA, $1);}
                   }
                |  paramattributes COMMA paramattribute {
                      if ($3==NULL){
                         $$ = $1;
                      }else{
                         if ($1==NULL){
-                           $$ = new SyntaxNode(COMMA, $3);
+                           $$ = new ListNode(COMMA, $3);
                         }else{
                            $$ = $1->push_back($3);
                         }
