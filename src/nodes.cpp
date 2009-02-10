@@ -342,36 +342,32 @@ SyntaxNode::dump(ostream &fout)
   fout << print_SyntaxNodesymb(this) << "\n";
 }
 
-char *
+string
 print_SyntaxNodesymb(SyntaxNode *node)
 {
-  int i;
   ValueNode<long> *inode;
   ValueNode<double> *dnode;
+  ostringstream  ost;
 
   if (node==NULL){
-    return strdup("NULL");
+    return "NULL";
   }
   if (node->opCode==ID){
-    return strdup("(ID T)");
+    return "(ID T)";
   }
   if ((inode = dynamic_cast<ValueNode<long> *>(node))){
     string temp = "T:";
     temp += inode->getValue();
-    return strdup(temp.c_str());
+    return temp;
   }
   if ((dnode = dynamic_cast<ValueNode<double> *>(node))){
     string temp = "T:";
     temp += dnode->getValue();
-    return strdup(temp.c_str());
+    return temp;
   }
 
   // start new version
   // print node symbol
-  int retsize=0;
-  char *buffer;
-  char *symb;
-  char **arg;
   switch (node->opCode)
   {
   case IDREF: {
@@ -381,47 +377,29 @@ print_SyntaxNodesymb(SyntaxNode *node)
       exit(1);
     }
     ModelComp *mc = onir->ref;
-    char buffer3[40]; 
-    sprintf(buffer3, "IDREF(%p:%s(%p))",node, mc->id, mc);
-    //return strdup(buffer3);
-    symb = strdup(buffer3);
+    ost << "IDREF(" << (void*)node << ":" << mc->id << "(" << (void*) mc <<"))";
   }
   break;
-  case ASSIGN: symb = strdup("ASSIGN"); break;
-  case IN:     symb = strdup("IN"); break;
-  case SUM:    symb = strdup("SUM"); break;
-  case LBRACE: symb = strdup("LBR{"); break;
-  case LBRACKET:symb = strdup("LBR("); break;
-  case COMMA:  symb = strdup("COMMA"); break;
-  case COLON:  symb = strdup("COLON"); break;
-  case '+':    symb = strdup("\"+\""); break;
-  case '*':    symb = strdup("\"*\""); break;
+  case ASSIGN: ost << "ASSIGN"; break;
+  case IN:     ost << "IN"; break;
+  case SUM:    ost << "SUM"; break;
+  case LBRACE: ost << "LBR{"; break;
+  case LBRACKET:ost << "LBR("; break;
+  case COMMA:  ost << "COMMA"; break;
+  case COLON:  ost << "COLON"; break;
+  case '+':    ost << "\"+\""; break;
+  case '*':    ost << "\"*\""; break;
   default:
-    symb = (char*)malloc(7*sizeof(char));
-    sprintf(symb, "\"%d\"",node->opCode);
+    ost << "\"" << node->opCode << "\"";
   }
-  retsize +=strlen(symb)+3; // allow space for \0 and ()
-  if (node->nval>0)
-    arg = (char**)calloc(node->nval, sizeof(char*));
-  for(i=0;i<node->nval;i++){
-    arg[i] = print_SyntaxNodesymb(node->values[i]);
-    retsize += strlen(arg[i])+2;
+  ost << "(";
+  for(SyntaxNode::iterator i=node->begin(); i!=node->end(); ++i){
+    if(i!=node->begin()) ost << ", ";
+    ost << print_SyntaxNodesymb(*i);
   }
+  ost << ")";
   
-  buffer = (char*)calloc(retsize, sizeof(char));
-  strcpy(buffer, symb);
-  free(symb);
-  strcat(buffer, "(");
-  for(i=0;i<node->nval;i++){
-    strcat(buffer, arg[i]);
-    if (i<node->nval-1) strcat(buffer, ",");
-    free(arg[i]);
-  }
-  if (node->nval>0) free(arg);
-  strcat(buffer, ")");
-  return buffer;
-	 
-	 
+  return ost.str();
 }
 /* ==========================================================================
 SyntaxNode Methods to follow

@@ -1029,11 +1029,9 @@ void
 add_indexing(SyntaxNodeIx *indexing){
    list_of_indexing[n_indexing] = indexing;
    if (GlobalVariables::logParseModel){
-      char *tmp2 = print_SyntaxNodesymb(indexing);
       cout << "add indexing expression to list: " << *indexing << "\n";
-      cout << "Symbolic indexing: " << tmp2 << "\n";
+      cout << "Symbolic indexing: " << print_SyntaxNodesymb(indexing) << "\n";
       cout << "length of indexing now: " << n_indexing+1 << "\n";
-      free(tmp2);
    }
    n_indexing++;
 }

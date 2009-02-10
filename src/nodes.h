@@ -37,9 +37,6 @@ class AmplModel;
  *       the SyntaxNode::values array with a C++ list.
  */
 class SyntaxNode {
-  //friend SyntaxNode* find_var_ref_in_context(AmplModel *context,
-  //  SyntaxNode *ref);
-  friend char *print_SyntaxNodesymb(SyntaxNode *node);
  public:
   virtual int nchild() const { return nval; }
   class iterator {
@@ -379,7 +376,7 @@ class OpNode : public SyntaxNode {
 };
 
 ListNode *addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem);
-char *print_SyntaxNodesymb(SyntaxNode *node);
+string print_SyntaxNodesymb(SyntaxNode *node);
 
 ostream& operator<<(ostream& s, const SyntaxNode &node);
 ostream& operator<<(ostream& s, const SyntaxNode *node);
