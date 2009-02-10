@@ -682,7 +682,7 @@ FillRhsVector(Vector *vb)
 
   Algebra *A = (Algebra*)T->nodeOfAlg; // the diagonal node that spawned this tree
   OOPSBlock *obl = (OOPSBlock*)A->id; // and its id structure
-  NlFile *nlf = obl->emrow->nlfile;
+  //NlFile *nlf = obl->emrow->nlfile;
   ExpandedModel *emrow = obl->emrow;
 
   // FIXME: should the id structure include information on the ExpandedModel
