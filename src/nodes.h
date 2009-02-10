@@ -37,8 +37,8 @@ class AmplModel;
  *       the SyntaxNode::values array with a C++ list.
  */
 class SyntaxNode {
-  friend SyntaxNode* find_var_ref_in_context(AmplModel *context,
-    SyntaxNode *ref);
+  //friend SyntaxNode* find_var_ref_in_context(AmplModel *context,
+  //  SyntaxNode *ref);
   friend char *print_SyntaxNodesymb(SyntaxNode *node);
  public:
   virtual int nchild() const { return nval; }
@@ -111,10 +111,6 @@ class SyntaxNode {
   SyntaxNode(SyntaxNode &src);
   // Destructor
   virtual ~SyntaxNode();
-
-  /** for nodes that are indexing expressions, get the set that is indexed over
-   * FIXME: move this to SyntaxNodeIx, also indexing expressions are more compl. */
-  SyntaxNode *getIndexingSet();
 
   string print();              // recursive printing of expression
 
@@ -224,12 +220,16 @@ class SyntaxNodeIx : public SyntaxNode {
   SyntaxNodeIx *deep_copy();    
 
   void printDiagnostic(ostream &fout);   //!< diagnostic print of class variables
+
+  /** for nodes that are indexing expressions, get the set that is indexed over
+   */
+  SyntaxNode *getIndexingSet();
 };
 
 class ValueNodeBase {
   public:
    virtual ~ValueNodeBase() {}
-   virtual double getFloatVal() const { throw exception(); return 0.0; }
+   virtual double getFloatVal() const = 0;
 };
 
 
@@ -258,6 +258,7 @@ class IDNode : public SyntaxNode, virtual ValueNodeBase {
       return new IDNode(name, stochparent);
    }
    SyntaxNode *clone() { return deep_copy(); }
+   double getFloatVal() const { return 0.0; }
 };
 
 
@@ -350,6 +351,10 @@ class ListNode: public SyntaxNode {
    }
    int nchild() const { return list_.size(); }
    SyntaxNode *operator[](int i) const { return list_[i]; }
+   void clear() { 
+      SyntaxNode::clear();
+      list_.clear();
+   }
 };
 
 class OpNode : public SyntaxNode {

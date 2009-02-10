@@ -389,10 +389,9 @@ process_model(AmplModel *model) /* should be called with model==root */
 
         /* found a submodel */
         AmplModel *submodel = (AmplModel*)mc->other;
-        SyntaxNode *ix = mc->indexing;
-        SyntaxNode *set;
+        SyntaxNodeIx *ix = mc->indexing;
     
-        set = ix->getIndexingSet(); // set is NULL if ix is NULL
+        SyntaxNode *set = ix->getIndexingSet(); // set is NULL if ix is NULL
   
         // the name of the *.crd file is the global name of the submodel
         // with all the current values of loop variables up to

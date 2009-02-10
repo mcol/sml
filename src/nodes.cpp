@@ -597,6 +597,7 @@ SyntaxNode::findIDREF(list<SyntaxNode*> *lnd)
     // if terminal then return
     return;
   }else if (opCode==-99) {
+     throw exception();
     cerr << "BAD findIDREF(-99)\n";
     return;
   }else{
@@ -656,9 +657,9 @@ ModelComp *SyntaxNode::findModelComp()
 
 
 /* --------------------------------------------------------------------------
-SyntaxNode::getIndexingSet()
+SyntaxNodeIx::getIndexingSet()
 ---------------------------------------------------------------------------- */
-SyntaxNode *SyntaxNode::getIndexingSet()
+SyntaxNode *SyntaxNodeIx::getIndexingSet()
 {
   SyntaxNode *ix = this;
   SyntaxNode *set;
@@ -666,11 +667,12 @@ SyntaxNode *SyntaxNode::getIndexingSet()
 
   if (ix==NULL) return NULL;
   /* remove outside braces from indexing expression */
-  if (ix->opCode==LBRACE) ix = (SyntaxNode*)ix->values[0];
+  if (ix->opCode==LBRACE) ix = *(ix->begin());
   /* assumes that the next level is the 'IN' keyword (if present) */
   if (ix->opCode==IN){
-    dummyVar = ix->values[0];
-    set = ix->values[1];
+    SyntaxNode::iterator i = ix->begin();
+    dummyVar = *i;
+    set = *(++i);
   }else{
     dummyVar = NULL;
     set = ix;
@@ -1171,7 +1173,8 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    */
   
    /* returns: pointer */
-   SyntaxNode *tmp, *argNode;
+   SyntaxNode *tmp;
+   ListNode *argNode;
    IDNode *idNode;
    SyntaxNodeIDREF *ret;
    int stochparent=0;
@@ -1199,7 +1202,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
       SyntaxNode::iterator i = ref->begin();
       idNode = (IDNode*)*i;
-      argNode = *(++i);
+      argNode = (ListNode*) *(++i);
       assert(idNode->opCode==ID);
       assert(argNode->opCode==COMMA);
    }
@@ -1230,9 +1233,9 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    if (argNode){
       if (GlobalVariables::logParseModel)
          cout << "Adding argument list to node: " << *argNode << "\n";
-      free(idNode->values); // jdh - what does this do?
-      ret->values = argNode->values;
-      ret->nval = argNode->nval;
+      //free(idNode->values); // jdh - what does this do?
+      for(SyntaxNode::iterator i=argNode->begin(); i!=argNode->end(); ++i)
+         ret->push_back(*i);
       if (ref->opCode==LBRACKET){
          // this is old code to deal with ancestor(1).ID declarations. To go
          cerr << "Executing old code to deal with ancestor(1).ID "
@@ -1247,10 +1250,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
          //}
          //ret->nval--;
       }
-      argNode->values=NULL;
-      argNode->nval = 0;
-   } else {
-      ret->nval = 0;
+      argNode->clear();
    }
   
    ret->stochparent = stochparent;
