@@ -22,13 +22,15 @@ public:
 class SimpleSet: public SetNode {
 private:
    int lower_bound_;
+   SyntaxNode *lbc_;
    int upper_bound_;
+   SyntaxNode *ubc_;
    int interval_;
 
 public:
    bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
    SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2);
-   vector<string> members();
+   vector<string> members(AmplModel &context);
 };
 
 /** @class ListSet
