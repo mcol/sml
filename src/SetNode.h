@@ -39,9 +39,7 @@ public:
 class ListSet: public SetNode {
 public:
    ListSet(SyntaxNode *list) :
-      SetNode(LBRACE, list)
-   {
-   }
+      SetNode(LBRACE, list) {}
 };
 
 /** @class CompositeSet
