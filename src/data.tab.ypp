@@ -129,13 +129,13 @@ data_setdef: SET ID DEFINED set_elements {
                     "not delcared a set!" << endl;
                     exit(1);
                 }
-                entry->mc->value = new Set($4);
+                entry->mc->value = new Set(*((ListNode*)$4));
               }
               
 
 set_elements: /* empty */ {$$=NULL;}
            | set_elements object {
-               $$ = addItemToListOrCreate(' ', $1, $2);
+               $$ = addItemToListOrCreate(' ', (ListNode*)$1, $2);
              }
            ;
 
@@ -229,12 +229,12 @@ set_name: ID {$$=new IDNode($1);}
 value_list: /* empty */ {$$=NULL;}
           | value_list value {
               if ($1==NULL){
-                $$ = new SyntaxNode(' ',$2);
+                $$ = new ListNode(' ',$2);
               }else{
                 if ($1->opCode==' '){
                   $$ = $1->push_back($2);
                 }else{
-                  $$ = new SyntaxNode(' ', $1, $2);
+                  $$ = new ListNode(' ', $1, $2);
                 }
               }
             }
@@ -263,7 +263,7 @@ paramspec:  param_template_opt value value_list {
               SyntaxNode *vl;
               //printf("Executing value_list branch of paramspec\n");
               if ($3==NULL){
-                vl = new SyntaxNode(' ', $2);
+                vl = new ListNode(' ', $2);
               }else{
                 vl = $3->push_front($2);
               }
@@ -317,7 +317,7 @@ value_table: TR COLON col_label_list DEFINED value_list
 
 col_label_list: col_label {
                   assert($1);
-                  $$ = new SyntaxNode(' ', $1);
+                  $$ = new ListNode(' ', $1);
                 }
               | col_label_list col_label {
                   assert($1 && $1->opCode==' ');
