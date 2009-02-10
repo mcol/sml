@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include "ModelComp.h"
-#include "Set.h"
 #include "backend.h"
 #include "GlobalVariables.h" //for GlobalVariables class
 #include "AmplModel.h"

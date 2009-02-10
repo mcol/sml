@@ -4,7 +4,6 @@
    #include <stdlib.h>
    #include <assert.h>
    #include "nodes.h"
-   #include "Set.h"
    #include "CompDescrParam.h"
    #include "AmplModel.h"
    #define YYERROR_VERBOSE
