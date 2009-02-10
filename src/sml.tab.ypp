@@ -375,7 +375,7 @@ setexpr_item : setexpression
 dummy_member : ID {$$=new IDNode($1);}
              | LBRACKET ID COMMA ID RBRACKET {
                   SyntaxNode *tmp = new SyntaxNode(LBRACKET, 
-                     new ListNode(COMMA, new IDNode($2), new IDNode($4)));
+                     new SyntaxNode(COMMA, new IDNode($2), new IDNode($4)));
                   $$ = tmp;
                }
              ;
