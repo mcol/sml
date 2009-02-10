@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <list>
+#include <vector>
 class ModelComp;
 using namespace std;
 
@@ -41,30 +42,30 @@ class SyntaxNode {
   friend char *print_SyntaxNodesymb(SyntaxNode *node);
  public:
   virtual int nchild() const { return nval; }
-  class Iterator {
+  class iterator {
      private:
       SyntaxNode **ptr;
 
      public:
-      Iterator(SyntaxNode **p) { ptr=p; }
-      ~Iterator() {}
+      iterator(SyntaxNode **p) { ptr=p; }
+      ~iterator() {}
 
-      Iterator& operator=(const Iterator &other) {
+      iterator& operator=(const iterator &other) {
          ptr = other.ptr;
          return (*this);
       }
-      bool operator==(const Iterator &other) {
+      bool operator==(const iterator &other) {
          return (other.ptr == ptr);
       }
-      bool operator!=(const Iterator &other) {
+      bool operator!=(const iterator &other) {
          return (other.ptr != ptr);
       }
-      Iterator& operator++() {
+      iterator& operator++() {
          ptr++;
          return(*this);
       }
-      Iterator operator++(int) {
-         Iterator tmp = *this;
+      iterator operator++(int) {
+         iterator tmp = *this;
          ++(*this);
          return tmp;
       }
@@ -78,18 +79,21 @@ class SyntaxNode {
       }
   };
 
-  virtual Iterator begin() const { return Iterator(values); }
-  virtual Iterator end() const { return Iterator(values+nval); }
+  iterator begin() const { return iterator(values); }
+  iterator end() const { return iterator(values+nval); }
+  /** This function clears the child list */
+  virtual void clear() { nval = 0; if(values) free(values); values = NULL; }
+ public:
+  int opCode;    //!< ID CODE of this node 
+                 // (a list can be found in ampl.tab.h)
  protected:
+  int nval;      //!< number of arguments 
   /** For opCode==ID, there is usually one argument, this is a (char*) to the
    *  name of the entity. If there are two arguments the second argument is
    *  an (int*) stating the ancestor information as set by ancestor(1).ID in
    *  stochastic programming */
- public: 
   SyntaxNode **values; //!< list of arguments 
-  int nval;      //!< number of arguments 
-  int opCode;    //!< ID CODE of this node 
-                 // (a list can be found in ampl.tab.h)
+ public: 
   
 
   /* FIXME: not sure if these two should be part of the class. They are 
@@ -224,6 +228,7 @@ class SyntaxNodeIx : public SyntaxNode {
 
 class ValueNodeBase {
   public:
+   virtual ~ValueNodeBase() {}
    virtual double getFloatVal() const { throw exception(); return 0.0; }
 };
 
@@ -279,7 +284,7 @@ class SyntaxNodeIDREF : public SyntaxNode {
   int stochparent; //!< levels above this one for which the reference is
   // ---------------------------- methods -----------------------------
   // constructor
-  SyntaxNodeIDREF(ModelComp *r=NULL);
+  SyntaxNodeIDREF(ModelComp *r=NULL, SyntaxNode *val1=NULL);
   SyntaxNodeIDREF(int opCode, ModelComp *r=NULL);
   
   //! creates a shallow copy: points to the same components as the original
@@ -322,25 +327,29 @@ template<class T> char *ValueNode<T>::getValue() const {
  */
 class ListNode: public SyntaxNode {
   public:
-   typedef list<SyntaxNode *>::const_iterator iterator;
-
+   typedef vector<SyntaxNode*>::const_iterator literator;
   private:
-   list<SyntaxNode *> list;
+   vector<SyntaxNode *> list_;
 
   public:
-   ListNode(SyntaxNode *val1=NULL, SyntaxNode *val2=NULL);
-   iterator begin() { return list.begin(); }
-   iterator end() { return list.end(); }
+   ListNode(int opCode=',', SyntaxNode *val1=NULL, SyntaxNode *val2=NULL);
+   literator lbegin() const { return list_.begin(); }
+   literator lend() const { return list_.end(); }
    ostream& put(ostream&s) const;
    ListNode *deep_copy();
    ListNode *clone();
-   SyntaxNode *push_front(SyntaxNode *node) { 
-      list.push_front(node); return this; 
+   ListNode *push_front(SyntaxNode *node) { 
+      SyntaxNode::push_front(node);
+      list_.insert(list_.begin(), node); 
+      return this; 
    }
-   SyntaxNode *push_back(SyntaxNode *node) { 
-      list.push_back(node); return this; 
+   ListNode *push_back(SyntaxNode *node) { 
+      SyntaxNode::push_back(node);
+      list_.push_back(node); 
+      return this; 
    }
-   int nchild() { return list.size(); }
+   int nchild() const { return list_.size(); }
+   SyntaxNode *operator[](int i) const { return list_[i]; }
 };
 
 class OpNode : public SyntaxNode {
@@ -364,7 +373,7 @@ class OpNode : public SyntaxNode {
    }
 };
 
-SyntaxNode *addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem);
+ListNode *addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem);
 char *print_SyntaxNodesymb(SyntaxNode *node);
 
 ostream& operator<<(ostream& s, const SyntaxNode &node);

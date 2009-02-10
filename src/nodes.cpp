@@ -68,16 +68,17 @@ addItemToListOrCreate
  *    single item that is passed
  */
 
-SyntaxNode *
-addItemToListOrCreate(int oc, SyntaxNode *list, SyntaxNode *newitem)
+ListNode *
+addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem)
 {
   if(!newitem) return list;
 
   if (list){
     assert(oc==list->opCode);
-    return list->push_back(newitem);
+    return (ListNode*) list->push_back(newitem);
   }else{
-    return new SyntaxNode(oc, newitem);
+    assert(oc==' '||oc==COMMA);
+    return new ListNode(oc, newitem);
   }
 }
 
@@ -109,7 +110,7 @@ ostream& SyntaxNode::put(ostream&s) const {
 
   if(this == NULL) return s;
 
-  SyntaxNode::Iterator i = this->begin();
+  SyntaxNode::iterator i = this->begin();
   /*if(s!=cout) {
      for(int j=0; j<level; ++j) cout << " ";
      if(level!=0) cout << "-";
@@ -305,7 +306,7 @@ ostream& SyntaxNodeIDREF::put(ostream& s) const {
          if(nval==0) {
             s << ref->id;
          } else {
-            SyntaxNode::Iterator i=begin();
+            SyntaxNode::iterator i=begin();
             s << ref->id << "[" << **i;
             for(++i; i!=end(); ++i){
                s << "," << **i;
@@ -431,7 +432,7 @@ SyntaxNode::SyntaxNode() :
   opCode(-1), nval(-1), values(NULL) {}
 
 SyntaxNode::SyntaxNode(SyntaxNode &src) :
-   nval(src.nval), opCode(src.opCode), values(src.values) {}
+   opCode(src.opCode), nval(src.nval), values(src.values) {}
 
 SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode* val3) :
    opCode(code), nval(0), values(NULL)
@@ -710,7 +711,7 @@ SyntaxNode::getArgumentList() const
       }
    }else{
       if (nval>0){
-         SyntaxNode::Iterator i = begin();
+         SyntaxNode::iterator i = begin();
          arglist += (*i)->print();
          for(++i;i!=end();++i){
             arglist += ",";
@@ -804,7 +805,7 @@ SyntaxNodeIx::getListDummyVars()
 	     cerr << "Given expression: " << dv << "\n";
 	     exit(1);
       }
-      for(SyntaxNode::Iterator j=dv->begin(); j!=dv->end(); ++j){
+      for(SyntaxNode::iterator j=dv->begin(); j!=dv->end(); ++j){
 	     l.push_back(*j);
       }
     }else{
@@ -842,7 +843,7 @@ void SyntaxNodeIx::splitExpression()
   tmp = *(this->begin());
   // discard the colon (if there is one present: only interested in lhs) 
   if (tmp->opCode==COLON) {
-    SyntaxNode::Iterator tj = tmp->begin();
+    SyntaxNode::iterator tj = tmp->begin();
     tmp = *tj; // step down tree
     qualifier = *(++tj); // qualifier from previous node
   }else{
@@ -855,11 +856,11 @@ void SyntaxNodeIx::splitExpression()
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
     this->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
     i=0;
-    for(SyntaxNode::Iterator ti=tmp->begin(); ti!=tmp->end(); ++ti, ++i){
+    for(SyntaxNode::iterator ti=tmp->begin(); ti!=tmp->end(); ++ti, ++i){
       tmp2 = findKeywordinTree(*ti, IN);
       /* everything to the left of IN is a dummy variables */
       if (tmp2){
-        SyntaxNode::Iterator j = tmp2->begin();
+        SyntaxNode::iterator j = tmp2->begin();
 	     dummyVarExpr[i] = *j;
 	     sets[i] = *(++j);
       } else {
@@ -882,7 +883,7 @@ void SyntaxNodeIx::splitExpression()
     this->dummyVarExpr = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
     tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
-      SyntaxNode::Iterator tj = tmp2->begin();
+      SyntaxNode::iterator tj = tmp2->begin();
       dummyVarExpr[0] = *tj;
       sets[0] = *(++tj);
     } else {
@@ -935,7 +936,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
       tmp = *(tmp->begin());
       // and this should be a comma separated list
       assert(tmp->opCode==COMMA);
-      for(SyntaxNode::Iterator j=tmp->begin(); j!=tmp->end(); ++j){
+      for(SyntaxNode::iterator j=tmp->begin(); j!=tmp->end(); ++j){
         // items on the list should be ID
         assert((*j)->opCode==ID);
         IDNode *tmp2 = (IDNode *) *j;
@@ -988,8 +989,8 @@ SyntaxNodeIDREF methods
 /* --------------------------------------------------------------------------
 SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r)
 ---------------------------------------------------------------------------- */
-SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r) :
-  SyntaxNode(IDREF), ref(r), stochparent(0) {}
+SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r, SyntaxNode *val1) :
+  SyntaxNode(IDREF, val1), ref(r), stochparent(0) {}
 
 SyntaxNodeIDREF::SyntaxNodeIDREF(int opCode, ModelComp *r) :
   SyntaxNode(opCode), ref(r), stochparent(0) 
@@ -1046,36 +1047,39 @@ IDNode::IDNode(const string new_name, long new_stochparent) :
    SyntaxNode(ID), name(new_name), stochparent(new_stochparent) {}
 
 ostream& ListNode::put(ostream& s) const {
-   iterator i = list.begin();
-   if(i==list.end()) return s;
+   literator i = lbegin();
+   if(i==lend()) return s;
+
+   char sep = ',';
+   if(opCode==' ') sep = ' ';
 
    s << *i;
-   for(++i; i!=list.end(); ++i)
-      s << "," << *i;
+   for(++i; i!=lend(); ++i)
+      s << sep << *i;
 
    return s;
 }
 
 ListNode *ListNode::deep_copy() {
-   ListNode *copy = new ListNode();
+   ListNode *copy = new ListNode(opCode);
 
-   for(iterator i=begin(); i!=end(); ++i)
+   for(literator i=lbegin(); i!=lend(); ++i)
       copy->push_back((*i)->deep_copy());
 
    return copy;
 }
 
 ListNode *ListNode::clone() {
-   ListNode *copy = new ListNode();
+   ListNode *copy = new ListNode(opCode);
 
-   for(iterator i=begin(); i!=end(); ++i)
+   for(literator i=lbegin(); i!=lend(); ++i)
       copy->push_back(*i);
 
    return copy;
 }
 
-ListNode::ListNode(SyntaxNode *val1, SyntaxNode *val2) :
-   SyntaxNode(COMMA, val1, val2) 
+ListNode::ListNode(int opCode, SyntaxNode *val1, SyntaxNode *val2) :
+   SyntaxNode(opCode, val1, val2) 
 {
    if(val1) push_back(val1);
    if(val2) push_back(val2);
@@ -1117,7 +1121,7 @@ findKeywordinTree(SyntaxNode *root, int oc)
 
    SyntaxNode *found, *res;
    found = NULL;
-   for(SyntaxNode::Iterator i=root->begin(); i!=root->end(); ++i) {
+   for(SyntaxNode::iterator i=root->begin(); i!=root->end(); ++i) {
       res = findKeywordinTree((SyntaxNode*)*i, oc);
       if(res && found) {
          cerr << "Found keyword " << oc << "at least twice in " << root << "\n";
@@ -1193,7 +1197,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       argNode = NULL;
    }else{
       assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
-      SyntaxNode::Iterator i = ref->begin();
+      SyntaxNode::iterator i = ref->begin();
       idNode = (IDNode*)*i;
       argNode = *(++i);
       assert(idNode->opCode==ID);
