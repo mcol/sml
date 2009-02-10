@@ -42,21 +42,15 @@ class SyntaxNode {
   class iterator {
      private:
       SyntaxNode **ptr;
-
      public:
       iterator(SyntaxNode **p) { ptr=p; }
       ~iterator() {}
-
       iterator& operator=(const iterator &other) {
          ptr = other.ptr;
          return (*this);
       }
-      bool operator==(const iterator &other) {
-         return (other.ptr == ptr);
-      }
-      bool operator!=(const iterator &other) {
-         return (other.ptr != ptr);
-      }
+      bool operator==(const iterator &other) { return (other.ptr == ptr); }
+      bool operator!=(const iterator &other) { return (other.ptr != ptr); }
       iterator& operator++() {
          ptr++;
          return(*this);
@@ -66,14 +60,7 @@ class SyntaxNode {
          ++(*this);
          return tmp;
       }
-
-      SyntaxNode* operator*() const {
-         return *ptr;
-      }
-
-      SyntaxNode** operator&() const {
-         return ptr;
-      }
+      SyntaxNode* operator*() const { return *ptr; }
   };
 
   iterator begin() const { return iterator(values); }
