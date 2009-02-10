@@ -184,7 +184,7 @@ void fill_model_list_(AmplModel *model, AmplModel **list, int *pos);
 void
 process_model(AmplModel *model) /* should be called with model==root */
 {
-  int i, j, k, n_models, n;
+  int i, j, k, n_models;
   AmplModel **model_list;
   
   cout << "-------------- start of process_model ----------------------\n";
@@ -310,7 +310,7 @@ process_model(AmplModel *model) /* should be called with model==root */
         if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin());
         /* assumes that the next level is the 'IN' keyword (if present) */
         if (ix->opCode==IN){
-          SyntaxNode::Iterator ixi = ix->begin();
+          SyntaxNode::iterator ixi = ix->begin();
           dummyVar = (SyntaxNode*)*ixi;
           set = (SyntaxNode*)*(++ixi);
         }else{
@@ -773,7 +773,6 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
        AmplModel **listam, AmplModel *submodel)
 {
   AmplModel *thism = listam[thislevel];
-  int j;
   ModelComp *comp;
   
   SyntaxNode::default_model = thism;
@@ -820,7 +819,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           if (ix->opCode==IN){
             //l_addIndex[n_addIndex]->dummyVar = (SyntaxNode*)ix->values[0];
             //l_addIndex[n_addIndex]->set = (SyntaxNode*)ix->values[1];
-             SyntaxNode::Iterator ixi = ix->begin();
+             SyntaxNode::iterator ixi = ix->begin();
             ai->dummyVar = (SyntaxNode*)*ixi;
             ai->set = (SyntaxNode*)*(++ixi);
           }else{ // no dummy variable, just a set
