@@ -24,7 +24,6 @@ class CompDescrParam: public CompDescr{
   int nread; //!< number of values that are given so far
 
   double *values; //!< the array of values
-  string *symvalues; //!< the array of values for symbolic params 
 
   // ------------------ constructors ---------------------
   

@@ -14,8 +14,7 @@ CompDescrParam::CompDescrParam():
   nix(-1),
   indices(NULL),
   n(-1),
-  values(NULL),
-  symvalues(NULL)
+  values(NULL)
 {}
 
 /* ---------------------------------------------------------------------------
@@ -34,8 +33,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   indices(NULL),
   n(-1),
   nread(-1),
-  values(NULL),
-  symvalues(NULL)
+  values(NULL)
 {
 
   /* 
