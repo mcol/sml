@@ -343,22 +343,25 @@ class ListNode: public SyntaxNode {
 
 class OpNode : public SyntaxNode {
   public:
-   SyntaxNode *operand[3];
+   SyntaxNode *left;
+   SyntaxNode *right;
 
   public:
-   OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2=NULL, 
-      SyntaxNode *op3=NULL);
+   OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2=NULL);
    ostream& put(ostream& s) const;
    OpNode *deep_copy();
    OpNode *clone();
    void findIDREF(list<ModelComp*> &lmc) { 
-      for(int i=0; i<nval; ++i) operand[i]->findIDREF(lmc);
+      if(left) left->findIDREF(lmc);
+      if(right) right->findIDREF(lmc);
    }
    void findIDREF(list<SyntaxNode*> *lnd) { 
-      for(int i=0; i<nval; ++i) operand[i]->findIDREF(lnd);
+      if(left) left->findIDREF(lnd);
+      if(right) right->findIDREF(lnd);
    }
    void findOpCode(int oc, list<SyntaxNode*> *lnd) {
-      for(int i=0; i<nval; ++i) operand[i]->findOpCode(oc, lnd);
+      if(left) left->findOpCode(oc, lnd);
+      if(right) right->findOpCode(oc, lnd);
    }
 };
 

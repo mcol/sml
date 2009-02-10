@@ -261,8 +261,7 @@ ostream& StageNodeNode::put(ostream &s) const {
 
 
 ostream& OpNode::put(ostream &s) const {
-  int op = 0;
-  if(nval>1) s << operand[op++];
+  if(left) s << left;
   
   switch(opCode) {
     case '+':
@@ -283,11 +282,7 @@ ostream& OpNode::put(ostream &s) const {
       exit(1);
   }
 
-  s << operand[op++];
-  if(nval<3) return s;
-
-  cerr << "Unknown ternary opCode for opNode" << opCode << endl;
-  exit(1);
+  s << right;
 
   return s;
 }
@@ -1065,26 +1060,34 @@ ListNode::ListNode(int opCode, SyntaxNode *val1, SyntaxNode *val2) :
    if(val2) push_back(val2);
 }
 
-OpNode::OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2, SyntaxNode *op3) :
-   SyntaxNode(opCode, op1, op2, op3)
+OpNode::OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2) :
+   SyntaxNode(opCode, op1, op2), left(NULL)
 {
-   operand[0] = op1;
-   operand[1] = op2;
-   operand[2] = op3;
+   assert(op1);
+   if(!op2) {
+      // Unary operation eg -1, op sign sits to left of operand
+      right = op1;
+   } else {
+      // Binary operation
+      left = op1;
+      right = op2;
+   }
 }
 
 OpNode *OpNode::deep_copy() {
-   SyntaxNode *temp[3];
-
-   for(int i=0; i<3; ++i) temp[i] = NULL;
-   for(int i=0; i<nval; ++i)
-      temp[i] = operand[i]->deep_copy();
-
-   return new OpNode(opCode, temp[0], temp[1], temp[2]);
+   if(left) {
+      return new OpNode(opCode, left->deep_copy(), right->deep_copy());
+   } else {
+      return new OpNode(opCode, right->deep_copy());
+   }
 }
 
 OpNode *OpNode::clone() {
-   return new OpNode(opCode, operand[0], operand[1], operand[2]);
+   if(left) {
+      return new OpNode(opCode, left, right);
+   } else {
+      return new OpNode(opCode, right);
+   }
 }
 
 
