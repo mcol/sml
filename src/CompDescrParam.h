@@ -23,8 +23,6 @@ class CompDescrParam: public CompDescr{
   int n; //!< total number of entries
   int nread; //!< number of values that are given so far
 
-  bool is_symbolic; //!< indicates if this is a symbolic set or not
-  
   double *values; //!< the array of values
   string *symvalues; //!< the array of values for symbolic params 
 

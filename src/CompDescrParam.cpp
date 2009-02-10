@@ -14,7 +14,6 @@ CompDescrParam::CompDescrParam():
   nix(-1),
   indices(NULL),
   n(-1),
-  is_symbolic(false),
   values(NULL),
   symvalues(NULL)
 {}
@@ -35,7 +34,6 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   indices(NULL),
   n(-1),
   nread(-1),
-  is_symbolic(false),
   values(NULL),
   symvalues(NULL)
 {
@@ -135,11 +133,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
    I guess we should invent some clear tokens
   */
 
-  if (is_symbolic){
-    symvalues = new string[n]; 
-  }else{
-    values = new double[n];
-  }
+  values = new double[n];
 
   // the paramdefinition is a list of PARAMSPEC's
   assert(desc->opCode==TOKPARAMSPECLIST);
@@ -196,18 +190,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
         }          
         SyntaxNode *on = (*((ListNode *)paramspec))[pos_in_paramspec+nobj];
         assert(on->opCode==ID||on->opCode==-99);
-        if (is_symbolic){
-          if (on->opCode==ID){
-            symvalues[pos_in_array] = string(((IDNode *)on)->name);
-            //symvalues[pos_in_array] = string((char*)on->values[0]);
-          }else{
-            cerr << "symbolic but not ID? help!" << endl;
-            throw exception();
-            //symvalues[pos_in_array] = to_string(on->values[0]);
-          }            
-        }else{ // not symbolic => numeric
-          values[pos_in_array] = ((ValueNodeBase*)on)->getFloatVal();
-        }
+        values[pos_in_array] = ((ValueNodeBase*)on)->getFloatVal();
         nread++;
       }// end loop over j
     }
@@ -237,11 +220,7 @@ CompDescrParam::printToString()
   str+=": ";
   for(int i=0;i<n;i++){
     if (i>0) str += " ";
-    if (is_symbolic){
-      str += symvalues[i];
-    }else{
-      str += to_string(values[i]);
-    }
+    str += to_string(values[i]);
   }
   return str;
 }
@@ -395,12 +374,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
         int poslist = (j+1)+k*(ncol+1);
         int posparam = colpos[j]+rowpos[k]*indices[ixcolset]->size();
         SyntaxNode *entry = (*on_values)[poslist];
-        if (is_symbolic){
-          assert(entry->opCode==ID);
-          symvalues[posparam] = string(((IDNode *)entry)->name);
-        }else{
-          values[posparam] = ((ValueNodeBase *) entry)->getFloatVal();
-        }
+        values[posparam] = ((ValueNodeBase *) entry)->getFloatVal();
         nread++;
       }
     }
