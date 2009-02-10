@@ -9,9 +9,9 @@
 Set::Set()
 ---------------------------------------------------------------------------- */
 Set::Set():
-  dim(1),
   //n(0),
-  elements()
+  elements(),
+  dim(1)
 {}
 
 /* ---------------------------------------------------------------------------
@@ -34,29 +34,29 @@ Set::Set(SyntaxNode *list)
  *     dimension of the set and each element of type opCode=ID 
  *     (carrying the actual dscription of the set element).
  */
-Set::Set(SyntaxNode *list):
+Set::Set(const ListNode &list):
   elements()
 {
   SyntaxNode *item;
 
-  assert(list->opCode=' ');
+  assert(list.opCode==' ');
   //this->n = list->nval;
   
   // have a look at the first item to get the dimension of the set
-  item = (SyntaxNode *)*(list->begin());
+  item = list[0];
   if (item->opCode==ID||item->opCode==-99){
     this->dim = 1;
   }else{
     // otherwise this needs to be an element of form (.., .., ..)
     assert(item->opCode==LBRACKET);
-    item = (SyntaxNode*)*(item->begin());
+    item = *(item->begin());
     assert(item->opCode==COMMA);
     this->dim = item->nchild();
   }
   
   // then place all the elements on the set
-  for(SyntaxNode::Iterator i=list->begin(); i!=list->end(); ++i){
-    item = (SyntaxNode*) *i;
+  for(SyntaxNode::iterator i=list.begin(); i!=list.end(); ++i){
+    item = *i;
     // and do some checking that all elements have the same dimension
     //    this->elements.push_back(item);
     if (dim==1) {
@@ -73,7 +73,7 @@ Set::Set(SyntaxNode *list):
       assert(item->opCode==COMMA);
       if (dim==item->nchild()){
         int j = 0;
-        for(SyntaxNode::Iterator k=item->begin(); k!=item->end(); ++k){
+        for(SyntaxNode::iterator k=item->begin(); k!=item->end(); ++k){
           SyntaxNode *idnd = (SyntaxNode*)*k;
           assert(idnd->opCode==ID);
           array[j++] = (char*)*(idnd->begin());

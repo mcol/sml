@@ -11,6 +11,7 @@
 
 class CompDescr{
  public:
+  virtual ~CompDescr() {}
   virtual string printToString() {return "";};
 };
 

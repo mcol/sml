@@ -208,14 +208,14 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
     // (*p) is the EXPECTATION node, it should have one child
 
-    SyntaxNode *child = (SyntaxNode*)*((*p)->begin());
+    SyntaxNode *child = *((*p)->begin());
 
     if (child->opCode!=COMMA||child->nchild()==1){
       // this is the "one argument" use if Exp within an objective function
       if (type==TMIN || type==TMAX){
         // set "up" to the argument of Exp(...)
         // FIXME: need to put brackets around this?
-        SyntaxNode *up = (SyntaxNode*)*((*p)->begin());
+        SyntaxNode *up = *((*p)->begin());
         for (int i=level;i>0;i--){
           
           // find the dummy variable expression
@@ -232,19 +232,16 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
             printf("Probabilities parameter in sblock nust be given as IDREF\n");
             exit(1);
           }
-          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref);
-          oncp->nval = 1;
-          oncp->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
-          oncp->values[0] = new IDNode((dv.front())->print());
+          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref, 
+             new IDNode((dv.front())->print()));
           SyntaxNode *onmult = new OpNode('*', oncp, up);
           up = onmult;
         }
         // up/onmult is now a pointer into the expression, this should
         // replace the EXP node?
-        (*p)->values[0] = up;
-        (*p)->nval = 1;
         (*p)->opCode = 0;
-
+        (*p)->clear();
+        (*p)->push_back(up);
       }else{
 
         // one argument version of Exp used in constraint
@@ -277,10 +274,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
             printf("Probabilities parameter in sblock nust be given as IDREF\n");
             exit(1);
           }
-          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref);
-          oncp->nval = 1;
-          oncp->values = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
-          oncp->values[0] = new IDNode(dv.front()->print());
+          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref,
+            new IDNode(dv.front()->print()));
           SyntaxNode *onmult = new OpNode('*', oncp, up);
           up = onmult;
 
@@ -316,9 +311,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
         cslon = new SyntaxNode(SUM, cslon, up);
         //printf("This is the sum: %s\n",cslon->print());
 
-        (*p)->values[0] = cslon;
-        (*p)->nval = 1;
         (*p)->opCode = 0;
+        (*p)->clear();
+        (*p)->push_back(cslon);
         
         //FIXME: need to somehow move this model comp to the root
         // model of the stoch prog.

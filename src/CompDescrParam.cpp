@@ -152,13 +152,13 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   // Some components of the indexing set(s) can be given by templates
   // in which case nobj is reduced
   int nobj = nix;
-  for(SyntaxNode::Iterator i=desc->begin(); i!=desc->end(); ++i){
+  for(SyntaxNode::iterator i=desc->begin(); i!=desc->end(); ++i){
     SyntaxNode *templ = NULL;
     paramspec = *i;
 
     // either of which can have a param_template
     if (paramspec->opCode==TOKPARAMTEMPLATE){
-      SyntaxNode::Iterator psi = paramspec->begin();
+      SyntaxNode::iterator psi = paramspec->begin();
       templ = (SyntaxNode*)*psi;
       paramspec = (SyntaxNode*)*(++psi);
     }
@@ -186,7 +186,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
         int pos_in_array = 0;
         for(int k=0;k<nobj;k++){
           pos_in_array*= indices[k]->size();
-          SyntaxNode *onid = (SyntaxNode *)(paramspec->values[pos_in_paramspec+k]);
+          SyntaxNode *onid = (*((ListNode *)paramspec))[pos_in_paramspec+k];
           char *obj = onid->getValue();
           // FIXME: if we want to allow multidimensional indexing sets we
           //        need to gather indices[k]->dim entries together and 
@@ -194,7 +194,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
           //        findPos
           pos_in_array += indices[k]->findPos(SetElement(1,&obj));
         }          
-        SyntaxNode *on = (SyntaxNode *)paramspec->values[pos_in_paramspec+nobj];
+        SyntaxNode *on = (*((ListNode *)paramspec))[pos_in_paramspec+nobj];
         assert(on->opCode==ID||on->opCode==-99);
         if (is_symbolic){
           if (on->opCode==ID){
@@ -203,7 +203,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
           }else{
             cerr << "symbolic but not ID? help!" << endl;
             throw exception();
-            symvalues[pos_in_array] = to_string(on->values[0]);
+            //symvalues[pos_in_array] = to_string(on->values[0]);
           }            
         }else{ // not symbolic => numeric
           values[pos_in_array] = ((ValueNodeBase*)on)->getFloatVal();
@@ -214,8 +214,8 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
 
   }
   if (GlobalVariables::prtLvl>0){
-    printf("Paramdef finished processing: %s\n",mc->id);
-    printf("  Read %d values, need %d\n",nread, n);
+    cout << "Paramdef finished processing: " << mc->id << endl;
+    cout << "  Read " << nread << " values, need " << n << endl;
   }
 }
 
@@ -301,15 +301,15 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
   
 
   // loop through all value_table's
-  for(SyntaxNode::Iterator i=node->begin(); i!=node->end(); ++i){
+  for(SyntaxNode::iterator i=node->begin(); i!=node->end(); ++i){
     SyntaxNode *on_valtab = (SyntaxNode*)*i;
     assert(on_valtab->opCode==TOKVALUETABLE);
     
     // get the dimensions of the value_table_list
     assert(on_valtab->nchild()==2);
-    SyntaxNode::Iterator ovti = on_valtab->begin();
+    SyntaxNode::iterator ovti = on_valtab->begin();
     SyntaxNode *on_collabel = (SyntaxNode*)*ovti;
-    SyntaxNode *on_values = (SyntaxNode*)*(++ovti);
+    ListNode *on_values = (ListNode*)*(++ovti);
     
     int ncol = on_collabel->nchild();
     int nval = on_values->nchild();
@@ -327,7 +327,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
     // process the col_label list first
     
     int jj=0;
-    for(SyntaxNode::Iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
+    for(SyntaxNode::iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
       SyntaxNode *cl = (SyntaxNode*)*j;
       assert(cl->opCode==ID || cl->opCode==LBRACKET);
       // need to get reference to the first indexing set and 
@@ -348,8 +348,9 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
         }
         cl = *(cl->begin());
         assert(cl->opCode==COMMA);
-        colpos[jj] = indices[ixcolset]->findPos(SetElement(1,
-          (IDNode **)cl->values));
+        ListNode *cll = (ListNode*) cl;
+        IDNode *cli = (IDNode *) (*cll)[0];
+        colpos[jj] = indices[ixcolset]->findPos(SetElement(1,&cli));
       }else{
         // this is a set of dim 1
         colpos[jj] = indices[ixcolset]->findPos(SetElement(1,(IDNode **) &cl));
@@ -360,7 +361,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
     // also do the same loop for row_labels
     for(int j=0;j<nrow;j++){
       int pos = j*(ncol+1); // get position of next row label
-      SyntaxNode *rl = (SyntaxNode*)on_values->values[pos];
+      SyntaxNode *rl = (*on_values)[pos];
       assert(rl->opCode==ID || rl->opCode==LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label
@@ -378,9 +379,10 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
             ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'" << endl;
           exit(1);
         }
-        rl = (SyntaxNode*)rl->values[0];
+        rl = *(rl->begin());
         assert(rl->opCode==COMMA);
-        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (IDNode**)rl->values));
+        IDNode *rli = (IDNode *) *(rl->begin());
+        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, &rli));
       }else{
         // this is a set of dim 1
         rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (IDNode**)&rl));
@@ -392,7 +394,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
       for (int k=0;k<nrow;k++){
         int poslist = (j+1)+k*(ncol+1);
         int posparam = colpos[j]+rowpos[k]*indices[ixcolset]->size();
-        SyntaxNode *entry = (SyntaxNode*)on_values->values[poslist];
+        SyntaxNode *entry = (*on_values)[poslist];
         if (is_symbolic){
           assert(entry->opCode==ID);
           symvalues[posparam] = string(((IDNode *)entry)->name);

@@ -227,7 +227,7 @@ ExpandedModel::print()
   if (children.size()>0)
     cout << "EM: now list the children:\n";
   
-  for(int i=0;i<children.size();i++){
+  for(unsigned int i=0; i<children.size(); ++i){
     ExpandedModel *em = children.at(i);
     em->print();
   }
@@ -306,7 +306,6 @@ ExpandedModel::getJacobianOfIntersection(ExpandedModel *emcol, int *colbeg,
 {
   int nvar;
   int *lvar;
-  int nz;
 
   if (emcol==NULL) emcol = this;
   
