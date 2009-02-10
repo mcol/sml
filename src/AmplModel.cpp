@@ -635,13 +635,13 @@ AmplModel::addDummyObjective()
         SyntaxNode *commasepon;
         for(i=0;i<ix->ncomp;i++){
           if (ix->dummyVarExpr[i]){
-            SyntaxNode *newon = new SyntaxNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
+            SyntaxNode *newon = new OpNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
             commaseplist.push_back(newon);
           }else{
             // need to make up a dummy variable
             ostringstream ost;
             ost << "dum" << i;
-            SyntaxNode *newon = new SyntaxNode(IN, new IDNode(ost.str()), ix->sets[i]);
+            SyntaxNode *newon = new OpNode(IN, new IDNode(ost.str()), ix->sets[i]);
             commaseplist.push_back(newon);
           }
         } // end for

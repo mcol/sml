@@ -439,7 +439,7 @@ StochModel::expandToFlatModel()
            the root node */
         // set rootset := {this_nd in NODES:Parent[this_nd] == "null"};
         // on_iinn: this_nd in NODES
-        on_iinN = new SyntaxNode(IN, new IDNode("this_nd"), nodeset->clone());
+        on_iinN = new OpNode(IN, new IDNode("this_nd"), nodeset->clone());
         // onai: A[this_nd]  
         onai= new SyntaxNode(LSBRACKET, anc->clone(), 
                        new ListNode(COMMA, new IDNode("this_nd")));
@@ -465,7 +465,7 @@ StochModel::expandToFlatModel()
       // this is going to be the dummy variable i (just an ID node?)
       on2 = new IDNode("this_nd");
       /** @bug 'this_nd' is a reserved variables now */
-      on_iinN = new SyntaxNode(IN, on2, on1);
+      on_iinN = new OpNode(IN, on2, on1);
       //printf("Test first part of expression: %s\n",on_iinN->print());
       // set up the 'A[i] in indS0' part now
 
@@ -504,7 +504,7 @@ StochModel::expandToFlatModel()
         //on3 = new SyntaxNode(ID, strdup("\"root\"")); //??? this root is a literal not an ID!
         //on3 = new SyntaxNode(ID, strdup("rootset"));
         on3 = new SyntaxNodeIDREF(smctmp);
-        on2 = new SyntaxNode(IN, onai, on3);
+        on2 = new OpNode(IN, onai, on3);
       }
       // problem: Since indset[stgct-1] is not set up it, the expression 
       // cannot be printed here
@@ -537,7 +537,7 @@ StochModel::expandToFlatModel()
         // need to create an indexing expression for the model above
         //on1 = new SyntaxNode(ID, strdup(buf)); //indset
         on1 = new SyntaxNodeIDREF(indset[stgcnt]); //indset
-        on_iinN = new SyntaxNode(IN, new IDNode(dummy_var.str()), on1); // i in N
+        on_iinN = new OpNode(IN, new IDNode(dummy_var.str()), on1); // i in N
         on2 = new SyntaxNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 

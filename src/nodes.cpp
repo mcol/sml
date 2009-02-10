@@ -141,10 +141,6 @@ ostream& SyntaxNode::put(ostream&s) const {
          s << "," << (**i);
       }
       break;
-    case IN:
-      s << **i << " in ";
-      s << **(++i);
-      break;
     case DIFF:
       if(this->nval>1) s << **(i++);
       s << " diff " <<  **i;
@@ -199,7 +195,7 @@ ostream& SyntaxNode::put(ostream&s) const {
       }
       break;
     case LBRACE:
-      s << "{" << **i << "}";
+      s << "{" << *i << "}";
       break;
     case LBRACKET:
       s << "(" << **i << ")";
@@ -277,6 +273,7 @@ ostream& OpNode::put(ostream &s) const {
     case LT:      s << "<";   break;
     case EQ:      s << "==";  break;
     case NE:      s << "!=";  break;
+    case IN:      s << " in "; break;
     default:
       cerr << "Unknown opCode for OpNode: " << opCode << endl;
       exit(1);

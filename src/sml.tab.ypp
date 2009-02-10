@@ -368,7 +368,7 @@ setexpr_list:  setexpr_item
 
 setexpr_item : setexpression
              | dummy_member IN setexpression{
-                  $$ = new SyntaxNode(IN, $1,$3);
+                  $$ = new OpNode(IN, $1,$3);
                }
              ;
 
@@ -495,7 +495,7 @@ paramattribute:   BINARY {$$ = new SyntaxNode(BINARY);}
               |   INTEGER {$$ = new SyntaxNode(INTEGER);}
               |   SYMBOLIC {$$ = new SyntaxNode(SYMBOLIC);}
               |   relop expr {$$ = new OpNode($1, $2);}
-              |   IN setexpression {$$ = new SyntaxNode(IN, $2);}
+              |   IN setexpression {$$ = new OpNode(IN, $2);}
               |   ASSIGN expr {$$ = new OpNode(ASSIGN, $2);}
               |   DEFAULT expr {$$ = new SyntaxNode(DEFAULT, $2);}
               ;
@@ -547,7 +547,7 @@ varattribute:  BINARY {$$ = new SyntaxNode(BINARY);}
          //| COEFF indexing_opt constraint expr
          //| COVER indexing_opt constraint expr
          //| OBJ indexing_opt objective expr
-            |  IN setexpression {$$ = new SyntaxNode(IN, $2);}
+            |  IN setexpression {$$ = new OpNode(IN, $2);}
             |  SUFFIX ID expr {$$ = new SyntaxNode(SUFFIX, $3);}
             ;
 
