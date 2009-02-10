@@ -200,13 +200,6 @@ ostream& SyntaxNode::put(ostream&s) const {
     case LBRACKET:
       s << "(" << **i << ")";
       break;
-    case DEFINED:
-      if(this->nval!=1) {
-         cerr << "':=' used as binary operator?\n";
-         exit(1);
-      }
-      s << ":=" << **i;
-      break;
     case COLON:
       if(this->nval>1) s << **(i++);
       s << ":" <<  **i;
@@ -274,6 +267,7 @@ ostream& OpNode::put(ostream &s) const {
     case EQ:      s << "==";  break;
     case NE:      s << "!=";  break;
     case IN:      s << " in "; break;
+    case DEFINED: s << ":=";  break;
     default:
       cerr << "Unknown opCode for OpNode: " << opCode << endl;
       exit(1);

@@ -446,8 +446,8 @@ StochModel::expandToFlatModel()
         // on2: A[this_nd]=="null"
         on2 =  new OpNode(EQ, onai, new IDNode("\"null\""));
         // on1: :={this_nd in NODES:Parent[this_nd] == "null"};
-        on1 = new SyntaxNode(DEFINED, 
-                         new SyntaxNode(LBRACE, new SyntaxNode(COLON, on_iinN, on2)));
+        on1 = new OpNode(DEFINED, 
+          new SyntaxNode(LBRACE, new SyntaxNode(COLON, on_iinN, on2)));
         // and add this to the model
         smctmp = new StochModelComp("rootset", TSET, NULL, on1);
         smctmp->stochmodel = this;
@@ -515,7 +515,7 @@ StochModel::expandToFlatModel()
       // and add curly brackets to it
       on3 = new SyntaxNode(LBRACE, on1);
       // and the :=
-      on1 = new SyntaxNode(DEFINED, on3);
+      on1 = new OpNode(DEFINED, on3);
       //printf("Test all of expression: %s\n",on1->print());
       
       // so we've got an SyntaxNode to '{i in NODES:A[i] in indS0}'

@@ -462,7 +462,7 @@ setattribute:  DIMEN INT_VAL {
                   $$ = new SyntaxNode(WITHIN, $2);
                }
             | DEFINED setexpression {
-                  $$ = new SyntaxNode(DEFINED, $2);
+                  $$ = new OpNode(DEFINED, $2);
                }
             |  DEFAULT setexpression {
                   $$ = new SyntaxNode(DEFAULT, $2);
@@ -541,7 +541,7 @@ varattribute:  BINARY {$$ = new SyntaxNode(BINARY);}
             |  SYMBOLIC {$$ = new SyntaxNode(SYMBOLIC);}
             |  LE expr {$$ = new OpNode(LE, $2);}
             |  GE expr {$$ = new OpNode(GE, $2);}
-            |  DEFINED expr {$$ = new SyntaxNode(DEFINED, $2);}
+            |  DEFINED expr {$$ = new OpNode(DEFINED, $2);}
             |  ASSIGN expr {$$ = new OpNode(ASSIGN, $2);}
             |  DEFAULT expr {$$ = new SyntaxNode(DEFAULT, $2);}
          //| COEFF indexing_opt constraint expr
