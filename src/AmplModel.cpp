@@ -649,7 +649,7 @@ AmplModel::addDummyObjective()
         if (ix->ncomp==1){
           commasepon = commaseplist[0];
         }else{
-          commasepon = new SyntaxNode(COMMA);
+          commasepon = new ListNode(COMMA);
           for(i=0;i<ix->ncomp;i++){
             commasepon->push_back(commaseplist[i]);
           }

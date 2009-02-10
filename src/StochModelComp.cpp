@@ -298,7 +298,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
           printf("Expectation indexing expression *must* be present\n");
           exit(1);
         }
-        SyntaxNode *cslon = new SyntaxNode(COMMA);
+        SyntaxNode *cslon = new ListNode(COMMA);
         for(list<SyntaxNode*>::iterator q = listofsum.begin();q!=listofsum.end();
             q++){
           cslon->push_back(*q);

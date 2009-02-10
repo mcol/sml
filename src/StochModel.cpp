@@ -442,7 +442,7 @@ StochModel::expandToFlatModel()
         on_iinN = new SyntaxNode(IN, new IDNode("this_nd"), nodeset->clone());
         // onai: A[this_nd]  
         onai= new SyntaxNode(LSBRACKET, anc->clone(), 
-                       new SyntaxNode(COMMA, new IDNode("this_nd")));
+                       new ListNode(COMMA, new IDNode("this_nd")));
         // on2: A[this_nd]=="null"
         on2 =  new OpNode(EQ, onai, new IDNode("\"null\""));
         // on1: :={this_nd in NODES:Parent[this_nd] == "null"};
@@ -475,7 +475,7 @@ StochModel::expandToFlatModel()
       on1 = anc->clone();
       // this is the comma separated list
       /* I think that  dummy variable is just left as a ID */
-      on2 = new SyntaxNode(COMMA, new IDNode("this_nd"));
+      on2 = new ListNode(COMMA, new IDNode("this_nd"));
       // this is A[i]
       onai= new SyntaxNode(LSBRACKET, on1, on2);
       // this is the A[i] in indSO
