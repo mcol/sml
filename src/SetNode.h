@@ -11,9 +11,13 @@
  * This class represents a set in the the syntax tree.
  */
 class SetNode: public SyntaxNode, public CompDescr {
+protected:
+   SetNode *within;
+
 public:
    SetNode(int opCode, SyntaxNode *node1=NULL, SyntaxNode *node2=NULL) :
-      SyntaxNode(opCode, node1, node2) {}
+      SyntaxNode(opCode, node1, node2), within(NULL) {}
+   virtual bool isMember(ValueNodeBase *sm) = 0;
 };
 
 /** @class SimpleSet
@@ -31,15 +35,19 @@ public:
    bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
    SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2);
    vector<string> members(AmplModel &context);
+   bool isMember(ValueNodeBase *sm);
 };
 
 /** @class ListSet
  * This class represents a set with explicitly enumerated members
  */
 class ListSet: public SetNode {
+private:
+   vector<string> set;
 public:
    ListSet(SyntaxNode *list) :
       SetNode(LBRACE, list) {}
+   bool isMember(ValueNodeBase *sm);
 };
 
 /** @class CompositeSet
@@ -52,6 +60,7 @@ public:
    {
       assert((opCode==CROSS) || (opCode==DIFF));
    }
+   bool isMember(ValueNodeBase *sm);
 };
 
 #endif /* ifndef SETNODE_H */

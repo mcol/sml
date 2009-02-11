@@ -7,6 +7,7 @@
    #include "nodes.h"
    #include "CompDescrParam.h"
    #include "AmplModel.h"
+   #include "DataNodes.h"
    #define YYERROR_VERBOSE
    int datalex(void);
    void dataerror(char *s);
@@ -53,6 +54,8 @@
 %token TOKVALUETABLE
 %token <string> CHARACTER_STRING
 
+%token TOKSETSPEC
+
 %nonassoc SEMICOLON
 
 %%
@@ -80,8 +83,8 @@ setdef:  SET ID defined_opt setspec_list SEMICOLON {
                exit(1);
             }
             assert($4->nchild() == 1);
-            ListNode *tmp = (ListNode*) *($4->begin());
-            entry->mc->value = new Set(*tmp);
+            SetSpec *tmp = (SetSpec*) *($4->begin());
+            entry->mc->value = new Set(*(tmp->list));
          }
       ;
 
@@ -117,7 +120,7 @@ member_table_list: member_table
                  | member_table_list member_table
                  ;
 
-setspec: set_template_opt object_list { $$ = $2; } // FIXME: Support templates
+setspec: set_template_opt object_list { $$ = new SetSpec($1, (ListNode*)$2); }
        | set_template_opt member_table_list
        ;
 
