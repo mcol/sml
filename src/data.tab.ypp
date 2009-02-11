@@ -1,4 +1,5 @@
 %debug
+%expect 20
 %{
    #include <stdio.h>
    #include <stdlib.h>
@@ -17,17 +18,19 @@
 
 %union
 {
-  long *ival;
-  double *fval;
-  char *string;
-  SyntaxNode *opPtr;
-  SyntaxNodeIx *opPtrIx;
+   long *ival;
+   double *fval;
+   char *string;
+   SyntaxNode *opPtr;
+   SyntaxNodeIx *opPtrIx;
 }
 
-%type <opPtr> number object set_elements set_name col_label
-%type <opPtr> paramspec_list paramspec value_list value param_template_opt
-%type <opPtr> value_table value_table_list col_label_list
- //%type <opPtr> entry_list entry string row_label
+%type <opPtr> setspec_list setspec 
+%type <opPtr> set_template_opt templ_item_list templ_item object_list
+%type <opPtr> member_table_list member_table theader_row settablerow_list
+%type <opPtr> theader_list settablerow plusminuslist object
+%type <opPtr> paramspec_list paramspec paramtemplate_opt
+%type <opPtr> valuetable_list valuetable
 
 %token <string> ID 
 %token <ival> INT_VAL
@@ -45,108 +48,122 @@
 %token PUBLIC CORE DOT BEG TIMESTAGE RANDOM SUFFIX BLOCK IDREF IDREFM
 %token SBLOCK USING DETERMINISTIC EXPECTATION STOCHASTIC STAGES
 %token STAGE NODE
-%token TR 
+%token TR ASSIGN
 %token TOKPARAMSPECLIST TOKPARAMTEMPLATE TOKVALUETABLELIST
 %token TOKVALUETABLE
 %token <string> CHARACTER_STRING
 
 %nonassoc SEMICOLON
-%right ASSIGN
-%left LOGICAL_OR
-%left LOGICAL_AND
-%left EQ NE
-%left LT LE GT GE
-%left '+' '-'
-%left '*' '/'
-%right POWER
-%left '!'
-%left ELLIPSE
-
-//%expect 10
 
 %%
- /* needs to come first, top level rule */
 
-data_statements: /* empty */
-          | data_statements data_statement 
+statements: /* empty */
+          | statements statement 
           ;
 
- /* This is the definition of an object. 
-"An object in a data specification may be either a number, or any character 
- string. [...] a character string may be specified by surrounding it with 
- quotes (' or ")". (AMPL book, p149) */
- /* Objects are set elements or values of parameters. 
-    According to the AMPL book, values of paramteres are 'entries', which in 
-    addition can be a "default" symbol. However, there is no way that the
-    grammar can distinguish whether an object or an entry is specified;
-    therefore object is used for both, the default symbol is processed later
- */
-
-object: ID {
-          $$ = new IDNode($1);
-          if (logParse) cout << "Found 'object' of type ID: " << (void*)$$ << 
-            ":" << $1 << "\n";
-        }
-      | CHARACTER_STRING {
-          $$ = new IDNode($1);
-          if (logParse) cout << "Found 'object' of type ID: " << (void*)$$ <<
-            ":" << $1 << "\n";
-        }
-      | INT_VAL {
-          $$ = (SyntaxNode *) new ValueNode<long>(*$1);
-          if (logParse) cout << "Found 'object' of type INT_VAL: " << (void*)$$
-            << ":" << *$1 << "\n";
-        }
-      | FLOAT_VAL {
-          $$ = (SyntaxNode *) new ValueNode<double>(*$1);
-          if (logParse) cout << "Found 'object' of type FLOAT_VAL: " <<
-            (void*)$$ << ":" << *$1 << "\n";
-        }
-      ;
-
-
-
-
-
-data_statement: data_paramdef SEMICOLON
-              | data_paramdef_alt SEMICOLON
-              | data_setdef SEMICOLON
-              ;
-
-data_setdef: SET ID DEFINED set_elements {
-                //$2 is the set being defined
-                //$4 are the set elements given as a ' ' node with list         
-                SymbolTable::Entry *entry =
-                  root->symbol_table.findSymbol($2);
-                if (entry==NULL){
-                  cerr << "Data given for set " << $2 << " which has not been"
-                    "declared at top level!" << endl;
-                  exit(1);
-                }
-                if(entry->type != SymbolTable::ST_SET) {
-                  cerr << "Set data given for variable " << $2 << " which was "
-                    "not delcared a set!" << endl;
-                    exit(1);
-                }
-                entry->mc->value = new Set(*((ListNode*)$4));
-              }
+statement:  paramdef
+         |  setdef
+         ;
               
 
-set_elements: /* empty */ {$$=NULL;}
-           | set_elements object {
-               $$ = addItemToListOrCreate(' ', (ListNode*)$1, $2);
-             }
+setdef:  SET ID defined_opt setspec_list SEMICOLON {
+            // Find symbol
+            SymbolTable::Entry *entry = root->symbol_table.findSymbol($2);
+            if (!entry) {
+               cerr << "Data given for set " << $2 << " which has not been"
+                  "declared at top level!" << endl;
+               exit(1);
+            }
+            if(entry->type != SymbolTable::ST_SET) {
+               cerr << "Set data given for variable " << $2 << " which was "
+                  "not delcared a set!" << endl;
+               exit(1);
+            }
+            assert($4->nchild() == 1);
+            ListNode *tmp = (ListNode*) *($4->begin());
+            entry->mc->value = new Set(*tmp);
+         }
+      ;
+
+defined_opt: /* empty */
+           | DEFINED
            ;
 
+setspec_list:  /* empty */ { $$=NULL; }
+            |  setspec_list setspec { 
+                  $$ = addItemToListOrCreate(' ', (ListNode*)$1, $2); 
+               }
+            ;
 
-/* This is the "normal" way of defining a parameter value, where only the
-   name of the (one!) parameter is given, without a set definition at the
-   same time */
-data_paramdef: PARAM ID paramdefault_opt DEFINED paramspec_list {
 
-                // try to find the correct param definition 
-                // unclear what context to use: global at the moment
-                SymbolTable::Entry *entry =
+set_template_opt: /* empty */ { $$=NULL; }
+                | LBRACKET templ_item_list RBRACKET { $$ = $2; }
+                ;
+
+templ_item_list: templ_item
+               | templ_item_list COMMA templ_item
+               ;
+
+templ_item: object
+          | '*' { $$ = new SyntaxNode('*'); }
+          | COLON { $$ = new SyntaxNode(COLON); }
+          ;
+
+object_list: object { $$ = new ListNode(' ', $1); }
+           | object_list object { $$ = $1->push_back($2); }
+           ;
+
+member_table_list: member_table
+                 | member_table_list member_table
+                 ;
+
+setspec: set_template_opt object_list { $$ = $2; } // FIXME: Support templates
+       | set_template_opt member_table_list
+       ;
+
+member_table: theader_row DEFINED settablerow_list
+            ;
+
+theader_row:   TR theader_list {
+                  cerr << "TR not yet supported." << endl;
+                  $$ = $2;
+               }
+           |   theader_list
+           ;
+
+settablerow_list: settablerow
+                | settablerow_list settablerow
+                ;
+
+theader_list:  COLON object_list { $$ = $2; }
+            |  theader_list COLON object_list {
+                  cerr << "Multiple theaders not yet supported." << endl;
+                  $$ = $1;
+               }
+            ;
+
+settablerow:   object_list plusminuslist {
+                  cerr << "set table definitions not yet supported." << endl;
+                  $$ = NULL;
+               }
+           ;
+
+plusminuslist: plusminus { $$ = NULL; }
+             | plusminuslist plusminus { $$ = NULL; }
+             ;
+
+plusminus: '+'
+         | '-'
+         ;
+
+object: ID { $$ = new IDNode($1); }
+      | CHARACTER_STRING { $$ = new IDNode($1); }
+      | INT_VAL { $$ = new ValueNode<long>(*$1); }
+      | FLOAT_VAL { $$ = new ValueNode<double>(*$1); }
+      ;
+
+paramdef:   PARAM ID paramdefault_opt defined_opt paramspec_list SEMICOLON {
+               SymbolTable::Entry *entry =
                   root->symbol_table.findSymbol($2);
                 if (entry==NULL){
                   cerr << "Data given for parameter " << $2 << " which has "
@@ -159,277 +176,62 @@ data_paramdef: PARAM ID paramdefault_opt DEFINED paramspec_list {
                     exit(1);
                 }
                 // reference has been found
-                entry->mc->value = new CompDescrParam(entry->mc, $5); 
-              }
-            | PARAM ID paramdefault_opt value_table_list {
-              /* This is an alternative (undocumented) form of the 
-                 paramdeclaration without the ':='. 
-                 Seems to just be used in the case where paramspec_list is 
-                 actually a value_table_list.
-                 In that case we would have a ":=:" which can be 
-                 abbreviated to ":"                                        */
-
-                // try to find the correct param definition 
-                // unclear what context to use: global at the moment
-                SymbolTable::Entry *entry =
-                  root->symbol_table.findSymbol($2);
-                if (entry==NULL){
-                  cerr << "Data given for param " << $2 << " which has not"
-                    "been declared at top level!" << endl;
-                  exit(1);
-                }
-                if(entry->type != SymbolTable::ST_PARAM) {
-                  cerr << "Param data given for variable " << $2 << " which "
-                    "was not delcared a param!" << endl;
-                    exit(1);
-                }
-                // reference has been found
-                // wrap the value_table_list in a single item paramspec_list
-                SyntaxNode *on = new SyntaxNode(TOKPARAMSPECLIST, $4);
-                entry->mc->value = new CompDescrParam(entry->mc, on);
-              }
-            ;
-//data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_item_list
-
-/* This is the alternative form of the parameter statement where set members
-   are given at the same time as parameter values */
-data_paramdef_alt: PARAM paramdefault_opt COLON param_name_list DEFINED value_list
-//                 | PARAM paramdefault_opt COLON set_name COLON param_name_list DEFINED value_item_list
-                 | PARAM paramdefault_opt COLON set_name COLON param_name_list DEFINED value_list
-                // for now just simply scan the rhs. Rhs can be:
-                // - single value (for scalar parameters)
-                // - list of element/value pairs (for 1d arrays)
-                // - list of tables of the form 
-                //   ": col col := row val val row val val ...
-                //   (for 2d arrays)
-                // - tables involving templates
-                //   [*,col,*] : col col := ...as above...
-
-                 ;
-
-param_name_list: ID
-               | param_name_list ID
-               ;
-set_name: ID {$$=new IDNode($1);}
-
-//value_item_list: value_item
-//               | value_item_list value_item
-//               ;    
-
-//FIXME: this does not work! There is no way the grammar can work out which 
-//       of the items listed in a paramdef is an object and which is an entry
-//       We would need to look at the dimension of the sets involved and then
-//       count
-//       => object and entries treated the same, after the definition try
-//          to analyse?
-
-//value_item: object_list entry
-
-value_list: /* empty */ {$$=NULL;}
-          | value_list value {
-              if ($1==NULL){
-                $$ = new ListNode(' ',$2);
-              }else{
-                if ($1->opCode==' '){
-                  $$ = $1->push_back($2);
-                }else{
-                  $$ = new ListNode(' ', $1, $2);
-                }
-              }
+                entry->mc->value = new CompDescrParam(entry->mc, $5);
             }
-          ;
+        |   PARAM paramdefault_opt COLON object_list DEFINED object_list 
+               SEMICOLON
+        |   PARAM paramdefault_opt COLON object COLON object_list DEFINED
+               object_list SEMICOLON
+        ;
 
 paramdefault_opt: /* empty */
-                | DEFAULT number
+                | DEFAULT INT_VAL {
+                     cerr << "Default values not yet supported." << endl;
+                  }
+                | DEFAULT FLOAT_VAL{
+                     cerr << "Default values not yet supported." << endl;
+                  }
                 ;
 
-paramspec_list: /* empty */ {$$=NULL;}
-              | paramspec_list paramspec {
-                  if ($1==NULL){
-                    $$ = new SyntaxNode(TOKPARAMSPECLIST, $2);
-                  }else{
-                    if ($1->opCode==TOKPARAMSPECLIST){
-                      $$ = $1->push_back($2);
-                    }else{        
-                      $$ = new SyntaxNode(TOKPARAMSPECLIST, $1, $2);
-                    }
-                  }
-                }
+paramspec_list: paramspec { $$ = new SyntaxNode(TOKPARAMSPECLIST, $1); }
+              | paramspec_list paramspec { $$ = $1->push_back($2); }
               ;
 
-//paramspec: param_template_opt value_item_list
-paramspec:  param_template_opt value value_list {
-              SyntaxNode *vl;
-              //printf("Executing value_list branch of paramspec\n");
-              if ($3==NULL){
-                vl = new ListNode(' ', $2);
-              }else{
-                vl = $3->push_front($2);
-              }
-              if ($1!=NULL){
-                $$ = new SyntaxNode(TOKPARAMTEMPLATE, $1, vl);
-              }else{
-                $$ = vl;
-              }
+paramspec:  paramtemplate_opt object_list {
+               if($1) {
+                  $$ = new SyntaxNode(TOKPARAMTEMPLATE, $1, $2);
+               } else {
+                  $$ = $2;
+               }
             }
-         |  param_template_opt value_table_list{
-              cerr << "Executing wrong(?) value_table_list branch of "
-                "paramspec\n";
-              exit(1);
+         |  paramtemplate_opt valuetable_list {
+               cerr << "Not properly supported yet \"paramtemplate_opt "
+                  "valuetable_list\"." << endl;
             }
          ;
 
-value_table_list: value_table {
-                    $$ = new SyntaxNode(TOKVALUETABLELIST, $1);
-                  }
-                | value_table_list value_table {
-                    $$ = $1->push_back($2);
-                  }  
-                ;
+paramtemplate_opt: /* empty */ { $$=NULL; }
+                 | LSBRACKET templ_item_list RSBRACKET { $$=$2; }
+                 ;
 
-//value_table: TR COLON col_label_list DEFINED value_table_row_list
-//           | COLON col_label_list DEFINED value_table_row_list
-//           ;
-/* The parser cannot distinguisg between rows at this point. All it
-   sees is a list of values. Hence the alternative below */
-
-value_table: TR COLON col_label_list DEFINED value_list
-           | COLON col_label_list DEFINED value_list {
-               SyntaxNode *cll = $2;
-               SyntaxNode *vl = $4;
-               assert(cll->opCode==' ');
-               assert(vl->opCode==' ');
-               if (vl->nchild()%(cll->nchild()+1)!=0){
-                 cerr << "DATA: error in line " << datalineno << ":\n";
-                 cerr << "Length of value table (" << vl->nchild() << ")";
-                 cerr << " not divisable by column labels +1 (" <<
-                   cll->nchild()+1 << ")\n";
-                 exit(1);
-               }
-               $$ = new SyntaxNode(TOKVALUETABLE, $2, $4);
-             }
-           ;
-
-//tr_opt: /* empty */
-//      | TR
-//      ;
-
-col_label_list: col_label {
-                  assert($1);
-                  $$ = new ListNode(' ', $1);
-                }
-              | col_label_list col_label {
-                  assert($1 && $1->opCode==' ');
-                  $$ = $1->push_back($2);
-                }
-              ;
-
-/*
-value_table_row_list: value_table_row
-                    | value_table_row_list value_table_row
-                    ;
-
-value_table_row: row_label entry_list
-// I don't think the parser can distiguish between a row_label and the 
-//   entry_list at this point. The parser would need to count the number
-//   of col_labels given and assign a row_label every n entries. 
-//   A \n at the end of a value_table_row is not mandatory, so cannot be used
-//   to help in the distinction                                             
-
-
-// an entry is an actual parameter value 
-
-entry_list: entry {
-              $$ = new SyntaxNode(' ',$1);}
-          | entry_list entry{
-              $$ = addItemToListNew($1, $2);}
-          ;
-
-entry: number {$$=$1;}
-     | string {$$=$1;}
-     | DOT {$$=new SyntaxNode(DOT, NULL);}
-     ;
- 
-string: ID {$$=new IDNode($1);}
-
-row_label: object
-
-*/
-
-param_template_opt: /* empty */
-                  | param_template
-                  ;
-//      param_template is [*, A2, *] 
-param_template: LSBRACKET templ_item_list RSBRACKET
-
-templ_item_list: templ_item
-               | templ_item_list COMMA templ_item
+valuetable_list: valuetable { new SyntaxNode(TOKVALUETABLELIST, $1); }
+               | valuetable_list valuetable { $$ = $1->push_back($2); }
                ;
 
-templ_item: object
-          | '*'
+valuetable: theader_row DEFINED object_list {
+               if($3->nchild() % ($1->nchild()+1) != 0) {
+                  cerr << "DATA: error in line " << datalineno << ":" << endl;
+                  cerr << "Length of value table (" << $3->nchild() << ")" <<
+                     " not divisable by column labels +1 (" <<
+                     $1->nchild()+1 << ")" << endl;
+                  exit(1);
+               }
+               $$ = new SyntaxNode(TOKVALUETABLE, $1, $3);
+            }
           ;
 
-col_label: object {
-             $$=$1;
-             if (logParse) cout << "Found 'col_label': " << (void*)$1 << "\n";
-           }
-
-value: object {
-         $$=$1;
-         if (logParse) cout << "Found 'value': " << (void *)$1 << "\n";
-       }
-
-
-/* an object is a member of a set that is used to identify which entry of
-   a parameter array is to be defined */
-
-//object_list: object
-//           | object_list object
-//           ;
-
-//object: ID
-
-
-
-//setlist_opt: /*empty*/
-//           | COLON setlist
-//           ;
-
-//setlist: ID
-//       | setlist ID
-//       ;
-
-//numberlist: number
-//         | numberlist number
-//         ;
-
-number: INT_VAL {
-  /* not entirly sure what is returned here as $1 */
-  // Aparently a pointer to long int
-          $$=(SyntaxNode *) new ValueNode<long>(*$1);
-       }
-     | FLOAT_VAL { 
-         $$=(SyntaxNode *) new ValueNode<double>(*$1);
-       }
-//     | identifier { 
-//          $$=new SyntaxNode(0, $1);
-//       }
-     | INFINITY { 
-          $$ = new SyntaxNode(INFINITY);
-       }
-     ;
 
 %%
-
-//int datalex(void){
-//  return yylex();
-//}
-
-//int datawrap(void){
-//  return 1;
-//}
-
 
 void dataerror(char *s) {
   cerr << "DATA: " << s << " on line " << datalineno << "\n";
