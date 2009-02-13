@@ -2,6 +2,7 @@
 #define STOCHMODEL_H
 
 #include "AmplModel.h"
+#include "SetNode.h"
 
 /* ------------------------------------------------------------------------ */
 /** @class StochModel
@@ -25,8 +26,8 @@
 class StochModel: public AmplModel{
  public:
   // FIXME: stage should be replaced by a Set (decribing the elements)
-  SyntaxNode *stageset;  //!< The set of STAGES
-  vector <string> *stagenames; //!< explicit set of STAGES 
+  SetNode *stageset;  //!< The set of STAGES
+  vector <string> stagenames; //!< explicit set of STAGES 
   bool is_symbolic_stages; //!< if stage names are symbolic or numeric
   SyntaxNode *nodeset;   //!< The set of NODES 
   SyntaxNode *anc;       //!< The parameter array of ancestors
@@ -36,7 +37,7 @@ class StochModel: public AmplModel{
   //! default constructor 
   StochModel();
   //! Constructor 
-  StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
+  StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
 	     SyntaxNode *onProb, AmplModel *parent);
 
   //! Expand the StochModel to a nested set of FlatModels 

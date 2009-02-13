@@ -1,10 +1,11 @@
+#include <typeinfo>
+#include <fstream>
+#include <sstream>
 #include "GlobalVariables.h"
 #include "StochModel.h"
 #include "StochModelComp.h"
 #include "sml.tab.h"
-#include <typeinfo>
-#include <fstream>
-#include <sstream>
+#include "SetNode.h"
 
 static bool logSM = false;
 
@@ -15,7 +16,6 @@ StochModel::StochModel()
 StochModel::StochModel() :
   AmplModel(),
   stageset(NULL),
-  stagenames(NULL),
   nodeset(NULL), 
   anc(NULL),
   prob(NULL)
@@ -26,11 +26,10 @@ StochModel::StochModel() :
 StochModel::StochModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
-StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
+StochModel::StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
                        SyntaxNode *onProb, AmplModel *prnt) :
   AmplModel(),
   stageset(onStages),
-  stagenames(NULL),
   nodeset(onNodes), 
   anc(onAncs),
   prob(onProb)
@@ -43,6 +42,83 @@ StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *on
 
 
 
+/* ---------------------------------------------------------------------------
+expandSet()
+---------------------------------------------------------------------------- */
+vector<string> expandSet(SetNode *set) {
+
+  /* analyze all dependencies of this expression */
+  ModelComp::untagAll();
+  
+  list <ModelComp*> dep;
+  set->findIDREF(dep);
+  for(list<ModelComp*>::iterator q=dep.begin(); q!=dep.end(); ++q){
+    if (logSM) cout << "dep: " << (*q)->id << endl;
+    (*q)->tagDependencies();
+  }
+
+  /* Also tag all global set and parameter definitions */
+  /** \bug this is just so that the global data file can be read, eventually
+     this should be removed */
+  {
+    list<ModelComp*> &comps = AmplModel::root->comps;
+    
+    for(list<ModelComp*>::iterator p=comps.begin(); p!=comps.end(); ++p){
+      if ((*p)->type==TSET || (*p)->type==TPARAM) (*p)->tagDependencies();
+    }
+  }
+
+  ofstream out("tmp.mod");
+  ModelComp::modifiedWriteAllTagged(out);
+  out << "set settemp = " << set << ";\n";
+  out.close();
+  
+  out.open("tmp.scr");
+  out << "reset;\n";
+  out << "model tmp.mod;\n";
+  out << "data ../" << GlobalVariables::datafilename << ";\n";
+  out << "display settemp > (\"tmp.out\");\n";
+  out.close();
+  
+  {
+    string command = GlobalVariables::amplcommand;
+    command += " tmp.scr";
+    cout << "Executing `" << command << "`\n";
+    int errc = system(command.c_str());
+    if (errc!=0){
+      cerr << "ERROR: Call to AMPL returns errc=" << errc << endl;
+      exit(1);
+    }
+  }
+
+  ifstream in("tmp.out");
+  if (!in){
+    cerr << "ERROR: File 'tmp.out' produced by AMPL does not exist. "
+       "AMPL processing failed?\n";
+    exit(1);
+  }
+  //in.getline(buffer, 500);
+  //if (logSM) cout <<"Set " << set << " members: " << buffer << "\n";
+
+  // parse the set members
+  vector<string> member_list;
+  {
+    string read;
+    getline(in, read, ';');
+
+    string::size_type p2 = read.find(":=") + 2;
+    string::size_type p = read.find_first_not_of(' ', p2);
+    
+    while(p!=read.npos){
+      p2 = read.find_first_of(' ', p);
+      member_list.push_back(read.substr(p,p2-p));
+      p = read.find_first_not_of(' ', p2);
+    }
+  }
+  in.close();
+
+  return member_list;
+}
 
 /* ---------------------------------------------------------------------------
 StochModel::expandStages()
@@ -57,89 +133,7 @@ StochModel::expandStages()
 void
 StochModel::expandStages()
 {
-  char buffer[500];
-  list <ModelComp*> dep;
-
-  /* analyze all dependencies of this expression */
-  ModelComp::untagAll();
-  
-  stageset->findIDREF(dep);
-  for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
-    if (logSM) printf("dep: %s\n",(*q)->id);
-    (*q)->tagDependencies();
-  }
-  /* Also tag all global set and parameter definitions */
-  /** \bug this is just so that the global data file can be read, eventually
-     this should be removed */
-  {
-    AmplModel *root = this;
-    while (root->parent) root = root->parent;
-    
-    for(list<ModelComp*>::iterator p = root->comps.begin();p!=root->comps.end();p++){
-      ModelComp *q = *p;
-      if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
-    }
-
-    
-  }
-
-  ofstream out("tmp.mod");
-  ModelComp::modifiedWriteAllTagged(out);
-  out << "set settemp = " << stageset << ";\n";
-  out.close();
-  
-  out.open("tmp.scr");
-  out << "reset;\n";
-  out << "model tmp.mod;\n";
-  out << "data ../" << GlobalVariables::datafilename << ";\n";
-  out << "display settemp > (\"tmp.out\");\n";
-  out.close();
-  
-  {
-    if(strlen(GlobalVariables::amplcommand)+9>500) {
-       // Avoid buffer overflow
-       cerr << "buffer too short to accomodate amplcommand length.\n";
-       exit(1);
-    }
-    strcpy(buffer, GlobalVariables::amplcommand);
-    strcat(buffer, " tmp.scr");
-    cout << "Executing `" << buffer << "`\n";
-    int errc = system(buffer);
-    if (errc!=0){
-      cerr << "ERROR: Call to AMPL returns errc=" << errc << "\n";
-      exit(1);
-    }
-  }
-
-  ifstream in("tmp.out");
-  if (!in){
-    cerr << "ERROR: File 'tmp.out' produced by AMPL does not exist. "
-       "AMPL processing failed?\n";
-    exit(1);
-  }
-  in.getline(buffer, 500);
-  in.close();
-  if (logSM) cout <<"Set " << stageset << " members: " << buffer << "\n";
-
-  // parse the set members
-  stagenames = new vector<string>;
-  {
-    char *p, *p2;
-    p = strstr(buffer, ":=");
-    p+=2;
-
-    p2 = strtok(p, " ;");
-    while(p2!=NULL){
-      if (logSM) printf("Member: %s\n",p2);
-      stagenames->push_back(p2);
-      p2 = strtok(NULL, " ;\n");
-    }
-    
-  }
-
-  //exit(1);
-
-
+   stagenames = expandSet(stageset);
 }
 
 /* ---------------------------------------------------------------------------
@@ -324,8 +318,8 @@ StochModel::expandToFlatModel()
 
   // we need to have the pointers to the submodel indexing sets all set
   // up from the beginning, so that they can be referred to
-  indset = (StochModelComp**)calloc(stagenames->size(),sizeof(StochModelComp*));
-  for(unsigned int i=0;i<stagenames->size();i++) {
+  indset = (StochModelComp**)calloc(stagenames.size(),sizeof(StochModelComp*));
+  for(unsigned int i=0;i<stagenames.size();i++) {
     indset[i] = new StochModelComp();
     // give it a dummy name just so that debugging routines work
     // @bug this introduces a memory leak
@@ -333,9 +327,9 @@ StochModel::expandToFlatModel()
   }
 
   // loop over all stages and create an AmplModel for every stage 
-  stgcnt = stagenames->size()-1;
-  for(vector<string>::reverse_iterator st=stagenames->rbegin();
-      st!=stagenames->rend();  st++,stgcnt--){// loops backwards through list
+  stgcnt = stagenames.size()-1;
+  for(vector<string>::reverse_iterator st=stagenames.rbegin();
+      st!=stagenames.rend();  st++,stgcnt--){// loops backwards through list
     printf("Creating ampl model at stage %d: %s\n",stgcnt, (*st).c_str());
     am = new AmplModel();
 
@@ -621,9 +615,9 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
      is symbolic. otherwise don't use quotation marks */
 
   if (is_symbolic_stages){
-    StageNodeNode::stage = "\""+stagenames->at(level)+"\"";
+    StageNodeNode::stage = "\""+stagenames.at(level)+"\"";
   } else {
-    StageNodeNode::stage = stagenames->at(level);
+    StageNodeNode::stage = stagenames.at(level);
   }
 
   if (level==0){
@@ -672,7 +666,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
   ModelComp *mc, *prev;
   list<char*>* dv;
   // need to set stage and node for the current model
-  SyntaxNode::stage = "\""+stagenames->at(level)+"\"";
+  SyntaxNode::stage = "\""+stagenames.at(level)+"\"";
   if (level==0){
     SyntaxNode::node = "\"root\"";
   }else{
