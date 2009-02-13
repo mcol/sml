@@ -364,7 +364,7 @@ mdim_dummy: mdim_dummy_start RBRACKET { $$ = new SyntaxNode(LBRACKET, $1); }
           ;
 
 mdim_dummy_start: LBRACKET ID { 
-                     $$ = new ListNode(COMMA, new IDNode($2));
+                     $$ = new SyntaxNode(COMMA, new IDNode($2));
                   }
                 | mdim_dummy_start COMMA ID {
                      $$ = $1->push_back(new IDNode($3));
