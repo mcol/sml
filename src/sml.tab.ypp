@@ -21,9 +21,6 @@
    void rem_indexing(SyntaxNodeIx *indexing);
    void begin_model(char *name, SyntaxNode *indexing);
    void end_model();
-   ModelComp *add_set_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
-   ModelComp *add_obj_to_model(int token, char *id, SyntaxNode *indx,
-      SyntaxNode *attrib);
 
    extern int yylineno;
    int yylex(void);
@@ -44,19 +41,15 @@
    int n_indexing;
    /* ---------------- stochastic global variables:------------------------ */
    static bool is_stoch_model;      /* true if inside stochastic model def */
-   /* these are set within entity definitions and reset at the end of them */
-   static bool is_deterministic_loc;
-   static SyntaxNode *stages_loc;
    /* these are set by global stocastic modifier commands */
    static bool is_deterministic_glo;
    static SyntaxNode *stages_glo;
    extern FILE *yyin;
    extern void parse_data(AmplModel *current_model, char *datafilename);
 
-   ModelComp *add_cons_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
    ModelComp *add_param_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
    ModelComp *add_var_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
-   void addStochInfo(StochModelComp *newmc);
+   void addStochInfo(StochModelComp *newmc, SyntaxNode*);
    void createSubdirTmpIfNotExist(void);
 %}
 
@@ -297,7 +290,15 @@ equation: expr ASSIGN expr { $$ = new OpNode(ASSIGN, $1, $3); }
 cnstr:   MAXIMIZE ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON expr {
-            ModelComp *newmc = add_obj_to_model(MAXIMIZE, $2, $3, $7);     
+            ModelComp *newmc;
+            if (is_stoch_model){
+               newmc = new StochModelComp($2, TMAX, $3, $7);
+               addStochInfo((StochModelComp*)newmc, $5);
+            }else{
+               newmc = new ModelComp($2, TMAX, $3, $7);
+            }
+
+            current_model->addComp(newmc);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_OBJ, $2,
                newmc);
             if ($3) rem_indexing($3);
@@ -306,7 +307,15 @@ cnstr:   MAXIMIZE ID indexing_opt {
      |   MINIMIZE ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON expr {
-            ModelComp *newmc = add_obj_to_model(MINIMIZE, $2, $3, $7);
+            ModelComp *newmc;
+            if (is_stoch_model){
+               newmc = new StochModelComp($2, TMIN, $3, $7);
+               addStochInfo((StochModelComp*)newmc, $5);
+            }else{
+               newmc = new ModelComp($2, TMIN, $3, $7);
+            }
+
+            current_model->addComp(newmc);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_OBJ, $2,
                newmc); 
             if ($3) rem_indexing($3);
@@ -315,7 +324,14 @@ cnstr:   MAXIMIZE ID indexing_opt {
      |   SUBJECTTO ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt COLON equation { 
-            ModelComp *newmc = add_cons_to_model($2, $3, $7);
+            ModelComp *newmc;
+            if (is_stoch_model){
+               newmc = new StochModelComp($2, TCON, $3, $7);
+               addStochInfo((StochModelComp*)newmc, $5);
+            }else{
+               newmc = new ModelComp($2, TCON, $3, $7);
+            }
+            current_model->addComp(newmc);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_CONS, $2,
                newmc); 
             if ($3) rem_indexing($3);
@@ -380,7 +396,14 @@ lexpr:   expr
 setdef:  SET ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt setattributes_opt {
-            ModelComp *newmc = add_set_to_model($2, $3, $6);
+            ModelComp *newmc;
+            if (is_stoch_model){
+               newmc = new StochModelComp($2, TSET, $3, $6);
+               addStochInfo((StochModelComp*)newmc, $5);
+            }else{
+               newmc = new ModelComp($2, TSET, $3, $6);
+            }
+            current_model->addComp(newmc);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_SET, $2,
                newmc); 
             if (GlobalVariables::logParseModel) 
@@ -396,7 +419,15 @@ setdef:  SET ID indexing_opt {
 paramdef:   qualifier PARAM ID indexing_opt {
                if ($4) add_indexing($4);
             } stochattr_opt paramattributes_opt {
-               ModelComp *newmc = add_param_to_model($3, $4, $7);
+               ModelComp *newmc;
+               if (is_stoch_model){
+                  StochModelComp *newmcs = new StochModelComp($3,TPARAM,$4,$7);
+                  addStochInfo(newmcs, $6);
+                  newmc = newmcs;
+               }else{
+                  newmc = new ModelComp($3, TPARAM, $4, $7);
+               }
+               current_model->addComp(newmc);
                current_model->symbol_table.defineSymbol(
                   SymbolTable::ST_PARAM, $3, newmc); 
                if ($4) rem_indexing($4);
@@ -407,7 +438,15 @@ paramdef:   qualifier PARAM ID indexing_opt {
 vardef:  VAR ID indexing_opt {
             if ($3) add_indexing($3);
          } stochattr_opt varattributes_opt {
-            ModelComp *newmc = add_var_to_model($2, $3, $6);
+            ModelComp *newmc;
+            if (is_stoch_model){
+               newmc = new StochModelComp($2, TVAR, $3, $6);
+               addStochInfo((StochModelComp*)newmc, $5);
+            }else{
+               newmc = new ModelComp($2, TVAR, $3, $6);
+            }
+
+            current_model->addComp(newmc);
             current_model->symbol_table.defineSymbol(SymbolTable::ST_VAR, $2,
                newmc); 
             if ($3) rem_indexing($3);
@@ -499,8 +538,7 @@ stochattr_opt: /* empty */ {$$ = NULL;}
                         "be used in stochastic blocks\n";
                      exit(1);
                   }
-                  is_deterministic_loc = true;
-                  $$ = NULL;
+                  $$ = new SyntaxNode(DETERMINISTIC);
                }
              | STAGES setexpression {
                   // check that this is in a stochastic model
@@ -509,8 +547,7 @@ stochattr_opt: /* empty */ {$$ = NULL;}
                         "in stochastic blocks\n";
                      exit(1);
                   }
-                  $$ = NULL;
-                  stages_loc = $2;
+                  $$ = $2;
                }
              ;
 
@@ -901,118 +938,6 @@ end_smodel(){
   is_stoch_model = false;
 }
 
-/* ----------------------------------------------------------------------------
-add_set_to_model
----------------------------------------------------------------------------- */
-ModelComp *
-add_set_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
-   ModelComp *newmc;
-   if (is_stoch_model){
-      newmc = new StochModelComp(id, TSET, indx, attrib);
-   }else{
-      newmc = new ModelComp(id, TSET, indx, attrib);
-   }
-   current_model->addComp(newmc);
-   if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
-
-   return newmc;
-}
-
-/* ----------------------------------------------------------------------------
-add_obj_to_model
----------------------------------------------------------------------------- */
-ModelComp *
-add_obj_to_model(int token, char *id, SyntaxNode *indx, SyntaxNode *attrib){
-   ModelComp *newmc;
-   if (is_stoch_model){
-      newmc = new StochModelComp(id, TMIN, indx, attrib);
-   }else{
-      newmc = new ModelComp(id, TMIN, indx, attrib);
-   }
-   if (token==MAXIMIZE) newmc->type = TMAX;
-   //newmc->ismin = (token==MINIMIZE);
-
-   current_model->addComp(newmc);
-   if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
-
-   return newmc;
-}
-
-/* ----------------------------------------------------------------------------
-add_cons_to_model
----------------------------------------------------------------------------- */
-ModelComp *
-add_cons_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
-   ModelComp *newmc;
-   if (is_stoch_model){
-      newmc = new StochModelComp(id, TCON, indx, attrib)   ;
-   }else{
-      newmc = new ModelComp(id, TCON, indx, attrib)   ;
-   }
-   current_model->addComp(newmc);
-   if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
-
-   /*
-   if (current_model->cons==NULL){
-      current_model->cons = newmc;
-   }else{
-      ModelComp *last = current_model->cons;
-      while(last->next!=NULL) last = last->next;
-      last->next = newmc;
-   }
-   current_model->n_cons++;
-   */
-
-   return newmc;
-}
-
-/* ----------------------------------------------------------------------------
-add_var_to_model
----------------------------------------------------------------------------- */
-ModelComp *
-add_var_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
-   ModelComp *newmc;
-   if (is_stoch_model){
-      newmc = new StochModelComp(id, TVAR, indx, attrib);
-   }else{
-      newmc = new ModelComp(id, TVAR, indx, attrib);
-   }
-   current_model->addComp(newmc);
-   if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
-
-   return newmc;
-}
-
-
-/* ----------------------------------------------------------------------------
-add_param_to_model
----------------------------------------------------------------------------- */
-ModelComp *
-add_param_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib){
-   ModelComp *newmc;
-   if (is_stoch_model){
-      newmc = new StochModelComp(id, TPARAM, indx, attrib);
-   }else{
-      newmc = new ModelComp(id, TPARAM, indx, attrib);
-   }
-   current_model->addComp(newmc);
-   if (is_stoch_model) addStochInfo((StochModelComp*)newmc);
-    
-   /*
-   if (current_model->params==NULL){
-      current_model->params = newmc;
-   }else{
-      ModelComp *last = current_model->params;
-      while(last->next!=NULL) last = last->next;
-      last->next = newmc;
-   }
-   current_model->n_params++;
-   */
-
-   return newmc;
-}
-
-
 /* ------------------------------------------------------------------------
 add_indexing/rem_indexing
 -------------------------------------------------------------------------- */
@@ -1043,21 +968,17 @@ rem_indexing(SyntaxNodeIx *indexing){
 Stochastic model helper functions
 ---------------------------------------------------------------------------- */
 void 
-addStochInfo(StochModelComp *newmc)
+addStochInfo(StochModelComp *newmcs, SyntaxNode *stochopt)
 {
-   newmc->is_deterministic = is_deterministic_loc | is_deterministic_glo;
-   if (stages_loc){
-      newmc->stageset = stages_loc;
-   }else{
-      newmc->stageset = stages_glo;
+   if(stochopt) {
+      newmcs->is_deterministic = (stochopt->opCode==DETERMINISTIC) | 
+         is_deterministic_glo;
+      newmcs->stageset = (stochopt->opCode!=DETERMINISTIC) ? stochopt :
+         stages_glo;
+   } else {
+      newmcs->is_deterministic = is_deterministic_glo;
+      newmcs->stageset = stages_glo;
    }
-   newmc->stochmodel = static_cast<StochModel*>(newmc->model);   
-   if (newmc->stochmodel==NULL){
-      cerr << "addStochInfo: dynamic cast failed!\n";
-      exit(1);
-   }
-   stages_loc = NULL;
-   is_deterministic_loc = false;
 }
 
 void parse_model(char *filename) {
@@ -1081,8 +1002,6 @@ void parse_model(char *filename) {
    AmplModel::root = new AmplModel("root");
    current_model = AmplModel::root;
    is_stoch_model = false;
-   is_deterministic_loc = false;
-   stages_loc = NULL;
    is_deterministic_glo = false;
    stages_glo = NULL;
 
