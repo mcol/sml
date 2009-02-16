@@ -340,7 +340,8 @@ indexing_opt: /* empty */ {$$=NULL;}
             ;
 
 indexing:   LBRACE setexpr_list COLON lexpr RBRACE {
-               SyntaxNode *tmp = new SyntaxNode(LBRACE, new SyntaxNode(COLON, $2, $4));
+               SyntaxNode *tmp = 
+                  new SyntaxNode(LBRACE, new SyntaxNode(COLON, $2, $4));
                $$ = new SyntaxNodeIx(tmp);
                delete tmp;
             }
