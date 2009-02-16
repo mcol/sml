@@ -3,6 +3,7 @@
 #include "GlobalVariables.h"
 #include "AmplModel.h"
 #include "backend.h"
+#include "sml-oops.h"
 
 using namespace std;
 
@@ -107,7 +108,18 @@ int main(int argc, char **argv) {
    AmplModel::root->addDummyObjective();
    AmplModel::root->dump("logModel.dat");
 
+   /* Write out and run ampl on ExpandedModels */
    process_model(AmplModel::root);
+
+   /* Call Solver */
+
+   cout << "------------- Generate ExpandedModel tree ------------ \n";
+   ExpandedModel *em = new ExpandedModel(AmplModel::root);
+   em->print();
+   cout << "=============================================================== \n";
+   cout << "----------------- Call OOPS generator ---------------- \n";
+
+   SML_OOPS_driver(em);
 
    return 0;
 }

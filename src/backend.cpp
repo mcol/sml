@@ -9,7 +9,6 @@
 #include "AmplModel.h"
 #include "nodes.h"
 #include "sml.tab.h"
-#include "sml-oops.h"
 //#include <list>
 
 static bool prt_modwrite = false;
@@ -529,19 +528,6 @@ process_model(AmplModel *model) /* should be called with model==root */
     }
   }
   cout << "done\n";
-
-  /* 4) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> build algebra tree */
-  
-  //model->print();
-  
-  cout << "------------- Generate ExpandedModel tree ------------ \n";
-  ExpandedModel *em = new ExpandedModel(model);
-  em->print();
-  cout << "=============================================================== \n";
-  cout << "----------------- Call OOPS generator ---------------- \n";
-
-  SML_OOPS_driver(em);
-  
 }
 
 /* ---------------------------------------------------------------------------
