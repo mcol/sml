@@ -1080,6 +1080,3 @@ ModelComp::reassignDependencies()
   delete(idrefnodes);
 
 }
-
-void
-ModelComp::foo(){}

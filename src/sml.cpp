@@ -104,7 +104,10 @@ int main(int argc, char **argv) {
       exit(1);
    }
 
-   do_stuff(AmplModel::root);
+   AmplModel::root->addDummyObjective();
+   AmplModel::root->dump("logModel.dat");
+
+   process_model(AmplModel::root);
 
    return 0;
 }

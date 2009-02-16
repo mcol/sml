@@ -42,22 +42,16 @@ static char *compTypes[7] = {"var","subject to","param",
  * - \<TYPE\> \<name\>\<indexing\>_opt \<attributes\>_opt
  */
 class ModelComp{
+ private:
  public:
   compType type;   //!< the type of the component
   char *id;        //!< the name of the component
-  //int ismin;       //!< for an objective ismin==1 ->minimize, ==0 ->maximize 
 
   /** this is a tree of specifications, this includes
    * :=, within, default, >=                                               */
   SyntaxNode *attributes;   
 			 
   SyntaxNodeIx *indexing; //!< indexing expression 
-
-  ///** ModelComp is set up as a double linked list 
-  // *  @attention This should be implemented in the AmplModel as a 
-  // *             list<ModelComp>, rather than the linked list here */
-  //ModelComp *next;    //!< next component in a double linked list 
-  //ModelComp *prev;    //!< previous component in a double linked list 
   
   /** List of all entities that this model component depends on:
    *  Basically a list of all model components used in the definition of
@@ -118,19 +112,6 @@ class ModelComp{
   void moveUp(int level);  //< move this model comp up in the model tree 
   virtual ModelComp *clone();     //< duplicate the object: shallow copy
   ModelComp *deep_copy(); //< duplicate the object: deep copy
-
-  virtual void foo();
-
-};
-
-/** @class ModelCompSet
- *  @brief The class describes a model component of type set 
- * 
- *  The class describes properties of a model component particular to sets
- */
-class ModelCompSet: public ModelComp {
- public:
-  bool is_symbolic; //!< indicates whether or not this set is symbolic
 };
 
 char *

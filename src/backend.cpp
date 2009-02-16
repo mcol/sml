@@ -16,10 +16,8 @@ static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
 
 void print_model(AmplModel *model);
-void process_model(AmplModel *model);
 
-void write_ampl_for_submodel(ostream &fout, AmplModel *root, 
-           AmplModel *submodel);
+void write_ampl_for_submodel(ostream &fout, AmplModel *submodel);
 void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 
 /* this struct stores an indexing expression in an easy to modify form:
@@ -57,23 +55,6 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 //         or conditions:    {(i,j) in SET1:i<j}
 //int n_addIndex;           /* number and list of indexing expressions */
 vector <list <add_index *>* > l_addIndex;  /* to add to all statements */
-
-
-/* ---------------------------------------------------------------------------
-do_stuff
----------------------------------------------------------------------------- */
-/* This is the entry function once the model has been parsed. It is called from
-   main in ampl.y
-   This includes calls to the various phases of the backend
-*/
-void do_stuff(AmplModel *model)
-{
-  model->addDummyObjective();
-  //print_model(model);
-  model->dump("logModel.dat");
-  //exit(1);
-  process_model(model);
-}
 
 static void
 print_entry(const ModelComp *entry) {
@@ -179,31 +160,28 @@ process_model
        *.nl files by columns
 */
 int count_models_(AmplModel *model);
-void fill_model_list_(AmplModel *model, AmplModel **list, int *pos);
+void fill_model_list_(AmplModel *model, list<AmplModel*> &listam);
 
 void
 process_model(AmplModel *model) /* should be called with model==root */
 {
-  int i, j, k, n_models;
-  AmplModel **model_list;
+  int j;
   
   cout << "-------------- start of process_model ----------------------\n";
 
   /* 1) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate list of all models */
 
-  /* recursively count all the models defined in the model tree */
-  n_models = count_models_(model);
-  cout << "Found " << n_models << " models\n";
-  model_list = (AmplModel**)calloc(n_models, sizeof(AmplModel*));
-  n_models=0;
   model->level=0; /* root is on level 0, fill_model_list also sets levels */
-  fill_model_list_(model, model_list, &n_models);
+  list<AmplModel*> model_list;
+  fill_model_list_(model, model_list);
   /* model_list[0-(n_models-1)] is now a list of all (sub)models defined
      in the ampl file */
 
   //printf("These are the models on the list:\n");
-  for(i=0;i<n_models;i++){
-    AmplModel *thism = model_list[i];
+  int i=0;
+  for(list<AmplModel*>::iterator mli=model_list.begin(); mli!=model_list.end();
+        ++mli,++i){
+    AmplModel *thism = *mli;
     cout << i << ": " << thism->name << " (level=" << thism->level << ")\n";
   }
   
@@ -216,14 +194,13 @@ process_model(AmplModel *model) /* should be called with model==root */
   string filename;   /* this is the name of the model file */
   
   /* loop over every single model defined */
-  for(i=0;i<n_models;i++){
-    AmplModel *this_model;
-    AmplModel **anc_list;
+  for(list<AmplModel*>::iterator mli=model_list.begin(); mli!=model_list.end();
+        ++mli){
+    AmplModel *this_model = *mli;
     /* need to construct the name of the model file:
        => this is a concatenated list of the models down the path
           (and 'root' for the top level model)
     */
-    this_model = model_list[i];
     if (this_model->parent==NULL){
       /* this is root */
       filename = "root";
@@ -270,7 +247,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     /* create a new model list that lists all models in this branch of the tree
        (i.e. all ancestors of the current model up to root */
     /* root will be entry 0, current model at entry model->level */
-    anc_list = (AmplModel**)calloc(this_model->level+1, sizeof(AmplModel*));
+    AmplModel **anc_list = (AmplModel**)calloc(this_model->level+1, sizeof(AmplModel*));
     {
       AmplModel *tmp_model = this_model;
       anc_list[tmp_model->level] = tmp_model;
@@ -288,7 +265,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     
     l_addIndex.clear();
 
-    for(k=1;k<=this_model->level;k++){
+    for(int k=1; k<=this_model->level; k++){
       AmplModel *tmp_model = anc_list[k];
       ModelComp *node = tmp_model->node; /* the node corresponding to model */
       SyntaxNode *ix = node->indexing; /* the indexing expression */
@@ -406,7 +383,7 @@ process_model(AmplModel *model) /* should be called with model==root */
         
 
         filename+= "\"";
-        for(k=1;k<=this_model->level;k++){
+        for(int k=1;k<=this_model->level;k++){
           // get all the indexing variables and add them together (joined by &)
           SyntaxNodeIx *ixn = (anc_list[k]->node)->indexing;
           if (ixn){
@@ -445,14 +422,14 @@ process_model(AmplModel *model) /* should be called with model==root */
     
 
     /* write the main part of the submodel generation part in the scripts */
-    for(j=1;j<k;j++) fscript << "  "; fscript << "fix all;\n";
-    for(j=1;j<k;j++) fscript << "  "; fscript << "unfix all;\n";
+    for(j=0;j<this_model->level;j++) fscript << "  "; fscript << "fix all;\n";
+    for(j=0;j<this_model->level;j++) fscript << "  "; fscript << "unfix all;\n";
     
     /* take the .mod suffix away from buffer */
     //n = strlen(buffer);buffer[n-4] = 0;
-    for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+    for(j=0;j<this_model->level;j++) fscript << "  "; /* prettyprinting */
     fscript << "write (\"b" << filename << "\"";
-    for(k=1;k<=this_model->level;k++) {
+    for(int k=1;k<=this_model->level;k++) {
       // get all the indexing variables and add them together (joined by &)
       SyntaxNodeIx *ixn = (anc_list[k]->node)->indexing;
       if (ixn){
@@ -469,7 +446,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     fscript << ");\n";
     
     /* and close all the brackets (prettyprinting) */
-    for(k=this_model->level;k>0;k--){
+    for(int k=this_model->level;k>0;k--){
       for(j=1;j<k;j++) fscript << "  ";
       fscript << "}\n";
       //rem_from_index_stack();
@@ -481,18 +458,17 @@ process_model(AmplModel *model) /* should be called with model==root */
     filename += ".mod";
     ofstream fout(filename.c_str());
     cout << "Write to model file: " << filename << "\n";
-    write_ampl_for_submodel(fout, model_list[n_models-1], model_list[i]);
+    write_ampl_for_submodel(fout, *mli);
     fout.close();
 
     /* FIXME: this looks redundant */
     /* and also write the column file for this submodel */
     filename.replace(filename.find(".mod"), 4, ".acl");
     fout.open(filename.c_str());
-    write_columnfile_for_submodel(fout, model_list[i]);
+    write_columnfile_for_submodel(fout, *mli);
     fout.close();
     free(anc_list);
   }
-  free(model_list);
 
   fscript.close();
 
@@ -590,7 +566,7 @@ int count_models_(AmplModel *model)
 fill_model_list 
 ---------------------------------------------------------------------------- */
 void
-fill_model_list_(AmplModel *model, AmplModel **listam, int *pos)
+fill_model_list_(AmplModel *model, list<AmplModel*> &listam)
 {
   /* fill_model_list:
      recursively creates a depth first list of all the models in the
@@ -600,31 +576,28 @@ fill_model_list_(AmplModel *model, AmplModel **listam, int *pos)
 
      IN: 
        AmplModel *model:          The start node (usually root)
-       AmplModel **listam:          The list in which models are added
-       int *pos:                   Position at which to enter the next model
+       list<AmplModel *> listam:  The list in which models are added
      OUT: 
        listam
        model->level
                                                                             */
-  ModelComp *comp;
 
   /* this works by first adding the current model to the list and then
      all its submodels. 
      It used to be that the submodels are added first, however then the
      level-calculation does not work */
 
-  listam[*pos] = model;
+  listam.push_back(model);
   if (model->parent) model->level = model->parent->level+1;
-  (*pos)++;
 
   if (model->n_submodels>0){
-    for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
-      comp = *p;
+    for(list<ModelComp*>::iterator p=model->comps.begin(); 
+          p!=model->comps.end(); ++p){
+      ModelComp *comp = *p;
       if (comp->type==TMODEL)
-  fill_model_list_((AmplModel*)comp->other, listam, pos);
+        fill_model_list_((AmplModel*)comp->other, listam);
     }
   }
-  
 }
 
 /* ---------------------------------------------------------------------------
@@ -653,7 +626,7 @@ void write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
 void modified_write(ostream &fout, ModelComp *comp);
 
 void
-write_ampl_for_submodel(ostream &fout, AmplModel *root, AmplModel *submodel)
+write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
 {
   AmplModel *listam[5];  /* assume models are not nested further than
          5 levels */
