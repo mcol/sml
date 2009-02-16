@@ -45,12 +45,8 @@
    static bool is_deterministic_glo;
    static SyntaxNode *stages_glo;
    extern FILE *yyin;
-   extern void parse_data(AmplModel *current_model, char *datafilename);
 
-   ModelComp *add_param_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
-   ModelComp *add_var_to_model(char *id, SyntaxNode *indx, SyntaxNode *attrib);
    void addStochInfo(StochModelComp *newmc, SyntaxNode*);
-   void createSubdirTmpIfNotExist(void);
 %}
 
 %union
