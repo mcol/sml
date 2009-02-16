@@ -659,6 +659,11 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 
 }
 
+void StochModel::addComp(ModelComp *comp) {
+   AmplModel::addComp(comp);
+   ((StochModelComp*) comp)->stochmodel = this;
+}
+
 #ifdef OLD
 void
 StochModel::_transcribeComponents(AmplModel *current, int level)

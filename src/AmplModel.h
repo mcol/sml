@@ -125,7 +125,7 @@ class AmplModel{
   void addDummyObjective();
 
   /** add a model component to the model */
-  void addComp(ModelComp *comp);
+  virtual void addComp(ModelComp *comp);
 
   /** remove a model component from the model */
   void removeComp(ModelComp *comp);
