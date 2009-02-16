@@ -54,6 +54,9 @@ class StochModel: public AmplModel{
   //!< expand STAGES set of all StochModelComps in this model
   void expandStagesOfComp(); 
 
+  /** expand on AmplModel::addComp to setup stochmodel of component too */
+  void addComp(ModelComp *comp);
+
 };
 
 
