@@ -159,7 +159,6 @@ process_model
     5) generate the corresponding structure files that partition the 
        *.nl files by columns
 */
-int count_models_(AmplModel *model);
 void fill_model_list_(AmplModel *model, list<AmplModel*> &listam);
 
 void
@@ -543,23 +542,6 @@ process_model(AmplModel *model) /* should be called with model==root */
 
   SML_OOPS_driver(em);
   
-}
-
-int count_models_(AmplModel *model)
-{
-  int count = 0;
-  ModelComp* comp;
-  if (model->n_submodels>0){
-    for(list<ModelComp*>::iterator p = model->comps.begin();
-  p!=model->comps.end();p++){
-      comp = *p;
-      if (comp->type==TMODEL)
-  count += count_models_((AmplModel*)comp->other);
-    }
-  }
-  count += 1; /* also count this model */
-
-  return count;
 }
 
 /* ---------------------------------------------------------------------------
