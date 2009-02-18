@@ -1,12 +1,5 @@
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
-#include <iostream>
-#include <cassert>
-#include "GlobalVariables.h"
-#include "ExpandedModel.h"
-#include "AmplsolverCalls.h"
-#include "OOPSBlock.h"
-//#include "asl_pfgh.h"
 extern "C" {
 #include "oops/oops.h"
 #include "oops/WriteMps.h"
@@ -15,7 +8,12 @@ extern "C" {
 #include "oops/CallBack.h"
 #include <math.h>
 }
-//#define asl cur_ASL
+
+#include <iostream>
+#include <cassert>
+#include "ModelInterface.h"
+#include "OOPSBlock.h"
+#include "sml-oops.h"
 
 // C++ static variables defined in an *. file need to be declared here as well
 #ifdef __cplusplus
@@ -41,6 +39,7 @@ typedef struct SMLReturn_st {
 //  int *lvar;
 //} NodeId;
 
+#if 0
 /** This is the identifier needed to fill in a block of the Hessian matrix */
 typedef struct NodeIdQ_st {
   NlFile *nlfile;  //< the *.nl-file that carries the information about this
@@ -49,16 +48,18 @@ typedef struct NodeIdQ_st {
   int ncolvar;        //< number of columns that this node has
   int *lcolvar;       //< number of column indices
 } NodeIdQ;
+#endif
 
-SMLReturn *generateSML(ExpandedModel *root);
+SMLReturn *generateSML(ModelInterface *root);
 void FillRhsVector(Vector *vb);
 void FillObjVector(Vector *vb);
 void FillUpBndVector(Vector *vb);
 
 FILE *globlog = NULL;
+const int prtLvl = 1;
 
 void
-SML_OOPS_driver(ExpandedModel *root)
+SML_OOPS_driver(ModelInterface *root)
 {
   Algebra *AlgAug;
   Vector *vb, *vc, *vu;
@@ -119,13 +120,13 @@ SML_OOPS_driver(ExpandedModel *root)
 Here comes the generation with all subroutines
 =========================================================================== */
 
-Algebra *createA(ExpandedModel *A);
-Algebra *createBottom(ExpandedModel *diag, ExpandedModel *offdiag);
-Algebra *createRhs(ExpandedModel *diag, ExpandedModel *offdiag);
-Algebra *createQ(ExpandedModel *A);
-Algebra *createBottomQ(ExpandedModel *diag, ExpandedModel *offdiag);
-Algebra *createRhsQ(ExpandedModel *diag, ExpandedModel *offdiag);
+Algebra *createA(ModelInterface *A);
+Algebra *createBottom(ModelInterface *diag, ModelInterface *offdiag);
+Algebra *createRhs(ModelInterface *diag, ModelInterface *offdiag);
 void SMLCallBack(CallBackInterfaceType *cbi);
+Algebra *createQ(ModelInterface *A);
+Algebra *createBottomQ(ModelInterface *diag, ModelInterface *offdiag);
+Algebra *createRhsQ(ModelInterface *diag, ModelInterface *offdiag);
 void SMLCallBackQ(CallBackInterfaceType *cbi);
 
 /* --------------------------------------------------------------------------
@@ -133,7 +134,7 @@ generateSLM
 --------------------------------------------------------------------------- */
 
 SMLReturn *
-generateSML(ExpandedModel *root)
+generateSML(ModelInterface *root)
 {
   SMLReturn *Ret = (SMLReturn*)calloc(1, sizeof(SMLReturn));
 
@@ -146,9 +147,9 @@ generateSML(ExpandedModel *root)
 /* --------------------------------------------------------------------------
 createA
 --------------------------------------------------------------------------- */
-/* This routine sets up the matrix A from the ExpandedModel tree */
+/* This routine sets up the matrix A from the ModelInterface tree */
 Algebra *
-createA(ExpandedModel *em)
+createA(ModelInterface *em)
 {
   Algebra *Alg;
 
@@ -164,13 +165,13 @@ createA(ExpandedModel *em)
              em->getNLocalCons());
       exit(1);
     }
-    if (GlobalVariables::prtLvl>=1){
-      printf("SMLOOPS: Create leaf node: %s (%dx%d)\n",
-             (em->model_file+":"+em->model_file).c_str(),
-             em->getNLocalCons(), em->getNLocalVars());
+    if (prtLvl>=1){
+      cout << "SMLOOPS: Create leaf node: " << em->getName() << ":" << 
+         em->getName() << " (" << em->getNLocalCons() << "x" << 
+         em->getNLocalVars() << ")" << endl;
     }
     Alg = NewAlgebraSparse(em->getNLocalCons(), em->getNLocalVars(), 
-                           (em->model_file+":"+em->model_file).c_str(),
+                           (em->getName()+":"+em->getName()).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
       
       
@@ -205,11 +206,11 @@ createA(ExpandedModel *em)
     OOPSBlock *obl = new OOPSBlock(em, em);
 
     D[nblk] = NewAlgebraSparse(em->getNLocalCons(), em->getNLocalVars(), 
-                               (em->model_file+":"+em->model_file).c_str(),
+                               (em->getName()+":"+em->getName()).c_str(),
                                (CallBackFunction)SMLCallBack, obl);
 
     Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
-                                (em->model_file+":"+em->model_file).c_str()); 
+                                (em->getName()+":"+em->getName()).c_str()); 
 
   }
 
@@ -219,7 +220,7 @@ createA(ExpandedModel *em)
 
 
 Algebra *
-createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
+createBottom(ModelInterface *diag, ModelInterface *nondiag)
 {
   Algebra *Alg;
   /* This is a bottom block: 
@@ -231,7 +232,7 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
     OOPSBlock *obl = new OOPSBlock(diag, nondiag);
     
     Alg = NewAlgebraSparse(diag->getNLocalCons(), nondiag->getNLocalVars(), 
-                           (diag->model_file+":"+nondiag->model_file).c_str(),
+                           (diag->getName()+":"+nondiag->getName()).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
 
   }else{
@@ -251,10 +252,10 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
     OOPSBlock *obl = new OOPSBlock(diag, nondiag);
 
     B[nblk] = NewAlgebraSparse(diag->getNLocalCons(),nondiag->getNLocalVars(), 
-                           (diag->model_file+":"+nondiag->model_file).c_str(), 
+                           (diag->getName()+":"+nondiag->getName()).c_str(), 
                                (CallBackFunction)SMLCallBack, obl);
     Alg = NewAlgebraBlockDense(1, nblk+1, B, 
-                      (diag->model_file+":"+nondiag->model_file).c_str());
+                      (diag->getName()+":"+nondiag->getName()).c_str());
 
   }
 
@@ -262,7 +263,7 @@ createBottom(ExpandedModel *diag, ExpandedModel *nondiag)
 }
 
 Algebra *
-createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
+createRhs(ModelInterface *diag, ModelInterface *nondiag)
 {
   Algebra *Alg;
   /* This is a bottom block: 
@@ -274,7 +275,7 @@ createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
     OOPSBlock *obl = new OOPSBlock(nondiag, diag);
 
     Alg = NewAlgebraSparse(nondiag->getNLocalCons(), diag->getNLocalVars(), 
-                           (nondiag->model_file+":"+diag->model_file).c_str(),
+                           (nondiag->getName()+":"+diag->getName()).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
 
   }else{
@@ -291,24 +292,23 @@ createRhs(ExpandedModel *diag, ExpandedModel *nondiag)
     OOPSBlock *obl = new OOPSBlock(nondiag, diag);
 
     B[nblk] = NewAlgebraSparse(nondiag->getNLocalCons(),diag->getNLocalVars(), 
-                           (nondiag->model_file+":"+diag->model_file).c_str(), 
+                           (nondiag->getName()+":"+diag->getName()).c_str(), 
                                (CallBackFunction)SMLCallBack, obl);
 
     Alg = NewAlgebraBlockDense(nblk+1, 1, B, 
-                       (nondiag->model_file+":"+diag->model_file).c_str());
+                       (nondiag->getName()+":"+diag->getName()).c_str());
 
   }
 
   return Alg;
 }
 
-
 /* --------------------------------------------------------------------------
 createQ
 --------------------------------------------------------------------------- */
-/* This routine sets up the matrix Q from the ExpandedModel tree */
+/* This routine sets up the matrix Q from the ModelInterface tree */
 Algebra *
-createQ(ExpandedModel *em)
+createQ(ModelInterface *em)
 {
   Algebra *Alg;
 
@@ -316,6 +316,7 @@ createQ(ExpandedModel *em)
   if (em->children.size()==0){
     // this is final node: read in *.nl file to get dimensions 
 
+#if 0
     NodeIdQ *id = new NodeIdQ();
 
     id->nlfile = em->nlfile;
@@ -323,10 +324,11 @@ createQ(ExpandedModel *em)
     id->lrowvar = em->listOfVars;
     id->ncolvar = em->getNLocalVars();
     id->lcolvar = em->listOfVars;
+#endif
 
     Alg = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
-                           ("Q"+em->model_file+":"+em->model_file).c_str(),
-                           (CallBackFunction)SMLCallBackQ, id);
+                           ("Q"+em->getName()+":"+em->getName()).c_str(),
+                           (CallBackFunction)SMLCallBackQ, em);
       
       
   }else{
@@ -351,7 +353,7 @@ createQ(ExpandedModel *em)
        in rows corresponding to children). 
        If so then set up a DblBordDiagMatrix and let the child work out
        which of these entries are his.
-       The child gets passed both ExpandedModels (for itself and the parent)
+       The child gets passed both ModelInterfaces (for itself and the parent)
        The objective however MUST be included in the parent part
 
     */
@@ -362,6 +364,7 @@ createQ(ExpandedModel *em)
        - bottom from this *.nl file and col from the children              */
 
 
+#if 0
     int nzH = (em->nlfile)->getNoHessianEntries();
     int colH = (em->nlfile)->getNoVariables(); 
     int *colbegH = (int *)malloc((colH+1)*sizeof(int));
@@ -420,13 +423,14 @@ createQ(ExpandedModel *em)
       id->lrowvar = em->listOfVars;
 
       D[nblk] = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
-                            ("Q"+em->model_file+":"+em->model_file).c_str(),
+                            ("Q"+em->getName()+":"+em->getName()).c_str(),
                                  (CallBackFunction)SMLCallBackQ, id);
 
       Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
-                             ("Q"+em->model_file+":"+em->model_file).c_str()); 
+                             ("Q"+em->getName()+":"+em->getName()).c_str()); 
 
     }else{ // Not foundCross => setup BlockDiagMatrix
+#endif
       /* every child is a diagonal block */
       Algebra **D;
       int nblk, i;
@@ -443,6 +447,7 @@ createQ(ExpandedModel *em)
       // this is final node: read in *.nl file to get dimensions 
       // I suspect we can just copy in the code from the leaf node case above 
 
+#if 0
       NodeIdQ *id = new NodeIdQ();
 
       id->nlfile = em->nlfile;
@@ -452,19 +457,26 @@ createQ(ExpandedModel *em)
       id->lrowvar = em->listOfVars;
 
       D[nblk] = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
-                              ("Q"+em->model_file+":"+em->model_file).c_str(),
+                              ("Q"+em->getName()+":"+em->getName()).c_str(),
                                  (CallBackFunction)SMLCallBackQ, id);
+#else
+      D[nblk] = NewAlgebraSparse(em->getNLocalVars(), em->getNLocalVars(), 
+                              ("Q"+em->getName()+":"+em->getName()).c_str(),
+                                 (CallBackFunction)SMLCallBackQ, em);
+#endif
 
       Alg = NewAlgebraBlockDiag(nblk+1, D, 
-                        ("Q"+em->model_file+":"+em->model_file).c_str()); 
-      
+                        ("Q"+em->getName()+":"+em->getName()).c_str()); 
+#if 0      
     }
+#endif
   }
 
   return Alg;
 
 }
 
+#if 0
 /* ----------------------------------------------------------------------------
 createBottom/RhsQ
 ---------------------------------------------------------------------------- */
@@ -479,7 +491,7 @@ createBottom/RhsQ
  *  to the parents variables and see if there are any entries in rows
  *  belonging to *this* child (names of these rows can be obtained from 
  *  'offdiag' they probably need scanning against the column name file
- *  diag->model_file+".col", to get their index numbers in the parents 
+ *  diag->getName()+".col", to get their index numbers in the parents 
  *  numbering.
  *  Also need some treatment of complicated blocks (i.e. when the child node
  *  'offdiag' itself has children) - this should jst be a matter of 
@@ -487,24 +499,25 @@ createBottom/RhsQ
  *  as done for the A matrix
  *
  *  FIXME: can any of this information (blocking of the Q matrix be
- *         included as part of the ExpandedModel (in order to separate
+ *         included as part of the ModelInterface (in order to separate
  *         frontend and backend and do as much processing in the frontend
  *         as possible?
  */
 
 Algebra *
-createBottomQ(ExpandedModel *diag, ExpandedModel *offdiag)
+createBottomQ(ModelInterface *diag, ModelInterface *offdiag)
 {
   printf("createBottomQ not implemented yet!\n");
   exit(1);
 }
 
 Algebra *
-createRhsQ(ExpandedModel *diag, ExpandedModel *offdiag)
+createRhsQ(ModelInterface *diag, ModelInterface *offdiag)
 {
   printf("createBottomQ not implemented yet!\n");
   exit(1);
 }
+#endif
 
 /* ---------------------------------------------------------------------------
 CallBackFunction: SMLCallBack
@@ -559,6 +572,7 @@ SMLCallBack(CallBackInterfaceType *cbi)
   
 
 }
+
 /* ---------------------------------------------------------------------------
 CallBackFunction: SMLCallBack
 ---------------------------------------------------------------------------- */
@@ -599,6 +613,7 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
      - the variable list for the diagonal part
      - the variable list for the nondiagonal part
   */
+#if 0
   NodeIdQ *id = (NodeIdQ*)cbi->id;
 
   if (cbi->row_nbs==NULL){
@@ -665,7 +680,15 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
       cbi->col_len[i] = cbi->col_beg[i+1]-cbi->col_beg[i];
     return;
   }
-  
+#else
+  ModelInterface *em = (ModelInterface*)cbi->id;
+  cbi->nz = 0;
+  if (cbi->row_nbs){
+    cbi->col_beg[em->getNLocalVars()] = cbi->nz;
+    for(int i=0;i<em->getNLocalVars();i++) 
+      cbi->col_len[i] = cbi->col_beg[i+1]-cbi->col_beg[i];
+  }
+#endif
 
 }
 
@@ -683,9 +706,9 @@ FillRhsVector(Vector *vb)
   Algebra *A = (Algebra*)T->nodeOfAlg; // the diagonal node that spawned this tree
   OOPSBlock *obl = (OOPSBlock*)A->id; // and its id structure
   //NlFile *nlf = obl->emrow->nlfile;
-  ExpandedModel *emrow = obl->emrow;
+  ModelInterface *emrow = obl->emrow;
 
-  // FIXME: should the id structure include information on the ExpandedModel
+  // FIXME: should the id structure include information on the ModelInterface
   //        as well? That way we could do some more sanity checks
 
   emrow->getRowLowBounds(dense->elts);
@@ -700,7 +723,7 @@ FillRhsVector(Vector *vb)
   for(int i=0;i<dense->dim; i++){
     if (fabs(dense->elts[i]-checkub[i])>1e-6){
       cerr << "At the moment OOPS only supports equality constraints!\n";
-      cerr << "Bounds for c/s " << i << " in " << emrow->model_file << ": " <<
+      cerr << "Bounds for c/s " << i << " in " << emrow->getName() << ": " <<
              dense->elts[i] << " " <<  checkub[i] << endl;
       exit(1);
     }
@@ -756,7 +779,7 @@ FillUpBndVector(Vector *vu)
   OOPSBlock *obl = (OOPSBlock*)A->id;        // and its id structure
   assert(obl->emrow==obl->emcol); // this should be a diagonal block
   //NlFile *nlf = obl->emrow->nlfile;
-  ExpandedModel *emrow = obl->emrow;
+  ModelInterface *emrow = obl->emrow;
 
   //double *test = new double[dense->dim];
 
@@ -776,7 +799,7 @@ FillUpBndVector(Vector *vu)
   for(int i=0;i<dense->dim;i++){
     if (fabs(lowbndchk[i])>1e-6) {
       printf("Found lower bound !=0 (=%f) in variable %i in model %s",
-             lowbndchk[i], i, emrow->model_file.c_str());
+             lowbndchk[i], i, emrow->getName().c_str());
       printf("Currently OOPS can only cope with zero lower bounds\n");
       exit(1);
     }

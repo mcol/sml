@@ -8,6 +8,7 @@
 
 
 list<string> ExpandedModel::pathToNodeStack;
+const bool log_EM = false;
 
 
 
@@ -228,7 +229,7 @@ ExpandedModel::print()
     cout << "EM: now list the children:\n";
   
   for(unsigned int i=0; i<children.size(); ++i){
-    ExpandedModel *em = children.at(i);
+    ExpandedModel *em = (ExpandedModel*) children.at(i);
     em->print();
   }
 
@@ -250,11 +251,12 @@ ExpandedModel::getNzJacobianOfIntersection
  * @return The number of nonzeros in the given part of the Jacobian
  */
 int 
-ExpandedModel::getNzJacobianOfIntersection(ExpandedModel *emcol)
+ExpandedModel::getNzJacobianOfIntersection(ModelInterface *emcol_)
 {
   int nvar;
   int *lvar;
   int nz;
+  ExpandedModel *emcol = static_cast< ExpandedModel* > (emcol_);
 
   if (emcol==NULL) emcol = this;
   
@@ -301,11 +303,12 @@ ExpandedModel::getJacobianOfIntersection
  *  getNzJacobianInintersection.
  */
 void 
-ExpandedModel::getJacobianOfIntersection(ExpandedModel *emcol, int *colbeg,
+ExpandedModel::getJacobianOfIntersection(ModelInterface *emcol_, int *colbeg,
 					 int *collen, int *rownbs, double *el)
 {
   int nvar;
   int *lvar;
+  ExpandedModel *emcol = static_cast< ExpandedModel* > (emcol_);
 
   if (emcol==NULL) emcol = this;
   
@@ -447,7 +450,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
   if (nlf->indexList.count(em)>0){
     // we have already calculated this list
     IndexListValue *ilv = nlf->indexList[em];
-    cout << "<<<<<<<<<<<<<<< found IndexValue "+nlfilename+":"+em->model_file+"\n";
+    if(log_EM) cout << "<<<<<<<<<<<<<<< found IndexValue "+nlfilename+":"+em->model_file+"\n";
     assert(nvar==ilv->nvar);
     for (int i=0;i<nvar;i++){
       lvar[i] = ilv->lvar[i];
@@ -455,7 +458,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
     }
     assert(count==ilv->count);
   }else{
-    cout << "<<<<<<<<<<<<<<< place IndexValue "+nlfilename+":"+em->model_file+"\n";
+    if(log_EM) cout << "<<<<<<<<<<<<<<< place IndexValue "+nlfilename+":"+em->model_file+"\n";
     // we need to calculate it
     for(int i=0;i<nvar;i++) lvar[i] = -1;
     

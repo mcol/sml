@@ -5,14 +5,14 @@
 #include "GlobalVariables.h"
 
 /* ----------------------------------------------------------------------------
-OOPSBlock::OOPSBlock(ExpandedModel*, list<string>*)
+OOPSBlock::OOPSBlock(ModelInterface*, list<string>*)
 ---------------------------------------------------------------------------- */
-OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
+OOPSBlock::OOPSBlock(ModelInterface *rowmod, ModelInterface *colmod)
 {
   /* We need to:
       - take the list of variable names from colmod (colmod->listOfVarNames)
       - compare them against the variables defined by the NlFile attached
-        to rowmod (rowmod->model_file+".col")
+        to rowmod (rowmod->getName()+".col")
       - colmod->listOfVarNames will give the number of columns in this block
       - need a list of indices into the NlFile for these columns
    */
@@ -24,8 +24,8 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
 
   if (GlobalVariables::prtLvl>=2){
     cout << "-------------------------OOPS Block---------------------------\n";
-    cout << "Generate OOPSBlock: col: " << colmod->model_file << 
-      "/ row: " << rowmod->model_file << endl;
+    cout << "Generate OOPSBlock: col: " << colmod->getName() << 
+      "/ row: " << rowmod->getName() << endl;
   }
 
   this->emrow = rowmod;
@@ -43,10 +43,10 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   // ------- read the names of columns defined in this NlFile ------------
   // FIXME: Should these be remembered in the NlFile rather than needing to be
   //        read in?
-  ifstream fin((rowmod->model_file+".col").c_str());
+  ifstream fin((rowmod->getName()+".col").c_str());
 
   if (!fin) {
-    cout << "Cannot open column name file: "+rowmod->model_file+".col";
+    cout << "Cannot open column name file: "+rowmod->getName()+".col";
     exit(1);
   }
   
@@ -59,7 +59,7 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   
   if (GlobalVariables::prtLvl>=2){
     printf("Read %d lines from file %s.col\n",colfilelist.size(),
-           rowmod->model_file.c_str());
+           rowmod->getName().c_str());
   }
 
   // -------------- compare this listOfVarNames against this list
@@ -79,8 +79,8 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
     i++;
   }
 
-  //printf("Row model: %s\n",rowmod->model_file.c_str());
-  //printf("Col model: %s\n",colmod->model_file.c_str());
+  //printf("Row model: %s\n",rowmod->getName().c_str());
+  //printf("Col model: %s\n",colmod->getName().c_str());
   //printf("Nb_row = %d\n",ncon);
 
   if (GlobalVariables::prtLvl>=3){
@@ -101,8 +101,8 @@ OOPSBlock::OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod)
   }
  
   if (GlobalVariables::prtLvl>=1){
-    cout << "OOPS Block: " << rowmod->model_file << "(rw)/" <<
-       colmod->model_file << "(cl): " << ncon << "x" << nvar << "\n";
+    cout << "OOPS Block: " << rowmod->getName() << "(rw)/" <<
+       colmod->getName() << "(cl): " << ncon << "x" << nvar << "\n";
   }
 #endif  
 

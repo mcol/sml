@@ -1,6 +1,6 @@
 class OOPSBlock;
 
-#include "ExpandedModel.h"
+#include "ModelInterface.h"
 #include "AmplsolverCalls.h"
 
 /** @class OOPSBlock
@@ -9,7 +9,7 @@ class OOPSBlock;
  *  OOPS Algebra Tree. 
  *  
  * It is characterized by 
- *   - An ExpandedModel/NlFile that gives information on the rows 
+ *   - An ModelInterface/NlFile that gives information on the rows 
  *     in this block
  *   - A list of variable definitions (given as the start of variable names)
  *     that should be used from the NlFile.
@@ -19,17 +19,17 @@ class OOPSBlock;
  */
 class OOPSBlock {
  public:
-  ExpandedModel *emrow;    //!< Expanded Model giving row information
-  ExpandedModel *emcol;    //!< Expanded Model giving col information
-  //  NlFile *nlfile;       //!< The NlFile correspoding to the ExpandedModel
+  ModelInterface *emrow;    //!< Expanded Model giving row information
+  ModelInterface *emcol;    //!< Expanded Model giving col information
+  //  NlFile *nlfile;       //!< The NlFile correspoding to the ModelInterface
   int ncon;             //!< number of rows in this block
   int nvar;             //!< number of columns in this block
   //  int *lvar;            //!< list of indices into the NlFile (-1 if not decl)
   // --------------------------- methods -----------------------------------
-  /** constrct an OOPS block from the cross section of two ExpandedModel's
+  /** constrct an OOPS block from the cross section of two ModelInterface's
    *  @param rowmod       The model giving the row information
    *  @param colmod       The model giving the column information
    */
-  OOPSBlock(ExpandedModel *rowmod, ExpandedModel *colmod);
+  OOPSBlock(ModelInterface *rowmod, ModelInterface *colmod);
 };
 
