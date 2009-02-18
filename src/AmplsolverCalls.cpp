@@ -11,6 +11,8 @@
 
 using namespace std;
 
+const bool log_NL=false;
+
 
 /* ===========================================================================
 constructors
@@ -32,7 +34,7 @@ NlFile::readCommonScalarValues()
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::readScalar: (%-30s): ",nlfilename.c_str());
+  if(log_NL) printf("NlFile::readScalar: (%-30s): ",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -48,7 +50,7 @@ NlFile::readCommonScalarValues()
   nrow = n_con;
   nzA = nzc;
 
-  printf("(%dx%d): %d nz\n",n_con, n_var,nzc);
+  if(log_NL) printf("(%dx%d): %d nz\n",n_con, n_var,nzc);
   ASL_free((ASL**)&asl);
 
 }
@@ -86,7 +88,7 @@ NlFile::getNoHessianEntries()
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getNzHess:  (%-30s): ",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getNzHess:  (%-30s): ",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -101,7 +103,7 @@ NlFile::getNoHessianEntries()
   nzH = sphsetup(/* nobj=*/0, /*ow =*/1, /*y=*/0, /*uptri=*/0); 
 
   ASL_free((ASL**)&asl);
-  printf("%d\n",nzH);
+  if(log_NL) printf("%d\n",nzH);
   return nzH;
 }
 /* ----------------------------------------------------------------------------
@@ -113,7 +115,7 @@ NlFile::getHessianStructure(int *colbegH, int *rownbsH)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getHessStr: (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getHessStr: (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -146,7 +148,7 @@ NlFile::getHessianEntries(int *colbegH, int *rownbsH, double *eltsH)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getHessian: (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getHessian: (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -203,7 +205,7 @@ NlFile::getNoNonzerosAMPL(int nvar, int *lvar)
   ASL *asl = ASL_alloc(ASL_read_f);
   int tt_nz;
   
-  printf("NlFile::getNoNz   : (%-30s): ",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getNoNz   : (%-30s): ",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -232,7 +234,7 @@ NlFile::getNoNonzerosAMPL(int nvar, int *lvar)
     printf("getNoNozerosAMPL returns tt_nz = %d\n",tt_nz);
     exit(1);
   }
-  printf("%d\n",tt_nz);
+  if(log_NL) printf("%d\n",tt_nz);
   
   return tt_nz;
 
@@ -271,7 +273,7 @@ NlFile::fillSparseAMPL(int nvar, int *lvar,
   ASL *asl = ASL_alloc(ASL_read_f);
   int tt_nz;
   
-  printf("NlFile::fillSparse: (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::fillSparse: (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -325,7 +327,7 @@ NlFile::getRowLowBoundsAMPL(double *elts)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -362,7 +364,7 @@ NlFile::getRowUpBoundsAMPL(double *elts)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -416,7 +418,7 @@ NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getObj    : (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getObj    : (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -464,7 +466,7 @@ NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -505,7 +507,7 @@ NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
   ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
   
-  printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
+  if(log_NL) printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
