@@ -4,6 +4,7 @@
 #include "AmplModel.h"
 #include "backend.h"
 #include "sml-oops.h"
+#include "sml-mps.h"
 
 using namespace std;
 
@@ -120,6 +121,7 @@ int main(int argc, char **argv) {
    cout << "----------------- Call OOPS generator ---------------- \n";
 
    SML_OOPS_driver(em);
+   //SML_MPS_driver(em);
 
    return 0;
 }

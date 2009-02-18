@@ -19,7 +19,7 @@ sml_SOURCES = sml.tab.ypp sml.yy.lpp symtab.cpp nodes.cpp backend.cpp \
 				  AmplModel.cpp ModelComp.cpp ExpandedModel.cpp sml.cpp \
 				  AmplsolverCalls.cpp sml-oops.cpp OOPSBlock.cpp StochModel.cpp \
 				  StochModelComp.cpp data.tab.ypp data.yy.lpp Set.cpp \
-				  CompDescrParam.cpp SetElement.cpp SetNode.cpp
+				  CompDescrParam.cpp SetElement.cpp SetNode.cpp #sml-mps.cpp
 sml_LDADD 	= -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack \
 				  -L$(METIS_DIR) -lmetis -lgfortran -lfl -ldl #-lefence
 
