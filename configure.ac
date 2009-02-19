@@ -8,5 +8,5 @@ AC_PROG_LEX
 AC_PROG_YACC
 AC_PROG_RANLIB
 AC_PROG_INSTALL
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile interfaces/oops/Makefile])
 AC_OUTPUT

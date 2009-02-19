@@ -1,47 +1,15 @@
 #include <iostream>
 #include <sys/stat.h>
+#include "sml.h"
 #include "GlobalVariables.h"
 #include "AmplModel.h"
 #include "backend.h"
-#include "sml-oops.h"
-#include "sml-mps.h"
 
 using namespace std;
 
 extern int yydebug;
 void parse_data(AmplModel*, char*);
 void parse_model(char *);
-
-void analyseOptions(int argc, char **argv){
-   int found = 0;
-   for (int i=1;i<argc;i++){
-      if (strcmp(argv[i], "-d")==0){
-         yydebug = 1;
-      }else{
-         if (found==0){
-            // first proper argument is the model file to read
-            GlobalVariables::modelfilename = argv[i];
-            found++;
-         }else{
-            // next one is data file
-            GlobalVariables::datafilename = argv[i];
-         }
-      }
-   }
-   // now echo the options
-   if (yydebug==1)
-      cout << "OPTIONS: debug mode\n";
-   if (GlobalVariables::modelfilename){
-      cout << "OPTIONS: model file: " << GlobalVariables::modelfilename << "\n";
-   }else{
-      cout << "OPTIONS: read model from stdout\n";
-   }
-   if (GlobalVariables::datafilename){
-      cout << "OPTIONS: data file: " << GlobalVariables::datafilename << "\n";
-   }else{
-      cout << "OPTIONS: read data from 'global.dat'\n";
-   }
-}
 
 void createSubdirTmpIfNotExist(void)
 {
@@ -71,12 +39,12 @@ void createSubdirTmpIfNotExist(void)
 /* ----------------------------------------------------------------------------
 main
 ---------------------------------------------------------------------------- */
-int main(int argc, char **argv) {
+ModelInterface* sml_generate(const string modelfilename, 
+      const string datafilename, const bool debug) {
    int errcode;
-   GlobalVariables::modelfilename = NULL;
-   GlobalVariables::datafilename = "global.dat";
-
-   analyseOptions(argc, argv);
+   GlobalVariables::modelfilename = strdup(modelfilename.c_str());
+   GlobalVariables::datafilename = strdup(datafilename.c_str());
+   yydebug = debug ? 1 : 0;
 
    /* make sure dir '/tmp' for temporary files exists */
    createSubdirTmpIfNotExist();
@@ -117,12 +85,7 @@ int main(int argc, char **argv) {
    cout << "------------- Generate ExpandedModel tree ------------ \n";
    ExpandedModel *em = new ExpandedModel(AmplModel::root);
    em->print();
-   cout << "=============================================================== \n";
-   cout << "----------------- Call OOPS generator ---------------- \n";
 
-   SML_OOPS_driver(em);
-   //SML_MPS_driver(em);
-
-   return 0;
+   return (ModelInterface*) em;
 }
 

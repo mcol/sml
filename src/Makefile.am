@@ -1,7 +1,3 @@
-OOPSHOME = /home/s0455378/src/oops
-AMPLSOLVER = /home/s0455378/src/ampl/solvers/sys.i686.Linux
-METIS_DIR = /home/s0455378/src/metis-4.0
-
 AM_YFLAGS = -d
 #AM_YFLAGS += -t -v
 AM_LEXFLAGS = 
@@ -13,15 +9,13 @@ AM_CXXFLAGS = -g -I$(AMPLSOLVER) -I$(OOPSHOME)/include -gstabs
 #CXXFLAGS += -DWITH_MPI -DMPI_PATH="\"mpi.h\"" 
 #CXX = mpic++
 
-bin_PROGRAMS = sml
+lib_LIBRARIES = libsml.a
 
-sml_SOURCES = sml.tab.ypp sml.yy.lpp symtab.cpp nodes.cpp backend.cpp \
+libsml_a_SOURCES = sml.tab.ypp sml.yy.lpp symtab.cpp nodes.cpp backend.cpp \
 				  AmplModel.cpp ModelComp.cpp ExpandedModel.cpp sml.cpp \
-				  AmplsolverCalls.cpp sml-oops.cpp OOPSBlock.cpp StochModel.cpp \
+				  AmplsolverCalls.cpp StochModel.cpp \
 				  StochModelComp.cpp data.tab.ypp data.yy.lpp Set.cpp \
-				  CompDescrParam.cpp SetElement.cpp SetNode.cpp #sml-mps.cpp
-sml_LDADD 	= -L$(AMPLSOLVER) -lamplsolver -L$(OOPSHOME)/lib -loops -llapack \
-				  -L$(METIS_DIR) -lmetis -lgfortran -lfl -ldl #-lefence
+				  CompDescrParam.cpp SetElement.cpp SetNode.cpp
 
 # Force these to get built first
 BUILT_SOURCES = sml.tab.h data.tab.h
