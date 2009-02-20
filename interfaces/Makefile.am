@@ -1,1 +1,1 @@
-SUBDIRS = oops
+SUBDIRS = oops mps

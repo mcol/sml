@@ -140,6 +140,9 @@ class ExpandedModel : public ModelInterface {
 
   //! Recursively print contents of this instance
   void print();
+
+  //! Return names of local vars.
+  const list<string>& getLocalVarNames();
   
   //! Return nb local vars.
   int getNLocalVars();    

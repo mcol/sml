@@ -3,7 +3,7 @@ AM_YFLAGS = -d
 AM_LEXFLAGS = 
 #AM_LEXFLAGS += -d
 AM_CFLAGS = -g 
-AM_CXXFLAGS = -g -I$(AMPLSOLVER) -I$(OOPSHOME)/include -gstabs
+AM_CXXFLAGS = -g @AMPL_INCLUDE@ -gstabs
 
 # for parallel uncomment this
 #CXXFLAGS += -DWITH_MPI -DMPI_PATH="\"mpi.h\"" 

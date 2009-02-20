@@ -165,6 +165,23 @@ ExpandedModel::setLocalVarInfo()
 /* --------------------------------------------------------------------------
 ExpandedModel::getNLocalVars
 -------------------------------------------------------------------------- */
+/** Returns the names of variables local to this node
+ *
+ * @return names of local variables
+ */
+const list<string>&
+ExpandedModel::getLocalVarNames() 
+{
+  if (!localVarInfoSet){
+    setLocalVarInfo();
+    localVarInfoSet=true;
+  }
+  return listOfVarNames;
+}
+
+/* --------------------------------------------------------------------------
+ExpandedModel::getNLocalVars
+-------------------------------------------------------------------------- */
 /** Returns the number of variables local to this node
  *
  * @return number of local variables

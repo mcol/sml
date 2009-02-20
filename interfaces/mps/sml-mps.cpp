@@ -39,34 +39,34 @@ class NameHasher {
    }
 };
 
-void SML_MPS_driver(ExpandedModel *root) {
+void SML_MPS_driver(ModelInterface *root) {
    map<string,string> rows; // Row names and equalities
    map<string,list<mps_entry> > cols; // columns, stored by name.
    map<string,double> rhs;
    NameHasher row_hash;
    NameHasher col_hash;
 
-   for(ExpandedModel::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
+   for(ModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
       cout << "On Model " << (*i)->getName() << " " << (*i)->getNLocalVars() <<
          "x" << (*i)->getNLocalCons() << endl;
-      for(list<string>::iterator j=(*i)->listOfVarNames.begin(); 
-            j!=(*i)->listOfVarNames.end(); ++j) {
+      for(list<string>::const_iterator j=(*i)->getLocalVarNames().begin(); 
+            j!=(*i)->getLocalVarNames().end(); ++j) {
          cout << "  " << *j << " - " << col_hash.getHash(*j) << endl;
       }
       // We observe that we will have a possible intersection with any of our
       // descendants, but nothing else.
       cout << "  Descendant Intersections:" << endl;
-      for(ExpandedModel::child_iterator j=(*i)->cbegin(); j!=(*i)->cend(); ++j) {
+      for(ModelInterface::child_iterator j=(*i)->cbegin(); j!=(*i)->cend(); ++j) {
          cout << "    " << (*j)->getName() << " : " << 
             (*i)->getNzJacobianOfIntersection(*j) << endl;
       }
       cout << "  Ancestoral Intersections:" << endl;
-      for(ExpandedModel::ancestor_iterator j=(*i)->abegin(); j!=(*i)->aend(); ++j) {
+      for(ModelInterface::ancestor_iterator j=(*i)->abegin(); j!=(*i)->aend(); ++j) {
          cout << "    " << (*j)->getName() << " : " << 
             (*i)->getNzJacobianOfIntersection(*j) << endl;
       }
    }
 }
 
-void writeMps(ExpandedModel *root, ostream &out) {
+void writeMps(ModelInterface *root, ostream &out) {
 }

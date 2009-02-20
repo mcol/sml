@@ -1,8 +1,8 @@
 #ifndef SML_MPS_H
 #define SML_MPS_H
 
-#include "ExpandedModel.h"
+#include "ModelInterface.h"
 
-void SML_MPS_driver(ExpandedModel *root);
+void SML_MPS_driver(ModelInterface *root);
 
 #endif

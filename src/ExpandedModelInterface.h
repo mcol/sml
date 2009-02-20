@@ -2,8 +2,7 @@
 #define MODEL_INTERFACE_H
 
 #include <vector>
-
-using namespace std;
+#include <list>
 
 /** 
  * @class ModelInterface
@@ -21,7 +20,7 @@ using namespace std;
 class ModelInterface {
  friend class AmplModel;
  public:
-  vector <ModelInterface*> children;  //!< list of children
+ std::vector <ModelInterface*> children;  //!< list of children
 
  protected:
   /** list of child nodes (vector, so that it can be indexed) */
@@ -32,7 +31,7 @@ class ModelInterface {
   class child_iterator {
    private:
     ModelInterface *model_;
-    vector<ModelInterface*>::iterator itr_;
+    std::vector<ModelInterface*>::iterator itr_;
     child_iterator *desc_itr_;
     bool end_;
    public:
@@ -122,6 +121,9 @@ class ModelInterface {
   //! Return nb local vars.
   virtual int getNLocalVars() = 0;
 
+  //! Return names of local vars.
+  virtual const std::list<std::string>& getLocalVarNames() = 0;
+
   //! Return nb local cons.
   virtual int getNLocalCons() = 0;
 
@@ -148,7 +150,7 @@ class ModelInterface {
   virtual void getObjGradient(double *elts) = 0;
 
   //! Returns unique name of this block
-  virtual string getName() const = 0;
+  virtual std::string getName() const = 0;
 };
 
 #endif
