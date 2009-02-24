@@ -8,7 +8,7 @@ AC_PROG_LEX
 AC_PROG_YACC
 AC_PROG_RANLIB
 AC_PROG_INSTALL
-AMPL_INCLUDE=-I/home/s0455378/src/ampl/solvers/sys.i686.Linux
+ACX_AMPL( [], AC_ERROR([Ampl Solver Library Required]) )
 AC_SUBST(AMPL_INCLUDE)
 AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile interfaces/oops/Makefile interfaces/mps/Makefile])
 AC_OUTPUT
