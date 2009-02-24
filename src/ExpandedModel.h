@@ -120,6 +120,9 @@ class ExpandedModel : public ModelInterface {
  
   //! list of global names of local variables 
   list<string> listOfVarNames; 
+ 
+  //! list of global names of local constraints
+  list<string> listOfConNames; 
 
   //! indices of local variables in the corresponding *.nl file */
   int *listOfVars;        
@@ -140,15 +143,17 @@ class ExpandedModel : public ModelInterface {
 
   //! Recursively print contents of this instance
   void print();
-
-  //! Return names of local vars.
-  const list<string>& getLocalVarNames();
   
   //! Return nb local vars.
   int getNLocalVars();    
 
+  //! Return names of local vars.
+  const list<string>& getLocalVarNames();
+
   //! Return nb local cons.
   int getNLocalCons();
+
+  const std::list<std::string>& getLocalConNames();
 
   //! Returns the nonzeros in the Jacobian of a section of the model.
   int getNzJacobianOfIntersection(ModelInterface *emcol);

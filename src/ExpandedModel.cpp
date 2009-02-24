@@ -95,11 +95,33 @@ ExpandedModel::setLocalVarInfo()
     localVarInfoSet=true;
   }
 
-  // ------- read the names of columns defined in this NlFile ------------
-  ifstream fin((model_file+".col").c_str());
+  // ------- read the names of constraints defined in this NlFile ------------
+  // These have been written in the correct order
+  ifstream fin((model_file+".row").c_str());
 
   if (!fin) {
-    cout << "Cannot open column name file: "+model_file+".col";
+    cerr << "Cannot open row name file: "+model_file+".row" << endl;
+    exit(1);
+  }
+  
+  while(!fin.eof()){
+    string line;
+    getline(fin, line);
+    listOfConNames.push_back(line);
+  }
+
+  fin.close();
+  
+  if (GlobalVariables::prtLvl>=2)
+    cout << "Read " << colfilelist.size() << " lines from file " << 
+       model_file << ".row" << endl;
+
+  // Now read vars - these actually need matching to correct order
+
+  fin.open((model_file+".col").c_str());
+
+  if (!fin) {
+    cerr << "Cannot open column name file: "+model_file+".col" << endl;
     exit(1);
   }
   
@@ -163,7 +185,7 @@ ExpandedModel::setLocalVarInfo()
 }
 
 /* --------------------------------------------------------------------------
-ExpandedModel::getNLocalVars
+ExpandedModel::getLocalVarNames
 -------------------------------------------------------------------------- */
 /** Returns the names of variables local to this node
  *
@@ -177,6 +199,23 @@ ExpandedModel::getLocalVarNames()
     localVarInfoSet=true;
   }
   return listOfVarNames;
+}
+
+/* --------------------------------------------------------------------------
+ExpandedModel::getLocalConNames
+-------------------------------------------------------------------------- */
+/** Returns the names of variables local to this node
+ *
+ * @return names of local variables
+ */
+const list<string>&
+ExpandedModel::getLocalConNames() 
+{
+  if (!localVarInfoSet){
+    setLocalVarInfo();
+    localVarInfoSet=true;
+  }
+  return listOfConNames;
 }
 
 /* --------------------------------------------------------------------------

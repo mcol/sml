@@ -121,11 +121,14 @@ class ModelInterface {
   //! Return nb local vars.
   virtual int getNLocalVars() = 0;
 
-  //! Return names of local vars.
+  //! Return names of local variables.
   virtual const std::list<std::string>& getLocalVarNames() = 0;
 
   //! Return nb local cons.
   virtual int getNLocalCons() = 0;
+
+  //! Return names of local constraints.
+  virtual const std::list<std::string>& getLocalConNames() = 0;
 
   //! Returns the nonzeros in the Jacobian of a section of the model.
   virtual int getNzJacobianOfIntersection(ModelInterface *emcol) = 0;
