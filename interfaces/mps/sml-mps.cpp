@@ -160,27 +160,9 @@ void SML_MPS_driver(ModelInterface *root, string filename) {
          }
       }
 
-      // Grab jacobian
-      {
-         int nz = im->getNzJacobianOfIntersection(im);
-         int colbeg[im->getNLocalVars()+1];
-         int collen[im->getNLocalVars()];
-         int rownbs[nz];
-         double elts[nz];
-         im->getJacobianOfIntersection(im, colbeg, collen, rownbs, elts);
-         int p = 0;
-         string first_con = *(im->getLocalConNames().begin());
-         int offset = row_hash.get_idx(first_con);
-         for(list<string>::const_iterator j=im->getLocalVarNames().begin(); 
-               j!=im->getLocalVarNames().end(); ++j,++p) {
-            sparse_col &col = cols[col_hash.getHash(*j)];
-            for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k)
-               col.add_entry(rownbs[k]+offset, elts[k]);
-         }
-      }
-
       // We observe that we will have a possible intersection with any of our
-      // descendants, or ancestors
+      // descendants, or ancestors. Note that the child_iterator also
+      // covers this node as its final entry.
       cout << "  Descendant Intersections:" << endl;
       for(ModelInterface::child_iterator j=(*i)->cbegin(); j!=(*i)->cend(); ++j) {
          ModelInterface *jm = *j;
@@ -277,13 +259,13 @@ void writeMps(ostream &out, string name, map<string,char> rows,
 
    out << "RHS" << endl;
    for(map<string,double>::iterator i=rhs.begin(); i!=rhs.end(); ++i) {
-      out << "    " << setw(8) << i->first << "  ";
+      out << "    rhs1      " << setw(8) << i->first << "  ";
       out << setw(12) << mps_float(i->second) << endl;
    }
 
    out << "RANGES" << endl;
    for(map<string,double>::iterator i=ranges.begin(); i!=ranges.end(); ++i) {
-      out << "    " << setw(8) << i->first << "  ";
+      out << "    range1    " << setw(8) << i->first << "  ";
       out << setw(12) << mps_float(i->second) << endl;
    }
 
@@ -298,5 +280,5 @@ void writeMps(ostream &out, string name, map<string,char> rows,
       out << setw(12) << mps_float(i->value) << endl;
    }
 
-   out << "ENDDATA" << endl;
+   out << "ENDATA" << endl;
 }
