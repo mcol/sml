@@ -1,10 +1,10 @@
 /* the asl_pfgh.h file in amplsolver globally redefines list
    => this is a separate file that provides all the calls to the
       amplsolver library (and that cannot use c++ lists
-
 */
 
 #include <string>
+#include <limits>
 #include "AmplsolverCalls.h"
 #include "asl_pfgh.h"
 #define asl cur_ASL
@@ -67,7 +67,7 @@ NlFile::getNoConstraints(){
 }
 
 /* ----------------------------------------------------------------------------
-NlFile::getNoVariabless
+NlFile::getNoVariables
 ---------------------------------------------------------------------------- */
 int
 NlFile::getNoVariables(){
@@ -342,6 +342,8 @@ NlFile::getRowLowBoundsAMPL(double *elts)
   
   for(int i=0;i<n_con; i++){
     elts[i] = LUrhs[2*i];
+    if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
+    if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
@@ -379,6 +381,8 @@ NlFile::getRowUpBoundsAMPL(double *elts)
   
   for(int i=0;i<n_con; i++){
     elts[i] = LUrhs[2*i+1];
+    if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
+    if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
@@ -482,6 +486,8 @@ NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
   for(int i=0;i<nvar; i++){
     int ix = lvar[i];
     elts[i] = LUv[2*ix+1];
+    if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
+    if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
@@ -523,6 +529,8 @@ NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
   for(int i=0;i<nvar; i++){
     int ix = lvar[i];
     elts[i] = LUv[2*ix];
+    if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
+    if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
