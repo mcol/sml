@@ -7,6 +7,7 @@ autoreconf
 
 Set values correctly at top of src/Makefile.am for OOPSHOME etc.
 Set name of ampl executable at top of ampl.tab.ypp.
+Set amplsolver path in configure.ac and rerun autoreconf
 
 Compilation:
 ./configure
