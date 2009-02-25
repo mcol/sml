@@ -9,38 +9,6 @@
 
 using namespace std;
 
-class NameHasher {
-  private:
-   map<string, string> var_to_hash;
-   map<string, int> var_to_idx;
-   vector<string> idx_to_hash;
-   const char prepend_;
-   int next;
-  public:
-   NameHasher(char prepend) :
-      prepend_(prepend), next(1) {}
-   void insertValue(string input, string hash, int idx) {
-      var_to_hash[input] = hash;
-      var_to_idx[input] = next;
-      idx_to_hash.push_back(hash);
-   }
-   string getHash(string input) {
-      if(var_to_hash.find(input)!=var_to_hash.end()) return var_to_hash[input];
-      // Otherwise doesn't have a hash value yet.
-      ostringstream oss;
-      oss << prepend_ << next;
-      insertValue(input, oss.str(), next++);
-      return oss.str();
-   }
-   int get_idx(string input) {
-      if(var_to_hash.find(input)==var_to_hash.end()) return -1;
-      return var_to_idx[input];
-   }
-   string get_hash(int idx) {
-      return idx_to_hash[idx];
-   }
-};
-
 class sparse_col {
   public:
    vector<int> row;
@@ -58,16 +26,16 @@ class sparse_col {
 class mps_bound {
   public:
    string type;
-   string name;
+   int id;
    double value;
 
-   mps_bound(char type_[3], string name_, double value_) :
-      type(type_), name(name_), value(value_) {}
+   mps_bound(char type_[3], int id_, double value_) :
+      type(type_), id(id_), value(value_) {}
 };
 
-void writeMps(ostream &out, string name, map<string,char> rows,
-   map<string,double> rhs, map<string,double> ranges, list<mps_bound> bnds,
-   map<string,sparse_col> cols, NameHasher row_hash, NameHasher col_hash);
+void writeMps(ostream &out, string name, map<int,char> rows,
+   map<int,double> rhs, map<int,double> ranges, list<mps_bound> bnds,
+   map<int,sparse_col> cols);
 
 /*
  * Each model block looks like the following:
@@ -81,138 +49,132 @@ void writeMps(ostream &out, string name, map<string,char> rows,
  * A_i->getJacobianOfIntersection(model)   returns C_i
  */
 void SML_MPS_driver(ModelInterface *root, string filename) {
-   map<string,char> rows; // Row names and equalities
-   map<string,double> rhs;
-   map<string,sparse_col> cols;
-   map<string,double> ranges;
-   list<mps_bound> bnds;
-   NameHasher row_hash('r');
-   NameHasher col_hash('c');
-
    const double inf = numeric_limits<double>::infinity();
    const string obj_name = "obj";
 
-   // Initialise objective
-   rows[obj_name] = 'N';
-   row_hash.insertValue(obj_name, obj_name, 0);
+   map<int,char> rows;
+   map<int,double> rhs;
+   map<int,sparse_col> cols;
+   map<int,double> ranges;
+   list<mps_bound> bnds;
+   int next_row = 1;
+   int next_col = 0;
 
+   // Initialise objective
+   rows[0] = 'N';
+
+   // Setup row and column numbering, together with bounds and constraint types
+   map<string,int> row_offset;
+   map<string,int> col_offset;
    for(ModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
-      ModelInterface *im = *i;
-      cout << "On Model " << im->getName() << " " << im->getNLocalVars() <<
-         "x" << im->getNLocalCons() << endl;
+      ModelInterface *model = *i;
+      row_offset[model->getName()] = next_row;
+      next_row += model->getNLocalCons();
+      col_offset[model->getName()] = next_col;
+      next_col += model->getNLocalVars();
+
 
       // Name columns, add objective entries and bounds
       {
-         double obj[im->getNLocalVars()];
-         double lwr_bnds[(*i)->getNLocalVars()];
-         double upr_bnds[(*i)->getNLocalVars()];
-         im->getObjGradient(obj);
-         im->getColLowBounds(lwr_bnds);
-         im->getColUpBounds(upr_bnds);
+         double obj[model->getNLocalVars()];
+         double lwr_bnds[model->getNLocalVars()];
+         double upr_bnds[model->getNLocalVars()];
+         model->getObjGradient(obj);
+         model->getColLowBounds(lwr_bnds);
+         model->getColUpBounds(upr_bnds);
          double *op=obj;
          double *lb = lwr_bnds;
          double *ub = upr_bnds;
-         for(list<string>::const_iterator j=im->getLocalVarNames().begin(); 
-               j!=im->getLocalVarNames().end(); ++j,++op,++lb,++ub) {
-            cout << "  v " << *j << " - " << col_hash.getHash(*j) << endl;
-            sparse_col &col = cols[col_hash.getHash(*j)];
-            col.add_entry(0, *op);
+         for(int j=col_offset[model->getName()]; j<next_col; ++j,++op,++lb,++ub) {
+            sparse_col &col = cols[j];
+            if(*op!=0) col.add_entry(0, *op);
             if(*lb == *ub) { // Fixed
-               bnds.push_back(mps_bound("FX", col_hash.getHash(*j), *lb));
+               bnds.push_back(mps_bound("FX", j, *lb));
             } else if(*lb==-inf && *ub==inf) {
-               bnds.push_back(mps_bound("FR", col_hash.getHash(*j), 0.0));
+               bnds.push_back(mps_bound("FR", j, 0.0));
             } else {
                if(*lb!=0.0)
-                  bnds.push_back(mps_bound("LO", col_hash.getHash(*j), *lb));
+                  bnds.push_back(mps_bound("LO", j, *lb));
                if(*ub!=inf)
-                  bnds.push_back(mps_bound("UP", col_hash.getHash(*j), *ub));
+                  bnds.push_back(mps_bound("UP", j, *ub));
             }
          }
       }
 
       // Name rows and identify constraint types
       {
-         double lwr_bnds[(*i)->getNLocalCons()];
-         double upr_bnds[(*i)->getNLocalCons()];
-         (*i)->getRowLowBounds(lwr_bnds);
-         (*i)->getRowUpBounds(upr_bnds);
+         double lwr_bnds[model->getNLocalCons()];
+         double upr_bnds[model->getNLocalCons()];
+         model->getRowLowBounds(lwr_bnds);
+         model->getRowUpBounds(upr_bnds);
          double *lb = lwr_bnds;
          double *ub = upr_bnds;
-         for(list<string>::const_iterator j=(*i)->getLocalConNames().begin(); 
-               j!=(*i)->getLocalConNames().end(); ++j,++lb,++ub) {
-            cout << "  c " << *j << " - " << row_hash.getHash(*j) << endl;
+         for(int j=row_offset[model->getName()]; j<next_row; ++j,++lb,++ub) {
             if(*lb==-inf && *ub==inf) {
-               rows[row_hash.getHash(*j)] = 'N';
+               rows[j] = 'N';
             } else if(*lb==-inf) {
-               rows[row_hash.getHash(*j)] = 'L';
-               if(*ub!=0) rhs[row_hash.getHash(*j)] = *ub;
+               rows[j] = 'L';
+               if(*ub!=0) rhs[j] = *ub;
             } else if(*ub== inf) {
-               rows[row_hash.getHash(*j)] = 'G';
-               if(*lb!=0) rhs[row_hash.getHash(*j)] = *lb;
+               rows[j] = 'G';
+               if(*lb!=0) rhs[j] = *lb;
             } else if(*lb==*ub) {
-               rows[row_hash.getHash(*j)] = 'E';
-               if(*lb!=0) rhs[row_hash.getHash(*j)] = *lb;
+               rows[j] = 'E';
+               if(*lb!=0) rhs[j] = *lb;
             } else {
-               rows[row_hash.getHash(*j)] = 'L';
-               if(*ub!=0) rhs[row_hash.getHash(*j)] = *ub;
-               ranges[row_hash.getHash(*j)] = *ub-*lb;
+               rows[j] = 'L';
+               if(*ub!=0) rhs[j] = *ub;
+               ranges[j] = *ub-*lb;
+            }
+         }
+      }
+   }
+
+   // Now aquire matrix information by ascending and descending tree
+   // Recall that model->getJacobianOfIntersection(jm) returns us the
+   // block in the current model's row using variables in block jm
+   for(ModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
+      ModelInterface *model = *i;
+      for(ModelInterface::child_iterator j=model->cbegin(); j!=model->cend(); ++j) {
+         ModelInterface *jm = *j;
+         if(model->getNzJacobianOfIntersection(jm)==0) continue;
+         int nz = model->getNzJacobianOfIntersection(jm);
+         int colbeg[jm->getNLocalVars()+1];
+         int collen[jm->getNLocalVars()];
+         int rownbs[nz];
+         double elts[nz];
+         model->getJacobianOfIntersection(jm, colbeg, collen, rownbs, elts);
+         int offset = row_offset[model->getName()];
+         for(int p=0; p<jm->getLocalVarNames().size(); ++p) {
+            sparse_col &col = cols[col_offset[jm->getName()]+p];
+            for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k) {
+               col.add_entry(rownbs[k]+offset, elts[k]);
             }
          }
       }
 
-      // We observe that we will have a possible intersection with any of our
-      // descendants, or ancestors. Note that the child_iterator also
-      // covers this node as its final entry.
-      cout << "  Descendant Intersections:" << endl;
-      for(ModelInterface::child_iterator j=(*i)->cbegin(); j!=(*i)->cend(); ++j) {
+      for(ModelInterface::ancestor_iterator j=model->abegin(); j!=model->aend(); ++j) {
          ModelInterface *jm = *j;
-         if(im->getNzJacobianOfIntersection(jm)==0) continue;
-         cout << "    " << jm->getName() << " : " << 
-            im->getNzJacobianOfIntersection(jm) << endl;
-         int nz = im->getNzJacobianOfIntersection(jm);
+         if(model->getNzJacobianOfIntersection(jm)==0) continue;
+         int nz = model->getNzJacobianOfIntersection(jm);
          int colbeg[jm->getNLocalVars()+1];
          int collen[jm->getNLocalVars()];
          int rownbs[nz];
          double elts[nz];
-         im->getJacobianOfIntersection(jm, colbeg, collen, rownbs, elts);
-         int p = 0;
-         string first_con = *(im->getLocalConNames().begin());
-         int offset = row_hash.get_idx(first_con);
-         for(list<string>::const_iterator j=jm->getLocalVarNames().begin(); 
-               j!=jm->getLocalVarNames().end(); ++j,++p) {
-            sparse_col &col = cols[col_hash.getHash(*j)];
-            for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k)
+         model->getJacobianOfIntersection(jm, colbeg, collen, rownbs, elts);
+         int offset = row_offset[model->getName()];
+         for(int p=0; p<jm->getLocalVarNames().size(); ++p) {
+            sparse_col &col = cols[col_offset[jm->getName()]+p];
+            for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k) {
                col.add_entry(rownbs[k]+offset, elts[k]);
-         }
-      }
-
-      cout << "  Ancestoral Intersections:" << endl;
-      for(ModelInterface::ancestor_iterator j=im->abegin(); j!=im->aend(); ++j) {
-         ModelInterface *jm = *j;
-         if(im->getNzJacobianOfIntersection(jm)==0) continue;
-         cout << "    " << (*j)->getName() << " : " << 
-            im->getNzJacobianOfIntersection(jm) << endl;
-         int nz = im->getNzJacobianOfIntersection(jm);
-         int colbeg[jm->getNLocalVars()+1];
-         int collen[jm->getNLocalVars()];
-         int rownbs[nz];
-         double elts[nz];
-         im->getJacobianOfIntersection(jm, colbeg, collen, rownbs, elts);
-         int p = 0;
-         string first_con = *(im->getLocalConNames().begin());
-         int offset = row_hash.get_idx(first_con);
-         for(list<string>::const_iterator j=jm->getLocalVarNames().begin(); 
-               j!=jm->getLocalVarNames().end(); ++j,++p) {
-            sparse_col &col = cols[col_hash.getHash(*j)];
-            for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k)
-               col.add_entry(rownbs[k]+offset, elts[k]);
+            }
          }
       }
    }
 
    string newfilename = "../" + filename;
    ofstream fout(newfilename.c_str());
-   writeMps(fout, "Test", rows, rhs, ranges, bnds, cols, row_hash, col_hash);
+   writeMps(fout, "Test", rows, rhs, ranges, bnds, cols);
    fout.close();
 }
 
@@ -232,24 +194,30 @@ string mps_float(double d) {
    return oss.str();
 }
 
-void writeMps(ostream &out, string name, map<string,char> rows,
-      map<string,double> rhs, map<string,double> ranges, list<mps_bound> bnds,
-      map<string,sparse_col> cols, NameHasher row_hash, NameHasher col_hash) {
+string concat(char c, int n) {
+   ostringstream oss;
+   oss << c << n;
+   return oss.str();
+}
+
+void writeMps(ostream &out, string name, map<int,char> rows,
+      map<int,double> rhs, map<int,double> ranges, list<mps_bound> bnds,
+      map<int,sparse_col> cols) {
    out << "NAME          " << name << endl;
    
    out << "ROWS" << endl;
-   for(map<string,char>::iterator i=rows.begin(); i!=rows.end(); ++i) {
-      out << " " << i->second << "  " << i->first << endl;
+   for(map<int,char>::iterator i=rows.begin(); i!=rows.end(); ++i) {
+      out << " " << i->second << "  " << concat('r',i->first) << endl;
    }
 
    out << "COLUMNS" << endl;
-   for(map<string,sparse_col>::iterator i=cols.begin(); i!=cols.end(); ++i) {
+   for(map<int,sparse_col>::iterator i=cols.begin(); i!=cols.end(); ++i) {
       sparse_col &col = i->second;
       bool rfirst = true;
       for(int j=0; j<col.size(); ++j) {
-         if(rfirst) out << "    " << setw(8) << i->first << "  ";
+         if(rfirst) out << "    " << setw(8) << concat('c',i->first) << "  ";
          else out << "   ";
-         out << setw(8) << row_hash.get_hash(col.row[j]) << "  ";
+         out << setw(8) << concat('r', col.row[j]) << "  ";
          out << setw(12) << mps_float(col.val[j]);
          if(!rfirst) out << endl;
          rfirst = !rfirst;
@@ -258,25 +226,23 @@ void writeMps(ostream &out, string name, map<string,char> rows,
    }
 
    out << "RHS" << endl;
-   for(map<string,double>::iterator i=rhs.begin(); i!=rhs.end(); ++i) {
-      out << "    rhs1      " << setw(8) << i->first << "  ";
+   for(map<int,double>::iterator i=rhs.begin(); i!=rhs.end(); ++i) {
+      out << "    rhs1      " << setw(8) << concat('r',i->first) << "  ";
       out << setw(12) << mps_float(i->second) << endl;
    }
 
    out << "RANGES" << endl;
-   for(map<string,double>::iterator i=ranges.begin(); i!=ranges.end(); ++i) {
-      out << "    range1    " << setw(8) << i->first << "  ";
+   for(map<int,double>::iterator i=ranges.begin(); i!=ranges.end(); ++i) {
+      out << "    range1    " << setw(8) << concat('r',i->first) << "  ";
       out << setw(12) << mps_float(i->second) << endl;
    }
 
    out << "BOUNDS" << endl;
    int brow = 0;
    for(list<mps_bound>::iterator i=bnds.begin(); i!=bnds.end(); ++i, ++brow) {
-      ostringstream oss;
-      oss << "b" << brow;
       out << " " << setw(2) << i->type << " ";
-      out << setw(8) << oss.str() << "  ";
-      out << setw(8) << i->name << "  ";
+      out << setw(8) << concat('b',brow) << "  ";
+      out << setw(8) << concat('c',i->id) << "  ";
       out << setw(12) << mps_float(i->value) << endl;
    }
 
