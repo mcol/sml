@@ -6,5 +6,5 @@ AM_CFLAGS = -g
 AM_CXXFLAGS = -g -I../../src -gstabs
 
 bin_PROGRAMS = smlmps
-smlmps_SOURCES = sml-mps.cpp wrapper.cpp
+smlmps_SOURCES = sml-mps.cpp sml-mps.h wrapper.cpp
 smlmps_LDADD = 	../../src/libsml.a @AMPL_LIBS@ -lfl -ldl
