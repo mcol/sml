@@ -1,6 +1,7 @@
 \documentclass[10pt,a4paper]{book}
 
-\usepackage{colordvi,epsfig,amsmath,xspace,fancyvrb,wrapfig}
+\usepackage{colordvi,amsmath,xspace,fancyvrb,wrapfig}
+\usepackage{pgf}
 \usepackage{fullpage}
 
 \newcommand{\ie}{i.e.\@\xspace}
@@ -56,30 +57,48 @@ by the following steps:
    \item make install
 \end{enumerate}
 
-In order to build correctly SML needs to know the location of the AMPL Solver
-library. This is freely available to download from 
-http://www.netlib.org/ampl/solvers/ and you need to supply the directory
-containing the final libamplsolver.a to configure's --with-ampl= argument.
-Further, SML {\it requires} AMPL to be installed to run. You can purchase a
-copy of AMPL from one of the suppliers listed on the AMPL webpage at 
-http://www.ampl.com/vendors.html and the shell command ampl should invoke it.
+However there are number of options and pieces of third party software you will
+require.
 
-SML currently offers two solver interfaces:
-\begin{description}
-   \item{MPS} which will output the problem to an MPS file but will
-      lose the strctural information in the process.
-   \item{OOPS} which requires the OOPS and MeTiS libraries.
-\end{description}
+\section{Third-party software}
 
-For information on the Object Orientated Parallel Solver (OOPS) please
-contact Jacek Gondzio or see his webpage http://www.maths.ed.ac.uk/~gondzio/parallel/solver.html . The MeTiS graph partitioning software used by OOPS is
-available from the Karypis lab at http://glaros.dtc.umn.edu/gkhome/views/metis .
- The locations of these packages can be passed to configure using the options
- --with-metis=/path/to/metis/base/dir and --with-oops=/path/to/oopshome .
+\begin{table}
+   \caption{ \label{Third-party urls}
+      Third-party software and where to get it
+   }
+   \begin{tabular}{lccl}
+      \hline
+      \bf Software & \bf Required? & \bf Free? & \bf URL \\
+      \hline
+      AMPL         & Yes           & No        & http://www.ampl.com/vendors.html \\
+      {\tt libamplsolver.a} & Yes & Yes & http://www.netlib.org/ampl/solvers/ \\
+      OOPS         & No            & Yes,Limited & http://www.maths.ed.ac.uk/~gondzio/parallel/solver.html \\
+      MeTiS        & Only By OOPS  & Yes       & http://glaros.dtc.umn.edu/gkhome/views/metis \\
+      \hline
+   \end{tabular}
+\end{table}
 
- To surpress the compilation of the MPS interface use the option --with-mps=no .
- configure also offer several other options run ./configure --help for a
- more detailed summary.
+The third-party software you will need is summarised in 
+Table~\ref{Third-party urls}. As SML is currently implemented as a pre- and
+post-processor to AMPL you will need an installed version of AMPL. If you wish
+to use the OOPS solver then you will also need the OOPS and MeTiS libraries.
+
+\section{Configuration Options}
+
+The following configuration options are available:
+
+\begin{tabular}{ll}
+   \tt --with-ampl=path & Path to directory containing libamplsolver.a \\
+   \tt --with-oops=path & Path to OOPSHOME directory \\
+   \tt --with-metis=path & Path to MeTiS directory \\
+   \tt --with-mps=[yes|no] & Enable/disable MPS interface
+\end{tabular}
+
+\noindent Running the command:
+\begin{verbatim}
+   ./configure --help
+\end{verbatim}
+will display a more comprehensive summary.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Structured Problems}
@@ -185,7 +204,7 @@ The complete formulation of the MSND problem is as follows:
 
 \begin{figure}[ht]
 \begin{center}
-\epsfig{file=fig/MSND_struct,width=7cm}
+\pgfimage[width=7cm]{fig/MSND_struct}
 \end{center}
 \caption{Structure of the constraint matrix for the MSND problem.}
 \label{MSND_struct}
@@ -483,6 +502,14 @@ calls. The implementor is advised to browse the source code for the MPS
 interface for an example implementation.
 
 \subsection{Data strcuture}
+\begin{figure}
+\begin{center}
+\pgfimage[width=7cm]{fig/Interface_Example}
+\end{center}
+\caption{Structure of the constraint matrix for the MSND problem.}
+\label{MSND_struct}
+\end{figure}
+
 Internally  SML describes a problem as a nested bordered block diagonal form.
 The data structure used to represent this assumes the following:
 \begin{enumerate}
@@ -530,7 +557,8 @@ which will provide access to all relevant definitions. The solver should then
 call the function:
 
 \begin{verbatim}
-ModelInterface* sml_generate(const std::string modelfilename, const std::string datafilename, const bool debug);
+ModelInterface* sml_generate(const std::string modelfilename, 
+   const std::string datafilename, const bool debug);
 \end{verbatim}
 
 to retrieve a {\tt ModelInterface} object which can then be queried. If the
