@@ -805,7 +805,7 @@ void SyntaxNodeIx::splitExpression()
     cerr << "     " << this;
     exit(1);
   }
-  
+
   tmp = *(this->begin());
   // discard the colon (if there is one present: only interested in lhs) 
   if (tmp->opCode==COLON) {
@@ -817,12 +817,13 @@ void SyntaxNodeIx::splitExpression()
   }
   /* this should now be a comma separated list */
   if (tmp->opCode==COMMA){
+    ListNode *tmpl = static_cast<ListNode*>(tmp);
     ncomp = tmp->nchild();
     this->sets = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
     this->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
     i=0;
-    for(SyntaxNode::iterator ti=tmp->begin(); ti!=tmp->end(); ++ti, ++i){
+    for(ListNode::literator ti=tmpl->lbegin(); ti!=tmpl->lend(); ++ti, ++i){
       tmp2 = findKeywordinTree(*ti, IN);
       /* everything to the left of IN is a dummy variables */
       if (tmp2){

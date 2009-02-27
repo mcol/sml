@@ -359,7 +359,7 @@ setexpr_list:  setexpr_item
                   if ($1->opCode==COMMA){
                      $$ = $1->push_back($3);
                   }else{
-                     $$ = new ListNode(COMMA, (ListNode*)$1, $3);
+                     $$ = new ListNode(COMMA, $1, $3);
                   }
                }
             ;
