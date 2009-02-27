@@ -58,7 +58,7 @@ We hope that object orientated modelling will eventually confer the following be
 It would be greatly appreciated if users would cite the following references
 in work that uses SML:
 \begin{itemize}
-   \item {\sc Andreas Grothey, Jonathan Hogg, Kristian Woodsend, Marco Colombo and Jacek Gondzio}, {\it A Structure Conveying Parallelizable Modeling Language for Mathematical Programming}, {Springer Optimization and Its Applications Vol. 27: Parallel Scientific Computing and Optimization ed: R.Ciegis, D.Henty, B.K\r{a}gstr\"{o}m, and J.\v{Z}ilinska. 2009.}
+   \item {\sc Andreas Grothey, Jonathan Hogg, Kristian Woodsend, Marco Colombo and Jacek Gondzio}, {\it A Structure Conveying Parallelizable Modelling Language for Mathematical Programming}, {Springer Optimization and Its Applications Vol. 27: Parallel Scientific Computing and Optimization ed: R.Ciegis, D.Henty, B.K\r{a}gstr\"{o}m, and J.\v{Z}ilinska. 2009.}
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -128,11 +128,11 @@ If the matrix $A$ is structured then this can be exploited by modern solvers
 to solve the problem faster.
 
 This structure can take a number of forms, for example if the problem involves
-a network then the node-arc inicidence matrix may be repeated multiple times
+a network then the node-arc incidence matrix may be repeated multiple times
 within the matrix $A$, or if the problem is stochastic in nature then the
 scenario tree can be exploited.
 
-Throught this guide we will consider two strucuted problems:
+Throughout this guide we will consider two structured problems:
 \begin{description}
    \item[MSND] Survivable Network Design
    \item[ALM] Asset and Liability Management
@@ -325,9 +325,9 @@ x_{i,j}^h &=& (1+r_{i,j})x_{\pi(i),j}^h +  x_{i,j}^b - x_{i,j}^s,&\forall i\ne 0
 
 \section{Identifying structure}
 
-So how do we identify strcuture? Generally if you are building you model out
-of repeated components you can easily obtain strucutre - it may be that this
-strucutre would be indexed over in the tradional Algerbraic Modelling Language
+So how do we identify structure? Generally if you are building you model out
+of repeated components you can easily obtain structure - it may be that this
+structure would be indexed over in the traditional Algebraic Modelling Language
 representation - for example the indexing over {\tt ARCS} and {\tt NODES} in
 the MSND example, and the indexing over the scenario tree in the stochastic
 ALM example.
@@ -386,7 +386,7 @@ Using the {\tt block} keyword, the previous MSND model can be rewritten as:
 
 \section{Stochastic Structure}
 
-As stochastic programming is a common source of such strucutred problems, and
+As stochastic programming is a common source of such structured problems, and
 the special conventions used to represent stochastic entities, SML includes
 some special conventions for handling stochastic problems. Our next example
 shows these in action.
@@ -432,7 +432,7 @@ shows these in action.
 \chapter{SML Keywords}
 \vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
 In order to facilitate Structured Modelling we have introduced several new
-keywords and structures into the AMPL langauge.
+keywords and structures into the AMPL language.
 
 \section{Blocks}
 A block is defined as follows:
@@ -486,7 +486,7 @@ probability of reaching that node given that its parent is reached. The
 set expression STAGES is used only to provide labels for the stages should
 they be required.
 
-Entites defined within the stochastic block are either {\it stochastic} and
+Entities defined within the stochastic block are either {\it stochastic} and
 are repeated for nodes in their {\it stageset}, or are {\it deterministic} and
 are repeated only once for each stage. By default entities are stochastic
 and their stageset is the full set STAGES. Entities within a {\tt stage} block
@@ -503,7 +503,7 @@ stage. Variables of the ancestor can be referenced using the normal SML syntax,
 {\tt ancestor(i).x}.
 
 Expectations may also be handled through a special new syntax. Within a
-stochastic block the expresion {\tt Exp(expr)} is equivilant to the expression
+stochastic block the expression {\tt Exp(expr)} is equivalent to the expression
 {\tt sum\{nd in NODES: nd in \textit{currentstage}\} PROBS[nd] * expr[nd]}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -516,10 +516,10 @@ stochastic block the expresion {\tt Exp(expr)} is equivilant to the expression
 If you wish to hook a solver other than OOPS to SML then you will need to use
 the interface described in this section. We first describe the data
 representation used by the interface before describing the available function
-calls. The implementor is advised to browse the source code for the MPS
+calls. The implementer is advised to browse the source code for the MPS
 interface for an example implementation.
 
-\subsection{Data strcuture}
+\subsection{Data structure}
 \begin{figure}
    \caption{ \label{Iface eg}
       Structure of the constraint matrix for the MSND problem.
@@ -538,19 +538,19 @@ The data structure used to represent this assumes the following:
    \item A block has zero or more additional blocks nested within it, these are
       represented by a list of pointers to the contained blocks.
    \item A contained block has a similar internal structure, labelled B, that
-      has no bearing on the constraints of varibles associated with this block.
+      has no bearing on the constraints of variables associated with this block.
    \item The constrained block may contain constraints on the variables
-      associated with this block, with a jacobian labelled C.
+      associated with this block, with a Jacobian labelled C.
    \item This block may place constraints upon variables associated with
-      the contained block, ielding the jacobian labelled D.
-   \item Any or all of the jacobians A, B, C or D may be identically zero.
+      the contained block, yielding the Jacobian labelled D.
+   \item Any or all of the Jacobians A, B, C or D may be identically zero.
 \end{enumerate}
 
-Clearly the list of pointers to contained blocks yields a tree strucutre which
+Clearly the list of pointers to contained blocks yields a tree structure which
 we refer to as the Expanded Model Tree.  This representation of the structured
 model is natural for a hierarchical linear algebra solver such as OOPS, but
 should also provide sufficient access for other designs of structure exploiting
-solver such as those which use decompopsition approaches.
+solver such as those which use decomposition approaches.
 
 \subsection{Basic Use}
 
@@ -561,13 +561,13 @@ solver is then free to query. Finally the solver should {\tt delete} the
 {\tt ModelInterface} object to free the memory.
 
 We recommend that most solvers parse the tree in either one or two passes. The
-inital parse may extract information on the dimension and relative density of
+initial parse may extract information on the dimension and relative density of
 the tree, setting up data structures are required, while the second pass will
 determine the actual numeric values.
 
 \subsection{API}
 
-\subsubsection{Aquiring the ModelInterface object}
+\subsubsection{Acquiring the ModelInterface object}
 The solver should use the include statement
 \begin{verbatim}
 #include "sml.h"
@@ -586,7 +586,7 @@ be generated.
 
 \subsubsection{Transversing the Tree}
 The {\tt ModelInterface} object returned after parsing the model and data files
-offers two iterators for movign through the tree, and further allows direct
+offers two iterators for moving through the tree, and further allows direct
 access to the list of children.
 
 The {\tt ModelInterface::ancestor\_iterator} allows the iteration up through
@@ -602,11 +602,11 @@ leaf in the subtree routed at the calling node. The function
 {\tt ModelInterface::cend()} returns an iterator representing the end of the
 child iteration sequence.
 
-The comonent {\tt std::vector<ModelInterface*> ModelInterface::children} allows
+The component {\tt std::vector<ModelInterface*> ModelInterface::children} allows
 the solver writer to use their own iteration scheme if the above are not
 sufficient.
 
-We note that (non-)equivilance of pointers is not a sufficient condition to
+We note that (non-)equivalence of pointers is not a sufficient condition to
 differentiate nodes, and the function {\tt std::string ModelInterface::getName()} should be used instead.
 
 \subsubsection{Accessing the Data}
@@ -649,7 +649,7 @@ double el[nz]}, where {\tt n} is the number of variables in this model, and
 {\tt nz} is the number returned by the corresponding call to
 {\tt getNzJacobianOfIntersection()}.
 
-On return {\tt colbeg[i]} is a pointer to the begining of column {\tt i}
+On return {\tt colbeg[i]} is a pointer to the beginning of column {\tt i}
 within the arrays {\tt rownbs[]} and {\tt el[]}, {\tt collen[i]} is the number
 of entries in that column --- which may be zero. The values {\tt rownbs[j]} and
 {\tt el[j]} represent a row number-value pair.
