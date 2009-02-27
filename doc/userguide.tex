@@ -503,18 +503,19 @@ interface for an example implementation.
 
 \subsection{Data strcuture}
 \begin{figure}
-\begin{center}
-\pgfimage[width=7cm]{fig/Interface_Example}
-\end{center}
-\caption{Structure of the constraint matrix for the MSND problem.}
-\label{MSND_struct}
+   \caption{ \label{Iface eg}
+      Structure of the constraint matrix for the MSND problem.
+   }
+   \begin{center}
+      \pgfimage[width=7cm]{fig/Interface_Example}
+   \end{center}
 \end{figure}
 
 Internally  SML describes a problem as a nested bordered block diagonal form.
 The data structure used to represent this assumes the following:
 \begin{enumerate}
    \item A block has a zero or more constraints of variables with an associated
-      Jacobian matrix, labelled A in Figure~XXX.
+      Jacobian matrix, labelled A in Figure~\ref{Iface eg}.
    \item Further, associated variables may contribute to the objective function.
    \item A block has zero or more additional blocks nested within it, these are
       represented by a list of pointers to the contained blocks.
