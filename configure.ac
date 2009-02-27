@@ -34,7 +34,8 @@ AC_ARG_WITH(
    ])
 
 
-AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile interfaces/oops/Makefile interfaces/mps/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile
+                 interfaces/oops/Makefile interfaces/mps/Makefile])
 AC_OUTPUT
 
 echo "==========================================="
