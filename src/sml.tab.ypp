@@ -107,22 +107,10 @@ statements: /* empty */
           | statements statement 
           ;
 
-block:   modelblock
-     //| coreblock
-     |   stochblock
+block:   stochblock
      |   blockblock
      |   stageblock
      ;
-
-modelblock: modelblockbegin statements modelblockend
-          ;
-
-/* a model command sets up a submodel of the current model */
-modelblockbegin:  MODEL ID optionlist {begin_model((char *)$2, NULL);}
-               |  MODEL MODELTYPE ID optionlist {begin_model((char*)$3, NULL);}
-               ;
-
-modelblockend: END MODEL {end_model(NULL);}
              ;
 
 optionlist: /*empty */ {$$=NULL;}
@@ -238,16 +226,23 @@ sblock_alias: STOCHASTIC BLOCK
   stageblock
 ------------------------------------------------------------------------- */
 
-stageblock: STAGE setexpression COLON {              
-               if (!is_stoch_model) { 
-                  cerr << "Syntax Error: keyword 'STAGES' can only be used in"
-                     "stochastic blocks\n";
-                  exit(1);
-               }
-               stages_glo = $2;
-            } LBRACE statements RBRACE {
+stageblock: stageblock_start LBRACE statements RBRACE {
                stages_glo = NULL;
             }
+          | stageblock_start statements END STAGE SEMICOLON {
+               stages_glo = NULL;
+            }
+          ;
+
+stageblock_start: STAGE setexpression COLON {              
+                     if (!is_stoch_model) { 
+                        cerr << "Syntax Error: keyword 'STAGES' can only be "
+                        "used in stochastic blocks" << endl;
+                        exit(1);
+                     }
+                     stages_glo = $2;
+                  }
+                ;
 
 /* -------------------------------------------------------------------- 
   ``Standard'' AMPL
