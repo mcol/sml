@@ -136,9 +136,6 @@ class ExpandedModel : public ModelInterface {
   // -------------------------- methods ------------------------------------
   // public:
 
-  //! takes flat AmplModel tree and expands it into an ExpandedModel tree 
-  ExpandedModel(AmplModel *model);
-
   ExpandedModel();     //< constructor
 
   //! Recursively print contents of this instance

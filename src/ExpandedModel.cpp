@@ -10,41 +10,6 @@
 list<string> ExpandedModel::pathToNodeStack;
 const bool log_EM = false;
 
-
-
-/* --------------------------------------------------------------------------
-ExpandedModel(ampl-model *model)
--------------------------------------------------------------------------- */
-/** This is the constructor that takes a FLAT AmplModel as argument
- * and creates an Expanded version of it 
- *
- * It is implemented as a wrapper to AmplModel::createExpandedModel
- *
- * @param root The AmplModel node at which to start the expansion
- *
- * @bug I believe that the parameter root is (at least implicitly)
- * assumed to be the root node. I cannot think of any situation where
- * a different parameter value should be passed
- */
-ExpandedModel::ExpandedModel(AmplModel *root){
-  /* this needs to:
-     (1) copy across information on local variables/constraints
-     (2) loop over all submodel declarations
-         (2a) work out their cardinality
-         (2b) and add them all (recursively) to this model-object
-  */
-  
-  ExpandedModel* em = root->createExpandedModel(string("root"),string(""));
-
-  model_file = em->model_file;
-  nlfile = em->nlfile;
-  localVarDef = em->localVarDef;
-  //nchd = em->nchd;
-  children = em->children;
-  localVarInfoSet = false;
-
-}
-
 ExpandedModel::ExpandedModel()
 {
   nLocalVars = -1;

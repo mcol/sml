@@ -83,7 +83,7 @@ ModelInterface* sml_generate(const string modelfilename,
    /* Call Solver */
 
    cout << "------------- Generate ExpandedModel tree ------------ \n";
-   ExpandedModel *em = new ExpandedModel(AmplModel::root);
+   ExpandedModel *em = AmplModel::root->createExpandedModel("root", "");
    em->print();
 
    return (ModelInterface*) em;
