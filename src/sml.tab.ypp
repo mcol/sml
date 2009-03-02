@@ -68,7 +68,7 @@
 //%type <opPtr> csattributes_opt csattributes csattribute 
 %type <opPtr> setexpr_list lexpr 
 %type <opPtr> setexpression identifier iditem setexpr_item mdim_dummy_start
-%type <opPtr> commasepoptions optionlist mdim_dummy
+%type <opPtr> commasepoptions optionlist mdim_dummy start_indexing
 %type <opPtrIx> indexing indexing_opt
 %type <optype> relop reduction_op func ubsetop bsetop
 
@@ -355,14 +355,23 @@ indexing_opt: /* empty */ {$$=NULL;}
             | indexing {$$=$1;}
             ;
 
-indexing:   LBRACE setexpr_list COLON lexpr RBRACE {
+start_indexing:   LBRACE setexpr_list { 
+                     SyntaxNodeIx *tmp = 
+                        new SyntaxNodeIx(new SyntaxNode(LBRACE, $2));
+                     add_indexing(tmp);
+                     $$ = $2;
+                  }
+              ;
+
+indexing:   start_indexing COLON lexpr RBRACE {
+               rem_indexing(NULL);
                SyntaxNode *tmp = 
-                  new SyntaxNode(LBRACE, new SyntaxNode(COLON, $2, $4));
+                  new SyntaxNode(LBRACE, new SyntaxNode(COLON, $1, $3));
                $$ = new SyntaxNodeIx(tmp);
-               delete tmp;
             }
-        |   LBRACE setexpr_list RBRACE {
-               SyntaxNodeIx *tmp = new SyntaxNodeIx(new SyntaxNode(LBRACE, $2));
+        |   start_indexing RBRACE {
+               rem_indexing(NULL);
+               SyntaxNodeIx *tmp = new SyntaxNodeIx(new SyntaxNode(LBRACE, $1));
                $$=tmp;
             }
         ;
@@ -761,7 +770,7 @@ expr: value
     | '-' expr { $$ = new OpNode('-', $2); }
     | expr '*' expr { $$ = new OpNode('*', $1, $3); }
     | expr '/' expr { $$ = new OpNode('/', $1, $3); }
-    | expr POWER expr { $$ = new SyntaxNode(POWER, $1, $3); }
+    | expr POWER expr { $$ = new OpNode(POWER, $1, $3); }
     | expr ELLIPSE expr { $$ = new SyntaxNode(ELLIPSE, $1, $3); }
     | expr LOGICAL_OR expr { $$ = new SyntaxNode(LOGICAL_OR, $1, $3); }
     | expr LOGICAL_AND expr { $$ = new SyntaxNode(LOGICAL_AND, $1, $3); }
