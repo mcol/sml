@@ -158,7 +158,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
 AmplModel::createExpandedModel
 ---------------------------------------------------------------------------- */
 char *crush(const char *inst);
-list<string> *getListOfInstances(string set);
+list<string> *getListOfInstances(istream &file);
 
 /** This method is given a location in the Expanded tree and the correspoding
  *  node of the AmplModel tree and creates recursively the ExpandedModel 
@@ -338,9 +338,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
           exit(1);
         }
 
-        getline(fset, setElements); // FIXME: can this be more than one line?
-
-        list<string>* li = getListOfInstances(setElements);
+        list<string>* li = getListOfInstances(fset);
 
         for(list<string>::iterator p=li->begin();p!=li->end();p++){
           string subModelName = smodelname+"_"+string(mc->id);
@@ -381,42 +379,25 @@ getListOfInstances
    extract all the set elements, crush them if mutidimensional and
    return them in a list   */
 list<string> *
-getListOfInstances(string set)
+getListOfInstances(istream &file)
 {
   list<string> *li = new list<string>;
 
-  // I do this in c style
-
-  char *buffer = strdup(set.c_str());
-  //printf("Set definition is %s\n",buffer);
-  
-  buffer = strstr(buffer, ":=");
-  if (buffer==NULL){
-    printf("Set definition must contain a ':='!\n  %s\n",set.c_str());
+  for(string token=""; token!=":=" && !file.fail(); file >> token);
+  if(file.fail()) {
+    cerr << "Set definition must contain a ':='!" << endl;
     exit(1);
   }
-  buffer += 3; // step past the ':= '
-  // final char should be ';'
-  int len = strlen(buffer);
-  assert(buffer[len-1]==';');
-  buffer[len-1]=0; // delete it
 
-  // now the rest of the string is tokenized into the set elements
-  for(char *str1=buffer; ;str1=NULL){
-    char *svptr1;
-    char *token = strtok_r(str1, " ", &svptr1);
-    if (token==NULL) break;
-    // token now points to a set element
-    if (token[0]=='('){
-      // this is a multidimensional element
-      //printf("Multidimensional token found: %s\n",token);
-      // remove front and back
-      li->push_back(string(token));
-    }else{
-      li->push_back(string(token));
-    }
+  for(char final=' '; !file.fail() && final!=';'; ) {
+     string token;
+     file >> token;
+     final = token.at(token.length()-1);
+     if(final==';') token = token.substr(0,token.length()-1);
+     li->push_back(token);
+     // FIXME: multidimensional?
   }
-
+  
   return li;
 }
 
