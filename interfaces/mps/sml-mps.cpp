@@ -238,10 +238,9 @@ void writeMps(ostream &out, string name, map<int,char> rows,
    }
 
    out << "BOUNDS" << endl;
-   int brow = 0;
-   for(list<mps_bound>::iterator i=bnds.begin(); i!=bnds.end(); ++i, ++brow) {
+   for(list<mps_bound>::iterator i=bnds.begin(); i!=bnds.end(); ++i) {
       out << " " << setw(2) << i->type << " ";
-      out << setw(8) << concat('b',brow) << "  ";
+      out << setw(8) << "bnd1" << "  ";
       out << setw(8) << concat('c',i->id) << "  ";
       out << setw(12) << mps_float(i->value) << endl;
    }
