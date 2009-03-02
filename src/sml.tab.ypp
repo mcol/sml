@@ -20,7 +20,7 @@
    void add_indexing(SyntaxNodeIx *indexing);
    void rem_indexing(SyntaxNodeIx *indexing);
    void begin_model(char *name, SyntaxNode *indexing);
-   void end_model();
+   void end_model(char *name);
    void begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets);
    void end_smodel(char *name);
 
@@ -115,13 +115,15 @@ block:   modelblock
      ;
 
 modelblock: modelblockbegin statements modelblockend
+          ;
 
 /* a model command sets up a submodel of the current model */
 modelblockbegin:  MODEL ID optionlist {begin_model((char *)$2, NULL);}
                |  MODEL MODELTYPE ID optionlist {begin_model((char*)$3, NULL);}
                ;
 
-modelblockend: END MODEL {end_model();}
+modelblockend: END MODEL {end_model(NULL);}
+             ;
 
 optionlist: /*empty */ {$$=NULL;}
           | LBRACKET commasepoptions RBRACKET {$$=$2;}
@@ -147,16 +149,27 @@ indexing expression
 */
 
 blockblock: blockblockbegin statements blockblockend
+          | blockblockbegin LBRACE statements RBRACE {
+               end_model(NULL);
+               rem_indexing(NULL);
+            }
+          ;
 
 blockblockbegin:  BLOCK ID indexing_opt COLON {
                      add_indexing($3);
                      begin_model((char*)$2, $3);
                   }
+               ;
 
 blockblockend: END BLOCK SEMICOLON {
-                  end_model();
+                  end_model(NULL);
                   rem_indexing(NULL);
                }
+             | END BLOCK ID SEMICOLON {
+                  end_model((char*)$3);
+                  rem_indexing(NULL);
+               }
+             ;
 /* -------------------------------------------------------------------- 
   stochblock
 ------------------------------------------------------------------------- */
@@ -926,8 +939,15 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
 end_model
 ---------------------------------------------------------------------------- */
 void
-end_model() {
-   current_model = current_model->parent;
+end_model(char *name) {
+  // Check end block name matches block name
+  if(name && strcmp(name,current_model->name)!=0) {
+    cerr << "end block '" << name << "' encountered in block '" << 
+      current_model->name << "'" << endl;
+    exit(1);
+  }
+
+  current_model = current_model->parent;
 }
 
 /* ----------------------------------------------------------------------------
