@@ -909,10 +909,10 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
       cout << "Start Stochastic Model: " << name << "\n";
 
    SyntaxNode::iterator i = stochsets->begin();
-   SetNode *stages = (SetNode*) *i;
-   SyntaxNode *nodes = *(++i);
+   SyntaxNode *nodes = *i;
    SyntaxNode *anc = *(++i);
    SyntaxNode *prob = *(++i);
+   SetNode *stages = (SetNode*) *(++i);
    new_mod = new StochModel(stages, nodes, anc, prob, current_model);
    new_mod->name = strdup(name);
   

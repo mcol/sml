@@ -21,7 +21,7 @@ param Probs{NODES}; # probability distribution of nodes
 
 var slack2{BENCHMARK, TIME} >=0;
 
-block alm stochastic using(TIME,NODES,Parent, Probs):{
+block alm stochastic using(NODES,Parent, Probs, TIME):{
 
   var x_hold{ASSETS} >=0;
   var risk{BENCHMARK} >=0;
