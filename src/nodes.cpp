@@ -268,6 +268,7 @@ ostream& OpNode::put(ostream &s) const {
     case NE:      s << "!=";  break;
     case IN:      s << " in "; break;
     case DEFINED: s << ":=";  break;
+    case POWER:   s << "**"; break;
     default:
       cerr << "Unknown opCode for OpNode: " << opCode << endl;
       exit(1);
