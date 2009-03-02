@@ -59,10 +59,4 @@ class StochModel: public AmplModel{
 
 };
 
-
-/* ----------------- stub for methods in ampl.y ------------------------- */
-
-void begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets);
-void end_smodel();
-
 #endif

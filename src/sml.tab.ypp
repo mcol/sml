@@ -21,6 +21,8 @@
    void rem_indexing(SyntaxNodeIx *indexing);
    void begin_model(char *name, SyntaxNode *indexing);
    void end_model();
+   void begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets);
+   void end_smodel(char *name);
 
    extern int yylineno;
    int yylex(void);
@@ -185,10 +187,9 @@ Logic of stochastic qualifiers: deterministic/stages:
 
 */
 
-stochblock: sblockbegin statements sblockend
-          | stochblockbegin statements stochblockend
-          | sblockbeginbrace statements RBRACE {
-               end_smodel();
+stochblock: stochblockbegin statements stochblockend
+          | stochblockbegin LBRACE statements RBRACE {
+               end_smodel(NULL);
                rem_indexing(NULL);
             }
           ;
@@ -196,37 +197,29 @@ stochblock: sblockbegin statements sblockend
 /* FIXME: optionlist is of form '(ID COMMA ID ...)'
      need to call new SyntaxNode and addToListItem functions in the 
      processing of optionlist and its children */
-stochblockbegin:  STOCHASTIC BLOCK ID indexing_opt USING optionlist COLON {
-                     add_indexing($4);
-                     begin_smodel((char*)$3, $4, $6);
+stochblockbegin:  sblock_alias ID indexing_opt USING optionlist COLON {
+                     add_indexing($3);
+                     begin_smodel((char*)$2, $3, $5);
                   }
-
-sblockbegin:   SBLOCK ID indexing_opt USING optionlist COLON {
-                  add_indexing($3);
-                  begin_smodel((char*)$2, $3, $5);
-               }
-           |   BLOCK ID indexing_opt STOCHASTIC USING optionlist COLON {
-                  add_indexing($3);
-                  begin_smodel((char*)$2, $3, $6);
-               }
-           ;             
-
-sblockbeginbrace: BLOCK ID indexing_opt STOCHASTIC USING optionlist COLON
-                  LBRACE {
+               |  BLOCK ID indexing_opt STOCHASTIC USING optionlist COLON {
                      add_indexing($3);
                      begin_smodel((char*)$2, $3, $6);
-                  }
-           ;             
+                  } 
+               ;
 
-stochblockend: END STOCHASTIC BLOCK SEMICOLON {
-                  end_model();
+stochblockend: END sblock_alias SEMICOLON {
+                  end_smodel(NULL);
                   rem_indexing(NULL);
                }
+             | END sblock_alias ID SEMICOLON {
+                  end_smodel((char*)$3);
+                  rem_indexing(NULL);
+               }
+             ;
 
-sblockend:  END SBLOCK SEMICOLON {
-               end_smodel();
-               rem_indexing(NULL);
-            }
+sblock_alias: STOCHASTIC BLOCK
+            | SBLOCK
+            ;
 
 /* -------------------------------------------------------------------- 
   stageblock
@@ -941,8 +934,15 @@ end_model() {
 end_smodel
 ---------------------------------------------------------------------------- */
 void
-end_smodel(){
+end_smodel(char *name){
   // current_model is a StochModel -> convert this into a tree a FlatModels
+
+  // Check end block name matches block name
+  if(name && strcmp(name,current_model->name)!=0) {
+    cerr << "end stochastic block '" << name << "' encountered in stochastic "
+      "block '" << current_model->name << "'" << endl;
+    exit(1);
+  }
 
   // this is the ModelComp pointing to the StochModel
   ModelComp *mc = current_model->node; 
