@@ -25,11 +25,14 @@
 #
 # LAST MODIFICATION
 #
-#   2008-04-12
+#   2009-03-03
 #
 # COPYLEFT
 #
-#   Copyright (c) 2008 Ben Bergen <ben@cs.fau.de>
+#   Small modification to avoid failure without .h file:
+#     Copyright (c) 2009 Jonathan Hogg <J.Hogg@ed.ac.uk>
+#   Original:
+#     Copyright (c) 2008 Ben Bergen <ben@cs.fau.de>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
@@ -98,13 +101,16 @@ AC_DEFUN([IMMDX_LIB_METIS], [
 			LDFLAGS=$old_LDFLAGS
 
 			AC_MSG_CHECKING(METIS in $with_metis)
-			if test "$metis_lib" = "yes" -a "$metis_h" = "yes" ; then
-				AC_SUBST(METIS_INCLUDE, [-I$with_metis/Lib])
+         #if test "$metis_lib" = "yes" -a "$metis_h" = "yes" ; then
+			if test "$metis_lib" = "yes" ; then
 				AC_SUBST(METIS_LIB, ["-L$with_metis -lmetis"])
 				AC_MSG_RESULT(ok)
 			else
 				AC_MSG_RESULT(failed)
 			fi
+			if test "$metis_h" = "yes" ; then
+				AC_SUBST(METIS_INCLUDE, [-I$with_metis/Lib])
+         fi
 		fi
 		#
 		#
