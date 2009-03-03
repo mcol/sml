@@ -11,6 +11,10 @@ extern int yydebug;
 void parse_data(AmplModel*, char*);
 void parse_model(char *);
 
+string sml_version() {
+   return "0.7";
+}
+
 void createSubdirTmpIfNotExist(void)
 {
    int fl_is_dir;
