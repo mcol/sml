@@ -1,0 +1,15 @@
+On initial checkout do the following:
+ln -s todo.txt ChangeLog
+ln -s todo.txt NEWS
+autoreconf
+automake --add-missing
+autoreconf
+
+Then to build:
+1. Configure:
+      ./configure --with-ampl=/path/to/amplsolver/dir
+   If you wish to use the oops interface you will also need to supply the
+   directories of MeTiS (--with-metis=path) and OOPS (--with-oops=path).
+   The MPS interface can be diabled with the option --with-mps=no
+2. Build:
+      make
