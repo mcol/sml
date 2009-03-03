@@ -1,0 +1,13 @@
+Version      Feature
+=======      =======
+0.7          First public release, understands majority of permissible models,
+             uses AMPL to interpret them correctly and writes out answers to
+             file. Does not support AMPL command language.
+
+?            Understand set members without reference to AMPL.
+
+?            Interprets AMPL command language.
+
+?            Understands AMPL model and data definitions completely.
+
+?            Parallel Model Generation.
