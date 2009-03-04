@@ -62,7 +62,6 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
 main
 ---------------------------------------------------------------------------- */
 int main(int argc, char **argv) {
-   int errcode;
    string modelfilename = "";
    string datafilename = "";
    string mpsfilename = "";

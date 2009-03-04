@@ -145,7 +145,7 @@ void SML_MPS_driver(ModelInterface *root, string filename) {
          double elts[nz];
          model->getJacobianOfIntersection(jm, colbeg, collen, rownbs, elts);
          int offset = row_offset[model->getName()];
-         for(int p=0; p<jm->getLocalVarNames().size(); ++p) {
+         for(unsigned int p=0; p<jm->getLocalVarNames().size(); ++p) {
             sparse_col &col = cols[col_offset[jm->getName()]+p];
             for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k) {
                col.add_entry(rownbs[k]+offset, elts[k]);
@@ -163,7 +163,7 @@ void SML_MPS_driver(ModelInterface *root, string filename) {
          double elts[nz];
          model->getJacobianOfIntersection(jm, colbeg, collen, rownbs, elts);
          int offset = row_offset[model->getName()];
-         for(int p=0; p<jm->getLocalVarNames().size(); ++p) {
+         for(unsigned int p=0; p<jm->getLocalVarNames().size(); ++p) {
             sparse_col &col = cols[col_offset[jm->getName()]+p];
             for(int k=colbeg[p]; k<colbeg[p]+collen[p]; ++k) {
                col.add_entry(rownbs[k]+offset, elts[k]);
