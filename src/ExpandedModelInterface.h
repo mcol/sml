@@ -154,6 +154,9 @@ class ModelInterface {
 
   //! Returns unique name of this block
   virtual std::string getName() const = 0;
+
+ protected:
+  virtual ~ModelInterface() {}
 };
 
 #endif
