@@ -10,11 +10,10 @@
 list<string> ExpandedModel::pathToNodeStack;
 const bool log_EM = false;
 
-ExpandedModel::ExpandedModel()
+ExpandedModel::ExpandedModel() :
+   nLocalVars(-1), nLocalCons(-1), localVarInfoSet(false), pvar(NULL), 
+   dvar(NULL), prow(NULL), drow(NULL)
 {
-  nLocalVars = -1;
-  nLocalCons = -1;
-  localVarInfoSet = false;
   //printf("ExpandedModel: Called default constructor\n");
   //exit(1);
 }
@@ -527,4 +526,68 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
   }
 
   return count;
+}
+
+/* -------------------------------------------------------------------------
+ExpandedModel::setPrimalSolColumns
+-------------------------------------------------------------------------- */
+/** Upload the local variable solutions */
+void ExpandedModel::setPrimalSolColumns(double *elts) {
+   if (!localVarInfoSet){
+      setLocalVarInfo();
+      localVarInfoSet=true;
+   }
+   if(!pvar) {
+      pvar = (double*) calloc(nLocalVars, sizeof(double));
+   }
+   for(double *src=elts,*dest=pvar; src<elts+nLocalVars; ++src,++dest)
+      *dest = *src;
+}
+
+/* -------------------------------------------------------------------------
+ExpandedModel::setDualSolColumns
+-------------------------------------------------------------------------- */
+/** Upload the local variable duals (multipliers on bounds) */
+void ExpandedModel::setDualSolColumns(double *elts) {
+   if (!localVarInfoSet){
+      setLocalVarInfo();
+      localVarInfoSet=true;
+   }
+   if(!dvar) {
+      dvar = (double*) calloc(nLocalVars, sizeof(double));
+   }
+   for(double *src=elts,*dest=dvar; src<elts+nLocalVars; ++src,++dest)
+      *dest = *src;
+}
+
+/* -------------------------------------------------------------------------
+ExpandedModel::setPrimalSolRows
+-------------------------------------------------------------------------- */
+/** Upload the local constraints slacks */
+void ExpandedModel::setPrimalSolRows(double *elts) {
+   if (!localVarInfoSet){
+      setLocalVarInfo();
+      localVarInfoSet=true;
+   }
+   if(!prow) {
+      prow = (double*) calloc(nLocalCons, sizeof(double));
+   }
+   for(double *src=elts,*dest=prow; src<elts+nLocalCons; ++src,++dest)
+      *dest = *src;
+}
+
+/* -------------------------------------------------------------------------
+ExpandedModel::setDualSolRows
+-------------------------------------------------------------------------- */
+/** Upload the local constraints duals (multipliers on constraints) */
+void ExpandedModel::setDualSolRows(double *elts) {
+   if (!localVarInfoSet){
+      setLocalVarInfo();
+      localVarInfoSet=true;
+   }
+   if(!drow) {
+      drow = (double*) calloc(nLocalCons, sizeof(double));
+   }
+   for(double *src=elts,*dest=drow; src<elts+nLocalCons; ++src,++dest)
+      *dest = *src;
 }

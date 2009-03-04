@@ -101,6 +101,10 @@ class ExpandedModel : public ModelInterface {
    */
   bool localVarInfoSet;     //!< indicator, if local variable info has been set
 
+  /* Store solutions */
+  double *pvar, *dvar;
+  double *prow, *drow;
+
  public:
 
   // local information:
@@ -173,6 +177,18 @@ class ExpandedModel : public ModelInterface {
 
   //! Returns the objective gradient for the local model w.r.t. local vars
   void getObjGradient(double *elts);
+
+  //! Upload the local variable solutions
+  void setPrimalSolColumns(double *elts);
+
+  //! Upload the local variable duals (multipliers on bounds)
+  void setDualSolColumns(double *elts);
+
+  //! Upload the local constraints slacks
+  void setPrimalSolRows(double *elts);
+
+  //! Upload the local constraints duals (multipliers on constraints)
+  void setDualSolRows(double *elts);
 
   int findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar);
 
