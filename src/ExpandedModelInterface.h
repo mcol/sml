@@ -167,6 +167,9 @@ class ModelInterface {
   //! Returns unique name of this block
   virtual std::string getName() const = 0;
 
+  //! Outputs the solution to the supplied stream at given indent 
+  virtual void outputSolution(std::ostream &out, int indent=0) = 0;
+
  protected:
   virtual ~ModelInterface() {}
 };

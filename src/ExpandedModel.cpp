@@ -591,3 +591,54 @@ void ExpandedModel::setDualSolRows(double *elts) {
    for(double *src=elts,*dest=drow; src<elts+nLocalCons; ++src,++dest)
       *dest = *src;
 }
+
+/* -------------------------------------------------------------------------
+ExpandedModel::outputSolution
+-------------------------------------------------------------------------- */
+/** Outputs the solution to the supplied stream */
+void ExpandedModel::outputSolution(ostream &out, int indent) {
+   if (!localVarInfoSet){
+      setLocalVarInfo();
+      localVarInfoSet=true;
+   }
+
+   string ind = "";
+   for(int i=0; i<indent; ++i) ind += " ";
+   string ind2 = ind + "  ";
+
+   out << ind << getName() << " {" << endl;
+
+   if(pvar) {
+      double *ptr = pvar;
+      for(list<string>::iterator i=listOfVarNames.begin(); 
+            i!=listOfVarNames.end(); ++i,++ptr)
+         out << ind2 << *i << ".primal = " << *ptr << endl << endl;
+   }
+
+   if(dvar) {
+      double *ptr = dvar;
+      for(list<string>::iterator i=listOfVarNames.begin(); 
+            i!=listOfVarNames.end(); ++i,++ptr)
+         out << ind2 << *i << ".dual = " << *ptr << endl << endl;
+   }
+
+   if(prow) {
+      double *ptr = prow;
+      for(list<string>::iterator i=listOfConNames.begin(); 
+            i!=listOfConNames.end(); ++i,++ptr)
+         out << ind2 << *i << ".primal = " << *ptr << endl << endl;
+   }
+
+   if(drow) {
+      double *ptr = drow;
+      for(list<string>::iterator i=listOfConNames.begin(); 
+            i!=listOfConNames.end(); ++i,++ptr)
+         out << ind2 << *i << ".dual = " << *ptr << endl << endl;
+   }
+
+   for(vector<ModelInterface*>::iterator i=children.begin(); 
+         i<children.end(); ++i)
+      (*i)->outputSolution(out, indent+2);
+
+   out << ind << "}" << endl;
+}

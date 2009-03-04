@@ -195,6 +195,9 @@ class ExpandedModel : public ModelInterface {
   //! Returns unique name of this block
   string getName() const { return model_file; }
 
+  //! Outputs the solution to the supplied stream, at given indent
+  void outputSolution(ostream &out, int indent=0);
+
  private: 
   //! sets nLocalVar, listOfVars, nLocalCons, listOfVarNames.
   void setLocalVarInfo(); 
