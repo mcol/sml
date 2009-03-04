@@ -438,7 +438,7 @@ keywords and structures into the AMPL language.
 A block is defined as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-   block \textit{nameofblock}\{[j in] \textit{set_expr}\}: \{
+   block \textit{nameofblock}[\{[\textit{j} in] \textit{set_expr}\}]: \{
      [statements]
    \}
 \end{Verbatim}
@@ -458,8 +458,8 @@ within the block.
 A stochastic program is declared in SML via the {\tt stochastic} modifier
 to the {\tt block} command:
 \begin{Verbatim}[commandchars=\\\{\}]
-  block \textit{nameofblock} stochastic using(NODES, PROB, PARENT, STAGES): \{
-     stochastic statements
+  block \textit{nameofblock}[\{[\textit{j} in] \textit{set_expr}\}] stochastic using(NODES, PROB, PARENT, STAGES): \{
+     [stochastic statements]
   \}
 \end{Verbatim}
 where the expressions {\tt NODES, PROB, PARENT} and {\tt STAGES} conform to
@@ -474,7 +474,7 @@ The {\tt stochastic statements} include both normal AMPL and {\tt block}
 statements, but may also include the special {\tt stage} statement:
 \begin{verbatim}
   stage set_expr: {
-    ...
+    [stochastic statements]
   }
 \end{verbatim}
 that declares variables and constraints which apply only to the specific stages
