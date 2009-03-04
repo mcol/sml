@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <sys/stat.h>
 #include "sml.h"
 #include "sml-oops.h"
@@ -91,7 +92,12 @@ int main(int argc, char **argv) {
 
    SML_OOPS_driver(em);
 
-   cout << "OUTFILE = '" << outfilename << "'" << endl;
+   if(outfilename!="") {
+      ofstream outfile(("../" + outfilename).c_str());
+      em->outputSolution(outfile);
+      outfile.close();
+      cout << "Solution written to file '" << outfilename << "'" << endl;
+   }
 
    return 0;
 }
