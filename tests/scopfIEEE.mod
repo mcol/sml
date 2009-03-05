@@ -20,7 +20,7 @@ param   abl {b in Buses, l in LineName} := (if b = StartBus[l] then -1 else (if 
 #param   abl {b in Buses, l in LineName}; 
 
 var power{g in ExistingGeneratorName} >= MinGen[g], <= MaxGen[g];
-var extrag{ Buses } >=-100000, <=100000;
+#var extrag{ Buses } >=-100000, <=100000;
 
 #set ESet:= aabb;
 #block trysml(k in {Contingencies union ESet}) :{
@@ -39,13 +39,14 @@ block trysml{hk in Contingencies}:
         sum{b in Buses} delta[b] = 1;
     
     subject to KCL{b in Buses}:
-      ( sum{g in ExistingGeneratorName: Location[g] == b} (power[g])) + ( sum{l in linediff} abl[b,l]*flow[l] ) + extrag[b] = Demand[b] ;  
+#      ( sum{g in ExistingGeneratorName: Location[g] == b} (power[g])) + ( sum{l in linediff} abl[b,l]*flow[l] ) + extrag[b] = Demand[b] ;  
+      ( sum{g in ExistingGeneratorName: Location[g] == b} (power[g])) + ( sum{l in linediff} abl[b,l]*flow[l] ) = Demand[b] ;  
 
 end block;
 
 
-subject to gb{b in Buses}:
-    extrag[b] = 0;
+#subject to gb{b in Buses}:
+#    extrag[b] = 0;
 
 minimize Total_Cost:  sum {g in ExistingGeneratorName} Cost[g]*power[g];
 
