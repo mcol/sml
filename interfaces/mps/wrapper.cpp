@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
    if(debug) 
       cout << "======================================================" << endl;
 
-   ModelInterface *em = sml_generate(modelfilename, datafilename, debug);
+   ExpandedModelInterface *em = sml_generate(modelfilename, datafilename, debug);
 
    SML_MPS_driver(em, mpsfilename);
 

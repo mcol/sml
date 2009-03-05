@@ -4,6 +4,6 @@
 #include "ExpandedModelInterface.h"
 #include <string>
 
-void SML_MPS_driver(ModelInterface *root, std::string filename);
+void SML_MPS_driver(ExpandedModelInterface *root, std::string filename);
 
 #endif

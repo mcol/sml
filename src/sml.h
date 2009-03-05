@@ -6,6 +6,6 @@
 
 std::string sml_version();
 
-ModelInterface* sml_generate(const std::string modelfilename, const std::string datafilename, const bool debug);
+ExpandedModelInterface* sml_generate(const std::string modelfilename, const std::string datafilename, const bool debug);
 
 #endif

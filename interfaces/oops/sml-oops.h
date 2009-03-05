@@ -4,6 +4,6 @@
 
 #include "ExpandedModelInterface.h"
 
-void SML_OOPS_driver(ModelInterface *root);
+void SML_OOPS_driver(ExpandedModelInterface *root);
 
 #endif

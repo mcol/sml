@@ -89,7 +89,7 @@ class NlFile;
  * the field nlfile) should be made accessible from this object (by
  * providing some wrapper routines)
  */
-class ExpandedModel : public ModelInterface {
+class ExpandedModel : public ExpandedModelInterface {
 
  private:
   int nLocalVars;  //!< number of local variables
@@ -157,10 +157,10 @@ class ExpandedModel : public ModelInterface {
   const std::list<std::string>& getLocalConNames();
 
   //! Returns the nonzeros in the Jacobian of a section of the model.
-  int getNzJacobianOfIntersection(ModelInterface *emcol);
+  int getNzJacobianOfIntersection(ExpandedModelInterface *emcol);
 
   //! Returns the nonzeros in the Jacobian of a section of the model.
-  void getJacobianOfIntersection(ModelInterface *emcol, int *colbeg,
+  void getJacobianOfIntersection(ExpandedModelInterface *emcol, int *colbeg,
 				 int *collen, int *rownbs, double *el);
 
   //! Returns the vector of lower bounds for the constraints in this model

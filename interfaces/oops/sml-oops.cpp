@@ -49,7 +49,7 @@ typedef struct NodeIdQ_st {
 } NodeIdQ;
 #endif
 
-SMLReturn *generateSML(ModelInterface *root);
+SMLReturn *generateSML(ExpandedModelInterface *root);
 void FillRhsVector(Vector *vb);
 void FillObjVector(Vector *vb);
 void FillUpBndVector(Vector *vb);
@@ -58,7 +58,7 @@ FILE *globlog = NULL;
 const int prtLvl = 1;
 
 void
-SML_OOPS_driver(ModelInterface *root)
+SML_OOPS_driver(ExpandedModelInterface *root)
 {
   Algebra *AlgAug;
   Vector *vb, *vc, *vu;
@@ -119,13 +119,13 @@ SML_OOPS_driver(ModelInterface *root)
 Here comes the generation with all subroutines
 =========================================================================== */
 
-Algebra *createA(ModelInterface *A);
-Algebra *createBottom(ModelInterface *diag, ModelInterface *offdiag);
-Algebra *createRhs(ModelInterface *diag, ModelInterface *offdiag);
+Algebra *createA(ExpandedModelInterface *A);
+Algebra *createBottom(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
+Algebra *createRhs(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
 void SMLCallBack(CallBackInterfaceType *cbi);
-Algebra *createQ(ModelInterface *A);
-Algebra *createBottomQ(ModelInterface *diag, ModelInterface *offdiag);
-Algebra *createRhsQ(ModelInterface *diag, ModelInterface *offdiag);
+Algebra *createQ(ExpandedModelInterface *A);
+Algebra *createBottomQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
+Algebra *createRhsQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
 void SMLCallBackQ(CallBackInterfaceType *cbi);
 
 /* --------------------------------------------------------------------------
@@ -133,7 +133,7 @@ generateSLM
 --------------------------------------------------------------------------- */
 
 SMLReturn *
-generateSML(ModelInterface *root)
+generateSML(ExpandedModelInterface *root)
 {
   SMLReturn *Ret = (SMLReturn*)calloc(1, sizeof(SMLReturn));
 
@@ -146,9 +146,9 @@ generateSML(ModelInterface *root)
 /* --------------------------------------------------------------------------
 createA
 --------------------------------------------------------------------------- */
-/* This routine sets up the matrix A from the ModelInterface tree */
+/* This routine sets up the matrix A from the ExpandedModelInterface tree */
 Algebra *
-createA(ModelInterface *em)
+createA(ExpandedModelInterface *em)
 {
   Algebra *Alg;
 
@@ -219,7 +219,7 @@ createA(ModelInterface *em)
 
 
 Algebra *
-createBottom(ModelInterface *diag, ModelInterface *nondiag)
+createBottom(ExpandedModelInterface *diag, ExpandedModelInterface *nondiag)
 {
   Algebra *Alg;
   /* This is a bottom block: 
@@ -262,7 +262,7 @@ createBottom(ModelInterface *diag, ModelInterface *nondiag)
 }
 
 Algebra *
-createRhs(ModelInterface *diag, ModelInterface *nondiag)
+createRhs(ExpandedModelInterface *diag, ExpandedModelInterface *nondiag)
 {
   Algebra *Alg;
   /* This is a bottom block: 
@@ -305,9 +305,9 @@ createRhs(ModelInterface *diag, ModelInterface *nondiag)
 /* --------------------------------------------------------------------------
 createQ
 --------------------------------------------------------------------------- */
-/* This routine sets up the matrix Q from the ModelInterface tree */
+/* This routine sets up the matrix Q from the ExpandedModelInterface tree */
 Algebra *
-createQ(ModelInterface *em)
+createQ(ExpandedModelInterface *em)
 {
   Algebra *Alg;
 
@@ -352,7 +352,7 @@ createQ(ModelInterface *em)
        in rows corresponding to children). 
        If so then set up a DblBordDiagMatrix and let the child work out
        which of these entries are his.
-       The child gets passed both ModelInterfaces (for itself and the parent)
+       The child gets passed both ExpandedModelInterfaces (for itself and the parent)
        The objective however MUST be included in the parent part
 
     */
@@ -498,20 +498,20 @@ createBottom/RhsQ
  *  as done for the A matrix
  *
  *  FIXME: can any of this information (blocking of the Q matrix be
- *         included as part of the ModelInterface (in order to separate
+ *         included as part of the ExpandedModelInterface (in order to separate
  *         frontend and backend and do as much processing in the frontend
  *         as possible?
  */
 
 Algebra *
-createBottomQ(ModelInterface *diag, ModelInterface *offdiag)
+createBottomQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag)
 {
   printf("createBottomQ not implemented yet!\n");
   exit(1);
 }
 
 Algebra *
-createRhsQ(ModelInterface *diag, ModelInterface *offdiag)
+createRhsQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag)
 {
   printf("createBottomQ not implemented yet!\n");
   exit(1);
@@ -680,7 +680,7 @@ SMLCallBackQ(CallBackInterfaceType *cbi)
     return;
   }
 #else
-  ModelInterface *em = (ModelInterface*)cbi->id;
+  ExpandedModelInterface *em = (ExpandedModelInterface*)cbi->id;
   cbi->nz = 0;
   if (cbi->row_nbs){
     cbi->col_beg[em->getNLocalVars()] = cbi->nz;
@@ -705,9 +705,9 @@ FillRhsVector(Vector *vb)
   Algebra *A = (Algebra*)T->nodeOfAlg; // the diagonal node that spawned this tree
   OOPSBlock *obl = (OOPSBlock*)A->id; // and its id structure
   //NlFile *nlf = obl->emrow->nlfile;
-  ModelInterface *emrow = obl->emrow;
+  ExpandedModelInterface *emrow = obl->emrow;
 
-  // FIXME: should the id structure include information on the ModelInterface
+  // FIXME: should the id structure include information on the ExpandedModelInterface
   //        as well? That way we could do some more sanity checks
 
   emrow->getRowLowBounds(dense->elts);
@@ -778,7 +778,7 @@ FillUpBndVector(Vector *vu)
   OOPSBlock *obl = (OOPSBlock*)A->id;        // and its id structure
   assert(obl->emrow==obl->emcol); // this should be a diagonal block
   //NlFile *nlf = obl->emrow->nlfile;
-  ModelInterface *emrow = obl->emrow;
+  ExpandedModelInterface *emrow = obl->emrow;
 
   //double *test = new double[dense->dim];
 

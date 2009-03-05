@@ -5,7 +5,7 @@
 #include <list>
 
 /** 
- * @class ModelInterface
+ * @class ExpandedModelInterface
  * @brief The representation of a a submodel (block) in the expanded model 
  * which is passed to the solver to allow it to calculate values.
  * 
@@ -17,25 +17,25 @@
  * models in which this model is contained.
  *
  */
-class ModelInterface {
+class ExpandedModelInterface {
  friend class AmplModel;
  public:
- std::vector <ModelInterface*> children;  //!< list of children
+ std::vector <ExpandedModelInterface*> children;  //!< list of children
 
  protected:
   /** list of child nodes (vector, so that it can be indexed) */
-  ModelInterface *parent;         //!< parent node 
+  ExpandedModelInterface *parent;         //!< parent node 
 
  public:
   /** Depth first iterator */
   class child_iterator {
    private:
-    ModelInterface *model_;
-    std::vector<ModelInterface*>::iterator itr_;
+    ExpandedModelInterface *model_;
+    std::vector<ExpandedModelInterface*>::iterator itr_;
     child_iterator *desc_itr_;
     bool end_;
    public:
-    child_iterator(ModelInterface *const model, bool end=false) :
+    child_iterator(ExpandedModelInterface *const model, bool end=false) :
       model_(model), itr_(model->children.begin()), desc_itr_(NULL), end_(end)
     {
        if(model->children.end() == itr_) return; // No children
@@ -80,7 +80,7 @@ class ModelInterface {
       ++(*this);
       return tmp;
     }
-    ModelInterface* operator*() const {
+    ExpandedModelInterface* operator*() const {
       if(desc_itr_) return **desc_itr_;
       return model_;
     }
@@ -89,9 +89,9 @@ class ModelInterface {
   /** Ancestor iterator */
   class ancestor_iterator {
    private:
-    ModelInterface *model_;
+    ExpandedModelInterface *model_;
    public:
-    ancestor_iterator(ModelInterface *const model) :
+    ancestor_iterator(ExpandedModelInterface *const model) :
       model_(model) {}
     ancestor_iterator& operator=(const ancestor_iterator &other) {
       model_ = other.model_;
@@ -110,7 +110,7 @@ class ModelInterface {
       ++(*this);
       return tmp;
     }
-    ModelInterface* operator*() const { return model_; }
+    ExpandedModelInterface* operator*() const { return model_; }
   };
 
   child_iterator cbegin() { return child_iterator(this); }
@@ -131,10 +131,10 @@ class ModelInterface {
   virtual const std::list<std::string>& getLocalConNames() = 0;
 
   //! Returns the nonzeros in the Jacobian of a section of the model.
-  virtual int getNzJacobianOfIntersection(ModelInterface *emcol) = 0;
+  virtual int getNzJacobianOfIntersection(ExpandedModelInterface *emcol) = 0;
 
   //! Returns the nonzeros in the Jacobian of a section of the model.
-  virtual void getJacobianOfIntersection(ModelInterface *emcol, int *colbeg,
+  virtual void getJacobianOfIntersection(ExpandedModelInterface *emcol, int *colbeg,
 				 int *collen, int *rownbs, double *el) = 0;
 
   //! Returns the vector of lower bounds for the constraints in this model
@@ -171,7 +171,7 @@ class ModelInterface {
   virtual void outputSolution(std::ostream &out, int indent=0) = 0;
 
  protected:
-  virtual ~ModelInterface() {}
+  virtual ~ExpandedModelInterface() {}
 };
 
 #endif

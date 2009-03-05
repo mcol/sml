@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
       cout << "----------------- Call OOPS generator ----------------" << endl;
    }
 
-   ModelInterface *em = sml_generate(modelfilename, datafilename, debug);
+   ExpandedModelInterface *em = sml_generate(modelfilename, datafilename, debug);
 
    SML_OOPS_driver(em);
 

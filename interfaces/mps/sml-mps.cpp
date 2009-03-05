@@ -48,7 +48,7 @@ void writeMps(ostream &out, string name, map<int,char> rows,
  * model->getJacobianOfIntersection(A_i)   returns B_i
  * A_i->getJacobianOfIntersection(model)   returns C_i
  */
-void SML_MPS_driver(ModelInterface *root, string filename) {
+void SML_MPS_driver(ExpandedModelInterface *root, string filename) {
    const double inf = numeric_limits<double>::infinity();
    const string obj_name = "obj";
 
@@ -66,8 +66,8 @@ void SML_MPS_driver(ModelInterface *root, string filename) {
    // Setup row and column numbering, together with bounds and constraint types
    map<string,int> row_offset;
    map<string,int> col_offset;
-   for(ModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
-      ModelInterface *model = *i;
+   for(ExpandedModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
+      ExpandedModelInterface *model = *i;
       row_offset[model->getName()] = next_row;
       next_row += model->getNLocalCons();
       col_offset[model->getName()] = next_col;
@@ -133,10 +133,10 @@ void SML_MPS_driver(ModelInterface *root, string filename) {
    // Now aquire matrix information by ascending and descending tree
    // Recall that model->getJacobianOfIntersection(jm) returns us the
    // block in the current model's row using variables in block jm
-   for(ModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
-      ModelInterface *model = *i;
-      for(ModelInterface::child_iterator j=model->cbegin(); j!=model->cend(); ++j) {
-         ModelInterface *jm = *j;
+   for(ExpandedModelInterface::child_iterator i=root->cbegin(); i!=root->cend(); ++i) {
+      ExpandedModelInterface *model = *i;
+      for(ExpandedModelInterface::child_iterator j=model->cbegin(); j!=model->cend(); ++j) {
+         ExpandedModelInterface *jm = *j;
          if(model->getNzJacobianOfIntersection(jm)==0) continue;
          int nz = model->getNzJacobianOfIntersection(jm);
          int colbeg[jm->getNLocalVars()+1];
@@ -153,8 +153,8 @@ void SML_MPS_driver(ModelInterface *root, string filename) {
          }
       }
 
-      for(ModelInterface::ancestor_iterator j=model->abegin(); j!=model->aend(); ++j) {
-         ModelInterface *jm = *j;
+      for(ExpandedModelInterface::ancestor_iterator j=model->abegin(); j!=model->aend(); ++j) {
+         ExpandedModelInterface *jm = *j;
          if(model->getNzJacobianOfIntersection(jm)==0) continue;
          int nz = model->getNzJacobianOfIntersection(jm);
          int colbeg[jm->getNLocalVars()+1];

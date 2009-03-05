@@ -9,7 +9,7 @@ class OOPSBlock;
  *  OOPS Algebra Tree. 
  *  
  * It is characterized by 
- *   - An ModelInterface/NlFile that gives information on the rows 
+ *   - An ExpandedModelInterface/NlFile that gives information on the rows 
  *     in this block
  *   - A list of variable definitions (given as the start of variable names)
  *     that should be used from the NlFile.
@@ -19,17 +19,17 @@ class OOPSBlock;
  */
 class OOPSBlock {
  public:
-  ModelInterface *emrow;    //!< Expanded Model giving row information
-  ModelInterface *emcol;    //!< Expanded Model giving col information
-  //  NlFile *nlfile;       //!< The NlFile correspoding to the ModelInterface
+  ExpandedModelInterface *emrow;    //!< Expanded Model giving row information
+  ExpandedModelInterface *emcol;    //!< Expanded Model giving col information
+  //  NlFile *nlfile;       //!< The NlFile correspoding to the ExpandedModelInterface
   int ncon;             //!< number of rows in this block
   int nvar;             //!< number of columns in this block
   //  int *lvar;            //!< list of indices into the NlFile (-1 if not decl)
   // --------------------------- methods -----------------------------------
-  /** constrct an OOPS block from the cross section of two ModelInterface's
+  /** constrct an OOPS block from the cross section of two ExpandedModelInterface's
    *  @param rowmod       The model giving the row information
    *  @param colmod       The model giving the column information
    */
-  OOPSBlock(ModelInterface *rowmod, ModelInterface *colmod);
+  OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *colmod);
 };
 

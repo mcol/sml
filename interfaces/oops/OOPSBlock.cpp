@@ -5,9 +5,9 @@
 #include "GlobalVariables.h"
 
 /* ----------------------------------------------------------------------------
-OOPSBlock::OOPSBlock(ModelInterface*, list<string>*)
+OOPSBlock::OOPSBlock(ExpandedModelInterface*, list<string>*)
 ---------------------------------------------------------------------------- */
-OOPSBlock::OOPSBlock(ModelInterface *rowmod, ModelInterface *colmod)
+OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *colmod)
 {
   /* We need to:
       - take the list of variable names from colmod (colmod->listOfVarNames)

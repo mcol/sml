@@ -43,7 +43,7 @@ void createSubdirTmpIfNotExist(void)
 /* ----------------------------------------------------------------------------
 main
 ---------------------------------------------------------------------------- */
-ModelInterface* sml_generate(const string modelfilename, 
+ExpandedModelInterface* sml_generate(const string modelfilename, 
       const string datafilename, const bool debug) {
    int errcode;
    GlobalVariables::modelfilename = strdup(modelfilename.c_str());
@@ -90,6 +90,6 @@ ModelInterface* sml_generate(const string modelfilename,
    ExpandedModel *em = AmplModel::root->createExpandedModel("root", "");
    em->print();
 
-   return (ModelInterface*) em;
+   return (ExpandedModelInterface*) em;
 }
 

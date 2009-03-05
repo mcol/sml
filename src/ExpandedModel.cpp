@@ -271,7 +271,7 @@ ExpandedModel::getNzJacobianOfIntersection
  * @return The number of nonzeros in the given part of the Jacobian
  */
 int 
-ExpandedModel::getNzJacobianOfIntersection(ModelInterface *emcol_)
+ExpandedModel::getNzJacobianOfIntersection(ExpandedModelInterface *emcol_)
 {
   int nvar;
   int *lvar;
@@ -323,7 +323,7 @@ ExpandedModel::getJacobianOfIntersection
  *  getNzJacobianInintersection.
  */
 void 
-ExpandedModel::getJacobianOfIntersection(ModelInterface *emcol_, int *colbeg,
+ExpandedModel::getJacobianOfIntersection(ExpandedModelInterface *emcol_, int *colbeg,
 					 int *collen, int *rownbs, double *el)
 {
   int nvar;
@@ -636,7 +636,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
          out << ind2 << *i << ".dual = " << *ptr << endl << endl;
    }
 
-   for(vector<ModelInterface*>::iterator i=children.begin(); 
+   for(vector<ExpandedModelInterface*>::iterator i=children.begin(); 
          i<children.end(); ++i)
       (*i)->outputSolution(out, indent+2);
 
