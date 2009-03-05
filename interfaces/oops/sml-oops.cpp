@@ -51,8 +51,11 @@ typedef struct NodeIdQ_st {
 
 SMLReturn *generateSML(ExpandedModelInterface *root);
 void FillRhsVector(Vector *vb);
-void FillObjVector(Vector *vb);
-void FillUpBndVector(Vector *vb);
+void FillObjVector(Vector *vc);
+void FillUpBndVector(Vector *vu);
+void FillLowBndVector(Vector *vl);
+void SML_OOPS_upload_sol(ExpandedModelInterface *root, Vector *vx, Vector *vy,
+			 Vector *vz);
 
 FILE *globlog = NULL;
 const int prtLvl = 1;
@@ -61,7 +64,7 @@ void
 SML_OOPS_driver(ExpandedModelInterface *root)
 {
   Algebra *AlgAug;
-  Vector *vb, *vc, *vu;
+  Vector *vb, *vc, *vu, *vl;
 
 
   PARALLEL_CODE(
@@ -74,7 +77,9 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   
   AlgAug = OOPSSetup(Pb->A, Pb->Q);
 
-
+  
+  //PrintTree(stdout, Pb->A->Tcol, "coltree");
+  //PrintTree(stdout, Pb->A->Trow, "rowtree");
   
   // FIXME: should the stuff below be included in OOPSSetup? 
   //        that would require OOPSSetup to return vectors as well
@@ -82,24 +87,30 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   vb = NewVector(Pb->A->Trow, "vb");
   vc = NewVector(Pb->A->Tcol, "vc");
   vu = NewVector(Pb->A->Tcol, "vu");
+  vl = NewVector(Pb->A->Tcol, "vl");
 
   VectorFillCallBack(vc, FillObjVector);
   VectorFillCallBack(vb, FillRhsVector);
   VectorFillCallBack(vu, FillUpBndVector);
+  VectorFillCallBack(vl, FillLowBndVector);
 
+  if (1)
   {
     FILE *mout = fopen("mat.m","w");
-    PrintMatrixMatlab(mout, Pb->A, "A");
-    PrintMatrixMatlab(mout, Pb->Q, "Q");
+    //PrintMatrixMatlab(mout, Pb->A, "A");
+    //PrintMatrixMatlab(mout, Pb->Q, "Q");
     PrintVectorMatlab(vb, mout, "b");
     PrintVectorMatlab(vc, mout, "c");
+    PrintVectorMatlab(vu, mout, "bu");
+    PrintVectorMatlab(vl, mout, "bl");
     fclose(mout);
   }
 
+  if (1)
   {
     FILE *mps_file;
     mps_file = fopen("test.mps","w");
-    Write_MpsFile(mps_file, AlgAug, vb,vc, vu, NULL, 1, NULL, NULL);
+    Write_MpsFile(mps_file, AlgAug, vb,vc, vu, vl, 1, NULL, NULL);
     fclose(mps_file);
   }
 
@@ -111,8 +122,17 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   vy = NewVector(Pb->A->Trow, "vy");
   vz = NewVector(Pb->A->Tcol, "vz");
   Prob = NewPDProblem(AlgAug, vb, vc, vu, vx, vy, vz);
+  Prob->l = vl;
   hopdm (stdout, Prob, Opt, Prt);
   
+
+  /* hopdm returns the solution vector in Prob->x/y/z
+     => need to recurse through the vectors and upload each bit to the 
+        corresponding ModelInterface.
+  */
+
+  SML_OOPS_upload_sol(root, Prob->x, Prob->y, Prob->z);
+
 }
 
 /* ==========================================================================
@@ -181,6 +201,11 @@ createA(ExpandedModelInterface *em)
        - Off-diagonals with *.nl file from children and col file from parent
        - bottom from this *.nl file and col from the children              */
 
+    if (prtLvl>=1){
+      cout << "SMLOOPS: Create complex node: " << em->getName() << ":" << 
+         em->getName() << " (" << em->getNLocalCons() << "x" << 
+	em->getNLocalVars() << ") nchd = " <<em->children.size()<< endl;
+    }
 
     /* every child is a diagonal block */
     Algebra **D, **B, **R;
@@ -771,7 +796,6 @@ FillUpBndVector(Vector *vu)
 {
   Tree *T = vu->node;
   DenseVector *dense = GetDenseVectorFromVector(vu);
-  double *lowbndchk = new double[dense->dim];
 
   Algebra *A = (Algebra *)T->nodeOfAlg; // the diagonal node that spawned this tree
   //NodeId *id = (NodeId*)A->id;        // and its id structure
@@ -780,30 +804,106 @@ FillUpBndVector(Vector *vu)
   //NlFile *nlf = obl->emrow->nlfile;
   ExpandedModelInterface *emrow = obl->emrow;
 
-  //double *test = new double[dense->dim];
-
   assert(obl->nvar==T->end-T->begin);
   //nlf->getColUpBoundsAMPL(obl->nvar, obl->lvar, test);
   emrow->getColUpBounds(dense->elts);
-  //for(int i=0;i<dense->dim;i++){
-  //  if (test[i]!=dense->elts[i]) {printf("OOPS1!\n");exit(1);}
-  //}
+}
 
-  //nlf->getColLowBoundsAMPL(obl->nvar, obl->lvar, test);
-  emrow->getColLowBounds(lowbndchk);
-  //for(int i=0;i<dense->dim;i++){
-  //  if (test[i]!=lowbndchk[i]) {printf("OOPS2!\n");exit(1);}
-  //}
+/* ---------------------------------------------------------------------------
+CallBackFunction: FillLowBndVector
+---------------------------------------------------------------------------- */
+void
+FillLowBndVector(Vector *vl)
+{
+  Tree *T = vl->node;
+  DenseVector *dense = GetDenseVectorFromVector(vl);
 
-  for(int i=0;i<dense->dim;i++){
-    if (fabs(lowbndchk[i])>1e-6) {
-      printf("Found lower bound !=0 (=%f) in variable %i in model %s",
-             lowbndchk[i], i, emrow->getName().c_str());
-      printf("Currently OOPS can only cope with zero lower bounds\n");
-      exit(1);
+  Algebra *A = (Algebra *)T->nodeOfAlg; // the diagonal node that spawned this tree
+  OOPSBlock *obl = (OOPSBlock*)A->id;        // and its id structure
+  assert(obl->emrow==obl->emcol); // this should be a diagonal block
+  ExpandedModelInterface *emrow = obl->emrow;
+
+
+  assert(obl->nvar==T->end-T->begin);
+  emrow->getColLowBounds(dense->elts);
+
+  //for(int i=0;i<dense->dim;i++){
+  //  if (fabs(dense->elts[i])>1e-6) {
+  //    printf("Found lower bound !=0 (=%f) in variable %i in model %s",
+  //           dense->elts[i], i, emrow->getName().c_str());
+  //    printf("Currently OOPS can only cope with zero lower bounds\n");
+  //    exit(1);
+  //  }
+  // }
+
+}
+
+/* ---------------------------------------------------------------------------
+SML_OOPS_upload_sol
+---------------------------------------------------------------------------- */
+void
+SML_OOPS_upload_sol(ExpandedModelInterface *root,
+		    Vector *vx, Vector *vy, Vector *vz)
+{
+  Tree *Tx = vx->node,*Ty = vy->node;
+  int nchd = root->children.size();
+  
+  printf("%d: %d %d\n",nchd, Tx->nb_sons, Ty->nb_sons);
+  assert((nchd==0&&Tx->nb_sons==0)||Tx->nb_sons==nchd+1);
+  assert((nchd==0&&Ty->nb_sons==0)||Ty->nb_sons==nchd+1);
+  if (nchd>0){
+    /* The final child of the vector tree corresponds to the local variables/
+       constraints of this node */
+    
+    /* upload local contributions */
+    Vector *vxs = SubVector(vx, nchd);
+    Vector *vys = SubVector(vy, nchd);
+    Vector *vzs = SubVector(vz, nchd);
+
+    DenseVector *dx = GetDenseVectorFromVector(vxs);
+    DenseVector *dy = GetDenseVectorFromVector(vys);
+    DenseVector *dz = GetDenseVectorFromVector(vzs);
+
+    assert(dx->dim == root->getNLocalVars());
+    assert(dy->dim == root->getNLocalCons());
+
+    root->setPrimalSolColumns(dx->elts);
+    root->setDualSolColumns(dz->elts);
+    root->setDualSolRows(dy->elts);
+
+    /* and upload a vector of zeros for the constraint slacks 
+       (OOPS can only deal with equality constraints)                    */
+    double *elts = new double[dy->dim];
+    for(int i=0;i<dy->dim;i++) elts[i] = 0;
+    root->setPrimalSolRows(elts);
+    delete(elts);
+
+    /* recurse down the rest of the tree */
+
+    for (int i=0;i<nchd-1;i++){
+      ExpandedModelInterface *model = root->children[i]; 
+      SML_OOPS_upload_sol(model, 
+			  SubVector(vx, i), SubVector(vy, i), SubVector(vz,i));
     }
+  }else{
+    /* This is a root node of the model tree and the vector trees */
+    DenseVector *dx = GetDenseVectorFromVector(vx);
+    DenseVector *dy = GetDenseVectorFromVector(vy);
+    DenseVector *dz = GetDenseVectorFromVector(vz);
+
+    assert(dx->dim == root->getNLocalVars());
+    assert(dy->dim == root->getNLocalCons());
+
+    root->setPrimalSolColumns(dx->elts);
+    root->setDualSolColumns(dz->elts);
+    root->setDualSolRows(dy->elts);
+
+    /* and upload a vector of zeros for the constraint slacks 
+       (OOPS can only deal with equality constraints)                    */
+    double *elts = new double[dy->dim];
+    for(int i=0;i<dy->dim;i++) elts[i] = 0;
+    root->setPrimalSolRows(elts);
+    delete(elts);
+
   }
-
-  delete [] lowbndchk;
-
 }
