@@ -1,7 +1,7 @@
 #ifndef SML_H
 #define SML_H
 
-#include "ModelInterface.h"
+#include "ExpandedModelInterface.h"
 #include <string>
 
 std::string sml_version();

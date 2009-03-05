@@ -11,7 +11,6 @@ extern "C" {
 
 #include <iostream>
 #include <cassert>
-#include "ModelInterface.h"
 #include "OOPSBlock.h"
 #include "sml-oops.h"
 

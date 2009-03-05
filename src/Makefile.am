@@ -12,14 +12,15 @@ libsml_a_SOURCES = AmplModel.cpp AmplModel.h AmplsolverCalls.cpp 		 	\
 						 CompDescr.h CompDescrParam.cpp CompDescrParam.h    	\
 						 DataNodes.h ExpandedModel.cpp ExpandedModel.h 		 	\
 						 GlobalVariables.h misc.h ModelComp.cpp ModelComp.h 	\
-						 ModelInterface.h nodes.cpp nodes.h SetElement.cpp    \
-						 SetElement.h Set.cpp Set.h SetNode.cpp SetNode.h     \
-						 sml.cpp sml.h StochModelComp.cpp StochModelComp.h 	\
-						 StochModel.cpp StochModel.h symtab.cpp symtab.h  		\
+						 ExpandedModelInterface.h nodes.cpp nodes.h  			\
+						 SetElement.cpp SetElement.h Set.cpp Set.h            \
+						 SetNode.cpp SetNode.h sml.cpp sml.h  						\
+						 StochModelComp.cpp StochModelComp.h StochModel.cpp   \
+						 StochModel.h symtab.cpp symtab.h                     \
 						 sml.tab.ypp sml.yy.lpp data.tab.ypp data.yy.lpp
 
 noinst_HEADERS = doxygen.h
-include_HEADERS = ModelInterface.h sml.h
+include_HEADERS = ExpandedModelInterface.h sml.h
 
 # Force these to get built first
 BUILT_SOURCES = sml.tab.h data.tab.h

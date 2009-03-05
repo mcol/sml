@@ -1,6 +1,6 @@
 class OOPSBlock;
 
-#include "ModelInterface.h"
+#include "ExpandedModelInterface.h"
 #include "AmplsolverCalls.h"
 
 /** @class OOPSBlock

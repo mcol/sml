@@ -19,7 +19,7 @@ This would still be in the Benders view.
 #include <string>
 #include <list>
 #include <vector>
-#include "ModelInterface.h"
+#include "ExpandedModelInterface.h"
 
 using namespace std;
 

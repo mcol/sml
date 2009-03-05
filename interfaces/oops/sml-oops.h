@@ -2,7 +2,7 @@
 #define SML_OOPS_H
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
-#include "ModelInterface.h"
+#include "ExpandedModelInterface.h"
 
 void SML_OOPS_driver(ModelInterface *root);
 
