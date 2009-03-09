@@ -25,12 +25,6 @@ using namespace std;
 		  "subject to" components)
 */
 class AmplModel;
-
-static char *nameTypes[7] = {"variable","constraint","parameter",
-			     "set", "objective min","objective max", 
-			     "submodel"};
-static char *compTypes[7] = {"var","subject to","param",
-			     "set", "minimize","maximize","block"};
 /** 
  * @class ModelComp
  * @brief Object to represent a component of an AMPL/SML model/block.
@@ -44,6 +38,9 @@ static char *compTypes[7] = {"var","subject to","param",
 class ModelComp{
  private:
  public:
+  static const string nameTypes[];
+  static const string compTypes[];
+
   compType type;   //!< the type of the component
   char *id;        //!< the name of the component
 

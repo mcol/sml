@@ -67,9 +67,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
 
   // ---------- (1) make deep_copy of StochModelComp ------------------------
 
-  // FIXME: this should be a deep copy
   newmc = deep_copy(); // clone the current node
-  //newmc = clone(); // clone the current node
   
   // ---------- (2) find list of all IDREF nodes in indexing/attributes ------
 
@@ -363,11 +361,8 @@ StochModelComp::clone()
 
   newsmc->type = type;
   newsmc->id = id;
-  //  newsmc->ismin = ismin;
   newsmc->attributes = attributes;
   newsmc->indexing = indexing;
-  //  newsmc->next = next;
-  //  newsmc->prev = prev;
   newsmc->dependencies = dependencies;
   newsmc->model = model;
   newsmc->stochmodel = stochmodel;

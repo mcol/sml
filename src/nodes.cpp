@@ -1231,7 +1231,7 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
          /* this is a match */
          if (GlobalVariables::logParseModel){
             cout << "Found Match: " << ref->name << " refers to ";
-            cout << nameTypes[thismc->type] << "\n";
+            cout << ModelComp::nameTypes[thismc->type] << "\n";
             cout << "    " << thismc->id << "\n";
             cout << "       " << *(thismc->indexing) << "\n";
             cout << "       " << *(thismc->attributes) << "\n";
@@ -1245,80 +1245,7 @@ find_var_ref_in_context_(AmplModel *context, IDNode *ref)
          ret->ref = thismc;
          return ret;
       }
-      //thismc = thismc->next;
    }
-
-  
-   //thismc = context->vars;
-   //for(i=0;i<context->n_vars;i++){
-   //  if (strcmp(name, thismc->id)==0){
-   //    /* this is a match */
-   //    printf("Found Match: %s refers to variable\n",name);
-   //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
-   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
-   //    ref->values[0] = (void*)thismc;
-   //    ref->opCode = IDREF;
-   //    return ref;
-   //  }
-   //  thismc = thismc->next;
-   //}
-   //thismc = context->cons;
-   //for(i=0;i<context->n_cons;i++){
-   //  if (strcmp(name, thismc->id)==0){
-   //    /* thismc is a match */
-   //    printf("Found Match: %s refers to constraint\n",name);
-   //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
-   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
-   //    ref->values[0] = (void*)thismc;
-   //    ref->opCode = IDREF;
-   //    return ref;
-   //  }
-   //  thismc = thismc->next;
-   //}
-   //thismc = context->sets;
-   //for(i=0;i<context->n_sets;i++){
-   //  if (strcmp(name, thismc->id)==0){
-   //    /* this is a match */
-   //    printf("Found Match: %s refers to set\n",name);
-   //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
-   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
-   //    ref->values[0] = (void*)thismc;
-   //    ref->opCode = IDREF;
-   //    return ref;
-   //  }
-   //  thismc = thismc->next;
-   //}
-   //thismc = context->params;
-   //for(i=0;i<context->n_params;i++){
-   //  if (strcmp(name, thismc->id)==0){
-   //    /* this is a match */
-   //    printf("Found Match: %s refers to parameter\n",name);
-   //    printf("    %s\n",thismc->id);
-   //    printf("       %s\n",print_SyntaxNode(thismc->indexing));
-   //    printf("       %s\n",print_SyntaxNode(thismc->attributes));
-   //    ref->values[0] = (void*)thismc;
-   //    ref->opCode = IDREF;
-   //    return ref;
-   //  }
-   //  thismc = thismc->next;
-   //}
-   //thism = context->submodels;
-   //for(i=0;i<context->n_submodels;i++){
-   //  if (strcmp(name, thism->name)==0){
-   //    /* this is a match */
-   //    printf("Found Match: %s refers to submodel\n",name);
-   //    printf("    %s\n",thism->name);
-   //    //printf("       %s\n",print_SyntaxNode(thism->indexing));
-   //    //printf("       %s\n",print_SyntaxNode(this->attributes));
-   //    ref->values[0] = (void*)thism;
-   //    ref->opCode = IDREFM;
-   //    return ref;
-   //  }
-   //  thism = thism->next;
-   //}
 
    /* need also to look through parent model */
    if (context->parent){
@@ -1364,48 +1291,6 @@ find_var_ref_in_indexing(const char *const name)
          tmp->splitExpression();
          ret = tmp->hasDummyVar(name);
          if (ret) return ret;
-       
-#if 0
-         assert(tmp->opCode==LBRACE);
-         tmp = (SyntaxNode*)tmp->values[0];
-         if (tmp->opCode==COLON) tmp = (SyntaxNode*)tmp->values[0];
-         /* this should now be a comma separated list */
-         if (tmp->opCode==COMMA){
-            for(j=0;j<tmp->nval;j++){
-               tmp2 = findKeywordinTree((SyntaxNode*)tmp->values[j], IN);
-               /* everything to the left of IN is a dummy variables */
-               if (tmp2){
-                  tmp2 = (SyntaxNode*)tmp2->values[0];
-                  assert(tmp2->opCode==ID);
-                  if (GlobalVariables::logParseModel)
-                     printf("Found dummy variable: %s\n",tmp2->values[0]);
-                  if (strcmp(name, (const char*)tmp2->values[0])==0)
-                     ret = (SyntaxNode*)tmp->values[j];
-     
-               }
-            }
-         }else{
-            /* if this is not a comma separated list, then look directly */
-            char *tmpbuf1 = print_SyntaxNode(tmp);
-            char *tmpbuf2 = print_SyntaxNodesymb(tmp);
-            if (GlobalVariables::logParseModel){
-               printf(">%s\n", tmpbuf1);
-               printf(">%s\n", tmpbuf2);
-            }
-            free(tmpbuf1);
-            free(tmpbuf2);
-            tmp2 = findKeywordinTree(tmp, IN);
-            /* everything to the left of IN is a dummy variables */
-            if (tmp2){
-               tmp2 = (SyntaxNode*)tmp2->values[0];
-               assert(tmp2->opCode==ID||tmp2->opCode==COMMA);
-               if (GlobalVariables::logParseModel)
-                  printf("Found dummy variable: %s\n",tmp2->values[0]);
-               if (strcmp(name, (const char*)tmp2->values[0])==0)
-                  ret = tmp;
-            }
-         }
-#endif
       }
    }
    return ret;

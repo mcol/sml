@@ -80,14 +80,6 @@ class AmplModel{
    */
   list<ModelComp*> comps;
 
-  //ModelComp *first; /**< pointer to the first model component */
-  //ModelComp *last;  /**< pointer to the last model component */
-  //ModelComp *vars;
-  //ModelComp *cons;
-  //ModelComp *objs;
-  //ModelComp *sets;
-  //ModelComp *params;
-
   AmplModel *parent; /**< the parent if this is a submodel of another model */
   // all models except root might have an indexing expression:
   // block name{i in SET}:

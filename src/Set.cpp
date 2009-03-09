@@ -31,7 +31,6 @@ Set::Set(const ListNode &list):
   SyntaxNode *item;
 
   assert(list.opCode==' ');
-  //this->n = list->nval;
   
   // have a look at the first item to get the dimension of the set
   item = list[0];
@@ -52,12 +51,9 @@ Set::Set(const ListNode &list):
     //    this->elements.push_back(item);
     if (dim==1) {
       char** array = (char**)calloc(1, sizeof(char*));
-      //string *array = (string*)calloc(1, sizeof(string));
       array[0] = item->getValue();
-      //this->elements.push_back(array);
       add(SetElement(1,array));
     }else{
-      //string* array = new string[dim];
       char **array = (char**)calloc(dim, sizeof(char*));
       assert(item->opCode==LBRACKET);
       item = (SyntaxNode*)*(item->begin());

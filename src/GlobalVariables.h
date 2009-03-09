@@ -23,5 +23,4 @@ class GlobalVariables{
   static int prtLvl; //!< The level of debugging printing to screen.
   
   static bool logParseModel; //!< Controls if the model parser should log
-  //static bool logParseData;
 };

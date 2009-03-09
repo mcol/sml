@@ -19,19 +19,6 @@ void print_model(AmplModel *model);
 void write_ampl_for_submodel(ostream &fout, AmplModel *submodel);
 void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 
-/* this struct stores an indexing expression in an easy to modify form:
-   the add_index below will be rendered as
-   val(dummyVar) in val(set) 
-     or just
-   val(set)
-     if dummyVar is NULL
-*/
-//typedef struct add_index_st {
-//  SyntaxNode *dummyVar;     /* an SyntaxNode representing the dummy variable expr */
-//  SyntaxNode *set;          /* an SyntaxNode representing the set */
-//} add_index;
-
-
 /* Stack of indexing expressions that are applicable to all variables that
    are printed:
 
@@ -46,13 +33,10 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
    This is done by the addIndex stack: as the sub file writer traverses through
    the tree the block-indexing expressions are added to the tree           */
 
-// FIXME: this stack could be implemented as its own class:
-//        these two would become static class variables 
 // FIXME: this is fairly dumb at the moment: it cannot deal with 
 //         mulitple dimensions {i in SET1,j in SET2} 
 //         SET valued expressions: {i in SET1 cross SET2} 
 //         or conditions:    {(i,j) in SET1:i<j}
-//int n_addIndex;           /* number and list of indexing expressions */
 vector <list <add_index *>* > l_addIndex;  /* to add to all statements */
 
 static void
@@ -82,52 +66,38 @@ print_model(AmplModel *model)
   cout << "n_cons: " << model->n_cons << "\n";
   for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
-    //  entry = model->first;
-    //while(entry!=NULL){
     if (entry->type==TCON){
       print_entry(entry);
     }
-    //entry = entry->next;
   }
   cout << "n_vars: " << model->n_vars << "\n";
   for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
-    //entry = model->first;
-    //while(entry!=NULL){
     if (entry->type==TVAR){
       print_entry(entry);
     }
-    //entry = entry->next;
   }
   cout << "n_params: " << model->n_params << "\n";
   for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
-    // entry = model->first;
-    //while(entry!=NULL){
     if (entry->type==TPARAM){
       print_entry(entry);
     }
-    //entry = entry->next;
   }
 
   cout << "n_obj: "<< model->n_objs;
   for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
-    //  entry = model->first;
-    //while(entry!=NULL){
     if (entry->type==TMIN||entry->type==TMAX){
       cout << "    " << entry->id << "\n";
       cout << "       " << entry->indexing << "\n";
       cout << "       " << entry->attributes << "\n";
     }
-    //entry = entry->next;
   }
   
   cout << "submodels: " << model->n_submodels << "\n";
   for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
     entry = *p;
-    //entry = model->first;
-    //while(entry!=NULL){
     if (entry->type==TMODEL){
       cout << "    " << entry->id << "\n";
       cout << "       " << entry->indexing << "\n";
@@ -135,7 +105,6 @@ print_model(AmplModel *model)
       submod = (AmplModel*)entry->other;
       print_model(submod);
     }
-    //entry = entry->next;
   }
   
   cout << "---END-------------------- backend::print_model -------------"
@@ -450,7 +419,6 @@ process_model(AmplModel *model) /* should be called with model==root */
     }
     
     /* write the submodel file */
-    //n = strlen(buffer);buffer[n-4] = 0;
     filename += ".mod";
     ofstream fout(filename.c_str());
     cout << "Write to model file: " << filename << "\n";
@@ -743,12 +711,6 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         // l.addIndex.push_back(li);
         if (ix){
           add_index *ai = (add_index*)calloc(1, sizeof(add_index));
-          //if (l_addIndex[n_addIndex]==NULL){
-          //  l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
-          //}
-          // add new entry on the addIndex stack
-          //list<add_index*> li = l_addIndex.last();
-          li->push_back(ai);
           
           // and place the indexing expression of this BLOCK onto the stack
           // the stack stores the dummy variable and the SET separately, 
@@ -766,6 +728,9 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             ai->dummyVar = NULL;
             ai->set = ix;
           }
+
+          // add new entry on the addIndex stack
+          li->push_back(ai);
           
           /* okay we have placed the set description on the stack
              but really this should be modified:
@@ -812,45 +777,36 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             modified_write(fout, newmc);
           }
           
-          if (true)
-          {
-            //SyntaxNode *setn = l_addIndex[n_addIndex]->set;
-            SyntaxNode *setn = ai->set;
-            ModelComp *tmp;
-            char *newname; 
-            //fprintf(fout, "set %s_SUB within %s;\n", 
-            //      print_SyntaxNode(setn), print_SyntaxNode(setn));
-            /* and now modify the set declaration */
-            if (setn->opCode!=IDREF){
-              cerr << "At the moment can index blocks only with simple sets\n";
-              cerr << "Indexing expression is " << setn->print() << "\n";
-              exit(1);
-            }
-            /* newn is the new node, first copy the old one */
-            SyntaxNodeIDREF *newn = ((SyntaxNodeIDREF *)setn)->clone();
-            // clone the ModelComp that is referred to
-            newn->ref = (ModelComp *)calloc(1,sizeof(ModelComp));
-            memcpy(newn->ref, ((SyntaxNodeIDREF*)setn)->ref, sizeof(ModelComp));
-            // ???but associate this with the current model
-            //newn->ref->model = thism;
+          SyntaxNode *setn = ai->set;
+          //fprintf(fout, "set %s_SUB within %s;\n", 
+          //      print_SyntaxNode(setn), print_SyntaxNode(setn));
+          /* and now modify the set declaration */
+          if (setn->opCode!=IDREF){
+            cerr << "At the moment can index blocks only with simple sets\n";
+            cerr << "Indexing expression is " << setn->print() << "\n";
+            exit(1);
+          }
+          /* newn is the new node, first copy the old one */
+          SyntaxNodeIDREF *newn = ((SyntaxNodeIDREF *)setn)->clone();
+          // clone the ModelComp that is referred to
+          newn->ref = (ModelComp *)calloc(1,sizeof(ModelComp));
+          memcpy(newn->ref, ((SyntaxNodeIDREF*)setn)->ref, sizeof(ModelComp));
+          // ???but associate this with the current model
+          //newn->ref->model = thism;
 
-            /* and finally set the new name (add _SUB) to the name */
-            tmp = newn->ref;
-            newname = (char *)calloc(strlen(tmp->id)+5, sizeof(char));
-            strcpy(newname, tmp->id);
-            strcat(newname, "_SUB");
-            tmp->id = newname;
-            /* and put this on the stack */
-            //l_addIndex[n_addIndex]->set = newn;
-            ai->set = newn;
-          }       
-          //n_addIndex++;
-        }
+          /* and finally set the new name (add _SUB) to the name */
+          ModelComp *tmp = newn->ref;
+          char *newname = (char *)calloc(strlen(tmp->id)+5, sizeof(char));
+          strcpy(newname, tmp->id);
+          strcat(newname, "_SUB");
+          tmp->id = newname;
+          /* and put this on the stack */
+          ai->set = newn;
+        }       
         l_addIndex.push_back(li);
         write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, 
                submodel);
         SyntaxNode::default_model = thism;
-        //if (ix) n_addIndex--;
         l_addIndex.pop_back();
       } /* end of (model on the current list branch) */
       else if (thislevel==0) {
@@ -872,8 +828,6 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
       }
       
     } /* end else (end of the TMODEL branch) */
-    
-    //comp = comp->next;
   }
   
 }
@@ -897,7 +851,7 @@ write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
   ModelComp *comp;
 
   for(list<ModelComp*>::iterator p = submodel->comps.begin();
-      p!=submodel->comps.end();p++){
+      p!=submodel->comps.end(); ++p){
     comp = *p;
     if (comp->type==TVAR){
       /* print global name here: 
@@ -908,7 +862,6 @@ write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
       /* the NOARG version of getGlobalName should do the trick */
       fout << getGlobalName(comp, NULL, NULL, NOARG) << "\n";
     }
-    //comp = comp->next;
   }
 }
 
@@ -965,31 +918,22 @@ modified_write(ostream &fout, ModelComp *comp)
   if (comp->type!=TMODEL){
     int first=1;
     /* start statement */
-    fout << compTypes[comp->type] << " ";
+    fout << ModelComp::compTypes[comp->type] << " ";
     
     // find number of indexing expressions on stack
     c_addIndex = 0;
-    //for(i=0;i<l_addIndex.size();i++){
     for(i=0;i<level;i++){
       c_addIndex += l_addIndex[i]->size();
-      //list <add_index*>* li = l_addIndex.at(i);
-      //for(list<add_index*>::iterator p=li->begin();p!=li->end();p++){
-      //c_addIndex++;
-      //}
     }
     /* write name and indexing expression */
     fout << getGlobalName(comp, NULL, NULL, NOARG) << " ";
-    //if (n_addIndex>0 || comp->indexing)
     if (c_addIndex>0 || comp->indexing)
       fout << "{";
     /* write out the additional indexes */
-    //for(i=0;i<l_addIndex.size();i++){
     for(i=0;i<level;i++){
       list <add_index*>* li = l_addIndex.at(i);
       for(list<add_index*>::iterator p=li->begin();p!=li->end();p++){
         add_index *ix = *p;
-        // for(i=0;i<n_addIndex;i++){
-        // add_index *ix = l_addIndex[i];
         if (first) {first = 0;} else {fout << ",";}
         if (ix->dummyVar){
           fout << ix->dummyVar << " in ";
@@ -1006,7 +950,6 @@ modified_write(ostream &fout, ModelComp *comp)
       if (ixsn->opCode==LBRACE) ixsn=(SyntaxNode*)*(ixsn->begin()); 
       fout << ixsn;
     }
-    //if (n_addIndex>0 || comp->indexing)
     if (c_addIndex>0 || comp->indexing)
       fout << "}";
     

@@ -16,8 +16,6 @@ list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
 
 extern void modified_write(ostream &fout, ModelComp *comp);
-//extern int n_addIndex;
-//extern add_index *l_addIndex[];
 
 // Utility function
 bool is_int(const char *tok); // 'const' here means that tok is not modified
@@ -102,7 +100,6 @@ AmplModel::setGlobalNameRecursive()
       AmplModel *am = (AmplModel*)mc->other;
       am->setGlobalNameRecursive();
     }
-    //mc = mc->next;
   }
 }
 
@@ -137,17 +134,10 @@ AmplModel::writeTaggedComponents(ostream &fout)
     // onto the stack
     
     //Place the indexing expression of the current model onto the addIndex stack 
-    // first make sure that there is space
-    //if (l_addIndex[n_addIndex]==NULL){
-    //  l_addIndex[n_addIndex] = (add_index*)calloc(1, sizeof(add_index));
-    //}
     add_index *ai = (add_index*)calloc(1, sizeof(add_index));
     ai->dummyVar = ix->dummyVarExpr[0];
     ai->set = ix->sets[0];
-    //    l_addIndex[n_addIndex]->dummyVar = ix->dummyVarExpr[0];
-    //    l_addIndex[n_addIndex]->set = ix->sets[0];
     li->push_back(ai);
-    //n_addIndex++;
   }
   l_addIndex.push_back(li);
 
@@ -161,7 +151,6 @@ AmplModel::writeTaggedComponents(ostream &fout)
       am->writeTaggedComponents(fout);
     }
   }
-  //  if (ix) n_addIndex--;
   l_addIndex.pop_back();
 
 }
@@ -777,26 +766,14 @@ AmplModel::addComp(ModelComp *comp)
     }
   n_total++;
   comp->model = this;
-  //comp->next = NULL;
-  //comp->prev = lastinmodel;
   comps.push_back(comp);
 
   comp->setUpDependencies();
-  //if (model->first==NULL){
-  //  model->first=comp;
-  //  model->last = comp;
-  //}else{
-  //  model->last = comp;
-  //  lastinmodel->next = comp;
-  // }
-  
-
 }
 
 /* --------------------------------------------------------------------------
 AmplModel::applyChanges()
 ---------------------------------------------------------------------------- */
-//static   // for some weird reason 'static' is not allowed here 
 void
 AmplModel::applyChanges()
 {

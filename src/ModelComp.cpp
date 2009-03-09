@@ -9,6 +9,14 @@ static bool prtAnaDep = false;
 
 int ModelComp::tt_count=0;  // initialise static class member
 
+const string ModelComp::nameTypes[] = {
+   "variable","constraint","parameter",
+   "set", "objective min","objective max", 
+   "submodel"};
+const string ModelComp::compTypes[] = {
+   "var","subject to","param",
+   "set", "minimize","maximize","block"};
+
 extern void modified_write(ostream &fout, ModelComp *comp);
 
 /* This should be an IDREF (or IDREFM) node that needs to be converted
@@ -56,63 +64,20 @@ ModelComp::ModelComp(char* is, compType type, SyntaxNode *ix, SyntaxNode *attr)
 ModelComp::ModelComp(char *id, compType type, 
                        SyntaxNode *indexing, SyntaxNode *attrib)
 {
-  //ModelComp *newmc = (ModelComp*)calloc(1,sizeof(ModelComp));
   value = NULL;
   this->tag = false;
   this->id = strdup(id);
   this->type = type;
   this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing);
   if (indexing) (this->indexing)->splitExpression();
-  //  if (indexing){
-  //  this->indexing = new SyntaxNodeIx(indexing);
-  //}else{
-  //  this->indexing = NULL;
-  //}
-  //delete(indexing);
   this->attributes = attrib;
 
   this->count = ModelComp::tt_count++;
   if (GlobalVariables::prtLvl>0) 
     printf("Defining model component (%4d): %s\n",this->count, id);
 
-  setUpDependencies();
-
   /* now set up the dependency list for the component */
-  //  printf("  dependencies in indexing: \n");
-  //  if (indexing) {
-  //    list<ModelComp*> lmc;
-  //    indexing->findIDREF(&lmc);
-  //    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
-  //      // see if element already on dep list
-  //      bool found=false;
-  //      for (list<ModelComp*>::iterator q=dependencies.begin();
-  //           q!=dependencies.end();q++)
-  //        if (*p==*q) found = true;
-  //      if (!found)
-  //        dependencies.push_back(*p);
-  //    }
-  //  }
-  //  if (attrib){
-  //    printf("  dependencies in attributes: %s\n", attrib->print());
-  //    //attrib->findIDREF();
-  //    list<ModelComp*> lmc;
-  //    attributes->findIDREF(&lmc);
-  //    // lmc should be a list of model components
-  //    // how do I iterate through it?
-  //    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
-  //      // see if element already on dep list
-  //      bool found=false;
-  //      for (list<ModelComp*>::iterator q=dependencies.begin();
-  //           q!=dependencies.end();q++)
-  //        if (*p==*q) found = true;
-  //     if (!found)
-  //        dependencies.push_back(*p);
-  //    }
-  //  }
-  //  printf("--------------------------------\n");
-  //  for( list<ModelComp*>::iterator p=dependencies.begin(); 
-  //       p!=dependencies.end(); ++p)
-  //    printf("%s\n",(*p)->id);
+  setUpDependencies();
 
   global_list.push_back(this);
 }
@@ -173,20 +138,17 @@ ModelComp::setUpDependencies()
 ModelComp::ModelComp()
 ---------------------------------------------------------------------------- */
 /** Default constructor: just sets all fields to -1/NULL/false               */
-ModelComp::ModelComp()
-{
-  type = TNOTYPE;
-  id = NULL;
-  indexing = NULL;
-  attributes = NULL;
-  //next = NULL;
-  //prev = NULL;
-  model = NULL;
-  other = NULL;
-  count = -1;
-  tag = false;
-  value = NULL;
-}
+ModelComp::ModelComp() :
+  type(TNOTYPE),
+  id(NULL),
+  attributes(NULL),
+  indexing(NULL),
+  model(NULL),
+  other(NULL),
+  count(-1),
+  tag(false),
+  value(NULL) { }
+
 /* --------------------------------------------------------------------------
 ModelComp::setTo()
 ---------------------------------------------------------------------------- */
@@ -207,18 +169,11 @@ ModelComp::setTo(char *id, compType type,
                        SyntaxNodeIx *indexing, SyntaxNode *attrib)
 {
   static int tt_count=0;
-  //ModelComp *newmc = (ModelComp*)calloc(1,sizeof(ModelComp));
   this->tag = false;
   this->id = strdup(id);
   this->type = type;
   this->indexing = indexing;
   if (indexing) (this->indexing)->splitExpression();
-  //  if (indexing){
-  //  this->indexing = new SyntaxNodeIx(indexing);
-  //}else{
-  //  this->indexing = NULL;
-  //}
-  //delete(indexing);
   this->attributes = attrib;
 
   /* now set up the dependency list for the component */
@@ -245,7 +200,6 @@ ModelComp::setTo(char *id, compType type,
     list<ModelComp*> lmc;
     attrib->findIDREF(lmc);
     // lmc should be a list of model components
-    // how do I iterate through it?
     for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
       // see if element already on dep list
       bool found=false;
@@ -260,7 +214,6 @@ ModelComp::setTo(char *id, compType type,
     for( list<ModelComp*>::iterator p=dependencies.begin(); 
          p!=dependencies.end(); ++p)
       printf("  %s\n",(*p)->id);
-    //return newmc;
     printf("--------------------------------\n");
   }
 
@@ -353,13 +306,10 @@ ModelComp::print()
 {
   cout << "------------------------------------------------------------\n";
   cout << "ModelComp: " << id << "\n";
-  cout << "  type: " << nameTypes[type] << "\n";
-  //printf("   (ismin: %d)\n",ismin);
+  cout << "  type: " << ModelComp::nameTypes[type] << "\n";
   cout << "  attributes: " << *attributes << "\n";
   cout << "  indexing: " << *indexing << "\n";
   if (indexing) indexing->printDiagnostic(cout);
-  //printf("  next: %s\n",(next==NULL)?"NULL":next->id);
-  //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
   cout << "  dependencies: " << dependencies.size() << ":\n";
   cout << "      ";
   for(list<ModelComp*>::iterator p = dependencies.begin();
@@ -381,15 +331,12 @@ ModelComp::dump(ostream &fout)
   fout << "MCDP  --------------------------------------------------------"
      "----\n";
   fout << "MCDP ModelComp: " << id << " ("<< (void *) this << ")\n";
-  fout << "MCDP  type: " << nameTypes[type] << "\n";
-  //printf("   (ismin: %d)\n",ismin);
+  fout << "MCDP  type: " << ModelComp::nameTypes[type] << "\n";
   fout << "MCDP  attributes: " << attributes << "\n";
   if (attributes) attributes->dump(fout);
   fout << "MCDP  indexing: " << indexing << "\n";
   if (indexing) indexing->printDiagnostic(fout);
   if (indexing) indexing->dump(fout);
-  //printf("  next: %s\n",(next==NULL)?"NULL":next->id);
-  //printf("  prev: %s\n",(prev==NULL)?"NULL":prev->id);
   fout << "MCDP  dependencies: " << dependencies.size() << ":\n";
   fout << "      ";
   for(list<ModelComp*>::iterator p = dependencies.begin();
@@ -410,7 +357,7 @@ ModelComp::printBrief()
 void
 ModelComp::printBrief()
 {
-  printf("%s %s\n",nameTypes[type], id);
+  cout << ModelComp::nameTypes[type] << " " << id << endl;
 }
 /* ---------------------------------------------------------------------------
 ModelComp::tagDependencies()
@@ -441,11 +388,8 @@ ModelComp::deep_copy()
 
   newm->type = type;
   newm->id = strdup(id);
-  //newm->ismin = ismin;
   if (attributes) newm->attributes = attributes->deep_copy();
   if (indexing) newm->indexing = indexing->deep_copy();
-  //newm->next = next;
-  //newm->prev = prev;
   newm->dependencies = dependencies;
   newm->model = model;
   newm->other = other;
@@ -467,11 +411,8 @@ ModelComp::clone()
 
   newm->type = type;
   newm->id = id;
-  //newm->ismin = ismin;
   newm->attributes = attributes;
   newm->indexing = indexing;
-  //newm->next = next;
-  //newm->prev = prev;
   newm->dependencies = dependencies;
   newm->model = model;
   newm->other = other;
@@ -530,13 +471,11 @@ char *
 getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 {
-  //ModelComp *node = opn->values[0];  /* this is the ModelComponent */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
   string globalName;
   string arglist;
   int n_index = 0;
-  //  int p_ix_list = n_addIndex-1;
   int i;
 
   globalName = "";
@@ -674,17 +613,6 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
         arglist += opn->getArgumentList();
       }
     }
-    //for(i=0;i<opn->nval;i++){
-    //  if (n_index==0){
-    //sprintf(arglistbuffer, "%s", print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
-    //        n_index++;
-    //  }else{
-    //        char *tmpc = strdup(arglistbuffer);
-    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
-    //        free(tmpc);
-    //n_index++;
-    //}
-    //}
     
     globalName += "[" + arglist + "]";
   }
@@ -755,13 +683,11 @@ char *
 getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 {
-  //ModelComp *node = opn->values[0];  /* this is the ModelComponent */
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
   string arglist;
   string globalName;
   int n_index = 0;
-  //  int p_ix_list = n_addIndex-1;
   int i;
 
   globalName = "";
@@ -903,17 +829,6 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
         arglist += opn->getArgumentList();
       }
     }
-    //for(i=0;i<opn->nval;i++){
-    //  if (n_index==0){
-    //sprintf(arglistbuffer, "%s", print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
-    //        n_index++;
-    //  }else{
-    //        char *tmpc = strdup(arglistbuffer);
-    //        sprintf(arglistbuffer, "%s,%s",tmpc, print_SyntaxNode((SyntaxNode*)opn->values[i+1]));
-    //        free(tmpc);
-    //n_index++;
-    //}
-    //}
     
     globalName += "[" + arglist + "]";
 
@@ -1017,7 +932,6 @@ ModelComp::moveUp(int level){
   rem->model = model;
   rem->action = CHANGE_REM;
   AmplModel::changes.push_back(rem); // Q for removal
-  //model->removeComp(this);
   for(i=0;i<level;i++){
     model = model->parent;
   }
