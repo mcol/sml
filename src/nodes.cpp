@@ -873,10 +873,9 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
 {
   int i;
   SyntaxNode *ret = NULL;
-  SyntaxNode *tmp;
 
   for(i=0;i<ncomp;i++){
-    tmp = dummyVarExpr[i];
+    SyntaxNode *tmp = dummyVarExpr[i];
     if (!tmp) continue; // no dummy var, just a set.
 
     // this is either ID or (ID,   ,ID)
@@ -889,9 +888,11 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
       /* This is a multidimensional dummy variable: */
       assert(tmp->opCode==LBRACKET);
       tmp = *(tmp->begin());
+      ListNode *tmpl = static_cast<ListNode*>(tmp);
       // and this should be a comma separated list
-      assert(tmp->opCode==COMMA);
-      for(SyntaxNode::iterator j=tmp->begin(); j!=tmp->end(); ++j){
+      assert(tmpl);
+      assert(tmpl->opCode==COMMA);
+      for(ListNode::literator j=tmpl->lbegin(); j!=tmpl->lend(); ++j){
         // items on the list should be ID
         assert((*j)->opCode==ID);
         IDNode *tmp2 = (IDNode *) *j;
@@ -1195,7 +1196,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       if (GlobalVariables::logParseModel)
          cout << "Adding argument list to node: " << *argNode << "\n";
       //free(idNode->values); // jdh - what does this do?
-      for(SyntaxNode::iterator i=argNode->begin(); i!=argNode->end(); ++i)
+      for(ListNode::literator i=argNode->lbegin(); i!=argNode->lend(); ++i)
          ret->push_back(*i);
       if (ref->opCode==LBRACKET){
          // this is old code to deal with ancestor(1).ID declarations. To go

@@ -118,7 +118,7 @@ optionlist: /*empty */ {$$=NULL;}
           ;
 
 commasepoptions:  identifier {
-                     $$ = new SyntaxNode(COMMA, $1);}
+                     $$ = new ListNode(COMMA, $1);}
                |  commasepoptions COMMA identifier{
                      $$ = $1->push_back($3);
                   }
@@ -403,7 +403,7 @@ mdim_dummy: mdim_dummy_start RBRACKET { $$ = new SyntaxNode(LBRACKET, $1); }
           ;
 
 mdim_dummy_start: LBRACKET ID { 
-                     $$ = new SyntaxNode(COMMA, new IDNode($2));
+                     $$ = new ListNode(COMMA, new IDNode($2));
                   }
                 | mdim_dummy_start COMMA ID {
                      $$ = $1->push_back(new IDNode($3));
@@ -749,7 +749,7 @@ iditem:  ID {                               /* simple identifier */
 */
 
 expr_list:  expr {
-               $$ = new SyntaxNode(COMMA, $1);
+               $$ = new ListNode(COMMA, $1);
             }
          |  expr_list COMMA expr {      /* add item to list */
                /* epxr_list could be a simple node or a comma separated
@@ -900,7 +900,9 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    StochModel *new_mod;
    ModelComp *newmc;
   
-   if (stochsets->opCode!=COMMA || stochsets->nchild()!=4){
+   ListNode *stochsetsl = static_cast<ListNode*>(stochsets);
+
+   if (!stochsetsl || stochsetsl->nchild()!=4){
       cerr << "Syntax error in Stochastic Block definition: \n";
       cerr << " 'USING' needs 4 parameters \n";
       exit(1);
@@ -909,7 +911,7 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    if (GlobalVariables::logParseModel)
       cout << "Start Stochastic Model: " << name << "\n";
 
-   SyntaxNode::iterator i = stochsets->begin();
+   ListNode::literator i = stochsetsl->lbegin();
    SyntaxNode *nodes = *i;
    SyntaxNode *anc = *(++i);
    SyntaxNode *prob = *(++i);
