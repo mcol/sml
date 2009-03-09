@@ -40,10 +40,22 @@ AmplModel::AmplModel() :
   parent(NULL),
   ix(NULL) {}
 
-AmplModel::AmplModel(const char *orig_name, AmplModel *par)
+// Note: just calling the other constructor is apparently insufficient
+// as this causes a bug for Marco's older version of g++
+AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
+  n_vars(0),
+  n_cons(0),
+  n_params(0),
+  n_sets(0),
+  n_objs(0),
+  n_submodels(0),
+  n_total(0),
+  level(0),
+  //first(NULL),
+  //last(NULL),
+  parent(NULL),
+  ix(NULL)
 {
-   AmplModel();
-
    name = strdup(orig_name);
    parent = par;
 
@@ -345,7 +357,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
           subModelInst += crush((*p).c_str());
-          cout << subModelName+":"+subModelInst+'\n';
+          cout << subModelName << ":" << subModelInst << endl;
           AmplModel *subampl = (AmplModel*)mc->other;
           ExpandedModel::pathToNodeStack.push_back(*p);
           ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
@@ -357,7 +369,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
         // if this node is not repeated over an indexing set
         string subModelName = smodelname+"_"+string(mc->id);
         string subModelInst;
-        cout << subModelName+":"+sinstanceStub+'\n';
+        cout << subModelName << ":" << sinstanceStub << endl;
         AmplModel *subampl = (AmplModel*)mc->other;
         ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);
         subem->parent = em;
