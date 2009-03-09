@@ -90,7 +90,6 @@ class SyntaxNode {
  public:
   // ------------------------ methods -----------------------------------
   // Constructors
-  SyntaxNode();
   SyntaxNode(int opCode, SyntaxNode *val1=NULL, SyntaxNode *val2=NULL, SyntaxNode *val3=NULL);
   SyntaxNode(SyntaxNode &src);
   // Destructor
@@ -188,7 +187,6 @@ class SyntaxNodeIx : public SyntaxNode {
   // private:            
   int done_split; //!< indicates that extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
   // --------------------------- methods ----------------------------------
-  SyntaxNodeIx();  //!< default constructor: sets everything to 0/NULL
   SyntaxNodeIx(SyntaxNode *on); //!< initialise values from an SyntaxNode
 
   //! Finds if the indexing expression defines a given dummy variable 

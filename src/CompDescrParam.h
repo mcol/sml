@@ -27,8 +27,6 @@ class CompDescrParam: public CompDescr{
 
   // ------------------ constructors ---------------------
   
-  CompDescrParam(); //!< Default Constructor
-
   /** Construct given data file description and model component */
   CompDescrParam(ModelComp *mc, SyntaxNode *desc); //!< Construct from data
 

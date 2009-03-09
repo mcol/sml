@@ -34,8 +34,6 @@ class StochModel: public AmplModel{
   SyntaxNode *prob;      //!< The parameter array of probabilities
 
   // -------------------------- methods ----------------------------------
-  //! default constructor 
-  StochModel();
   //! Constructor 
   StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
 	     SyntaxNode *onProb, AmplModel *parent);

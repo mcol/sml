@@ -13,19 +13,6 @@ static bool logSM = false;
 StochModel::StochModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
-StochModel::StochModel() :
-  AmplModel(),
-  stageset(NULL),
-  nodeset(NULL), 
-  anc(NULL),
-  prob(NULL)
-{
-}
-
-/* ---------------------------------------------------------------------------
-StochModel::StochModel()
----------------------------------------------------------------------------- */
-/** Constructor */
 StochModel::StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
                        SyntaxNode *onProb, AmplModel *prnt) :
   AmplModel(),

@@ -393,9 +393,6 @@ SyntaxNode Methods to follow
 ============================================================================*/
 // constructors:
 
-SyntaxNode::SyntaxNode() :
-  opCode(-1), nval(-1), values(NULL) {}
-
 SyntaxNode::SyntaxNode(SyntaxNode &src) :
    opCode(src.opCode), nval(src.nval), values(src.values) {}
 
@@ -715,16 +712,6 @@ SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
 /* ==========================================================================
 SyntaxNodeix Methods to follow
 ============================================================================*/
-SyntaxNodeIx::SyntaxNodeIx()
-{
-  qualifier = NULL;
-  ncomp = 0;
-  sets = NULL;
-  sets_mc = NULL;
-  dummyVarExpr = NULL;
-  done_split = 0;
-}
-
 SyntaxNodeIx::SyntaxNodeIx(SyntaxNode *on) :
    SyntaxNode(*on)
 {

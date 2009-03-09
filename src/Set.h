@@ -28,8 +28,6 @@ class Set: public CompDescr{
  public:
   int dim; //!< A set can be mutidimensional
  private:
-  Set(); //!< default constructor
-
   // ---------------- methods -----------------
   void add(SetElement);     //!< add element to set
 
