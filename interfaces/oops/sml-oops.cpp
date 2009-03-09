@@ -876,7 +876,7 @@ SML_OOPS_upload_sol(ExpandedModelInterface *root,
     double *elts = new double[dy->dim];
     for(int i=0;i<dy->dim;i++) elts[i] = 0;
     root->setPrimalSolRows(elts);
-    delete(elts);
+    delete[] elts;
 
     /* recurse down the rest of the tree */
 
@@ -903,7 +903,6 @@ SML_OOPS_upload_sol(ExpandedModelInterface *root,
     double *elts = new double[dy->dim];
     for(int i=0;i<dy->dim;i++) elts[i] = 0;
     root->setPrimalSolRows(elts);
-    delete(elts);
-
+    delete[] elts;
   }
 }
