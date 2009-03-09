@@ -1,0 +1,12 @@
+.deps
+Makefile
+Makefile.in
+data.tab.cpp
+data.tab.h
+data.yy.cpp
+sml.tab.cpp
+sml.tab.h
+sml.yy.cpp
+*.output
+html
+latex
