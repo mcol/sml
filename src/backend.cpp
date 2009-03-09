@@ -267,12 +267,12 @@ process_model(AmplModel *model) /* should be called with model==root */
       AmplModel *tmp_model = anc_list[k];
       ModelComp *node = tmp_model->node; /* the node corresponding to model */
       SyntaxNode *ix = node->indexing; /* the indexing expression */
-      SyntaxNode *set; /* the set that is indexed over */
-      SyntaxNode *dummyVar; /* the dummy var of the indexing expression */
+      SyntaxNode *set=NULL; /* the set that is indexed over */
+      SyntaxNode *dummyVar=NULL; /* the dummy var of the indexing expression */
 
       // need to set SyntaxNode::default_model for component printing routines
       SyntaxNode::default_model = tmp_model; 
-      
+
       /* Need to analyse the indexing expression to get the set that is
         indexed over 
         (I guess this should be done by an "indexing" object) */
@@ -284,27 +284,25 @@ process_model(AmplModel *model) /* should be called with model==root */
         li->push_back(ai);
         if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin());
         /* assumes that the next level is the 'IN' keyword (if present) */
-        if (ix->opCode==IN){
-          SyntaxNode::iterator ixi = ix->begin();
+        dummyVar = NULL;
+        set = ix;
+        if (set->opCode==IN){
+          SyntaxNode::iterator ixi = set->begin();
           dummyVar = (SyntaxNode*)*ixi;
           set = (SyntaxNode*)*(++ixi);
-        }else{
-          dummyVar = NULL;
-          set = ix;
         }
         ai->dummyVar = dummyVar;
         ai->set = set;
-      }else{
-        set = NULL;
       }
 
       // FIXME: how to deal with multidimensional dummy variables?
       //        need to work out the dimenension of a set?
       //        => for now simply use the original dummy variable
       //        => REQUIRE a dummy variable in block indexing
-      if (!dummyVar){
+      if (set && !dummyVar){
         cerr << "Indexing expressions for block's need dummy variables!" <<endl;
         cerr << "Model: " << this_model->name << " level " << k << endl;
+        cerr << "Node: " << node->id << endl;
         cerr << "Indexing: " << node->indexing << "(" <<
            (void*) node->indexing << ")" << endl;
         exit(1);
