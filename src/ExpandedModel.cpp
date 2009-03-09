@@ -75,9 +75,10 @@ ExpandedModel::setLocalVarInfo()
   }
 
   fin.close();
+  fin.clear(); // Recommended by Marco
   
   if (GlobalVariables::prtLvl>=2)
-    cout << "Read " << colfilelist.size() << " lines from file " << 
+    cout << "Read " << listOfConNames.size() << " lines from file " << 
        model_file << ".row" << endl;
 
   // Now read vars - these actually need matching to correct order
@@ -94,6 +95,9 @@ ExpandedModel::setLocalVarInfo()
     getline(fin, line);
     colfilelist.push_back(line);
   }
+
+  fin.close(); // Added by Marco, probably not strictly required
+               // as it shuold occour in destructor.
   
   if (GlobalVariables::prtLvl>=2)
     cout << "Read " << colfilelist.size() << " lines from file " << 
@@ -612,28 +616,40 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       double *ptr = pvar;
       for(list<string>::iterator i=listOfVarNames.begin(); 
             i!=listOfVarNames.end(); ++i,++ptr)
-         out << ind2 << *i << ".primal = " << *ptr << endl << endl;
+         out << ind2 << *i << ".primal = " << *ptr << endl;
+      out << endl;
    }
 
    if(dvar) {
       double *ptr = dvar;
       for(list<string>::iterator i=listOfVarNames.begin(); 
             i!=listOfVarNames.end(); ++i,++ptr)
-         out << ind2 << *i << ".dual = " << *ptr << endl << endl;
+         out << ind2 << *i << ".dual = " << *ptr << endl;
+      out << endl;
    }
 
    if(prow) {
       double *ptr = prow;
+      bool has_output = false;
       for(list<string>::iterator i=listOfConNames.begin(); 
-            i!=listOfConNames.end(); ++i,++ptr)
-         out << ind2 << *i << ".primal = " << *ptr << endl << endl;
+            i!=listOfConNames.end(); ++i,++ptr) {
+         if(*i == "" || *i == "dummy") continue;
+         out << ind2 << *i << ".primal = " << *ptr << endl;
+         has_output = true;
+      }
+      if(has_output) out << endl;
    }
 
    if(drow) {
       double *ptr = drow;
+      bool has_output = false;
       for(list<string>::iterator i=listOfConNames.begin(); 
-            i!=listOfConNames.end(); ++i,++ptr)
-         out << ind2 << *i << ".dual = " << *ptr << endl << endl;
+            i!=listOfConNames.end(); ++i,++ptr) {
+         if(*i == "" || *i == "dummy") continue;
+         out << ind2 << *i << ".dual = " << *ptr << endl;
+         has_output = true;
+      }
+      if(has_output) out << endl;
    }
 
    for(vector<ExpandedModelInterface*>::iterator i=children.begin(); 
