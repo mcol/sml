@@ -1,4 +1,4 @@
-AC_INIT([SML],[0.1],[J.Hogg@ed.ac.uk])
+AC_INIT([SML],[0.7],[sml-support@maths.ed.ac.uk])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/sml.tab.ypp])
