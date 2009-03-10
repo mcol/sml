@@ -177,7 +177,7 @@ class StageNodeNode : public SyntaxNode {
 class SyntaxNodeIx : public SyntaxNode {
  private:
   SyntaxNodeIx(const int opCode) :
-    SyntaxNode(opCode) {}
+    SyntaxNode(opCode), done_split(0) {}
  public:
   SyntaxNode *qualifier;    //!< the stuff to the right of ':' (if present)
   int ncomp;            //!< number of 'dummy IN set'-type expressions
