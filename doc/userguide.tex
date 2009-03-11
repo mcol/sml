@@ -1,3 +1,20 @@
+% (c) 2009 Jonathan Hogg, Marco Colombo, Andreas Grothey, Kristian Woodsend
+%          and Jacek Gondzio
+%
+% This file is part of SML.
+%
+% SML is free software: you can redistribute it and/or modify it under the
+% terms of the GNU Lesser General Public License as published by the Free
+% Software Foundation, using version 3 of the License.
+%
+% SML is distributed in the hope that it will be useful, but WITHOUT ANY
+% WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+% FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+% details.
+%
+% You should have received a copy of the GNU Lesser General Public License
+% along with this program. If not, see http://www.gnu.org/licenses/.
+
 \documentclass[10pt,a4paper]{book}
 
 \usepackage{colordvi,amsmath,xspace,fancyvrb,wrapfig}
@@ -11,7 +28,8 @@
 
 \begin{document}
 
-\title{SML the Structure-Conveying Modelling Language \\
+\title{SML \\
+   Structure-Conveying Modelling Language \\
    \bf User's Guide}
 \author{Marco Colombo
 \and Andreas Grothey
@@ -61,6 +79,15 @@ in work that uses SML:
    \item {\sc Andreas Grothey, Jonathan Hogg, Kristian Woodsend, Marco Colombo and Jacek Gondzio}, {\it A Structure Conveying Parallelizable Modelling Language for Mathematical Programming}, {Springer Optimization and Its Applications Vol. 27: Parallel Scientific Computing and Optimization ed: R.Ciegis, D.Henty, B.K\r{a}gstr\"{o}m, and J.\v{Z}ilinska. 2009.}
 \end{itemize}
 
+\section*{Reproduction}
+This user's guide is licenced as part of SML under the Lesser GNU Public
+License (LGPL) version 3. You can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free
+Software Foundation, using version 3 of the License.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program. If not, see {\tt http://www.gnu.org/licenses/}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Installation}
 \vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
@@ -88,7 +115,7 @@ require.
       AMPL         & Yes           & No        & http://www.ampl.com/vendors.html \\
       {\tt libamplsolver.a} & Yes & Yes & http://www.netlib.org/ampl/solvers/ \\
       OOPS         & No            & Yes,Limited & http://www.maths.ed.ac.uk/~gondzio/parallel/solver.html \\
-      MeTiS        & Only By OOPS  & Yes       & http://glaros.dtc.umn.edu/gkhome/views/metis \\
+      MeTiS        & No            & Yes       & http://glaros.dtc.umn.edu/gkhome/views/metis \\
       \hline
    \end{tabular}
 \end{table}
@@ -96,7 +123,17 @@ require.
 The third-party software you will need is summarised in 
 Table~\ref{Third-party urls}. As SML is currently implemented as a pre- and
 post-processor to AMPL you will need an installed version of AMPL. If you wish
-to use the OOPS solver then you will also need the OOPS and MeTiS libraries.
+to use the OOPS solver then you will also need the OOPS library.
+
+OOPS is the Object-Orientated Parallel Solver by Gondzio and Grothey
+\cite{mybib:oops}. A serial version, limited to 5000 constraints, is
+distributed with SML under a closed-source licence and may only be linked with
+the LGPL SML library. See {\tt ThirdParty/oops/COPYING} for full terms. If you
+have a full version of OOPS (contact Jacek Gondzio $<$J.Gondzio@ed.ac.uk$>$ for
+further information) you may use this instead, though you may also need the
+MeTiS library. OOPS also requires LAPACK and BLAS routines; we advise that you
+use the ones supplied by your computer vendor, however there are freely
+available implementations available from the Netlib archive.
 
 \section{Configuration Options}
 
@@ -106,6 +143,8 @@ The following configuration options are available:
    \tt --with-ampl=path & Path to directory containing libamplsolver.a \\
    \tt --with-oops=path & Path to OOPSHOME directory \\
    \tt --with-metis=path & Path to MeTiS directory \\
+   \tt --with-blas=library & BLAS library to use \\
+   \tt --with-lapack=library & LAPACK library to use \\
    \tt --with-mps=[yes|no] & Enable/disable MPS interface
 \end{tabular}
 
@@ -246,7 +285,7 @@ formulation (\ref{MSND}).
 \subsection{Standard modelling language formulation}
 
 Problem \eqref{MSND} can be represented in an algebraic
-modelling language as shown in Figure~\ref{AMPLMSND}, where we adopt a
+modelling language as shown below, where we adopt a
 syntax that is very close to AMPL, slightly modified to compress the example
 and aid readability; models in other languages will look much the same.
 %
@@ -556,9 +595,9 @@ solver such as those which use decomposition approaches.
 
 The model currently used by SML is that it is called by the solver and passed
 the names of the model and data files, it will then return a pointer to an
-Expanded Model Tree represented by a {\tt ModelInterface} object which the
-solver is then free to query. Finally the solver should {\tt delete} the
-{\tt ModelInterface} object to free the memory.
+Expanded Model Tree represented by a {\tt ExpandedModelInterface} object which
+the solver is then free to query. Finally the solver should {\tt delete} the
+{\tt ExpandedModelInterface} object to free the memory.
 
 We recommend that most solvers parse the tree in either one or two passes. The
 initial parse may extract information on the dimension and relative density of
@@ -567,7 +606,7 @@ determine the actual numeric values.
 
 \subsection{API}
 
-\subsubsection{Acquiring the ModelInterface object}
+\subsubsection{Acquiring the ExpandedModelInterface object}
 The solver should use the include statement
 \begin{verbatim}
 #include "sml.h"
@@ -576,38 +615,41 @@ which will provide access to all relevant definitions. The solver should then
 call the function:
 
 \begin{verbatim}
-ModelInterface* sml_generate(const std::string modelfilename, 
+ExpandedModelInterface* sml_generate(const std::string modelfilename, 
    const std::string datafilename, const bool debug);
 \end{verbatim}
 
-to retrieve a {\tt ModelInterface} object which can then be queried. If the
-argument {\tt debug} is {\tt true} then additional debugging information will
-be generated.
+to retrieve a {\tt ExpandedModelInterface} object which can then be queried.
+If the argument {\tt debug} is {\tt true} then additional debugging information
+will be generated.
 
 \subsubsection{Transversing the Tree}
-The {\tt ModelInterface} object returned after parsing the model and data files
-offers two iterators for moving through the tree, and further allows direct
-access to the list of children.
+The {\tt ExpandedModelInterface} object returned after parsing the model and
+data files offers two iterators for moving through the tree, and further allows
+direct access to the list of children.
 
-The {\tt ModelInterface::ancestor\_iterator} allows the iteration up through
-the tree to the root. The function {\tt ModelInterface::abegin()} returns an
+The {\tt ExpandedModelInterface::ancestor\_iterator} allows the iteration up
+through the tree to the root. The function
+{\tt ExpandedModelInterface::abegin()} returns an
 iterator which points to the parent of the node it is called on. The function
-{\tt ModelInterface::aend()} return an iterator which represents the top of the
-tree, above the root.
+{\tt ExpandedModelInterface::aend()} return an iterator which represents the
+top of the tree, above the root.
 
-The {\tt ModelInterface::child\_iterator} allows the iteration over all children
-of a node in a depth-first order, with the node itself being last. The function
-{\tt ModelInterface::cbegin()} returns an iterator pointing to the left-most
-leaf in the subtree routed at the calling node. The function 
-{\tt ModelInterface::cend()} returns an iterator representing the end of the
-child iteration sequence.
+The {\tt ExpandedModelInterface::child\_iterator} allows the iteration over all
+children of a node in a depth-first order, with the node itself being last. The
+function {\tt ExpandedModelInterface::cbegin()} returns an iterator pointing to
+the left-most leaf in the subtree routed at the calling node. The function 
+{\tt ExpandedModelInterface::cend()} returns an iterator representing the end
+of the child iteration sequence.
 
-The component {\tt std::vector<ModelInterface*> ModelInterface::children} allows
-the solver writer to use their own iteration scheme if the above are not
+The component
+{\tt std::vector<ExpandedModelInterface*> ExpandedModelInterface::children}
+allows the solver writer to use their own iteration scheme if the above are not
 sufficient.
 
 We note that (non-)equivalence of pointers is not a sufficient condition to
-differentiate nodes, and the function {\tt std::string ModelInterface::getName()} should be used instead.
+differentiate nodes, and the function {\tt std::string
+ExpandedModelInterface::getName()} should be used instead.
 
 \subsubsection{Accessing the Data}
 Each block essentially allows the query of all data in its row block. The
@@ -621,10 +663,10 @@ following functions are available:
    Number of constraints local to block \\
 {\tt const std::list<std::string>\& getLocalConNames()} &
    List of constraint names local to block \\
-\multicolumn{2}{l}{\tt int getNzJacobianOfIntersection(ModelInterface *emcol)}\\
+\multicolumn{2}{l}{\tt int getNzJacobianOfIntersection(ExpandedModelInterface *emcol)}\\
 \multicolumn{2}{r}{Number of non-zeros in submatrix in block column {\tt emcol}
    and this block row} \\
-\multicolumn{2}{l}{\tt void getJacobianOfIntersection(ModelInterface *emcol,
+\multicolumn{2}{l}{\tt void getJacobianOfIntersection(ExpandedModelInterface *emcol,
       *colbeg, *collen, *rownbs, *el)} \\
 \multicolumn{2}{r}{Entries of submatrix in block column {\tt emcol} and this
    block row, in CSC format (see below)} \\
@@ -653,6 +695,32 @@ On return {\tt colbeg[i]} is a pointer to the beginning of column {\tt i}
 within the arrays {\tt rownbs[]} and {\tt el[]}, {\tt collen[i]} is the number
 of entries in that column --- which may be zero. The values {\tt rownbs[j]} and
 {\tt el[j]} represent a row number-value pair.
+
+\subsection{Returning the solution}
+You may return the solution to SML and have it write out a file containing
+these solutions. The following functions are available for each
+{\tt ExpandedModelInterface} block to return the primal and dual solutions
+associated with each variable and constraint within the block: \\
+\begin{tabular}{ll}
+{\tt void setPrimalSolColumns(double *elts)} & 
+   Set the primal solution vector for variables in this block. \\
+{\tt void setDualSolColumns(double *elts)} & 
+   Set the dual solution vector for variables in this block. \\
+{\tt void setPrimalSolRows(double *elts)} & 
+   Set the primal solution vector for constraints in this block. \\
+{\tt void setDualSolRows(double *elts)} & 
+   Set the dual solution vector for constraints in this block.
+\end{tabular}
+
+The complete solution may be output recursively for a block (ie the solution
+associated with this block and all its descendants) by calling the function
+\begin{verbatim}
+   void outputSolution(std::ostream &out [, int indent] )
+\end{verbatim}
+which will write the solution to the output stream {\tt out}. If the optional
+argument {\tt indent} is supplied that the solution will be indented by a
+number of spaces equal to {\tt indent}. If {\tt indent} is not present, then
+no indent will be used.
 
 \section{Implementation} \label{implementation}
 
