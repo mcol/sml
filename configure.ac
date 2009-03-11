@@ -12,17 +12,29 @@ AC_PROG_INSTALL
 # amplsolver is required
 ACX_AMPL( [], AC_ERROR([Ampl Solver Library Required]) )
 
-# OOPS interface requires OOPS and MeTiS
+# OOPS interface requires OOPS and dependant libraries
+ACX_BLAS(HAVE_BLAS=yes,HAVE_BLAS=no)
+ACX_LAPACK(HAVE_LAPACK=yes,HAV_LAPACK=no)
 IMMDX_LIB_METIS( [HAVE_METIS=yes], [] )
 ACX_OOPS( [HAVE_OOPS=yes], [] )
-if test "$HAVE_METIS" = "yes" -a "$HAVE_OOPS" = "yes" ; then
+if test "$HAVE_OOPS" = "yes" ; then
   AC_SUBST(OOPS_INTERFACE, [oops])
 fi
+
+AC_LANG_PUSH(C++)
+old_LIBS=$LDFLAGS
+old_LDFLAGS=$LDFLAGS
+LIBS="$LIBS $METIS_LIB $LAPACK_LIB $BLAS_LIB -lm"
+LDFLAGS="$LDFLAGS -L$with_oops/lib"
+AC_CHECK_LIB(oops, hopdm)
+LDFLAGS=$old_LDFLAGS
+LIBS=$old_LIBS
+AC_LANG_POP(C++)
 
 AC_ARG_WITH(
    [mps],
    [AC_HELP_STRING([--with-mps],
-   [enable SML-MPS interface])
+      [enable SML-MPS interface])
    ],
    [
       if test "$withval" == yes ; then
