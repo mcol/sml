@@ -109,8 +109,9 @@ int main(int argc, char **argv) {
       cout << "----------------- Call OOPS generator ----------------" << endl;
    }
 
-   ExpandedModelInterface *em = sml_generate(modelfilename, datafilename, debug);
+   ExpandedModelInterface *em = sml_generate(modelfilename,datafilename,debug);
 
+   cout << "Calling OOPS..." << endl;
    SML_OOPS_driver(em);
 
    if(outfilename!="") {

@@ -67,7 +67,7 @@ DIGIT    [0-9]
    /* This here defines a character string */
 '([^']|'')+'|\"([^\"]|\"\")+\"  {
             datalval.string = strndup(yytext+1, strlen(yytext)-2);
-            printf("Read string >%s<>%s<\n",yytext, datalval.string);
+            //printf("Read string >%s<>%s<\n",yytext, datalval.string);
             myreturn(CHARACTER_STRING);
 }
    /* comments */

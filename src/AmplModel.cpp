@@ -27,6 +27,7 @@
 #include "AmplsolverCalls.h"
 #include "nodes.h"
 #include "sml.tab.h"
+#include "GlobalVariables.h"
 
 list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
@@ -362,7 +363,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
           subModelInst += crush((*p).c_str());
-          cout << subModelName << ":" << subModelInst << endl;
+          if(GlobalVariables::prtLvl>=1)
+            cout << subModelName << ":" << subModelInst << endl;
           AmplModel *subampl = (AmplModel*)mc->other;
           ExpandedModel::pathToNodeStack.push_back(*p);
           ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
@@ -374,7 +376,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
         // if this node is not repeated over an indexing set
         string subModelName = smodelname+"_"+string(mc->id);
         string subModelInst;
-        cout << subModelName << ":" << sinstanceStub << endl;
+        if(GlobalVariables::prtLvl>=1)
+          cout << subModelName << ":" << sinstanceStub << endl;
         AmplModel *subampl = (AmplModel*)mc->other;
         ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);
         subem->parent = em;

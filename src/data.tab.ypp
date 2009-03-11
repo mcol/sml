@@ -24,6 +24,7 @@
    #include "CompDescrParam.h"
    #include "AmplModel.h"
    #include "DataNodes.h"
+   #include "GlobalVariables.h"
    #define YYERROR_VERBOSE
    int datalex(void);
    void dataerror(char *s);
@@ -260,9 +261,11 @@ void dataerror(char *s) {
 
 void parse_data(AmplModel *current_model, char *datafilename){
         
-  cout << "================================================================\n";
-  cout << " Start parsing data file: " << datafilename << "\n";
-  cout << "================================================================\n";
+  if(GlobalVariables::prtLvl>=1) {
+    cout << "===============================================================\n";
+    cout << " Start parsing data file: " << datafilename << "\n";
+    cout << "===============================================================\n";
+  }
 
   datain = fopen(datafilename,"r");
   root = current_model;
@@ -272,8 +275,9 @@ void parse_data(AmplModel *current_model, char *datafilename){
   }
           
   dataparse();
-  cout << "================================================================\n";
-  cout << " Finished parsing data file\n";
-  cout << "================================================================\n";
-  //exit(1);
+  if(GlobalVariables::prtLvl>=1) {
+    cout << "===============================================================\n";
+    cout << " Finished parsing data file\n";
+    cout << "===============================================================\n";
+  }
 }

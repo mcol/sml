@@ -36,7 +36,14 @@ void parse_data(AmplModel*, char*);
 void parse_model(char *);
 
 string sml_version() {
-   return "0.7";
+   return PACKAGE_VERSION;
+}
+
+void writeCopyright(ostream &out) {
+   out << PACKAGE_NAME" "PACKAGE_VERSION", Structure-conveying Modelling Language" << endl;
+   out << "(c) 2008,2009 Jonathan Hogg and Andreas Grothey, "
+      "University of Edinburgh." << endl;
+   out << "Released under LGPL v3" << endl;
 }
 
 void createSubdirTmpIfNotExist(void)
@@ -74,6 +81,8 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    GlobalVariables::datafilename = strdup(datafilename.c_str());
    yydebug = debug ? 1 : 0;
 
+   writeCopyright(cout);
+
    /* make sure dir '/tmp' for temporary files exists */
    createSubdirTmpIfNotExist();
    errcode = chdir("tmp");
@@ -91,7 +100,11 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
       exit(1);
    }
    
+   cout << "Reading model file '" << GlobalVariables::modelfilename << 
+      "'..." << endl;
    parse_model(GlobalVariables::modelfilename);
+   cout << "Reading data file '" << GlobalVariables::datafilename << 
+      "'..." << endl;
    parse_data(AmplModel::root, GlobalVariables::datafilename);
 
    // change working directory back to tmp/ for processing model
@@ -110,9 +123,12 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
 
    /* Call Solver */
 
-   cout << "------------- Generate ExpandedModel tree ------------ \n";
+   if(GlobalVariables::prtLvl>=1)
+      cout << "------------- Generate ExpandedModel tree ------------ \n";
    ExpandedModel *em = AmplModel::root->createExpandedModel("root", "");
-   em->print();
+
+   if(GlobalVariables::prtLvl>=1)
+      em->print();
 
    return (ExpandedModelInterface*) em;
 }

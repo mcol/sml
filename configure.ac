@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see http://www.gnu.org/licenses/.
 
-AC_INIT([SML],[0.7-RC1],[sml-support@maths.ed.ac.uk])
+AC_INIT([SML],[0.7-RC2],[sml-support@maths.ed.ac.uk])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/sml.tab.ypp])

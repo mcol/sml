@@ -70,7 +70,8 @@ void SML_OOPS_upload_sol(ExpandedModelInterface *root, Vector *vx, Vector *vy,
 			 Vector *vz);
 
 FILE *globlog = NULL;
-const int prtLvl = 1;
+const int prtLvl = 0;
+const bool writeMPS = false;
 
 void
 SML_OOPS_driver(ExpandedModelInterface *root)
@@ -118,7 +119,7 @@ SML_OOPS_driver(ExpandedModelInterface *root)
     fclose(mout);
   }
 
-  if (1)
+  if (writeMPS)
   {
     FILE *mps_file;
     mps_file = fopen("test.mps","w");

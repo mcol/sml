@@ -470,7 +470,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
 
-  cout << "call AMPL to process script file: " << endl;
+  cout << endl << "call AMPL to process script file: " << endl;
 
   {
     // call ampl to process script and analyse the output
@@ -502,6 +502,7 @@ process_model(AmplModel *model) /* should be called with model==root */
         }
       }
     }
+    cout << endl;
     if (n_nocsobj+n_other>0){
       printf("\nAMPL: ampl returned output\n");
       cout << "AMPL: Model without constraints and objectives: " <<
