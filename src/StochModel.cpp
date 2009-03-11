@@ -32,6 +32,7 @@ StochModel::StochModel()
 StochModel::StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
                        SyntaxNode *onProb, AmplModel *prnt) :
   AmplModel(),
+  is_symbolic_stages(false),
   stageset(onStages),
   nodeset(onNodes), 
   anc(onAncs),
