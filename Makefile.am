@@ -17,15 +17,18 @@
 AM_CFLAGS = -g
 AM_CXXFLAGS = -g -gstabs
 SUBDIRS = src interfaces
-EXTRA_DIST = $(DOC_FILES) $(TEST_FILES) $(THIRDPARTY_FILES)
+EXTRA_DIST = $(DOC_FILES) $(TEST_FILES) $(THIRDPARTY_FILES) \
+				 gpl.txt lgpl.txt
 
 DOC_FILES  = doc/userguide.pdf doc/userguide.bib doc/userguide.tex \
 				 doc/fig/Interface_Example.fig doc/fig/Interface_Example.jpg \
-				 doc/fig/MSND_struct.fig doc/fig/MSND_struct.jpg
+				 doc/fig/MSND_struct.fig doc/fig/MSND_struct.jpg \
+				 doc/Makefile
 TEST_FILES = tests/alm_xi.dat tests/alm_xi.mod \
 				 tests/ampl_msnd_test_slck.dat tests/ampl_msnd_test_slck.mod \
 				 tests/scopfIEEE_ampl.mod tests/scopfIEEE.dat tests/scopfIEEE.mod
 THIRDPARTY_FILES = \
+				ThirdParty/oops/COPYING \
 				ThirdParty/oops/lib/liboops.a \
 				ThirdParty/oops/include/oops/Algebra.h \
 				ThirdParty/oops/include/oops/BlockDenseAlg.h \
