@@ -73,27 +73,62 @@ AC_DEFUN([ACX_OOPS], [
 			CFLAGS="-I$with_oops/include"
 			LDFLAGS="-L$with_oops/lib"
 
-			AC_LANG_SAVE
-			AC_LANG_C
+         AC_LANG_PUSH(C)
 
 			AC_CHECK_LIB(oops, OOPSSetup,	[oops_lib=yes], [oops_lib=no])
 			AC_CHECK_HEADER(oops/oops.h, [oops_h=yes],
 				[oops_h=no], [/* check */])
 
-			AC_LANG_RESTORE
+         AC_LANG_POP(C)
 
 			CFLAGS=$old_CFLAGS
 			LDFLAGS=$old_LDFLAGS
 
 			AC_MSG_CHECKING(OOPS in $with_oops)
 			if test "$oops_lib" = "yes" -a "$oops_h" = "yes" ; then
-				AC_SUBST(OOPS_INCLUDE, [-I$with_oops/include])
-				AC_SUBST(OOPS_LIB, ["-L$with_oops/lib -loops"])
+            OOPS_INCLUDE="-I$with_oops/include"
+            OOPS_LIB_DIR="-L$with_oops/lib"
+				OOPS_LIB="$OOPS_LIB_DIR -loops"
 				AC_MSG_RESULT(ok)
 			else
 				AC_MSG_RESULT(failed)
 			fi
 		fi
+      #
+      #
+      #
+      # Now check for complex linking
+      if test "$HAVE_BLAS" = "yes" -a "$HAVE_LAPACK" = "yes"; then
+         old_LIBS=$LIBS
+         old_LDFLAGS=$LDFLAGS
+         LIBS="$LIBS $METIS_LIB $LAPACK_LIBS $BLAS_LIBS -lm"
+         LDFLAGS="$LDFLAGS $OOPS_LIB_DIR"
+         AC_LANG_PUSH(C++)
+         AC_CHECK_LIB(oops, hopdm, oops_full_link="yes", oops_full_link="no")
+         AC_LANG_POP(C++)
+         LIBS=$old_LIBS 
+         LDFLAGS=$old_LDFLAGS
+
+         AC_MSG_CHECKING(OOPS linking requirements)
+         if test "$oops_full_link" = "yes"; then
+            AC_MSG_RESULT(ok)
+         else
+            AC_MSG_RESULT([failed - check metis?])
+         fi
+      else
+         AC_MSG_CHECKING(OOPS linking requirements)
+         AC_MSG_RESULT(Requires BLAS and LAPACK)
+         oops_full_link="no"
+      fi
+         
+      if test "$oops_full_link" = "no"; then
+         OOPS_LIB=""
+         OOPS_INCLUDE=""
+      else
+         AC_SUBST(OOPS_INCLUDE, [$OOPS_INCLUDE])
+         AC_SUBST(OOPS_LIB, [$OOPS_LIB])
+      fi
+
 		#
 		#
 		#

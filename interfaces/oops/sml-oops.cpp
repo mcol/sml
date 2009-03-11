@@ -848,7 +848,7 @@ SML_OOPS_upload_sol(ExpandedModelInterface *root,
   Tree *Tx = vx->node,*Ty = vy->node;
   int nchd = root->children.size();
   
-  printf("%d: %d %d\n",nchd, Tx->nb_sons, Ty->nb_sons);
+  //printf("%d: %d %d\n",nchd, Tx->nb_sons, Ty->nb_sons);
   assert((nchd==0&&Tx->nb_sons==0)||Tx->nb_sons==nchd+1);
   assert((nchd==0&&Ty->nb_sons==0)||Ty->nb_sons==nchd+1);
   if (nchd>0){

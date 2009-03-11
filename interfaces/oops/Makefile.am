@@ -8,4 +8,4 @@ bin_PROGRAMS = smloops
 smloops_SOURCES = wrapper.cpp OOPSBlock.cpp sml-oops.cpp OOPSBlock.h \
 						sml-oops.h
 smloops_LDADD = 	../../src/libsml.a @AMPL_LIBS@ \
-						@OOPS_LIB@ -llapack @METIS_LIB@ -lgfortran -lfl -ldl
+						@OOPS_LIB@ @METIS_LIB@ @LAPACK_LIBS@ @BLAS_LIBS@ -lfl -ldl
