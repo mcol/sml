@@ -32,7 +32,6 @@
 #   and this notice are preserved.
 
 AC_DEFUN([ACX_OOPS], [
-	AC_MSG_CHECKING(for OOPS library)
 	AC_REQUIRE([AC_PROG_CC])
 	#
 	# User hints...
@@ -43,21 +42,16 @@ AC_DEFUN([ACX_OOPS], [
 		[user defined path to OOPS library])],
 		[
 			if test -n "$OOPSHOME" ; then
-				AC_MSG_RESULT(yes)
 				with_oops=$OOPSHOME
 			elif test "$withval" != no ; then
-				AC_MSG_RESULT(yes)
 				with_oops=$withval
-			else
-				AC_MSG_RESULT(no)
 			fi
 		],
 		[
 			if test -n "$OOPSHOME" ; then
 				with_oops=$OOPSHOME
-				AC_MSG_RESULT(yes)
 			else
-            AC_MSG_RESULT(failed)
+            with_oops=`pwd`"/ThirdParty/oops"
 			fi
 		])
 	#
@@ -72,7 +66,7 @@ AC_DEFUN([ACX_OOPS], [
          AC_LANG_PUSH(C)
 
 			AC_CHECK_LIB(oops, OOPSSetup,	[oops_lib=yes], [oops_lib=no])
-			AC_CHECK_HEADER(oops/oops.h, [oops_h=yes],
+			AC_CHECK_HEADER(oops/OopsInterface.h, [oops_h=yes],
 				[oops_h=no], [/* check */])
 
          AC_LANG_POP(C)
@@ -96,14 +90,16 @@ AC_DEFUN([ACX_OOPS], [
       # Now check for complex linking
       if test "$HAVE_BLAS" = "yes" -a "$HAVE_LAPACK" = "yes"; then
          old_LIBS=$LIBS
-         old_LDFLAGS=$LDFLAGS
-         LIBS="$LIBS $METIS_LIB $LAPACK_LIBS $BLAS_LIBS -lm"
-         LDFLAGS="$LDFLAGS $OOPS_LIB_DIR"
+         LIBS="$LIBS $OOPS_LIB $METIS_LIB $LAPACK_LIBS $BLAS_LIBS -lm"
          AC_LANG_PUSH(C++)
-         AC_CHECK_LIB(oops, hopdm, oops_full_link="yes", oops_full_link="no")
+         AC_LINK_IFELSE(
+            [AC_LANG_PROGRAM([[#include <stdio.h>
+                              FILE *globlog=NULL;
+                              extern "C" char hopdm();]],
+                             [[hopdm();]])],
+            [oops_full_link="yes"], [oops_full_link="no"])
          AC_LANG_POP(C++)
          LIBS=$old_LIBS 
-         LDFLAGS=$old_LDFLAGS
 
          AC_MSG_CHECKING(OOPS linking requirements)
          if test "$oops_full_link" = "yes"; then

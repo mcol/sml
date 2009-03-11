@@ -17,14 +17,10 @@
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
 extern "C" {
-#include "oops/oops.h"
-#include "oops/WriteMps.h"
 #include "oops/OopsInterface.h"
-//#include "oops/MatrixSparseSimple.h"
-#include "oops/CallBack.h"
-#include <math.h>
 }
 
+#include <cmath>
 #include <iostream>
 #include <cassert>
 #include "OOPSBlock.h"
