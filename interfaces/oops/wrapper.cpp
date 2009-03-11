@@ -73,9 +73,14 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
             // first proper argument is the model file to read
             modelfilename = argv[i];
             found++;
-         }else{
+         }else if(found==1){
             // next one is data file
             datafilename = argv[i];
+            found++;
+         }else{
+            cerr << "Error, too many filenames." << endl;
+            writeHelp(cerr, progname);
+            exit(1);
          }
       }
    }
