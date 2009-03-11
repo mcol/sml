@@ -137,6 +137,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   */
 
   values = new double[n];
+  memset(values, 0, n * sizeof(double));
 
   // the paramdefinition is a list of PARAMSPEC's
   assert(desc->opCode==TOKPARAMSPECLIST);
