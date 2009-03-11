@@ -90,7 +90,7 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   
   SMLReturn *Pb = generateSML(root);
   hopdm_opt_type *Opt = NewHopdmOptions();
-  
+
   AlgAug = OOPSSetup(Pb->A, Pb->Q);
 
   
@@ -132,7 +132,7 @@ SML_OOPS_driver(ExpandedModelInterface *root)
 
   Vector *vx, *vy, *vz;
   primal_dual_pb *Prob;
-  hopdm_prt_type *Prt = NewHopdmPrt(3);
+  hopdm_prt_type *Prt = NewHopdmPrt(1);
 
   vx = NewVector(Pb->A->Tcol, "vx");
   vy = NewVector(Pb->A->Trow, "vy");
