@@ -37,16 +37,6 @@ if test "$HAVE_OOPS" = "yes" ; then
   AC_SUBST(OOPS_INTERFACE, [oops])
 fi
 
-AC_LANG_PUSH(C++)
-old_LIBS=$LDFLAGS
-old_LDFLAGS=$LDFLAGS
-LIBS="$LIBS $METIS_LIB $LAPACK_LIB $BLAS_LIB -lm"
-LDFLAGS="$LDFLAGS -L$with_oops/lib"
-AC_CHECK_LIB(oops, hopdm)
-LDFLAGS=$old_LDFLAGS
-LIBS=$old_LIBS
-AC_LANG_POP(C++)
-
 AC_ARG_WITH(
    [mps],
    [AC_HELP_STRING([--with-mps],

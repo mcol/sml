@@ -16,10 +16,33 @@
  
 AM_CFLAGS = -g
 AM_CXXFLAGS = -g -gstabs
-
 SUBDIRS = src interfaces
-EXTRA_DIST = doc/userguide.pdf \
-				 tests/alm_xi.dat tests/alm_xi.mod \
+EXTRA_DIST = $(DOC_FILES) $(TEST_FILES) $(THIRDPARTY_FILES)
+
+DOC_FILES  = doc/userguide.pdf doc/userguide.bib doc/userguide.tex \
+				 doc/fig/Interface_Example.fig doc/fig/Interface_Example.jpg \
+				 doc/fig/MSND_struct.fig doc/fig/MSND_struct.jpg
+TEST_FILES = tests/alm_xi.dat tests/alm_xi.mod \
 				 tests/ampl_msnd_test_slck.dat tests/ampl_msnd_test_slck.mod \
-				 tests/scopfIEEE_ampl.mod tests/scopfIEEE.dat tests/scopfIEEE.mod \
-				 ThirdParty/liboops.a
+				 tests/scopfIEEE_ampl.mod tests/scopfIEEE.dat tests/scopfIEEE.mod
+THIRDPARTY_FILES = \
+				ThirdParty/oops/lib/liboops.a \
+				ThirdParty/oops/include/oops/Algebra.h \
+				ThirdParty/oops/include/oops/BlockDenseAlg.h \
+				ThirdParty/oops/include/oops/BlockDiagSimpleAlg.h \
+				ThirdParty/oops/include/oops/CallBack.h \
+				ThirdParty/oops/include/oops/DblBordDiagSimpleAlg.h \
+				ThirdParty/oops/include/oops/DenseVector.h \
+				ThirdParty/oops/include/oops/GlobalOpt.h \
+				ThirdParty/oops/include/oops/hopdm.h \
+				ThirdParty/oops/include/oops/LogiVector.h \
+				ThirdParty/oops/include/oops/MatrixDense.h \
+				ThirdParty/oops/include/oops/MatrixSparseSimple.h \
+				ThirdParty/oops/include/oops/OopsInterface.h \
+				ThirdParty/oops/include/oops/ParAlgList.h \
+				ThirdParty/oops/include/oops/parutil.h \
+				ThirdParty/oops/include/oops/SparseVector.h \
+				ThirdParty/oops/include/oops/StrSparseVector.h \
+				ThirdParty/oops/include/oops/Tree.h \
+				ThirdParty/oops/include/oops/Vector.h \
+				ThirdParty/oops/include/oops/WriteMps.h

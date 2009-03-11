@@ -17,4 +17,7 @@ and one containing the data. You should then run as
 which will then print the objective value to the screen and write the values
 of the primal and dual variables to a file solution.sol
 
-Please report any bugs to J.Hogg@ed.ac.uk
+Please note that while the SML library and interface wrappers are lisenced
+under the LGPL v3, third party software, including the solver OOPS, is not.
+
+Please report any bugs to sml-support@maths.ed.ac.uk
