@@ -63,7 +63,7 @@ ExpandedModel::setLocalVarInfo()
 {
 
   if (GlobalVariables::prtLvl>=2)
-    printf("setLocalVarInfo(): %s\n",model_file.c_str());
+    cout << "setLocalVarInfo(): " << model_file << endl;
   // FIXME: pretty unelegant to have to do n*m comparisons
 
   list<string> colfilelist;

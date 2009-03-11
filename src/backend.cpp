@@ -150,7 +150,8 @@ process_model(AmplModel *model) /* should be called with model==root */
 {
   int j;
   
-  cout << "-------------- start of process_model ----------------------\n";
+  if(GlobalVariables::prtLvl>=1)
+    cout << "-------------- start of process_model ----------------------\n";
 
   /* 1) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate list of all models */
 
@@ -161,14 +162,16 @@ process_model(AmplModel *model) /* should be called with model==root */
      in the ampl file */
 
   //printf("These are the models on the list:\n");
-  int i=0;
-  for(list<AmplModel*>::iterator mli=model_list.begin(); mli!=model_list.end();
+  if(GlobalVariables::prtLvl>=1) {
+    int i=0;
+    for(list<AmplModel*>::iterator mli=model_list.begin();mli!=model_list.end();
         ++mli,++i){
-    AmplModel *thism = *mli;
-    cout << i << ": " << thism->name << " (level=" << thism->level << ")\n";
+      AmplModel *thism = *mli;
+      cout << i << ": " << thism->name << " (level=" << thism->level << ")\n";
+    }
+
+    cout << "----------- generate submodel files --------------\n";
   }
-  
-  cout << "----------- generate submodel files --------------\n";
 
   /* 2) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> output all submodel files */
   /* and */
@@ -437,7 +440,8 @@ process_model(AmplModel *model) /* should be called with model==root */
     /* write the submodel file */
     filename += ".mod";
     ofstream fout(filename.c_str());
-    cout << "Write to model file: " << filename << "\n";
+    if(GlobalVariables::prtLvl>=1)
+      cout << "Write to model file: " << filename << endl;
     write_ampl_for_submodel(fout, *mli);
     fout.close();
 
@@ -466,7 +470,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
 
-  cout << "call AMPL to process script file: ";
+  cout << "call AMPL to process script file: " << endl;
 
   {
     // call ampl to process script and analyse the output
@@ -509,7 +513,8 @@ process_model(AmplModel *model) /* should be called with model==root */
       if (n_other>0) exit(1);
     }
   }
-  cout << "done\n";
+  if(GlobalVariables::prtLvl>=1)
+    cout << "done\n";
 }
 
 /* ---------------------------------------------------------------------------

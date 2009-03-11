@@ -86,8 +86,12 @@ vector<string> expandSet(SetNode *set) {
   
   {
     string command = GlobalVariables::amplcommand;
-    command += " tmp.scr";
-    cout << "Executing `" << command << "`\n";
+    if(GlobalVariables::prtLvl>=1) {
+      command += " tmp.scr";
+      cout << "Executing `" << command << "`\n";
+    } else {
+      command += " tmp.scr 2> /dev/null";
+    }
     int errc = system(command.c_str());
     if (errc!=0){
       cerr << "ERROR: Call to AMPL returns errc=" << errc << endl;
@@ -222,8 +226,12 @@ StochModel::expandStagesOfComp()
        exit(1);
     }
     strcpy(buffer, GlobalVariables::amplcommand);
-    strcat(buffer, " tmp.scr");
-    printf("Executing `%s`\n", buffer);
+    if(GlobalVariables::prtLvl>=1) {
+      strcat(buffer, " tmp.scr");
+      cout << "Executing `" << buffer << "`\n";
+    } else {
+      strcat(buffer, " tmp.scr 2> /dev/null");
+    }
     int errc = system(buffer);
     if (errc!=0){
       printf("ERROR: Call to AMPL returns errc=%d\n",errc);
@@ -245,7 +253,8 @@ StochModel::expandStagesOfComp()
       }
       in.getline(buffer, 500);
       in.close();
-      cout << "Set " << smc->stageset << " members: " << buffer << "\n";
+      if(logSM) 
+         cout << "Set " << smc->stageset << " members: " << buffer << "\n";
 
       // parse the set members
       smc->stagenames = new vector<string>;
@@ -309,9 +318,11 @@ StochModel::expandToFlatModel()
   StochModelComp **indset;
   int stgcnt;
 
-  printf("----------------------------------------------------------------\n");
-  printf(" StochModel::expandToFlatModel: \n");
-  printf("----------------------------------------------------------------\n");
+  if(logSM) {
+    cout << "---------------------------------------------------------------\n";
+    cout << " StochModel::expandToFlatModel: \n";
+    cout << "---------------------------------------------------------------\n";
+  }
   
   /* expand the stages set for all the StochModelComp entities in this model */
   expandStagesOfComp();
@@ -334,7 +345,8 @@ StochModel::expandToFlatModel()
   stgcnt = stagenames.size()-1;
   for(vector<string>::reverse_iterator st=stagenames.rbegin();
       st!=stagenames.rend();  st++,stgcnt--){// loops backwards through list
-    printf("Creating ampl model at stage %d: %s\n",stgcnt, (*st).c_str());
+    if(logSM) 
+       cout << "Creating ampl model at stage " << stgcnt << ": " << *st << endl;
     am = new AmplModel();
 
     // set name and global name for this ampl model
@@ -559,13 +571,15 @@ StochModel::expandToFlatModel()
   am->node = node;
   am->ix = node->indexing;
 
-  printf(" -----------------------------------------------------------\n");
-  printf(" StochModel::expandToFlatModel: Finished Pass 1: ");
-  if (GlobalVariables::prtLvl>1)
-    printf("printing FlatModel tree:");
-  printf("\n");
-  printf(" -----------------------------------------------------------\n");
-  if (GlobalVariables::prtLvl>1) am->print();
+  if(logSM) {
+    cout << " -----------------------------------------------------------\n";
+    cout << " StochModel::expandToFlatModel: Finished Pass 1: ";
+    if (GlobalVariables::prtLvl>1)
+      cout << "printing FlatModel tree:";
+    cout << endl;
+    cout << " -----------------------------------------------------------\n";
+    if (GlobalVariables::prtLvl>1) am->print();
+  }
 
   /* =========================== PASS 2 ================================== */
      
@@ -578,15 +592,17 @@ StochModel::expandToFlatModel()
   AmplModel::applyChanges();
   am->reassignDependencies();
 
-  printf(" -----------------------------------------------------------\n");
-  printf(" StochModel::expandToFlatModel: Finished converting:");
-  if (GlobalVariables::prtLvl>1)
-    printf(" printing FlatModel tree:");
-  printf("\n");
-  printf(" -----------------------------------------------------------\n");
-  if (GlobalVariables::prtLvl>1){
-    am->print();
-    printf(" -----------------------------------------------------------\n");
+  if(logSM) {
+    cout << " -----------------------------------------------------------\n";
+    cout << " StochModel::expandToFlatModel: Finished converting:";
+    if (GlobalVariables::prtLvl>1)
+      cout << " printing FlatModel tree:";
+    cout << endl;
+    cout << " -----------------------------------------------------------\n";
+    if (GlobalVariables::prtLvl>1){
+      am->print();
+      cout << " -----------------------------------------------------------\n";
+    }
   }
   return am;
 }

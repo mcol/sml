@@ -43,13 +43,6 @@
    extern int yylineno;
    int yylex(void);
    void yyerror(char *s);
-   /* global variables */
-   char *GlobalVariables::modelfilename = NULL;
-   char *GlobalVariables::datafilename = NULL;
-   char *GlobalVariables::amplcommand = "ampl";
-
-   bool GlobalVariables::logParseModel = false;
-   int GlobalVariables::prtLvl = 1;
 
    static AmplModel *current_model;    /* this is the model currently active */
                                        /* this is the GLOBAL context */

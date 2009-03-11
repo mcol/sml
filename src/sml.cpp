@@ -23,6 +23,14 @@
 
 using namespace std;
 
+/* global variables */
+char *GlobalVariables::modelfilename = NULL;
+char *GlobalVariables::datafilename = NULL;
+char *GlobalVariables::amplcommand = "ampl";
+
+bool GlobalVariables::logParseModel = false;
+int GlobalVariables::prtLvl = 0;
+
 extern int yydebug;
 void parse_data(AmplModel*, char*);
 void parse_model(char *);
