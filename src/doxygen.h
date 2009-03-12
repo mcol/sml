@@ -20,7 +20,7 @@
 This is the doxygen documentation for the \ref language "Structured Modelling Language (SML)"
 Interface to OOPS.
 
-\section Introduction
+\section sec_introduction Introduction
 
 
 \ref language "SML" is a structured modelling extension to AMPL, designed to act as a
@@ -42,45 +42,26 @@ provided. The backend is independent of AMPL (just the amplsolver
 library needs to be called). The frontend is dependent on AMPL.
 
 
-\section Install
+\section sec_installation Installation and usage
 
-In the Makefile the following lines need to be set to the correct values
-\code
-OOPSHOME=
-AMPLSOLVER=
-\endcode
-to point to the location of OOPS and the amplsolver (AMPL's *.nl file reader).
-
-further the line 
-\code 
-LDFLAGS 
-\endcode 
-
-needs to include the correct fortran libraries for use with OOPS (this
-is -lg2c for g77 and -lgfortran for gfortran)
-
-
-\section Usage
-
-In order to process an SML file say 
-
-\code
-sml name-of-smlfile name-of-datafile
-\endcode
+For information on how to install and use SML, please refer to the user guide.
 
 \section sec_interface Solver Interface
 
 SML can be interfaced with any structure exploiting solver as the backend. 
 
-A detailed description of the \ref interface "Solver Interface" can be found here.
+A detailed description of the \ref page_interface "Solver Interface"
+can be found here.
 
 \section Internals
 
-The processing of an SML file is done in three steps:
-- \ref frontend "Frontend" (reading the file into the internal data structures)
-- \ref scriptfile "writing out" the script file and submodel AMPL files
+The processing of an SML file is done in the following steps:
+- \ref frontend "Frontend work" (reading the file into the internal data
+  structures)
+- \ref scriptfile "Writing out" the script file and submodel AMPL files
 - Creating the \ref expanded "Expanded Model"
-- \ref backend "Backend" (creating OOPS data structures from the internal SML objects)
+- \ref backend "Backend work" (creating OOPS data structures from the internal
+  SML objects)
 
 */
 
@@ -104,8 +85,8 @@ other lines into set/parameter/variable/constraint/objective/submodel
 declarations - which are stored in a ModelComp object - and attaches
 them to the appropriate (current) model.
 
-\ref stochmodel "Stochastic Programming models" defined by sblock
-commands are treated specially. They will be read into a StochModel
+\ref stochmodel "Stochastic Programming models" defined by the "block
+stochastic" commands are treated specially. They will be read into a StochModel
 object.
 
 Every declaration is further divided into a name, indexing and
@@ -139,12 +120,12 @@ section of the declaration
 */
 
 /**
-\page stochmodel Processing of Stochastic Programming blocks (sblocks)
+\page stochmodel Processing of Stochastic Programming blocks
 
-An sblock definition is read in as a normal block definition (just
+An stochastic block definition is read in as a normal block definition (just
 that it creates a StochModel object rather than an AmplModel object).
-The difference is that StochModel carries information about the
-parameters of the sblock (STAGES, NODES, PROBABILITY, ANCENSTOR).
+The difference is that StochModel carries information about the stochastic
+parameters of the block (STAGES, NODES, PROBABILITY, ANCENSTOR).
 
 The components of a StochModel are StochModelComp objects (rather than
 ModelComp objects). The difference here is that a STochModelComp
@@ -152,11 +133,11 @@ carries information about which stages this component belongs to and
 if a component is "deterministic" (i.e. there is only one copy of it
 per stage, not one copy per node)
 
-After reading is complete (i.e. when the "end sblock" line
-is read) the StochModel object is translated into a chain of
+After the reading of the stochastic block is complete,
+the StochModel object is translated into a chain of
 AmplModel objects.  This is done by StochModel::expandToFlatModel
 
-\section Expansion to flat model tree 
+\section expFlat Expansion to flat model tree
 
 Expansion works in two passes. In the first pass the chain of
 AmplModel objects is build (whose components are still StochModelComp
@@ -288,7 +269,7 @@ Since the SML interpreter does not attempt
 to understand AMPL enough to generate the indexing set member list
 itself, the ampl-interpreter is used for this purpose. 
 
-\section Naming of Nodes
+\section sec_naming_nodes Naming of Nodes
 
 While nodes in the "flat" model are named by concatenating the block
 names from root to the current model, in the expanded model nodes are
@@ -310,7 +291,7 @@ called root, root_MCNF and root_MCNF_RouteComm and expanded tree nodes
 being called root_MCNF_A1, root_MCNF_A2, ... and
 root_MCNF_RouteComm_A1_C1, root_MCNF_RouteComm_A1_C2, etc.
 
-\section Generation of expanded model instance lists/cardinalities
+\section genExpModel Generation of expanded model instance lists/cardinalities
 
 Lines 
 
@@ -331,7 +312,7 @@ root_MCNF_RouteComm_A2.crd/set, giving the cardinality and instance
 names of the root_MCNF_RouteComm submodel in the root_MCNF_A1/A2
 branches of the expanded model
 
-\section Generation of the expanded model tree
+\section genExpModelTree Generation of the expanded model tree
 
 The expanded model is represented as a tree of ExpandedTree
 objects. The tree is generated by calling the constructor
@@ -442,15 +423,9 @@ same level) or their child blocks cannot be used.
 
 A stochastic programming block can be defined as
 \code
- block alm stochastic using (STAGES, NODES, PARENTS, PROBS):
+ block alm stochastic using (NODES, PARENTS, PROBS, STAGES): {
    ...
- end block;
-\endcode
-or short
-\code
- sblock alm using (STAGES, NODES, PARENTS, PROBS):
-   ...
- end sblock;
+ }
 \endcode
 
 Here 'alm' is the name of the block, 'STAGES' and 'NODES' are sets of
@@ -466,7 +441,7 @@ gives for every node in NODES the name of its parent node. For the root node
 it is required that PARENT[root] = "null"
 
 There are a variety of specifiers that can be applied to model
-components declared within an sblock:
+components declared within a stochastic block:
 <ul>
 <li> Components can be declared in only some of the stages. This can be specified in two ways: 
 - either by using the 'stages' keyword in the definition
@@ -498,20 +473,20 @@ components declared within an sblock:
       param Liability deterministic, >=0;
     \endcode
 
-  @bug This is understood by the parse, but not implemented yet in the backend
+  @bug This is understood by the parser, but not implemented yet in the backend
 
-<li> It is possible to explicitely refer to the node or stage of a component (for example to refer to parameters declared outside the sblock):
+<li> It is possible to explicitely refer to the node or stage of a component (for example to refer to parameters declared outside the stochastic block):
 \code
  param Liability{STAGES}; //an alternative deterministic parameter
- sblock alm using (STAGES, NODES, PARENT, PROBS):
+ block alm stochastic using (NODES, PARENT, PROBS, STAGES): {
    subject to CashBalance:
       sum{i in ASSETS} xs[i] =  Liability[stage] + sum{i in ASSETS} xb[i];
    ...
- end sblock;
+ }
  \endcode
 
  Here the constraint CashBalance is repeated over all nodes in the
- sblock, whereas the keyword 'stage' in the constraint is replaced by
+ stochastic block, whereas the keyword 'stage' in the constraint is replaced by
  the stage of the constraint.
 
  
@@ -519,7 +494,7 @@ components declared within an sblock:
  should be done by declaring dummy variables for the NODES, STAGES
  set:
 \code
- sblock alm using (st in STAGES, nd in NODES, ANCESTORS, PROBS):
+ block alm stochastic using (nd in NODES, ANCESTORS, PROBS, st in STAGES):
   ..
       ...  Liability[st] +...
  \endcode
@@ -547,7 +522,7 @@ variables (at least for the dummy objective). Without the dummy
 variable (i,j) SML has no way of knowing that the set ARCS is
 2-dimensional. This should be fixed once SML understands data files.
 
-@bug In an sblock all entities *must* have different names, even if
+@bug In a stochastic block all entities *must* have different names, even if
 they are defined in different stages, i.e.
 \code
   subject to CashBalance stages (TIME diff {first(TIME)}): ...
@@ -555,9 +530,9 @@ they are defined in different stages, i.e.
 \endcode
 This can probably remedied by encoding the stages information in the
 internally used global name somehow.
-
-
-\page interface Solver Interface
+*/
+/**
+\page page_interface Solver Interface
 
 The information about the problem and its structure as processed by
 SML is stored in a tree of ExpandedModel objects. The solver can be called by
