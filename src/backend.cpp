@@ -503,7 +503,7 @@ process_model(AmplModel *model) /* should be called with model==root */
       }
     }
     cout << endl;
-    if (n_nocsobj+n_other>0){
+    if (n_nocsobj+n_novar+n_other>0){
       printf("\nAMPL: ampl returned output\n");
       cout << "AMPL: Model without constraints and objectives: " <<
         n_nocsobj << "\n";
