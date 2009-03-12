@@ -86,11 +86,9 @@ vector<string> expandSet(SetNode *set) {
   
   {
     string command = GlobalVariables::amplcommand;
+    command += " tmp.scr";
     if(GlobalVariables::prtLvl>=1) {
-      command += " tmp.scr";
       cout << "Executing `" << command << "`\n";
-    } else {
-      command += " tmp.scr 2> /dev/null";
     }
     int errc = system(command.c_str());
     if (errc!=0){
