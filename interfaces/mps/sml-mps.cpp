@@ -21,6 +21,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <limits> // for numeric_limits
 #include "sml-mps.h"
 
 using namespace std;

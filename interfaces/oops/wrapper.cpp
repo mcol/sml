@@ -16,6 +16,8 @@
  */
 #include <iostream>
 #include <fstream>
+#include <cstring> // for strcmp() and strncmp()
+#include <cstdlib> // for exit()
 #include <sys/stat.h>
 #include "sml.h"
 #include "sml-oops.h"

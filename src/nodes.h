@@ -19,6 +19,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstdlib> // for free()
+#include <cstring> // for strdup()
 #include <list>
 #include <vector>
 class ModelComp;
