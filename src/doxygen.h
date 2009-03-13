@@ -63,6 +63,11 @@ The processing of an SML file is done in the following steps:
 - \ref backend "Backend work" (creating OOPS data structures from the internal
   SML objects)
 
+\section sec_problems Known problems
+
+Read the \ref problems "Known Problems" page to see the current limitations
+in SML.
+
 */
 
 /**
@@ -505,12 +510,22 @@ components declared within a stochastic block:
 
 Add something on how to write Expectation type constraints
 
-\section problems Known Problems
+\section sec_problems Known problems
 
-@bug Currently *all* parameters must be global (i.e. declared in the top
+Read the \ref problems "Known Problems" page to see the current limitations
+in SML.
+
+*/
+
+/**
+\page problems Known Problems
+
+@bug 
+- Currently *all* parameters must be global (i.e. declared in the top
 level block). This should be fixed once SML understands data files.
 
-@bug variables that are defined over higher dimensional indexing sets
+@bug 
+- Variables that are defined over higher dimensional indexing sets
 *must* have a dummy variable in their definition,i.e.
 \code
   set NODES; 
@@ -522,7 +537,8 @@ variables (at least for the dummy objective). Without the dummy
 variable (i,j) SML has no way of knowing that the set ARCS is
 2-dimensional. This should be fixed once SML understands data files.
 
-@bug In a stochastic block all entities *must* have different names, even if
+@bug 
+- In a stochastic block all entities *must* have different names, even if
 they are defined in different stages, i.e.
 \code
   subject to CashBalance stages (TIME diff {first(TIME)}): ...
@@ -530,6 +546,14 @@ they are defined in different stages, i.e.
 \endcode
 This can probably remedied by encoding the stages information in the
 internally used global name somehow.
+
+
+@bug
+- At the moment all blocks have to contain at least a variable, otherwise
+the following assertion is triggered:
+\code
+  smloops: MatrixSparseSimple.c:122: NewSparseMatrix: Assertion `element_sz == 0' failed.
+\endcode
 */
 /**
 \page page_interface Solver Interface
