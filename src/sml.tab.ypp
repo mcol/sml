@@ -172,15 +172,15 @@ blockblockend: END BLOCK SEMICOLON {
 ------------------------------------------------------------------------- */
 /* A stochblock is a block definition of the form
 
-     [sblock/stochastic block] name{indexing} using (STAGES,NODES,ANC,PROB):
+     [sblock/stochastic block] name{indexing} using (NODES,ANC,PROB,STAGES):
        statements
      end sblock;
 
 where 
-  STAGES: set of time stages 
   NODES: set of nodes in the tree
   ANC{NODES}: ancestor for every node
   PROB{NODES}: conditional probability of reaching this node from parent
+  STAGES: set of time stages 
 
   The whole block is repeated over all STAGES (actually over all NODES). 
   Entities marked 'deterministic' are only repeated over STAGES
@@ -245,7 +245,7 @@ stageblock: stageblock_start LBRACE statements RBRACE {
 
 stageblock_start: STAGE setexpression COLON {              
                      if (!is_stoch_model) { 
-                        cerr << "Syntax Error: keyword 'STAGES' can only be "
+                        cerr << "Syntax Error: keyword 'STAGE' can only be "
                         "used in stochastic blocks" << endl;
                         exit(1);
                      }
