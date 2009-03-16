@@ -79,7 +79,8 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    int errcode;
    GlobalVariables::modelfilename = strdup(modelfilename.c_str());
    GlobalVariables::datafilename = strdup(datafilename.c_str());
-   yydebug = debug ? 1 : 0;
+   //yydebug = debug ? 1 : 0;
+   if(debug) GlobalVariables::prtLvl++;
 
    writeCopyright(cout);
 
