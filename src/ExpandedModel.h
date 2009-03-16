@@ -121,6 +121,8 @@ class ExpandedModel : public ExpandedModelInterface {
   double *pvar, *dvar;
   double *prow, *drow;
 
+  AmplModel *src;
+
  public:
 
   // local information:
@@ -156,7 +158,7 @@ class ExpandedModel : public ExpandedModelInterface {
   // -------------------------- methods ------------------------------------
   // public:
 
-  ExpandedModel();     //< constructor
+  ExpandedModel(AmplModel *src_model);     //< constructor
 
   //! Recursively print contents of this instance
   void print();

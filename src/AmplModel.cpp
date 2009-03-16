@@ -239,7 +239,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
   }
 
 
-  ExpandedModel *em = new ExpandedModel();
+  ExpandedModel *em = new ExpandedModel(this);
   
   // copy information on the constraints/variables?
   

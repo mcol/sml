@@ -26,10 +26,12 @@
 list<string> ExpandedModel::pathToNodeStack;
 const bool log_EM = false;
 
-ExpandedModel::ExpandedModel() :
+ExpandedModel::ExpandedModel(AmplModel *src_model) :
    nLocalVars(-1), nLocalCons(-1), localVarInfoSet(false), pvar(NULL), 
-   dvar(NULL), prow(NULL), drow(NULL)
+   dvar(NULL), prow(NULL), drow(NULL), src(src_model)
 {
+  // Note: Setup of model is largely done in AmplModel::createExpandedModel()
+
   //printf("ExpandedModel: Called default constructor\n");
   //exit(1);
 }
@@ -137,9 +139,7 @@ ExpandedModel::setLocalVarInfo()
         listColIx.push_back(cnt);
         listOfVarNames.push_back(*q);
       }
-      
     }
-    
   }
   
   // FIXME: cannot sort and uniquify just the numerical list, since these
@@ -626,7 +626,11 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    for(int i=0; i<indent; ++i) ind += " ";
    string ind2 = ind + "  ";
 
-   out << ind << getName() << " {" << endl;
+   if(getName()!="root") {
+      out << ind << getName() << " {" << endl;
+   } else {
+      ind2 = ind;
+   }
 
    if(pvar) {
       double *ptr = pvar;
@@ -649,7 +653,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       bool has_output = false;
       for(list<string>::iterator i=listOfConNames.begin(); 
             i!=listOfConNames.end(); ++i,++ptr) {
-         if(*i == "" || *i == "dummy") continue;
+         if(*i == "" || i->rfind("dummy")==i->size()-5) continue;
          out << ind2 << *i << ".primal = " << *ptr << endl;
          has_output = true;
       }
@@ -661,7 +665,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       bool has_output = false;
       for(list<string>::iterator i=listOfConNames.begin(); 
             i!=listOfConNames.end(); ++i,++ptr) {
-         if(*i == "" || *i == "dummy") continue;
+         if(*i == "" || i->rfind("dummy")==i->size()-5) continue;
          out << ind2 << *i << ".dual = " << *ptr << endl;
          has_output = true;
       }
@@ -670,7 +674,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
 
    for(vector<ExpandedModelInterface*>::iterator i=children.begin(); 
          i<children.end(); ++i)
-      (*i)->outputSolution(out, indent+2);
+      (*i)->outputSolution(out, indent+(getName()=="root"?0:2));
 
-   out << ind << "}" << endl;
+   if(getName()!="root") out << ind << "}" << endl;
 }
