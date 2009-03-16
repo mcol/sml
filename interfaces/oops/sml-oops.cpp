@@ -893,7 +893,7 @@ SML_OOPS_upload_sol(ExpandedModelInterface *root,
 
     /* recurse down the rest of the tree */
 
-    for (int i=0;i<nchd-1;i++){
+    for (int i=0;i<nchd;i++){
       ExpandedModelInterface *model = root->children[i]; 
       SML_OOPS_upload_sol(model, 
 			  SubVector(vx, i), SubVector(vy, i), SubVector(vz,i));
