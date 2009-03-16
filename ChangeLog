@@ -1,0 +1,6 @@
+2009-03-11  Jonathan Hogg  <J.Hogg@ed.ac.uk>
+
+  * Version 0.7
+  * First public release, works for example problems, but suffers from memory
+  leaks. ChangeLog started to track changes, copyright notices added for
+  LGPL release.
