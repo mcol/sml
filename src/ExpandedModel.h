@@ -142,9 +142,13 @@ class ExpandedModel : public ExpandedModelInterface {
  
   //! list of global names of local variables 
   list<string> listOfVarNames; 
+  //! list of local names of local variables 
+  list<string> listOfLocalVarNames; 
  
   //! list of global names of local constraints
   list<string> listOfConNames; 
+  //! list of local names of local constraints
+  list<string> listOfLocalConNames; 
 
   //! indices of local variables in the corresponding *.nl file */
   int *listOfVars;        

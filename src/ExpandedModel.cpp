@@ -86,10 +86,21 @@ ExpandedModel::setLocalVarInfo()
     exit(1);
   }
   
+  string model_name = getName();
+  if(model_name!="root") model_name = model_name.substr(5); // skip "root_"
   while(!fin.eof()){
     string line;
     getline(fin, line);
     listOfConNames.push_back(line);
+    // Trim away common characters between model name and var from varname
+    unsigned int j = 0;
+    if(getName()!="root" && line!="") {
+      for(j=0; j<model_name.size() && j<line.size(); ++j) {
+        if(model_name.at(j)!=line.at(j)) break;
+      }
+      if(j<line.size() && line.at(j)=='_') j++;
+    }
+    listOfLocalConNames.push_back(line.substr(j));
   }
 
   fin.close();
@@ -123,7 +134,6 @@ ExpandedModel::setLocalVarInfo()
 
   // -------------- compare this list against the given VarDefs
   
-  
   for(list<string>::iterator p=localVarDef.begin();p!=localVarDef.end();p++){
     // for all variable declarations in ExpandedModel
 
@@ -138,6 +148,16 @@ ExpandedModel::setLocalVarInfo()
           cout << "Match of " << cand << " and " << *p << "\n";
         listColIx.push_back(cnt);
         listOfVarNames.push_back(*q);
+
+        // Trim away common characters between model name and var from varname
+        unsigned int j = 0;
+        if(getName()!="root" && *p!="") {
+          for(j=0; j<model_name.size() && j<(*p).size(); ++j) {
+             if(model_name.at(j)!=(*p).at(j)) break;
+          }
+          if(j<(*p).size() && (*p).at(j)=='_') j++;
+        }
+        listOfLocalVarNames.push_back((*q).substr(j));
       }
     }
   }
@@ -182,7 +202,7 @@ ExpandedModel::getLocalVarNames()
     setLocalVarInfo();
     localVarInfoSet=true;
   }
-  return listOfVarNames;
+  return listOfLocalVarNames;
 }
 
 /* --------------------------------------------------------------------------
@@ -199,7 +219,7 @@ ExpandedModel::getLocalConNames()
     setLocalVarInfo();
     localVarInfoSet=true;
   }
-  return listOfConNames;
+  return listOfLocalConNames;
 }
 
 /* --------------------------------------------------------------------------
@@ -627,23 +647,25 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    string ind2 = ind + "  ";
 
    if(getName()!="root") {
-      out << ind << getName() << " {" << endl;
+      string name = getName();
+      string pname = parent->getName();
+      out << ind << name.substr(pname.size()+1) << " {" << endl;
    } else {
       ind2 = ind;
    }
 
    if(pvar) {
       double *ptr = pvar;
-      for(list<string>::iterator i=listOfVarNames.begin(); 
-            i!=listOfVarNames.end(); ++i,++ptr)
+      for(list<string>::const_iterator i=getLocalVarNames().begin(); 
+            i!=getLocalVarNames().end(); ++i,++ptr)
          out << ind2 << *i << ".primal = " << *ptr << endl;
       out << endl;
    }
 
    if(dvar) {
       double *ptr = dvar;
-      for(list<string>::iterator i=listOfVarNames.begin(); 
-            i!=listOfVarNames.end(); ++i,++ptr)
+      for(list<string>::const_iterator i=getLocalVarNames().begin(); 
+            i!=getLocalVarNames().end(); ++i,++ptr)
          out << ind2 << *i << ".dual = " << *ptr << endl;
       out << endl;
    }
@@ -651,8 +673,8 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    if(prow) {
       double *ptr = prow;
       bool has_output = false;
-      for(list<string>::iterator i=listOfConNames.begin(); 
-            i!=listOfConNames.end(); ++i,++ptr) {
+      for(list<string>::const_iterator i=getLocalConNames().begin(); 
+            i!=getLocalConNames().end(); ++i,++ptr) {
          if(*i == "" || i->rfind("dummy")==i->size()-5) continue;
          out << ind2 << *i << ".primal = " << *ptr << endl;
          has_output = true;
@@ -663,8 +685,8 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    if(drow) {
       double *ptr = drow;
       bool has_output = false;
-      for(list<string>::iterator i=listOfConNames.begin(); 
-            i!=listOfConNames.end(); ++i,++ptr) {
+      for(list<string>::const_iterator i=getLocalConNames().begin(); 
+            i!=getLocalConNames().end(); ++i,++ptr) {
          if(*i == "" || i->rfind("dummy")==i->size()-5) continue;
          out << ind2 << *i << ".dual = " << *ptr << endl;
          has_output = true;
