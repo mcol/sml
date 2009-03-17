@@ -544,6 +544,10 @@ Relations between different stages can be expressed by using the
 stage. Variables of the ancestor can be referenced using the normal SML syntax,
 {\tt ancestor(i).x}.
 
+Within stochastic blocks the keywords {\tt node} and {\tt stage} may be used.
+These will be repalced with the corresponding value of the {\tt NODES} or
+{\tt STAGES} sets within each node of the tree.
+
 Expectations may also be handled through a special new syntax. Within a
 stochastic block the expression {\tt Exp(expr)} is equivalent to the expression
 {\tt sum\{nd in NODES: nd in \textit{currentstage}\} PROBS[nd] * expr[nd]}.
