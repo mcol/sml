@@ -655,40 +655,27 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    }
 
    if(pvar) {
-      double *ptr = pvar;
+      double *pptr = pvar;
+      double *dptr = dvar;
       for(list<string>::const_iterator i=getLocalVarNames().begin(); 
-            i!=getLocalVarNames().end(); ++i,++ptr)
-         out << ind2 << *i << ".primal = " << *ptr << endl;
-      out << endl;
-   }
-
-   if(dvar) {
-      double *ptr = dvar;
-      for(list<string>::const_iterator i=getLocalVarNames().begin(); 
-            i!=getLocalVarNames().end(); ++i,++ptr)
-         out << ind2 << *i << ".dual = " << *ptr << endl;
+            i!=getLocalVarNames().end(); ++i,++pptr) {
+         out << ind2 << *i << ".primal = " << *pptr;
+         if(dvar) out << "     " << *i << ".dual = " << *(dptr++);
+         out << endl;
+      }
       out << endl;
    }
 
    if(prow) {
-      double *ptr = prow;
+      double *pptr = prow;
+      double *dptr = drow;
       bool has_output = false;
       for(list<string>::const_iterator i=getLocalConNames().begin(); 
-            i!=getLocalConNames().end(); ++i,++ptr) {
+            i!=getLocalConNames().end(); ++i,++pptr) {
          if(*i == "" || (i->size()>=5 && i->substr(0,5)=="dummy")) continue;
-         out << ind2 << *i << ".primal = " << *ptr << endl;
-         has_output = true;
-      }
-      if(has_output) out << endl;
-   }
-
-   if(drow) {
-      double *ptr = drow;
-      bool has_output = false;
-      for(list<string>::const_iterator i=getLocalConNames().begin(); 
-            i!=getLocalConNames().end(); ++i,++ptr) {
-         if(*i == "" || (i->size()>=5 && i->substr(0,5)=="dummy")) continue;
-         out << ind2 << *i << ".dual = " << *ptr << endl;
+         out << ind2 << *i << ".primal = " << *pptr;
+         if(drow) out << "     " << *i << ".dual = " << *(dptr++);
+         out << endl;
          has_output = true;
       }
       if(has_output) out << endl;
