@@ -675,7 +675,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       bool has_output = false;
       for(list<string>::const_iterator i=getLocalConNames().begin(); 
             i!=getLocalConNames().end(); ++i,++ptr) {
-         if(*i == "" || i->rfind("dummy")==i->size()-5) continue;
+         if(*i == "" || (i->size()>=5 && i->substr(0,5)=="dummy")) continue;
          out << ind2 << *i << ".primal = " << *ptr << endl;
          has_output = true;
       }
@@ -687,7 +687,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       bool has_output = false;
       for(list<string>::const_iterator i=getLocalConNames().begin(); 
             i!=getLocalConNames().end(); ++i,++ptr) {
-         if(*i == "" || i->rfind("dummy")==i->size()-5) continue;
+         if(*i == "" || (i->size()>=5 && i->substr(0,5)=="dummy")) continue;
          out << ind2 << *i << ".dual = " << *ptr << endl;
          has_output = true;
       }
