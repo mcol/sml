@@ -775,7 +775,8 @@ SyntaxNodeIx::getListDummyVars()
 	     cerr << "Given expression: " << dv << "\n";
 	     exit(1);
       }
-      for(SyntaxNode::iterator j=dv->begin(); j!=dv->end(); ++j){
+      ListNode *dvl = static_cast<ListNode *>(dv);
+      for(ListNode::literator j=dvl->lbegin(); j!=dvl->lend(); ++j){
 	     l.push_back(*j);
       }
     }else{
