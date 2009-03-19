@@ -865,3 +865,36 @@ is_int(const char *tok){
 
   return true;
 }
+
+SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
+   for(list<ModelComp*>::iterator p=comps.begin(); p!=comps.end(); ++p){
+      ModelComp *thismc = *p;
+      if (strcmp(ref->name.c_str(), thismc->id)==0){
+         /* this is a match */
+         if (GlobalVariables::logParseModel){
+            cout << "Found Match: " << ref->name << " refers to ";
+            cout << ModelComp::nameTypes[thismc->type] << "\n";
+            cout << "    " << thismc->id << "\n";
+            cout << "       " << *(thismc->indexing) << "\n";
+            cout << "       " << *(thismc->attributes) << "\n";
+         }
+
+         SyntaxNodeIDREF *ret;
+         if(thismc->type==TMODEL) {
+           ret = new SyntaxNodeIDREF(IDREFM);
+         } else {
+           ret = new SyntaxNodeIDREF(IDREF);
+         }
+         ret->ref = thismc;
+         return ret;
+      }
+   }
+
+   /* need also to look through parent model */
+   if (parent) return parent->find_var_ref_in_context(ref);
+
+   /* need also to look through list of local variables */
+
+   cerr << "Could not find ref " << ref->name << " in context\n";
+   exit(1);
+}

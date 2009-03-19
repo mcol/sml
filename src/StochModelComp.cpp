@@ -56,7 +56,8 @@ StochModelComp::transcribeToModelComp()
  */
 
 ModelComp *
-StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
+StochModelComp::transcribeToModelComp(AmplModel *current_model,
+   string nodedummy, string stagedummy, int level)
 {
   /* The routine works as follows:
      (1)  create a deep copy of the StochModelComp
@@ -147,17 +148,17 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model, int level)
   // find all STAGE & NODE nodes
   idrefnodes->clear();
   if (newmc->attributes){
-    (newmc->attributes)->findOpCode(STAGE,idrefnodes);
-    (newmc->attributes)->findOpCode(NODE,idrefnodes);
+    (newmc->attributes)->findOpCode(ID,idrefnodes);
   }
 
   // ---------- (3a) and replace them by text -------------------------------
 
   for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
   {
-    if ((*p)->opCode==STAGE){
+    IDNode *node = static_cast<IDNode *>(*p);
+    if (node->name == stagedummy){
       ((StageNodeNode *)*p)->setValue(StageNodeNode::stage);
-    }else{
+    } else if(node->name == nodedummy) {
       ((StageNodeNode *)*p)->setValue(StageNodeNode::node);
     }
   }

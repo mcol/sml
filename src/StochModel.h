@@ -43,11 +43,11 @@ class StochModel: public AmplModel{
  public:
   // FIXME: stage should be replaced by a Set (decribing the elements)
   SyntaxNode *stageset;  //!< The set of STAGES
-  SyntaxNode *stagedummy;
+  IDNode *stagedummy;
   vector <string> stagenames; //!< explicit set of STAGES 
   bool is_symbolic_stages; //!< if stage names are symbolic or numeric
   SyntaxNode *nodeset;   //!< The set of NODES 
-  SyntaxNode *nodedummy;
+  IDNode *nodedummy;
   SyntaxNode *anc;       //!< The parameter array of ancestors
   SyntaxNode *prob;      //!< The parameter array of probabilities
 
@@ -73,6 +73,7 @@ class StochModel: public AmplModel{
   /** expand on AmplModel::addComp to setup stochmodel of component too */
   void addComp(ModelComp *comp);
 
+  SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
 };
 
 #endif

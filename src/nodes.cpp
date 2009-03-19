@@ -1033,6 +1033,10 @@ ostream& ListNode::put(ostream& s) const {
    return s;
 }
 
+void IDNode::findOpCode(int oc, list<SyntaxNode*> *lnd) {
+   if(oc==ID) lnd->push_back(this);
+}
+
 ListNode *ListNode::deep_copy() {
    ListNode *copy = new ListNode(opCode);
 
@@ -1207,7 +1211,17 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    }
 
    // try to find a match in the local context
-   ret = find_var_ref_in_context_(context, idNode);
+   ret = context->find_var_ref_in_context(idNode);
+
+   // ret could be NULL if it is actually a STAGE or NODE dummy varaible
+   if(!ret) {
+      if(argNode) {
+         cerr << "dummy index of stageset or nodeset and argNode=true not "
+            "yet handled!" << endl;
+         exit(1);
+      }
+      return idNode; // return something at least vaguely meaninful
+   }
 
    if (argNode){
       if (GlobalVariables::logParseModel)
@@ -1235,48 +1249,6 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    ret->stochparent = stochparent;
    return ret;
 }
-
-SyntaxNodeIDREF*
-find_var_ref_in_context_(AmplModel *context, IDNode *ref)
-{
-   ModelComp *thismc;
-   SyntaxNodeIDREF *ret;
-  
-   for(list<ModelComp*>::iterator p = context->comps.begin();
-         p!=context->comps.end();p++){
-      thismc = *p;
-      if (strcmp(ref->name.c_str(), thismc->id)==0){
-         /* this is a match */
-         if (GlobalVariables::logParseModel){
-            cout << "Found Match: " << ref->name << " refers to ";
-            cout << ModelComp::nameTypes[thismc->type] << "\n";
-            cout << "    " << thismc->id << "\n";
-            cout << "       " << *(thismc->indexing) << "\n";
-            cout << "       " << *(thismc->attributes) << "\n";
-         }
-
-         if(thismc->type==TMODEL) {
-           ret = new SyntaxNodeIDREF(IDREFM);
-         } else {
-           ret = new SyntaxNodeIDREF(IDREF);
-         }
-         ret->ref = thismc;
-         return ret;
-      }
-   }
-
-   /* need also to look through parent model */
-   if (context->parent){
-      SyntaxNodeIDREF *match = find_var_ref_in_context_(context->parent, ref);
-      return match;
-   }
-
-   /* need also to look through list of local variables */
-
-   cerr << "Could not find ref " << ref->name << " in context\n";
-   exit(1);
-}
-
 
 /* ---------------------------------------------------------------------------
 find_var_ref_in_indexing

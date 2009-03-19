@@ -25,10 +25,10 @@
 
 static bool logSM = false;
 
-void splitIn(SyntaxNode *expr, SyntaxNode **dummy, SyntaxNode **set) {
+void splitIn(SyntaxNode *expr, IDNode **dummy, SyntaxNode **set) {
    if(expr->opCode == IN) {
       SyntaxNode::iterator i = expr->begin();
-      *dummy = *i;
+      *dummy = static_cast<IDNode *>(*i);
       *set = *(++i);
    } else {
       *dummy = NULL;
@@ -48,7 +48,7 @@ StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *on
   /* Split up possible indexing expressions for params */
   splitIn(onStages, &stagedummy, &stageset);
   splitIn(onNodes, &nodedummy, &nodeset);
-  SyntaxNode *baddummy;
+  IDNode *baddummy;
   splitIn(onAncs, &baddummy, &anc);
   if(baddummy) {
      cerr << "Dummy index '" << baddummy << "' on set " << anc <<
@@ -687,7 +687,9 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
       ModelComp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
-        mcnew = smc->transcribeToModelComp(current, level);
+        string ndname = nodedummy ? nodedummy->name : "__INVALID__";
+        string stname = stagedummy ? stagedummy->name : "__INVALID__";
+        mcnew = smc->transcribeToModelComp(current, ndname, stname, level);
         newcomps.push_back(mcnew);
       }else{
         // This is not a StochModelComp: this should be an indexing set 
@@ -704,6 +706,12 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 void StochModel::addComp(ModelComp *comp) {
    AmplModel::addComp(comp);
    ((StochModelComp*) comp)->stochmodel = this;
+}
+
+SyntaxNodeIDREF* StochModel::find_var_ref_in_context(IDNode *ref) {
+   if(ref->name == stagedummy->name || ref->name == nodedummy->name) 
+      return NULL; // but don't generate an error
+   return AmplModel::find_var_ref_in_context(ref);
 }
 
 #ifdef OLD
@@ -737,7 +745,8 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
       ModelComp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
-        mcnew = smc->transcribeToModelComp(current, level);
+        mcnew = smc->transcribeToModelComp(current, level, 
+          nodedummy->getValue(), stagedummy->getDummy());
       
         // and place this on the model, instead of mc
         if (mc==current->first) {

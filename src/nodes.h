@@ -250,7 +250,7 @@ class IDNode : public SyntaxNode, virtual ValueNodeBase {
    void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for ID:
-   void findOpCode(int oc, list<SyntaxNode*> *lnd) { return; }
+   void findOpCode(int oc, list<SyntaxNode*> *lnd);
    ostream& put(ostream&s) const { 
       return s << name;
    }
@@ -390,7 +390,6 @@ ostream& operator<<(ostream& s, const SyntaxNode *node);
 // Routines taken from ampl.h
 SyntaxNode *findKeywordinTree(SyntaxNode *root, int oc);
 SyntaxNode* find_var_ref_in_context(AmplModel *context, SyntaxNode *ref);
-SyntaxNodeIDREF* find_var_ref_in_context_(AmplModel *context, IDNode *ref);
 SyntaxNode* find_var_ref_in_indexing(const char *const name);
 
 #endif
