@@ -709,8 +709,9 @@ void StochModel::addComp(ModelComp *comp) {
 }
 
 SyntaxNodeIDREF* StochModel::find_var_ref_in_context(IDNode *ref) {
-   if(ref->name == stagedummy->name || ref->name == nodedummy->name) 
-      return NULL; // but don't generate an error
+   if((stagedummy && ref->name == stagedummy->name) || 
+      (nodedummy && ref->name == nodedummy->name)) 
+         return NULL; // but don't generate an error
    return AmplModel::find_var_ref_in_context(ref);
 }
 

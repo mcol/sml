@@ -929,9 +929,9 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    SyntaxNode *anc = *(++i);
    SyntaxNode *prob = *(++i);
    SyntaxNode *stages = *(++i);
-   cout << "BEG SMODEL " << name << endl << "   nodes = " << nodes << endl;
+   /*cout << "BEG SMODEL " << name << endl << "   nodes = " << nodes << endl;
    cout << "   anc = " << anc << endl << "   prob = " << prob << endl;
-   cout << "   stages = " << stages << endl;
+   cout << "   stages = " << stages << endl;*/
    new_mod = new StochModel(stages, nodes, anc, prob, current_model);
    new_mod->name = strdup(name);
   
