@@ -474,7 +474,23 @@ shows these in action.
 \chapter{SML Keywords}
 \vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
 In order to facilitate Structured Modelling we have introduced several new
-keywords and structures into the AMPL language.
+keywords and structures into the AMPL language. These keywords are the
+following reserved words which may not be used for component names:
+
+\begin{verbtaim}
+   ancestor    block       deterministic 
+   Exp         node        stage 
+   stages      stochastic  suffix 
+   using 
+\end{verbatim}
+
+We also note that while ampl allows the redefinition of certain keywords
+(for example {\tt from} and {\tt prod}) rendering their erstwhile meanings
+unavailable, sml does not permit this for two reasons:
+\begin{enumerate}
+   \item It complicates the coding required to handle them.
+   \item We believe it makes model more error prone and hard to read.
+\end{enumerate}
 
 \section{Blocks}
 A block is defined as follows:

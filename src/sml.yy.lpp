@@ -82,8 +82,8 @@ coeff?         myreturn(COEFF);
 cover          myreturn(COVER);
 obj            myreturn(OBJ);
 default        myreturn(DEFAULT);
-FROM           myreturn(FROM);
-TO             myreturn(TO);
+from           myreturn(FROM);
+to             myreturn(TO);
 to_come        myreturn(TO_COME);
 net_in         myreturn(NET_IN);
 net_out        myreturn(NET_OUT);
@@ -98,8 +98,8 @@ arc            myreturn(ARC);
 deterministic  myreturn(DETERMINISTIC);
 stochastic     myreturn(STOCHASTIC);
 
-random         myreturn(RANDOM);
-public         myreturn(PUBLIC);
+   /*random         myreturn(RANDOM); */
+   /*public         myreturn(PUBLIC); */
 setof          myreturn(SETOF);
 by             myreturn(BY);
 less           myreturn(LESS);
@@ -127,9 +127,9 @@ solve          myreturn(SOLVE);
 update         myreturn(UPDATE);
 write          myreturn(WRITE);
 shell          myreturn(SHELL);
-block|BLOCK    myreturn(BLOCK);
-sblock         myreturn(SBLOCK);
-model|MODEL    {
+block          myreturn(BLOCK);
+   /*sblock         myreturn(SBLOCK);*/
+model          {
                  BEGIN(accept_model_type);
                  myreturn(MODEL);
                }
@@ -137,16 +137,15 @@ model|MODEL    {
                  BEGIN(0);
                  myreturn(MODELTYPE);
                }
-begin|BEGIN    myreturn(BEG);
-core|CORE      myreturn(CORE);
-include|INCLUDE myreturn(INCLUDE);
+   /*begin          myreturn(BEG);*/
+include        myreturn(INCLUDE);
 data           myreturn(DATA);
 option         myreturn(OPTION);
 let            myreturn(LET);
 solution       myreturn(SOLUTION);
 fix            myreturn(FIX);
 unfix          myreturn(UNFIX);
-end|END        myreturn(END);
+end            myreturn(END);
 function       myreturn(FUNCTION);
 pipe           myreturn(PIPE);
 format         myreturn(FORMAT);
@@ -162,7 +161,6 @@ forall         myreturn(FORALL);
 not            myreturn(NOT);
 within         myreturn(WITHIN);
 stages         myreturn(STAGES);
-STAGES         myreturn(STAGES);
 stage          myreturn(STAGE);
 node           myreturn(NODE);
 
@@ -241,7 +239,7 @@ suffix                  myreturn(SUFFIX);
   /* special stuff */
 
 Exp         myreturn(EXPECTATION);
-TimeStage   myreturn(TIMESTAGE);
+   /*TimeStage   myreturn(TIMESTAGE);*/
 ancestor    myreturn(ANCESTOR);
 
    /* Else it mut be an identifyer */

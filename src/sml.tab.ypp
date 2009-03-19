@@ -96,8 +96,9 @@
 %token OBJECTIVE SUBJECTTO SUM PROD IN POWER NE LE GE EQ LT GT UNION DIFF
 %token CROSS INTER SYMDIFF LBRACE RBRACE COMMA SEMICOLON LSBRACKET RSBRACKET
 %token COLON LBRACKET RBRACKET DEFINED LOGICAL_OR LOGICAL_AND ELLIPSE
-%token PUBLIC CORE DOT BEG TIMESTAGE RANDOM SUFFIX BLOCK IDREF IDREFM
-%token SBLOCK USING DETERMINISTIC EXPECTATION STOCHASTIC STAGES
+%token DOT SUFFIX BLOCK IDREF IDREFM
+/*%token PUBLIC RANDOM SBLOCK BEG TIMESTAGE */
+%token USING DETERMINISTIC EXPECTATION STOCHASTIC STAGES
 %token STAGE NODE ANCESTOR
 
 %right ASSIGN
@@ -228,7 +229,7 @@ stochblockend: END sblock_alias SEMICOLON {
              ;
 
 sblock_alias: STOCHASTIC BLOCK
-            | SBLOCK
+            /*| SBLOCK*/
             ;
 
 /* -------------------------------------------------------------------- 
@@ -238,14 +239,14 @@ sblock_alias: STOCHASTIC BLOCK
 stageblock: stageblock_start LBRACE statements RBRACE {
                stages_glo = NULL;
             }
-          | stageblock_start statements END STAGE SEMICOLON {
+/*          | stageblock_start statements END STAGE SEMICOLON {
                stages_glo = NULL;
-            }
+            }*/
           ;
 
-stageblock_start: STAGE setexpression COLON {              
+stageblock_start: STAGES setexpression COLON {              
                      if (!is_stoch_model) { 
-                        cerr << "Syntax Error: keyword 'STAGE' can only be "
+                        cerr << "Syntax Error: keyword 'stages' can only be "
                         "used in stochastic blocks" << endl;
                         exit(1);
                      }
@@ -265,11 +266,11 @@ statement:  setdef SEMICOLON
          |  command SEMICOLON
          |  block
          |  INCLUDE ID SEMICOLON
-         |  set_default COLON
+/*         |  set_default COLON*/
          ;
 
-set_default: TIMESTAGE INT_VAL
-           ;
+/*set_default: TIMESTAGE INT_VAL
+           ;*/
 
 /* FIXME */
 command: SOLVE
@@ -489,8 +490,8 @@ vardef:  VAR ID indexing_opt {
 
 
 qualifier:  /* empty */
-         |  PUBLIC
-         |  RANDOM
+         /*|  PUBLIC
+         |  RANDOM*/
          ;
 
 /* these are SET definitions */

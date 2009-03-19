@@ -28,18 +28,18 @@ block alm stochastic using(NODES,Parent, Probs, TIME):{
 #  var wealth >=0;
   var cash >=0;
 
-  stage (1..T) :{
+  stages (1..T) :{
     var x_sold{ASSETS} >=0;
     var x_bought{ASSETS} >=0;
   }
 
-  stage {0} :{
+  stages {0} :{
 #    var slackStartBudget >=0;
     subject to StartBudget:
       (1+Gama)*sum{j in ASSETS} x_hold[j]*Price[j] + cash = Init;
   }
 
-  stage (1..T) :{
+  stages (1..T) :{
     var slack1{BENCHMARK} >=0;
     subject to CashBalance:
       cash + (1+Gama) * sum{j in ASSETS} Price[j] * x_bought[j] = 
@@ -54,7 +54,7 @@ block alm stochastic using(NODES,Parent, Probs, TIME):{
       Exp(risk[l]) = Bench2nd[l] - slack2[l,stage];
   }
 
-  stage {T}:{
+  stages {T}:{
     var wealth >=0;
     subject to wealthcs:  wealth = sum{j in ASSETS} Price[j]*x_hold[j]+cash;
     maximize objFunc: Exp(wealth);
