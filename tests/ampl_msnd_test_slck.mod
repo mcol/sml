@@ -16,8 +16,8 @@ set COMM;
 param cost{ARCS};
 param cap{ARCS};
 
-param from{COMM};
-param to{COMM};
+param src{COMM};
+param dest{COMM};
 param amount{COMM};
 
 var sparecap{(i1,i2) in ARCS} >=0;
@@ -32,8 +32,8 @@ block MCNF{(i1,i2) in ARCS}:
   block RouteComm{j in COMM}:
      var Flow{(s,t) in ARCSDIFF} >=0;
      subject to FlowBalance{l in NODES}:
-         sum{(m,l) in ARCSDIFF} Flow[m,l] + (if (ord(l)==from[j]) then amount[j]) =
-         sum{(l,m) in ARCSDIFF} Flow[l,m] + (if (ord(l)==to[j]) then amount[j]);
+         sum{(m,l) in ARCSDIFF} Flow[m,l] + (if (ord(l)==src[j]) then amount[j]) =
+         sum{(l,m) in ARCSDIFF} Flow[l,m] + (if (ord(l)==dest[j]) then amount[j]);
 #     subject to FlowBalance{l in NODES}:
 #         sum{m in ARCSDIFF} Flow[l] =
 #         sum{m in ARCSDIFF} Flow[l,m];
