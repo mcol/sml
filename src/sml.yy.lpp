@@ -161,8 +161,8 @@ forall         myreturn(FORALL);
 not            myreturn(NOT);
 within         myreturn(WITHIN);
 stages         myreturn(STAGES);
-stage          myreturn(STAGE);
-node           myreturn(NODE);
+   /*stage          myreturn(STAGE);*/
+   /*node           myreturn(NODE);*/
 
    /* looping */
 while          myreturn(WHILE);

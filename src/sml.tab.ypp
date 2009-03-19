@@ -97,10 +97,10 @@
 %token OBJECTIVE SUBJECTTO SUM PROD IN POWER NE LE GE EQ LT GT UNION DIFF
 %token CROSS INTER SYMDIFF LBRACE RBRACE COMMA SEMICOLON LSBRACKET RSBRACKET
 %token COLON LBRACKET RBRACKET DEFINED LOGICAL_OR LOGICAL_AND ELLIPSE
-%token DOT SUFFIX BLOCK IDREF IDREFM
+%token DOT SUFFIX BLOCK IDREF IDREFM STAGE NODE
 /*%token PUBLIC RANDOM SBLOCK BEG TIMESTAGE */
 %token USING DETERMINISTIC EXPECTATION STOCHASTIC STAGES
-%token STAGE NODE ANCESTOR
+%token ANCESTOR
 
 %right ASSIGN
 %left LOGICAL_OR
@@ -830,12 +830,12 @@ value:   INT_VAL {
      |   INFINITY { 
             $$ = new SyntaxNode(INFINITY);
          }
-     |   STAGE { 
+     /*|   STAGE { 
             $$ = new StageNodeNode(STAGE);
          }
      |   NODE { 
             $$ = new StageNodeNode(NODE);
-         }
+         }*/
      ;
 
 /* ----------------------------------------------------------------------------

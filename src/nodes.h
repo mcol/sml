@@ -240,7 +240,7 @@ IDNode
  */
 class IDNode : public SyntaxNode, virtual ValueNodeBase {
   public:
-   const string name;
+   string name;
    long stochparent;
   
   public:

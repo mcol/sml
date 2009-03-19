@@ -157,9 +157,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   {
     IDNode *node = static_cast<IDNode *>(*p);
     if (node->name == stagedummy){
-      ((StageNodeNode *)*p)->setValue(StageNodeNode::stage);
+       node->name = StageNodeNode::stage;
     } else if(node->name == nodedummy) {
-      ((StageNodeNode *)*p)->setValue(StageNodeNode::node);
+       node->name = StageNodeNode::node;
     }
   }
 
