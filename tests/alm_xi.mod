@@ -21,7 +21,7 @@ param Probs{NODES}; # probability distribution of nodes
 
 var slack2{BENCHMARK, TIME} >=0;
 
-block alm stochastic using(NODES,Parent, Probs, TIME):{
+block alm stochastic using(nd in NODES,Parent, Probs, st in TIME):{
 
   var x_hold{ASSETS} >=0;
   var risk{BENCHMARK} >=0;
@@ -47,11 +47,11 @@ block alm stochastic using(NODES,Parent, Probs, TIME):{
           x_sold[j];
     subject to Inventory{j in ASSETS}:
       x_hold[j] =
-        (1+Return[j,node])*ancestor(1).x_hold[j]+x_bought[j]-x_sold[j];
+        (1+Return[j,nd])*ancestor(1).x_hold[j]+x_bought[j]-x_sold[j];
     subject to StochasticDominance1{l in BENCHMARK}:
       sum{j in ASSETS}Price[j]*x_hold[j]+cash-Vbenchmk[l] = -risk[l] + slack1[l];
     subject to StochasticDominance2{l in BENCHMARK}:
-      Exp(risk[l]) = Bench2nd[l] - slack2[l,stage];
+      Exp(risk[l]) = Bench2nd[l] - slack2[l,st];
   }
 
   stages {T}:{
