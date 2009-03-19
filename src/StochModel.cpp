@@ -25,19 +25,43 @@
 
 static bool logSM = false;
 
+void splitIn(SyntaxNode *expr, SyntaxNode **dummy, SyntaxNode **set) {
+   if(expr->opCode == IN) {
+      SyntaxNode::iterator i = expr->begin();
+      *dummy = *i;
+      *set = *(++i);
+   } else {
+      *dummy = NULL;
+      *set = expr;
+   }
+}
+
 /* ---------------------------------------------------------------------------
 StochModel::StochModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
-StochModel::StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
+StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
                        SyntaxNode *onProb, AmplModel *prnt) :
   AmplModel(),
-  is_symbolic_stages(false),
-  stageset(onStages),
-  nodeset(onNodes), 
-  anc(onAncs),
-  prob(onProb)
+  is_symbolic_stages(false)
 {
+  /* Split up possible indexing expressions for params */
+  splitIn(onStages, &stagedummy, &stageset);
+  splitIn(onNodes, &nodedummy, &nodeset);
+  SyntaxNode *baddummy;
+  splitIn(onAncs, &baddummy, &anc);
+  if(baddummy) {
+     cerr << "Dummy index '" << baddummy << "' on set " << anc <<
+        " not allowed" << endl;
+     exit(1);
+  }
+  splitIn(onProb, &baddummy, &prob);
+  if(baddummy) {
+     cerr << "Dummy index '" << baddummy << "' on set " << anc <<
+        " not allowed" << endl;
+     exit(1);
+  }
+
   /* Do this later? -> parent not set up yet*/
   /* No: do this here, should set up a nested list of normal AMPL models */
   parent = prnt;
@@ -49,7 +73,7 @@ StochModel::StochModel(SetNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAnc
 /* ---------------------------------------------------------------------------
 expandSet()
 ---------------------------------------------------------------------------- */
-vector<string> expandSet(SetNode *set) {
+vector<string> expandSet(SyntaxNode *set) {
 
   /* analyze all dependencies of this expression */
   ModelComp::untagAll();

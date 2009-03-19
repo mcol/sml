@@ -79,7 +79,8 @@
 //%type <opPtr> csattributes_opt csattributes csattribute 
 %type <opPtr> setexpr_list lexpr 
 %type <opPtr> setexpression identifier iditem setexpr_item mdim_dummy_start
-%type <opPtr> commasepoptions optionlist mdim_dummy start_indexing
+%type <opPtr> mdim_dummy start_indexing
+/*%type <opPtr> commasepoptions optionlist*/
 %type <opPtrIx> indexing indexing_opt
 %type <optype> relop reduction_op func ubsetop bsetop
 
@@ -123,7 +124,8 @@ block:   stochblock
      ;
              ;
 
-optionlist: /*empty */ {$$=NULL;}
+/*
+optionlist:*/ /*empty *//* {$$=NULL;}
           | LBRACKET commasepoptions RBRACKET {$$=$2;}
           ;
 
@@ -132,7 +134,7 @@ commasepoptions:  identifier {
                |  commasepoptions COMMA identifier{
                      $$ = $1->push_back($3);
                   }
-               ;
+               ;*/
 /* -------------------------------------------------------------------- 
   blockblock
 ------------------------------------------------------------------------- */
@@ -208,14 +210,15 @@ stochblock: stochblockbegin statements stochblockend
 /* FIXME: optionlist is of form '(ID COMMA ID ...)'
      need to call new SyntaxNode and addToListItem functions in the 
      processing of optionlist and its children */
-stochblockbegin:  sblock_alias ID indexing_opt USING optionlist COLON {
+stochblockbegin:  BLOCK ID indexing_opt STOCHASTIC USING LBRACKET 
+                        setexpr_list RBRACKET COLON {
+                     add_indexing($3);
+                     begin_smodel((char*)$2, $3, $7);
+                  }
+               /*|  sblock_alias ID indexing_opt USING optionlist COLON {
                      add_indexing($3);
                      begin_smodel((char*)$2, $3, $5);
-                  }
-               |  BLOCK ID indexing_opt STOCHASTIC USING optionlist COLON {
-                     add_indexing($3);
-                     begin_smodel((char*)$2, $3, $6);
-                  } 
+                  }*/
                ;
 
 stochblockend: END sblock_alias SEMICOLON {
@@ -925,7 +928,10 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    SyntaxNode *nodes = *i;
    SyntaxNode *anc = *(++i);
    SyntaxNode *prob = *(++i);
-   SetNode *stages = (SetNode*) *(++i);
+   SyntaxNode *stages = *(++i);
+   cout << "BEG SMODEL " << name << endl << "   nodes = " << nodes << endl;
+   cout << "   anc = " << anc << endl << "   prob = " << prob << endl;
+   cout << "   stages = " << stages << endl;
    new_mod = new StochModel(stages, nodes, anc, prob, current_model);
    new_mod->name = strdup(name);
   
