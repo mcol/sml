@@ -470,7 +470,7 @@ process_model(AmplModel *model) /* should be called with model==root */
 
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
 
-  cout << endl << "call AMPL to process script file: " << endl;
+  cout << endl << "Calling AMPL to process script file..." << endl;
 
   {
     // call ampl to process script and analyse the output
