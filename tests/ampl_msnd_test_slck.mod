@@ -1,3 +1,7 @@
+# This file is (c) 2008 Andreas Grothey, University of Edinburgh
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty.
+
 # this is a structured AMPL model of the MSND problem 
 #
 #   In MSND a network (with installed capacity) is repeated many times

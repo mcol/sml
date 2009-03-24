@@ -1,3 +1,7 @@
+# This file is (c) 2008 Andreas Grothey, University of Edinburgh
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty.
+
 # First ALM model with Stochastic dominance constraints
 # written in SML
 # 30/05/2008
