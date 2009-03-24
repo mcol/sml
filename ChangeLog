@@ -1,6 +1,11 @@
-2009-03-11  Jonathan Hogg  <J.Hogg@ed.ac.uk>
+2009-03-24  Marco Colombo  <m.colombo@ed.ac.uk>
 
   * Version 0.7
-  * First public release, works for example problems, but suffers from memory
+  * First public release.
+
+2009-03-11  Jonathan Hogg  <J.Hogg@ed.ac.uk>
+
+  * Version 0.7-RC1
+  * First release, works for example problems, but suffers from memory
   leaks. ChangeLog started to track changes, copyright notices added for
   LGPL release.
