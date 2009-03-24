@@ -224,10 +224,10 @@ paramspec:  paramtemplate_opt object_list {
                   $$ = $2;
                }
             }
-         |  paramtemplate_opt valuetable_list {
+         |  paramtemplate_opt valuetable_list /*{
                cerr << "Not properly supported yet \"paramtemplate_opt "
                   "valuetable_list\"." << endl;
-            }
+            }*/
          ;
 
 paramtemplate_opt: /* empty */ { $$=NULL; }
