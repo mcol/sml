@@ -25,8 +25,10 @@ DOC_FILES  = doc/userguide.pdf doc/userguide.bib doc/userguide.tex \
 				 doc/fig/MSND_struct.fig doc/fig/MSND_struct.jpg \
 				 doc/Makefile
 TEST_FILES = tests/alm_xi.dat tests/alm_xi.mod \
-				 tests/ampl_msnd_test_slck.dat tests/ampl_msnd_test_slck.mod \
-				 tests/scopfIEEE_ampl.mod tests/scopfIEEE.dat tests/scopfIEEE.mod
+				 tests/ampl_msnd_test_slck.dat tests/ampl_msnd_test_slck.mod
+				 # scopfIEEE model does not converge under OOPS due to numeric
+				 # issues in the dual space. Not distributed as a good example.
+				 #tests/scopfIEEE_ampl.mod tests/scopfIEEE.dat tests/scopfIEEE.mod
 THIRDPARTY_FILES = \
 				ThirdParty/oops/COPYING \
 				ThirdParty/oops/lib/liboops.a \
