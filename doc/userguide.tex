@@ -595,7 +595,7 @@ interface for an example implementation.
    \end{center}
 \end{figure}
 
-Internally  SML describes a problem as a nested bordered block diagonal form.
+Internally, SML describes a problem as a nested bordered block diagonal form.
 The data structure used to represent this assumes the following:
 \begin{enumerate}
    \item A block has a zero or more constraints of variables with an associated
@@ -612,8 +612,8 @@ The data structure used to represent this assumes the following:
    \item Any or all of the Jacobians A, B, C or D may be identically zero.
 \end{enumerate}
 
-Clearly the list of pointers to contained blocks yields a tree structure which
-we refer to as the Expanded Model Tree.  This representation of the structured
+The list of pointers to contained blocks yields a tree structure which
+we refer to as the {\em Expanded Model Tree}. This representation of the structured
 model is natural for a hierarchical linear algebra solver such as OOPS, but
 should also provide sufficient access for other designs of structure exploiting
 solver such as those which use decomposition approaches.
@@ -623,10 +623,10 @@ solver such as those which use decomposition approaches.
 The model currently used by SML is that it is called by the solver and passed
 the names of the model and data files, it will then return a pointer to an
 Expanded Model Tree represented by a {\tt ExpandedModelInterface} object which
-the solver is then free to query. Finally the solver should {\tt delete} the
+the solver is then free to query. Finally, the solver should {\tt delete} the
 {\tt ExpandedModelInterface} object to free the memory.
 
-We recommend that most solvers parse the tree in either one or two passes. The
+We recommend that solvers parse the tree in either one or two passes. The
 initial parse may extract information on the dimension and relative density of
 the tree, setting up data structures are required, while the second pass will
 determine the actual numeric values.
@@ -645,42 +645,45 @@ call the function:
 ExpandedModelInterface* sml_generate(const std::string modelfilename, 
    const std::string datafilename, const bool debug);
 \end{verbatim}
-
 to retrieve a {\tt ExpandedModelInterface} object which can then be queried.
 If the argument {\tt debug} is {\tt true} then additional debugging information
 will be generated.
 
-\subsubsection{Transversing the Tree}
+\subsubsection{Traversing the Tree}
 The {\tt ExpandedModelInterface} object returned after parsing the model and
 data files offers two iterators for moving through the tree, and further allows
-direct access to the list of children.
+direct access to the list of children:
 
-The {\tt ExpandedModelInterface::ancestor\_iterator} allows the iteration up
-through the tree to the root. The function
+\begin{itemize}
+\item The {\tt ExpandedModelInterface::ancestor\_iterator} allows the iteration
+up through the tree to the root. The function
 {\tt ExpandedModelInterface::abegin()} returns an
 iterator which points to the parent of the node it is called on. The function
 {\tt ExpandedModelInterface::aend()} return an iterator which represents the
 top of the tree, above the root.
 
-The {\tt ExpandedModelInterface::child\_iterator} allows the iteration over all
+\item The {\tt ExpandedModelInterface::child\_iterator} allows the iteration over all
 children of a node in a depth-first order, with the node itself being last. The
 function {\tt ExpandedModelInterface::cbegin()} returns an iterator pointing to
 the left-most leaf in the subtree routed at the calling node. The function 
 {\tt ExpandedModelInterface::cend()} returns an iterator representing the end
 of the child iteration sequence.
 
-The component
+\item The component
 {\tt std::vector<ExpandedModelInterface*> ExpandedModelInterface::children}
-allows the solver writer to use their own iteration scheme if the above are not
+allows the implementer to use their own iteration scheme if the above are not
 sufficient.
+\end{itemize}
 
 We note that (non-)equivalence of pointers is not a sufficient condition to
-differentiate nodes, and the function {\tt std::string
-ExpandedModelInterface::getName()} should be used instead.
+differentiate nodes, and the function {\tt ExpandedModelInterface::getName()}
+should be used instead to compare the names of the blocks (which are
+guaranteed to be unique).
 
 \subsubsection{Accessing the Data}
 Each block essentially allows the query of all data in its row block. The
 following functions are available:
+\begin{center}
 \begin{tabular}{ll}
 {\tt int getNLocalVars()} & 
    Number of variables local to block \\
@@ -708,17 +711,21 @@ following functions are available:
 {\tt void getObjGradient(double *elts)} &
    Objective coefficients for block.
 \end{tabular}
+\end{center}
 
 The Compressed Sparse Column (CSC) format used by 
 {\tt getJacobianOfIntersection()} describes for each column only the non-zero
 entries within it, and for each entry gives a row number and value pair. On
 entry the parameters should point to areas of memory corresponding to the
-following arrays: {\tt int colbeg[n+1], int collen[n], int rownbs[nz],
-double el[nz]}, where {\tt n} is the number of variables in this model, and
+following arrays: 
+\begin{center}
+{\tt int colbeg[n+1], int collen[n], int rownbs[nz], double el[nz]}
+\end{center}
+ where {\tt n} is the number of variables in this model, and
 {\tt nz} is the number returned by the corresponding call to
 {\tt getNzJacobianOfIntersection()}.
 
-On return {\tt colbeg[i]} is a pointer to the beginning of column {\tt i}
+On return, {\tt colbeg[i]} is a pointer to the beginning of column {\tt i}
 within the arrays {\tt rownbs[]} and {\tt el[]}, {\tt collen[i]} is the number
 of entries in that column --- which may be zero. The values {\tt rownbs[j]} and
 {\tt el[j]} represent a row number-value pair.
