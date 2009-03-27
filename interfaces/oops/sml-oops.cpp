@@ -146,6 +146,8 @@ SML_OOPS_driver(ExpandedModelInterface *root)
 
   SML_OOPS_upload_sol(root, Prob->x, Prob->y, Prob->z);
 
+  // clean up
+  FreePDProblem(Prob);
 }
 
 /* ==========================================================================
