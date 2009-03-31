@@ -43,7 +43,6 @@ ExpandedModel::setLocalVarInfo
 /** This routine identifies the indices of the local variables in the 
  *  *.nl file that is associated with this ExpandedModel node.
  * 
-
  * The routine compares the variable name stubs stored in localVarDef
  * (which are set up from the constructor using the corresponding flat
  * model (AmplModel) and the instance (defined by appropriate values
@@ -53,8 +52,6 @@ ExpandedModel::setLocalVarInfo
  *
  * The routine sets the nLocalVar, listLocalVar, nLocalCons fields of
  * the object.
- *
- * @todo This method should become private 
  *
  * @note The method works by comparing all stubs with all names in the
  * *.col file, this uses a lot of string comparisons and is likely
