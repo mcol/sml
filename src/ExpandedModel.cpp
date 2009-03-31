@@ -49,7 +49,7 @@ ExpandedModel::setLocalVarInfo
  * model (AmplModel) and the instance (defined by appropriate values
  * for the indexing variables), with the names of the variables
  * defined in the *.nl file (obtained by reading the corresponding
- * *.col file)`
+ * *.col file).
  *
  * The routine sets the nLocalVar, listLocalVar, nLocalCons fields of
  * the object.
@@ -303,10 +303,10 @@ ExpandedModel::getNzJacobianOfIntersection
  *  by the intersection of the local constraints in this model with the
  *  local variables of another (or the same) model.
  *
- *  @param emcol The model w.r.t. whose local variables the Jacobian
- *  should be evaluated. This parameter can be NULL in which case the
+ *  @param emcol_ The model w.r.t. whose local variables the Jacobian
+ *  should be evaluated. This parameter can be NULL, in which case the
  *  method works on the intersection of the local constraints with the
- *  local variables (a "diagonal" block)
+ *  local variables (a "diagonal" block).
  *
  * @return The number of nonzeros in the given part of the Jacobian
  */
@@ -345,10 +345,10 @@ ExpandedModel::getJacobianOfIntersection
  *  the local constraints in this model with the local variables of
  *  another (or the same) model in sparse matrix format
  *
- *  @param[in] emcol The model w.r.t. whose local variables the Jacobian
- *  should be evaluated. This parameter can be NULL in which case the
+ *  @param[in] emcol_ The model w.r.t. whose local variables the Jacobian
+ *  should be evaluated. This parameter can be NULL, in which case the
  *  method works on the intersection of the local constraints with the
- *  local variables (a "diagonal" block)
+ *  local variables (a "diagonal" block).
  *  @param[out] colbeg Column starts of the Jacobian.
  *  @param[out] collen Column lengths of the Jacobian 
  *       (not returned if NULL on call)

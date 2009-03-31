@@ -263,7 +263,7 @@ createBottom(ExpandedModelInterface *diag, ExpandedModelInterface *nondiag)
 {
   Algebra *Alg;
   /* This is a bottom block: 
-     take the locl constraints from the diag block and
+     take the local constraints from the diag block and
      follow tree defined from the non-diag block */
 
   if (nondiag->children.size()==0){

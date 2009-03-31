@@ -574,7 +574,7 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
 
     
     /* for every level above 0 there should be a dummy variable on the stack 
-       => go up the path and add dummy varables to arglist */
+       => go up the path and add dummy variables to arglist */
     for(i=0;i<clvl;i++){
       /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */
@@ -786,7 +786,7 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
 
     
     /* for every level above 0 there should be a dummy variable on the stack 
-       => go up the path and add dummy varables to arglist */
+       => go up the path and add dummy variables to arglist */
     for(i=1;i<=clvl;i++){ //start from 1: 0 is the root which has no indexing
       /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */

@@ -153,11 +153,12 @@ vector<string> expandSet(SyntaxNode *set) {
 /* ---------------------------------------------------------------------------
 StochModel::expandStages()
 ---------------------------------------------------------------------------- */
-/** expand the set used for the STAGES part in the sblock ... using (...)
+/** Expand the set used for the STAGES part in the sblock ... using (...)
  *  expression. 
  *  An AMPL model file and correspoding script file is created that
- *  when executes writes the components of the set to disk. This routine
- *  also reads in that file and stores the set members in the list stagenames
+ *  when executed writes the components of the set to disk. This routine
+ *  also reads in that file and stores the set members in the
+ *  StochModel::stagenames list.
  */ 
 
 void
@@ -169,14 +170,15 @@ StochModel::expandStages()
 /* ---------------------------------------------------------------------------
 StochModel::expandStagesOfComp()
 ---------------------------------------------------------------------------- */
-/** expand the sets used in 'stages' qualifiers for all model components of 
+/** Expand the sets used in 'stages' qualifiers for all model components of 
  *  this model.
  *  An AMPL model file and corresponding script file is created that
- *  when executes writes the components of the set to disk. This routine
- *  also reads in that file and stores the set members in the list stagenames
+ *  when executed writes the components of the set to disk. This routine
+ *  also reads in that file and stores the set members in the
+ *  StochModel::stagenames list.
  *
  *  This is a StochModel method rather than a StochModelComp method in 
- *  order to gather all expansions into a single call to AMPL
+ *  order to gather all expansions into a single call to AMPL.
  */ 
 
 void
@@ -496,7 +498,7 @@ StochModel::expandToFlatModel()
       on1 = nodeset->clone(); // does this work?
       // this is going to be the dummy variable i (just an ID node?)
       on2 = new IDNode("this_nd");
-      /** @bug 'this_nd' is a reserved variables now */
+      /** @bug 'this_nd' is a reserved variable now */
       on_iinN = new OpNode(IN, on2, on1);
       //printf("Test first part of expression: %s\n",on_iinN->print());
       // set up the 'A[i] in indS0' part now

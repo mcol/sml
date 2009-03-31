@@ -162,7 +162,7 @@ class ExpandedModelInterface {
   //! Returns the vector of lower bounds for the local variables in this model
   virtual void getColLowBounds(double *elts) = 0;
 
-  //! Returns the vector of upper bounds for the local varables in this model
+  //! Returns the vector of upper bounds for the local variables in this model
   virtual void getColUpBounds(double *elts) = 0;
 
   //! Returns the objective gradient for the local model w.r.t. local vars

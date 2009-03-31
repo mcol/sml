@@ -116,38 +116,38 @@ class AmplModel{
   /** Destructor */
   virtual ~AmplModel();
 
-  /** set global name by concatenating ancestor names */
+  /** Set global name by concatenating ancestor names */
   void setGlobalName();      
 
-  /** set global name recursively for this and all submodels */
+  /** Set global name recursively for this and all submodels */
   void setGlobalNameRecursive();      
-                                //
-  /** recursively write all out all tagged model components in this model and 
-   * submodels to file          */
+
+  /** Recursively write out all tagged model components in this model and 
+      submodels to file */
   void writeTaggedComponents(ostream &fout=cout);  
                                 
   /** Recursively creates an ExpandedModel tree from the flat AmplModel */
   ExpandedModel* createExpandedModel(string smodelname, string sinstanceStub);
 
-  /** add dummy objective that uses (sums up) all variables in the model */
+  /** Add dummy objective that uses (sums up) all variables in the model */
   void addDummyObjective();
 
-  /** add a model component to the model */
+  /** Add a model component to the model */
   virtual void addComp(ModelComp *comp);
 
-  /** remove a model component from the model */
+  /** Remove a model component from the model */
   void removeComp(ModelComp *comp);
 
-  /** recursively recalculate dependency list and re-resolve IDREF nodes */
+  /** Recursively recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();
 
   void print();    //< prints debugging output recursively
   void check();    //< checks instance for consistency
 
-  /** recursive detailed debugging output */
+  /** Recursive detailed debugging output */
   void dump(char *filename);
 
-  /** recursive detailed debugging output */
+  /** Recursive detailed debugging output */
   void dump(ostream &fout);
 
   static void applyChanges(); //< apply the model changes stored in Q

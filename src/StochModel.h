@@ -62,15 +62,13 @@ class StochModel: public AmplModel{
   //! recursive helper function for expandToFlatModel 
   void _transcribeComponents(AmplModel *current, int level);
 
-  //! expands the STAGES set into the actual elements and stores them in stagenames 
+  //! Expand the STAGES set into the actual elements and stores them in stagenames
   void expandStages();
 
-  /** expands all STAGES set associated with StochModelComp components into 
-   * the actual elements and stores them in  StochModelComp->stagenames */
-  //!< expand STAGES set of all StochModelComps in this model
+  //!< Expand STAGES set of all StochModelComps in this model
   void expandStagesOfComp(); 
 
-  /** expand on AmplModel::addComp to setup stochmodel of component too */
+  /** Expand on AmplModel::addComp to setup stochmodel of component too */
   void addComp(ModelComp *comp);
 
   SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);

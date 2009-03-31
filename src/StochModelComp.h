@@ -22,7 +22,7 @@
  *  The class stores information that is read in from a stochastic block
  *  It is equivalent to the ModelComp class, the only difference is that
  *  is also stores an expression corresponding to the applicable stageset
- *  and a possible deterministic attribute
+ *  and a possible deterministic attribute.
  */
 
 class StochModelComp: public ModelComp {
@@ -50,12 +50,13 @@ class StochModelComp: public ModelComp {
   /* ======================== methods =================================== */
   StochModelComp();  //!< constructor that sets everything to default values
 
-  //! constructor
+  //! Constructor
   StochModelComp(char *id, compType type, SyntaxNode *indexing, SyntaxNode *attrib);
 
-  //! transcribe a StochModelComp in a StochModel into a ModelComp 
+  //! Transcribe a StochModelComp in a StochModel into a ModelComp 
   ModelComp *transcribeToModelComp(AmplModel *current_model, string nodedummy, 
       string stagedummy, int level);
 
-  StochModelComp *clone(); //!< shallow copy. Only copy pointers.
+  //! Shallow copy, only copies pointers
+  StochModelComp *clone();
 };

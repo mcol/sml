@@ -75,13 +75,14 @@ SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
 /* --------------------------------------------------------------------------
 addItemToListOrCreate
 -------------------------------------------------------------------------- */
-/** A 'List' is an SyntaxNode of opCode COMMA or ' ' with a variable number
+/** A 'List' is a SyntaxNode of opCode COMMA or ' ' with a variable number
  *  of arguments. 
- *  This function takes (a possibly existing) list and adds an item to it
+ *  This function takes (a possibly existing) list and adds an item to it.
+ *
  *  Both the list and the item can be NULL:
- *  - if the item is NULL then the old list is simply returned.
+ *  - if the item is NULL then the old list is simply returned;
  *  - if the list is NULL then a list with opCode 'oc' is created from the
- *    single item that is passed
+ *    single item that is passed.
  */
 
 ListNode *
@@ -233,7 +234,7 @@ ostream& SyntaxNode::put(ostream&s) const {
       }
       s << onidref;
       break;
-    case -99: // tempalte<class T> ValueNode
+    case -99: // template<class T> ValueNode
       cerr << "FAIL(-99)";
       throw exception();
       break;
@@ -1213,14 +1214,14 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    // try to find a match in the local context
    ret = context->find_var_ref_in_context(idNode);
 
-   // ret could be NULL if it is actually a STAGE or NODE dummy varaible
+   // ret could be NULL if it is actually a STAGE or NODE dummy variable
    if(!ret) {
       if(argNode) {
          cerr << "dummy index of stageset or nodeset and argNode=true not "
             "yet handled!" << endl;
          exit(1);
       }
-      return idNode; // return something at least vaguely meaninful
+      return idNode; // return something at least vaguely meaningful
    }
 
    if (argNode){

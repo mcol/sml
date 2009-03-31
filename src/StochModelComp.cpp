@@ -33,14 +33,14 @@ StochModelComp::StochModelComp(char *id, compType type,
 /* ---------------------------------------------------------------------------
 StochModelComp::transcribeToModelComp()
 ---------------------------------------------------------------------------- */
-/** transcribeToModelComp():
+/**
  *  This function takes a StochModelComp as read in by the parses and
  *  transcribes it into a corresponding ModelComp of the current
- *  FlatModel. It does this by
+ *  FlatModel. It does this by:
  *   - Scanning for all IDREF references to entities defined in the StochModel
  *     and replacing this by references to entities in the FlatModel
  *     (i.e the pointer to a StochModelComp is replaced by a pointer to
- *      the corresponding ModelComp)
+ *      the corresponding ModelComp).
  *     This also deals with references to StochModel entities in a diffent
  *     stage (i.e. through xh(-1;...))
  *   - Objective components have a term for the node probability added

@@ -109,7 +109,7 @@ class ExpandedModel : public ExpandedModelInterface {
 
  private:
   int nLocalVars;  //!< number of local variables
-  int nLocalCons;  //!< number of locl constraints
+  int nLocalCons;  //!< number of local constraints
 
   /** Indicator if information on local variables 
    *  (nLocalVars, listLocalVars, nLocalCons) has been obtained by comparing 
@@ -194,7 +194,7 @@ class ExpandedModel : public ExpandedModelInterface {
   //! Returns the vector of lower bounds for the local variables in this model
   void getColLowBounds(double *elts);
 
-  //! Returns the vector of upper bounds for the local varables in this model
+  //! Returns the vector of upper bounds for the local variables in this model
   void getColUpBounds(double *elts);
 
   //! Returns the objective gradient for the local model w.r.t. local vars

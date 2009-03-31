@@ -69,7 +69,7 @@ class ModelComp{
   /** List of all entities that this model component depends on:
    *  Basically a list of all model components used in the definition of
    *  this component                                                  */
-  list<ModelComp*> dependencies;     //!< list of dependecies:
+  list<ModelComp*> dependencies;     //!< list of dependencies:
 
   AmplModel *model;    //!< The model this belongs to 
 
@@ -105,21 +105,21 @@ class ModelComp{
   void print();   //!< prints elements of the class
   void printBrief();   //!< prints one liner
   void tagDependencies();  //!< tag this components and all its dependencies
-                           // recuresively
+                           // recursively
 
-  /** recalculate dependency list and re-resolve IDREF nodes */
+  /** Recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();
 
-  /** set the tag to false for all models: using global_list */
+  /** Set the tag to false for all models: using global_list */
   static void untagAll();  
 
-  /** recursively set the tag to false for all models */
+  /** Recursively set the tag to false for all models */
   static void untagAll(AmplModel *start);  
 
-  /** recursively write name of all tagged components */
+  /** Recursively write name of all tagged components */
   static void writeAllTagged(AmplModel *start);
 
-  /** write definition of all tagged components to file, using global_list */
+  /** Write definition of all tagged components to file, using global_list */
   static void modifiedWriteAllTagged(ostream &fout); 
 
   void moveUp(int level);  //< move this model comp up in the model tree 

@@ -291,7 +291,7 @@ class SyntaxNodeIDREF : public SyntaxNode {
   //! creates a shallow copy: points to the same components as the original
   SyntaxNodeIDREF *clone();
   
-  //! creates a copy using all new datastrutures (does not duplicate ->ref)
+  //! creates a copy using all new datastructures (does not duplicate ->ref)
   SyntaxNodeIDREF *deep_copy();
 
   ostream& put(ostream&s) const;
