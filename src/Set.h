@@ -38,12 +38,12 @@ class Set: public CompDescr{
    *   - string* for a one dimensional set, 
    *   - string[] for a multidimensional set 
    * look at http://www.cppreference.com/cppmap/map_constructors.html
-
    */
   map<SetElement, int, SetElement> elements; //!< The elements of the set
- public:
-  int dim; //!< A set can be mutidimensional
- private:
+
+  //! Dimension: a set can be multidimensional
+  int dim_;
+
   // ---------------- methods -----------------
   void add(SetElement);     //!< add element to set
 
@@ -52,6 +52,10 @@ class Set: public CompDescr{
  public:
   Set(const ListNode &list_of_els); //!< construct a set from a list of elements in an SyntaxNode
   int size(); //!< return size of Set
+
+  //! Return the dimension of the set
+  int dim();
+
   int findPos(SetElement);  //!<find position of element in set
 };
 

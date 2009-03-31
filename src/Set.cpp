@@ -51,13 +51,13 @@ Set::Set(const ListNode &list):
   // have a look at the first item to get the dimension of the set
   item = list[0];
   if (item->opCode==ID||item->opCode==-99){
-    this->dim = 1;
+    this->dim_ = 1;
   }else{
     // otherwise this needs to be an element of form (.., .., ..)
     assert(item->opCode==LBRACKET);
     item = *(item->begin());
     assert(item->opCode==COMMA);
-    this->dim = item->nchild();
+    this->dim_ = item->nchild();
   }
   
   // then place all the elements on the set
@@ -65,26 +65,26 @@ Set::Set(const ListNode &list):
     item = *i;
     // and do some checking that all elements have the same dimension
     //    this->elements.push_back(item);
-    if (dim==1) {
+    if (dim_==1) {
       char** array = (char**)calloc(1, sizeof(char*));
       array[0] = item->getValue();
       add(SetElement(1,array));
     }else{
-      char **array = (char**)calloc(dim, sizeof(char*));
+      char **array = (char**)calloc(dim_, sizeof(char*));
       assert(item->opCode==LBRACKET);
       item = (SyntaxNode*)*(item->begin());
       assert(item->opCode==COMMA);
-      if (dim==item->nchild()){
+      if (dim_==item->nchild()){
         int j = 0;
         for(SyntaxNode::iterator k=item->begin(); k!=item->end(); ++k){
           SyntaxNode *idnd = (SyntaxNode*)*k;
           assert(idnd->opCode==ID);
           array[j++] = (char*)*(idnd->begin());
         }
-        add(SetElement(dim, array));
+        add(SetElement(dim_, array));
         //this->elements.push_back(array);
       }else{
-        cerr << "First element in set has dim=" <<dim << " later element '"
+        cerr << "First element in set has dim=" << dim_ << " later element '"
            << (SyntaxNode*)*i << "' has dim=" << item->nchild() << "\n";
         exit(1);
       }
@@ -100,6 +100,15 @@ int
 Set::size()
 {
   return elements.size();
+}
+
+/* ---------------------------------------------------------------------------
+Set::dim();
+---------------------------------------------------------------------------- */
+int
+Set::dim()
+{
+  return dim_;
 }
 
 

@@ -85,7 +85,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
         exit(1);
       }
       n *= indices[i]->size(); // number of parameters is cartesian product of sets 
-      nix += indices[i]->dim;
+      nix += indices[i]->dim();
     }
   }else{ /* no indexing expression => scalar parameter */
     nix = 0;
@@ -218,7 +218,7 @@ CompDescrParam::printToString()
   for(int i=0;i<nix;i++){
     if (i>0) str+="x";
     Set *st = indices[i];
-    str += to_string(st->dim);
+    str += to_string(st->dim());
   }
 
   str+=": ";
@@ -317,15 +317,15 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
       // ask it for the position of this label
       
       // make the label into a SetElement
-      if (indices[ixcolset]->dim>1){
+      if (indices[ixcolset]->dim()>1){
         if (cl->opCode!=LBRACKET){
           printf("col_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixcolset]->id);
           exit(1);
         }
-        if (cl->nchild()!=indices[ixcolset]->dim){
+        if (cl->nchild()!=indices[ixcolset]->dim()){
           cerr << "Number of entries in bracketed expression used as "
              "col_label (" << cl->nchild() << ")" << endl;
-          cerr << "does not match dimension (" << indices[ixcolset]->dim <<
+          cerr << "does not match dimension (" << indices[ixcolset]->dim() <<
              ") of indexing set '" << ix->sets_mc[ixcolset]->id << "'" << endl;
           exit(1);
         }
@@ -350,15 +350,15 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
       // ask it for the position of this label
       
       // make the label into a SetElement
-      if (indices[ixrowset]->dim>1){
+      if (indices[ixrowset]->dim()>1){
         if (rl->opCode!=LBRACKET){
           printf("row_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixrowset]->id);
           exit(1);
         }
-        if (rl->nchild()!=indices[ixrowset]->dim){
+        if (rl->nchild()!=indices[ixrowset]->dim()){
           cerr << "Number of entries in bracketed expression used as "
             "row_label (" << rl->nchild() << ")" << endl;
-          cerr << "does not match dimension (" << indices[ixrowset]->dim <<
+          cerr << "does not match dimension (" << indices[ixrowset]->dim() <<
             ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'" << endl;
           exit(1);
         }
