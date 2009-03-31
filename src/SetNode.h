@@ -45,9 +45,9 @@ private:
    int upper_bound_;
    SyntaxNode *ubc_;
    int interval_;
+   bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
 
 public:
-   bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
    SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2);
    vector<string> members(AmplModel &context);
 };
