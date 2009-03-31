@@ -59,9 +59,6 @@ class StochModel: public AmplModel{
   //! Expand the StochModel to a nested set of FlatModels 
   AmplModel *expandToFlatModel();
 
-  //! recursive helper function for expandToFlatModel 
-  void _transcribeComponents(AmplModel *current, int level);
-
   //! Expand the STAGES set into the actual elements and stores them in stagenames
   void expandStages();
 
@@ -72,6 +69,11 @@ class StochModel: public AmplModel{
   void addComp(ModelComp *comp);
 
   SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
+
+ private:
+
+  //! Recursive helper function for expandToFlatModel
+  void _transcribeComponents(AmplModel *current, int level);
 };
 
 #endif
