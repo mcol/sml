@@ -15,39 +15,87 @@
 % You should have received a copy of the GNU Lesser General Public License
 % along with this program. If not, see http://www.gnu.org/licenses/.
 
-\documentclass[10pt,a4paper]{book}
+\documentclass[10pt,a4paper]{report}
 
 \usepackage{colordvi,amsmath,xspace,fancyvrb,wrapfig}
 \usepackage{pgf}
 \usepackage{fullpage}
+\usepackage[calcwidth]{titlesec} % for titleformat, titlespacing
 
 \newcommand{\ie}{i.e.\@\xspace}
 \newcommand{\R}{\mbox{$I\!\!R$}}
 \newcommand{\E}{\mbox{$I\!\!E$}}
 \newcommand{\Var}{\mathrm{Var}}
 
+
+\makeatletter
+\ProcessOptions
+\renewcommand{\maketitle}{
+\thispagestyle{empty}
+\begin{center}
+\vspace*{4cm}
+{\rmfamily\Huge \@title}\\
+\vspace{2cm}
+{\rmfamily\Large
+\begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}
+}\\
+\vspace{1cm}
+{\rmfamily\Large School of Mathematics and Maxwell Institute, \\[0.5ex]
+University of Edinburgh, UK} \\[5ex]
+{\ttfamily\Large http://www.maths.ed.ac.uk/ERGO/sml/ \\[0.5ex]
+                 sml-support@maths.ed.ac.uk}\\
+\vspace{2cm}
+{\rmfamily \Large \@date}
+\end{center}
+\clearpage
+}
+\makeatother
+
+
+% reformat the chapter headings
+\titleformat{\chapter}[hang]{\bfseries}
+  {\Huge\thechapter}{20pt}{\Huge}[{\titlerule[2pt]}]
+\titlespacing{\chapter}{0pt}{1.5cm}{1cm}
+
+% reformat the section headings
+\titleformat{\section}[hang]{\bfseries}
+  {\Large\thesection}{12pt}{\Large}[{\titlerule[1pt]}]
+\titlespacing{\section}{0pt}{1ex}{2ex}
+
+% rename the table of contents
+\renewcommand{\contentsname}{Table of Contents}
+
+
+%
+% Document
+%
 \begin{document}
 
-\title{SML \\
-   Structure-Conveying Modelling Language \\
-   \bf User's Guide}
+\title{Structure-Conveying Modelling Language \\[1em]
+   \textbf{SML User's Guide}}
 \author{Marco Colombo
-\and Andreas Grothey
-\and Jonathan Hogg
-\and Kristian Woodsend
-\and Jacek Gondzio \\[3ex]
-School of Mathematics and Maxwell Institute, \\
-University of Edinburgh, UK \\[5ex]
-{\tt http://www.maths.ed.ac.uk/ERGO/sml/} \\
-{\tt sml-support@maths.ed.ac.uk}
-}
-
+  \and Andreas Grothey
+  \and Jonathan Hogg
+  \and Kristian Woodsend
+  \and Jacek Gondzio}
 \date{\today}
 
 \maketitle
 
+\parindent 0pt
+\parskip   1ex
+
+\tableofcontents
+
+\parskip   2ex
+
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+
 \section*{Foreword}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
 \label{sec:Intro}
 
 Algebraic modelling languages are recognised as an important tool in the
@@ -62,20 +110,19 @@ and Xpress-Mosel \cite{mybib:Mosel}.
 SML (Structured Modelling Language) attempts build on these traditional
 approaches while encapsulating the {\bf structure} of the problem. As such
 it encapsulates the AMPL syntax in an object orientated fashion.
-
-We hope that object orientated modelling will eventually confer the following benefits:
+%
+We believe that objec- orientated modelling will eventually confer the
+following benefits:
 \begin{description}
    \item[Clarity] of modelling, reducing the apparent complexity of models
-   \item[Reuse] of model parts, reducing errors and allowing more {\it complex}
+   \item[Reusability] of model parts, reducing errors and allowing more complex
       systems to be modelled. (Planned for later releases)
    \item[Speed] of solution, encouraging a structured model which can be
       exploited by transparently passing structural information to the solver.
 \end{description}
 
-\section*{Citation}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
+\section*{References}
 
-\noindent 
 It would be greatly appreciated if users would cite the following references
 in work that uses SML:
 \begin{itemize}
@@ -84,7 +131,7 @@ in work that uses SML:
 \end{itemize}
 
 \section*{Reproduction}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
+
 This user's guide is licenced as part of SML under the Lesser GNU Public
 License (LGPL) version 3. You can redistribute it and/or modify it under the
 terms of the GNU Lesser General Public License as published by the Free
@@ -95,7 +142,7 @@ along with this program. If not, see {\tt http://www.gnu.org/licenses/}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Installation}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
+
 SML uses the standard GNU autotools install process. This can be summarised
 by the following steps:
 \begin{enumerate}
@@ -109,32 +156,36 @@ require.
 
 \section{Third-party software}
 
-\begin{table}
-   \caption{ \label{Third-party urls}
-      Third-party software and where to get it
-   }
+The third-party software you will need is summarised in 
+Table~\ref{Third-party urls}. As SML is currently implemented as a pre- and
+post-processor to AMPL you will need an installed version of AMPL.
+
+\begin{table}[ht]
    \begin{tabular}{lccl}
       \hline
       \bf Software & \bf Required? & \bf Free? & \bf URL \\
       \hline
-      AMPL         & Yes           & No        & http://www.ampl.com/vendors.html \\
+      AMPL  & Yes & No      & http://www.ampl.com/vendors.html \\
       {\tt libamplsolver.a} & Yes & Yes & http://www.netlib.org/ampl/solvers/ \\
-      OOPS         & No            & Yes,Limited & http://www.maths.ed.ac.uk/~gondzio/parallel/solver.html \\
-      MeTiS        & No            & Yes       & http://glaros.dtc.umn.edu/gkhome/views/metis \\
+      OOPS  & No  & Limited & http://www.maths.ed.ac.uk/~gondzio/parallel/solver.html \\
+      MeTiS & No  & Yes     & http://glaros.dtc.umn.edu/gkhome/views/metis \\
       \hline
    \end{tabular}
+   \caption{ \label{Third-party urls}
+      Third-party software and where to get it
+   }
 \end{table}
 
-The third-party software you will need is summarised in 
-Table~\ref{Third-party urls}. As SML is currently implemented as a pre- and
-post-processor to AMPL you will need an installed version of AMPL. If you wish
-to use the OOPS solver then you will also need the OOPS library.
-
 OOPS is the Object-Orientated Parallel Solver by Gondzio and Grothey
-\cite{mybib:oops}. A serial version, limited to 5000 constraints, is
+\cite{mybib:oops}. 
+
+If you wish to use the OOPS solver then you will also need the OOPS library.
+A serial version, limited to 5000 constraints, is
 distributed with SML under a closed-source licence and may only be linked with
-the LGPL SML library. See {\tt ThirdParty/oops/COPYING} for full terms. If you
-have a full version of OOPS (contact Andreas Grothey $<$A.Grothey@ed.ac.uk$>$
+the LGPL SML library. See {\tt ThirdParty/oops/COPYING} for full terms.
+
+If you
+have a full version of OOPS (contact Andreas Grothey {\tt <A.Grothey@ed.ac.uk>}
 for further information) you may use this instead, though you may also need the
 MeTiS library. OOPS also requires LAPACK and BLAS routines; we advise that you
 use the ones supplied by your computer vendor, however there are freely
@@ -153,7 +204,7 @@ The following configuration options are available:
    \tt --with-mps=[yes|no] & Enable/disable MPS interface
 \end{tabular}
 
-\noindent Running the command:
+Running the command:
 \begin{verbatim}
    ./configure --help
 \end{verbatim}
@@ -161,7 +212,6 @@ will display a more comprehensive summary.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Structured Problems}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
 \label{background}
 
 A typical mathematical programming problem can be written in the form
@@ -181,9 +231,8 @@ Throughout this guide we will consider two structured problems:
    \item[MSND] Survivable Network Design
    \item[ALM] Asset and Liability Management
 \end{description}
-and these will be described in the following sections.
 
-\section{Example Problem: Survivable Network Design}
+\section{Example Problem 1: Survivable Network Design}
 A network is described by sets $\mathcal{V}$ of nodes and
 $\mathcal{E}$ of (directed) arcs and a base capacity $C_j$
 for every arc $j\in\mathcal{E}$. The basic multi-commodity network flow
@@ -322,7 +371,7 @@ and aid readability; models in other languages will look much the same.
 \Red{minimize} obj: sum\{j in ARCS\} sparecap[j]*cost[j];
 \end{Verbatim}
 
-\section{Example Problem: Asset and Liability Management}
+\section{Example Problem 2: Asset and Liability Management}
 
 As an example of a stochastic programming problem we use an asset and
 liability management problem.
@@ -367,9 +416,9 @@ x_{i,j}^h &=& (1+r_{i,j})x_{\pi(i),j}^h +  x_{i,j}^b - x_{i,j}^s,&\forall i\ne 0
 \label{alm}
 \end{eqnarray}
 
-\section{Identifying structure}
+\section{Identifying the structure}
 
-So how do we identify structure? Generally if you are building you model out
+How do we identify the structure? Generally if you are building you model out
 of repeated components you can easily obtain structure - it may be that this
 structure would be indexed over in the traditional Algebraic Modelling Language
 representation - for example the indexing over {\tt ARCS} and {\tt NODES} in
@@ -474,16 +523,15 @@ shows these in action.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{SML Keywords}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
+
 In order to facilitate Structured Modelling we have introduced several new
 keywords and structures into the AMPL language. These keywords are the
 following reserved words which may not be used for component names:
 
 \begin{verbatim}
-   ancestor    block       deterministic 
-   Exp         node        stage 
-   stages      stochastic  suffix 
-   using 
+       ancestor                     Exp                       stochastic
+       block                        node                      suffix
+       deterministic                stages                    using
 \end{verbatim}
 
 We also note that while AMPL allows the redefinition of certain keywords
@@ -504,7 +552,7 @@ A block is defined as follows:
 \end{Verbatim}
 Between the curly braces {\tt \{\}} , any number of {\tt set, param,
 subject to, var, minimize} or indeed further {\tt block} definitions can be
-placed. The square brackets {\tt []} are not aprt of the language and are
+placed. The square brackets {\tt []} are not part of the language and are
 merely used to indicate optinal parts of the expression. The interpretation is
 that all declarations placed inside the block environment are implicitly
 repeated over the indexing expression used for the
@@ -574,7 +622,6 @@ stochastic block the expression {\tt Exp(expr)} is equivalent to the expression
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Advanced Topics}
-\vspace{-0.6cm}\rule{\textwidth}{0.4ex}\vspace{0.1cm}
 
 \section{Solver Interface}
 \label{interface}
@@ -864,6 +911,7 @@ the SML documentation.
 
 \bibliographystyle{siam}
 \bibliography{userguide}
+\addcontentsline{toc}{chapter}{Bibliography}
 
 %
 % End Document
