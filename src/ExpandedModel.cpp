@@ -670,6 +670,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       for(list<string>::const_iterator i=getLocalConNames().begin(); 
             i!=getLocalConNames().end(); ++i,++pptr) {
          if(*i == "" || (i->size()>=5 && i->substr(0,5)=="dummy")) continue;
+         if(*i == "" || (i->size()>=7 && i->substr(0,7)=="objFunc")) continue;
          out << ind2 << *i << ".primal = " << *pptr;
          if(drow) out << "     " << *i << ".dual = " << *(dptr++);
          out << endl;
