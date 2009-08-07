@@ -51,7 +51,8 @@ AC_DEFUN([ACX_OOPS], [
 			if test -n "$OOPSHOME" ; then
 				with_oops=$OOPSHOME
 			else
-            with_oops="$srcdir/ThirdParty/oops"
+            abssrc=`cd $srcdir; pwd`
+            with_oops="$abssrc/ThirdParty/oops"
 			fi
 		])
 	#

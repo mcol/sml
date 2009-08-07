@@ -1,3 +1,8 @@
+2009-08-08  Jonathan Hogg  <J.Hogg@ed.ac.uk>
+
+  * Fix VPATH build by using $srcdir and fixing acx_oops.m4 to use absolute
+  src path.
+
 2009-08-07  Jonathan Hogg  <J.Hogg@ed.ac.uk>
 
   * Fix a bug that tried to output information for objFunc as a constraint

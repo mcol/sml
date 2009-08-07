@@ -15,7 +15,7 @@
 # along with this program. If not, see http://www.gnu.org/licenses/.
 
 AM_CFLAGS = -g
-AM_CXXFLAGS = -g -I../../src -gstabs
+AM_CXXFLAGS = -g -I$(srcdir)/../../src -gstabs
 
 bin_PROGRAMS = smlmps
 smlmps_SOURCES = sml-mps.cpp sml-mps.h wrapper.cpp
