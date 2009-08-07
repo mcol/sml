@@ -1,3 +1,7 @@
+2009-08-07  Jonathan Hogg  <J.Hogg@ed.ac.uk>
+
+  * Fix a bug that tried to output information for objFunc as a constraint
+
 2009-03-24  Marco Colombo  <m.colombo@ed.ac.uk>
 
   * Version 0.7
