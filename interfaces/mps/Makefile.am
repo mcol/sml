@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see http://www.gnu.org/licenses/.
 
-AM_CFLAGS = -g
-AM_CXXFLAGS = -g -I$(srcdir)/../../src -gstabs
+AM_CXXFLAGS = -I$(srcdir)/../../src
 
 bin_PROGRAMS = smlmps
 smlmps_SOURCES = sml-mps.cpp sml-mps.h wrapper.cpp

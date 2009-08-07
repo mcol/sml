@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see http://www.gnu.org/licenses/.
  
-AM_CFLAGS = -g
-AM_CXXFLAGS = -g -gstabs
 SUBDIRS = src interfaces
 EXTRA_DIST = $(DOC_FILES) $(TEST_FILES) $(THIRDPARTY_FILES) \
 				 gpl.txt lgpl.txt

@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see http://www.gnu.org/licenses/.
 
-AM_CFLAGS = -g
-AM_CXXFLAGS = -g -I$(srcdir)/../../src @OOPS_INCLUDE@ -gstabs
+AM_CXXFLAGS = -I$(srcdir)/../../src @OOPS_INCLUDE@
 
 bin_PROGRAMS = smloops
 smloops_SOURCES = wrapper.cpp OOPSBlock.cpp sml-oops.cpp OOPSBlock.h \

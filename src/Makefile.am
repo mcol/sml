@@ -18,8 +18,7 @@ AM_YFLAGS = -d
 #AM_YFLAGS += -t -v
 AM_LEXFLAGS = 
 #AM_LEXFLAGS += -d
-AM_CFLAGS = -g 
-AM_CXXFLAGS = -g @AMPL_INCLUDE@ -gstabs
+AM_CXXFLAGS = @AMPL_INCLUDE@
 
 lib_LIBRARIES = libsml.a
 
