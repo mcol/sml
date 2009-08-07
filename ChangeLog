@@ -2,6 +2,11 @@
 
   * Fix VPATH build by using $srcdir and fixing acx_oops.m4 to use absolute
   src path.
+  * Remove -g -gstabs from build commands to improve portability. Use
+  CXXFLAGS=-g at configure time from now on for debugging.
+  * Modify README and userguide.tex to reflect that liboops.a is for 32-bit
+  linux only.
+  * Fix some spelling mistakes in various COPYING files
 
 2009-08-07  Jonathan Hogg  <J.Hogg@ed.ac.uk>
 
