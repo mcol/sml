@@ -322,9 +322,10 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         cslon = new SyntaxNode(LBRACE, cslon);
         
         // now build the sum
-        //printf("This is the sum: %s\n",cslon->print());
+        //cout << "Expression to be summed: " << up->print() << "\n";
+        //cout << "This is the set of the sum: " << cslon->print() << "\n";
         cslon = new SyntaxNode(SUM, cslon, up);
-        //printf("This is the sum: %s\n",cslon->print());
+        //cout << "This is the sum: " << cslon->print() << "\n";
 
         (*p)->opCode = 0;
         (*p)->clear();
