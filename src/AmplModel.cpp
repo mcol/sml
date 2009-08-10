@@ -561,23 +561,23 @@ AmplModel::check()
     cerr << "AmplModel " << name << ": n_vars = " << n_vars << "\n";
     exit(1);
   }
-  if (n_vars<0){
+  if (n_cons<0){
     cerr << "AmplModel " << name << ": n_cons = " << n_cons << "\n";
     exit(1);
   }
-  if (n_vars<0){
+  if (n_params<0){
     cerr << "AmplModel " << name << ": n_params = " << n_params << "\n";
     exit(1);
   }
-  if (n_vars<0){
+  if (n_sets<0){
     cerr << "AmplModel " << name << ": n_sets = "<< n_sets << "\n";
     exit(1);
   }
-  if (n_vars<0){
+  if (n_objs<0){
     cerr << "AmplModel " << name << ": n_objs = " << n_objs << "\n";
     exit(1);
   }
-  if (n_vars<0){
+  if (n_submodels<0){
     cerr << "AmplModel " << name << ": n_submodels = " << n_submodels << "\n";
     exit(1);
   }
