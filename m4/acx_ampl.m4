@@ -65,7 +65,7 @@ AC_ARG_WITH(ampl,
 case $with_ampl in
 	yes | "") ;;
 	no) acx_ampl_ok=disable ;;
-	*) AMPL_LIBS="-L$with_ampl -lamplsolver"; AMPL_INCLUDE="-I$with_ampl" ;;
+	*) AMPL_LIBS="$with_ampl/amplsolver.a"; AMPL_INCLUDE="-I$with_ampl" ;;
 esac
 
 acx_ampl_save_LIBS="$LIBS"
