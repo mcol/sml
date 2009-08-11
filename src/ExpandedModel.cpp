@@ -16,6 +16,7 @@
  */
 #include <list>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include "ExpandedModel.h"
 #include "GlobalVariables.h"
@@ -669,7 +670,7 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    if(getName()!="root") {
       string name = getName();
       string pname = parent->getName();
-      out << ind << name.substr(pname.size()+1) << " {" << endl;
+      out << "\n" << ind << name.substr(pname.size()+1) << " {" << endl;
    } else {
       ind2 = ind;
    }
@@ -678,10 +679,11 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       double *pptr = pvar;
       double *dptr = dvar;
       for(list<string>::const_iterator i=getLocalVarNames().begin(); 
-            i!=getLocalVarNames().end(); ++i,++pptr) {
-         out << ind2 << *i << ".primal = " << *pptr;
-         if(dvar) out << "     " << *i << ".dual = " << *(dptr++);
-         out << endl;
+          i!=getLocalVarNames().end(); ++i) {
+        out << ind2 << left << setw(20) << *i
+            << " Value = " << setw(15) << *(pptr++);
+        if(dvar) out << " Reduced cost = " << *(dptr++);
+        out << endl;
       }
       out << endl;
    }
@@ -689,15 +691,13 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
    if(prow) {
       double *pptr = prow;
       double *dptr = drow;
-      bool has_output = false;
       for(list<string>::const_iterator i=getLocalConNames().begin(); 
-            i!=getLocalConNames().end(); ++i,++pptr) {
-         out << ind2 << *i << ".primal = " << *pptr;
-         if(drow) out << "     " << *i << ".dual = " << *(dptr++);
-         out << endl;
-         has_output = true;
+          i!=getLocalConNames().end(); ++i) {
+        out << ind2 << left << setw(20) << *i
+            << " Slack = " << setw(15) << *(pptr++);
+        if(drow) out << " Dual = " << *(dptr++);
+        out << endl;
       }
-      if(has_output) out << endl;
    }
 
    for(vector<ExpandedModelInterface*>::iterator i=children.begin(); 

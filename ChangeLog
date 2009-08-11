@@ -1,7 +1,10 @@
+2009-08-11  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Improved the way the solution is printed.
+
 2009-08-11  Jonathan Hogg  <J.Hogg@ed.ac.uk>
 
   * Fixed amplsolver.a/libamplsolver.a issue when configured with --with-ampl
-  * Propogate symbol table to stochastic models (needs done properly later)
+  * Propagate symbol table to stochastic models (needs done properly later)
   * Add routines to return list of symbols that are objectives
   * When reading row file skip dummy, objective and empty lines
   * Remove output processing that used to to the above
