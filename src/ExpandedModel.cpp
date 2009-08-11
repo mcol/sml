@@ -83,6 +83,7 @@ ExpandedModel::setLocalVarInfo()
     exit(1);
   }
   
+  list<SymbolTable::Entry> objList = getObjList();
   string model_name = getName();
   if(model_name!="root") model_name = model_name.substr(5); // skip "root_"
   while(!fin.eof()){
@@ -97,6 +98,28 @@ ExpandedModel::setLocalVarInfo()
       }
       if(j<line.size() && line.at(j)=='_') j++;
     }
+    // skip empty line
+    if(line.substr(j) == "") continue;
+    // skip dummy row
+    if(line.substr(j,5) == "dummy") {
+       if(line.size()==j+5) continue;
+       if(line.at(j+5)=='[') continue;
+    }
+    // skip any objectives
+    bool isObj = false;
+    for(list<SymbolTable::Entry>::const_iterator i=objList.begin(); i!=objList.end(); ++i) {
+       if(line.substr(j,i->id.size()) == i->id) {
+          if(line.size()==j+i->id.size()) {
+             isObj=true;
+             break;
+          }
+          if(line.at(j+i->id.size()=='[')) {
+             isObj=true;
+             break;
+          }
+       }
+    }
+    if(isObj) continue;
     listOfLocalConNames.push_back(line.substr(j));
   }
 
@@ -669,8 +692,6 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       bool has_output = false;
       for(list<string>::const_iterator i=getLocalConNames().begin(); 
             i!=getLocalConNames().end(); ++i,++pptr) {
-         if(*i == "" || (i->size()>=5 && i->substr(0,5)=="dummy")) continue;
-         if(*i == "" || (i->size()>=7 && i->substr(0,7)=="objFunc")) continue;
          out << ind2 << *i << ".primal = " << *pptr;
          if(drow) out << "     " << *i << ".dual = " << *(dptr++);
          out << endl;
@@ -684,4 +705,8 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       (*i)->outputSolution(out, indent+(getName()=="root"?0:2));
 
    if(getName()!="root") out << ind << "}" << endl;
+}
+
+list<SymbolTable::Entry> ExpandedModel::getObjList() const {
+   return src->getObjList();
 }

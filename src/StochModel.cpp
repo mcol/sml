@@ -381,6 +381,10 @@ StochModel::expandToFlatModel()
       am->name = strdup((*st).c_str());
     }
 
+    // FIXME: We just duplicate the symbol table. We should separate
+    // out what belong to which model to do this properly
+    am->symbol_table.copy(symbol_table);
+
     ModelComp *comp;
 
     // loop over all components of the StochModel 

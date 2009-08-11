@@ -42,8 +42,17 @@ private:
    list<Entry> table_[n_hash];
 
 public:
+   SymbolTable() {};
+   void copy(SymbolTable &src) {
+      for(int i=0; i<n_hash; ++i) {
+         for(list<Entry>::const_iterator j=src.table_[i].begin(); j!=src.table_[i].end(); ++j) {
+            table_[i].push_back(*j);
+         }
+      }
+   }
    bool defineSymbol(symb_type, char *id, ModelComp *mc);
    Entry* findSymbol(string id);
+   list<Entry> getListByType(const symb_type type) const;
 
 private:
    unsigned long hash_function(const char *str);

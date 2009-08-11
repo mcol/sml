@@ -68,3 +68,17 @@ unsigned long SymbolTable::hash_function(const char *str)
   
   return hash;
 }
+
+list<SymbolTable::Entry> SymbolTable::getListByType(const symb_type type) const {
+   list<Entry> result;
+
+   for(int j=0; j<n_hash; j++) {
+      for(list<Entry>::const_iterator i=table_[j].begin(); i!=table_[j].end(); ++i) {
+         if(i->type == type) {
+            result.push_back(*i);
+         }
+      }
+   }
+
+   return result;
+}

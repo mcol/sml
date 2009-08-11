@@ -847,6 +847,22 @@ SymbolTable::Entry *AmplModel::findComponent(string id) {
    return ent;
 }
 
+/* --------------------------------------------------------------------------
+AmplModel::findComponent()
+---------------------------------------------------------------------------- */
+/** returns a list of all objective functions in context
+ */
+list<SymbolTable::Entry> AmplModel::getObjList() const {
+   list<SymbolTable::Entry> result = 
+      symbol_table.getListByType(SymbolTable::ST_OBJ);
+   if(parent) {
+      list<SymbolTable::Entry> pres = parent->getObjList();
+      for(list<SymbolTable::Entry>::const_iterator i=pres.begin(); i!=pres.end(); ++i)
+         result.push_back(*i);
+   }
+   return result;
+}
+
 /* ---------------------------------------------------------------------------
 bool is_int(char *tok)
 ---------------------------------------------------------------------------- */

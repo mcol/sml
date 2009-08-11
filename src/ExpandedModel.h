@@ -36,6 +36,7 @@ This would still be in the Benders view.
 #include <list>
 #include <vector>
 #include "ExpandedModelInterface.h"
+#include "symtab.h"
 
 using namespace std;
 
@@ -223,6 +224,7 @@ class ExpandedModel : public ExpandedModelInterface {
  private: 
   //! sets nLocalVar, listOfVars, nLocalCons, listOfVarNames.
   void setLocalVarInfo(); 
+  list<SymbolTable::Entry> getObjList() const;
 
 };
 

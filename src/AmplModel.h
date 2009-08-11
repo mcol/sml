@@ -153,6 +153,7 @@ class AmplModel{
   static void applyChanges(); //< apply the model changes stored in Q
 
   SymbolTable::Entry *findComponent(string id);
+  list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
 };
