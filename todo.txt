@@ -1,3 +1,8 @@
+11/08/09:
+ - We need to perform checks on the validity of the values indicated in
+   the PROB set: the values have to be positive and sum up to 1 for all
+   stages.
+
 01/02/09:
  - Seems the correct way is that lvar becomes a vector. This way it
    carries information on both the size and content of the array.
