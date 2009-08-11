@@ -31,7 +31,7 @@
  *  - stageset:    (ordered) set of stages
  *  - nodeset:     set of nodes
  *  - anc:         parameter array giving ancestor node for every node
- *  - prob:        parameter array giving conditional probability for e node
+ *  - prob:        parameter array giving conditional probability for each node
  *
  *  In principle the stochastic model block can also be repeated "horizontally"
  *  in the same manner as all other blocks by specifying an indexing 

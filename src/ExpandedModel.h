@@ -25,7 +25,7 @@ EVERY submodel (rather than just every type of submodel as the FLAT model)
 
 It would serve as an intermediate step between the AmplModel view of
 the world (which seems the right structure for a Benders type solver -
-complicating constaints/variables are associated with the parent node)
+complicating constraints/variables are associated with the parent node)
 and the OOPS view of the world (where complicating
 variables/constraints belong to off-diagonal subblocks)
 

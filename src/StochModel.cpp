@@ -213,7 +213,6 @@ StochModel::expandStagesOfComp()
       if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
     }
 
-    
   }
 
   
@@ -459,7 +458,7 @@ StochModel::expandToFlatModel()
     */
     
       /* so this is a set definition ModelComp with an SyntaxNode tree 
-         dscribing the indexing set
+         describing the indexing set
        */
       
       // start with the "i in NODES" bit

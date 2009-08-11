@@ -123,7 +123,7 @@ ExpandedModel::setLocalVarInfo()
   }
 
   fin.close(); // Added by Marco, probably not strictly required
-               // as it shuold occour in destructor.
+               // as it should occour in destructor.
   
   if (GlobalVariables::prtLvl>=2)
     cout << "Read " << colfilelist.size() << " lines from file " << 

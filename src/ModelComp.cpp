@@ -295,7 +295,7 @@ ModelComp::modifiedWriteAllTagged()
 ---------------------------------------------------------------------------- */
 /** Write out a list of all model components that have the tag set:
  write every component how it would appear in the global model file 
-\bug modified_write should be called within the model writing process:
+ @bug modified_write should be called within the model writing process:
   it depends on addIndex/l_addIndex, i.e. some indexing expressions (and
   subbmodel names) should be added to entity names depending on where in the
   model it is called 
@@ -554,7 +554,7 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
       path2[n_path2] = tmp;
       n_path2++;
     }
-    /* okay the two paths are build, lets print them */
+    /* okay the two paths are build, let's print them */
     //printf("Path to current_model: %s:\n",current_model->name);
     //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
     //printf("Path to model_of_comp: %s:\n",model_of_comp->name);
@@ -766,7 +766,7 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
       path2[n_path2] = tmp;
       n_path2++;
     }
-    /* okay the two paths are build, lets print them */
+    /* okay the two paths are build, let's print them */
     //printf("Path to current_model: %s:\n",current_model->name);
     //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
     //printf("Path to model_of_comp: %s:\n",model_of_comp->name);

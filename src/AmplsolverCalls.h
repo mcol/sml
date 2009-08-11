@@ -55,19 +55,18 @@ inline IndexListValue::IndexListValue(int new_nvar, int *new_lvar,
  *  an ExpandedModel object and provides routines to access the *.nl
  *  file through the amplsolver library.
  *
- *  
  *
  *  @note The main reason for having the class is that the use of
- *  amplsolver (AMPL's nl-file reading library) requires the inclusing
+ *  amplsolver (AMPL's nl-file reading library) requires the inclusion
  *  of asl.h which defines lots of global variables with inconvenient
  *  names like 'list'. This way, only this class has to avoid name
- *  clashes 
+ *  clashes.
  *
  *  @attention This class only stores the filename as a
  *  reference, it therefore reopens the *.nl file every time a method
  *  is called. It would probably be better to open the file once and
  *  then keep a pointer to amplsolver's ASL structure. However it is
- *  not clear if this would work (due to global variables)
+ *  not clear if this would work (due to global variables).
  * 
  *  @bug The Hessian routines are not tested. The interface should
  *  probably change as well (i.e. pass in a list of variables w.r.t

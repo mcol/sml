@@ -41,7 +41,7 @@ StochModelComp::transcribeToModelComp()
  *     and replacing this by references to entities in the FlatModel
  *     (i.e the pointer to a StochModelComp is replaced by a pointer to
  *      the corresponding ModelComp).
- *     This also deals with references to StochModel entities in a diffent
+ *     This also deals with references to StochModel entities in a different
  *     stage (i.e. through xh(-1;...))
  *   - Objective components have a term for the node probability added
  *   - replacing special StochModel constructs (i.e. Exp(...) by their
@@ -71,7 +71,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
      (3a) replace them with the values in SyntaxNode::stage and SyntaxNode::node
      (4)  find all EXP nodes in tbe attribute section
      (4a) replace them by path probabilities
-     //(4)  if this is an OBJ component, then add probablilities to it
+     //(4)  if this is an OBJ component, then add probabilities to it
   */
   ModelComp *newmc;
   list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
@@ -163,7 +163,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     }
   }
 
-  // ---------- (4) add probablilities to Exp components ---------------
+  // ---------- (4) add probablities to Exp components ---------------
 
   /* Exp(..) can be used in two forms in the SML model files:
    *
@@ -244,7 +244,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // create the *CP[ix0] term
           SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
           if (opn_prob==NULL){
-            printf("Probabilities parameter in sblock nust be given as IDREF\n");
+            printf("Probabilities parameter in stochastic block must be given as IDREF\n");
             exit(1);
           }
           SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref, 
@@ -274,6 +274,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         SyntaxNode *up = (SyntaxNode*)*((*p)->begin());
         // put brackets around this
         up = new SyntaxNode(LBRACKET, up);
+
         for (int i=level;i>0;i--){
           
           // find the dummy variable expression
@@ -286,7 +287,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // create the *CP[ix0] term
           SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
           if (opn_prob==NULL){
-            printf("Probabilities parameter in sblock nust be given as IDREF\n");
+            printf("Probabilities parameter in stochastic block must be given as IDREF\n");
             exit(1);
           }
           SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref,
@@ -342,7 +343,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         free(newmc->id);
         newmc->id = id2;
         newmc->moveUp(level);
-        
       }
     }
     if (child->opCode==COMMA&&child->nchild()>1){
@@ -357,9 +357,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     }
   }
 
-  
 
-  
 
   delete(idrefnodes);
   return newmc;

@@ -17,7 +17,7 @@
 /** @class GlobalVariables 
  *  @brief This class provides some static global variables
  *
- *  This class provides lgobal variables that control the level of debug
+ *  This class provides global variables that control the level of debug
  *  printing and logging.
  *  It also stores the names of the model and data input files.
  *  The initial values for these variables is set in ampl.ypp. Any class

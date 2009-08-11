@@ -816,7 +816,7 @@ AmplModel::reassignDependencies()
  *  nodes from the StochModel tree (or the intermediate tree)
  *
  *  This routine goes through all components and makes sure that IDREF
- *  nodes are resolved with respet to the correct ModelComp and that
+ *  nodes are resolved with respect to the correct ModelComp and that
  *  the dependency lists are in order.
  *  Recursively follows down submodels.
  */

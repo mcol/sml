@@ -39,7 +39,7 @@ Set::Set(SyntaxNode *list)
  *     child of type COMMA. 
  *     The COMMA SyntaxNode is a list, with number of entries equal to the 
  *     dimension of the set and each element of type opCode=ID 
- *     (carrying the actual dscription of the set element).
+ *     (carrying the actual description of the set element).
  */
 Set::Set(const ListNode &list):
   elements()

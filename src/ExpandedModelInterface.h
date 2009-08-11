@@ -29,7 +29,7 @@
  * child_iterator - iterates over descenants in depth-first order
  * ancestor_iterator - iterates back to root
  * These allow access to all nodes we may interact with.
- * Descdants are submodels contained within this one, and ancestors are
+ * Descendants are submodels contained within this one, and ancestors are
  * models in which this model is contained.
  *
  */
@@ -79,7 +79,7 @@ class ExpandedModelInterface {
          end_ = true;
          return (*this);
       }
-      if(desc_itr_->desc_itr_) { // Easy case, jsut increment descendant
+      if(desc_itr_->desc_itr_) { // Easy case, just increment descendant
         ++(*desc_itr_);
         return (*this);
       }
