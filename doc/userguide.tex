@@ -593,16 +593,22 @@ statements, but may also include the special {\tt stages} statement:
 that declares variables and constraints which apply only to the specific stages
 in the supplied set expression.
 
+Currently, no check is performed on the validity of the values indicated in
+the {\tt PROB} set: the user has to be careful to indicate positive values
+such that for all stages their sum is 1.
+
 The scenario tree is defined by the set of {\tt NODES} and their {\tt PARENT}
 relationship. The probability associated with a node is the conditional
 probability of reaching that node given that its parent is reached. The
-set expression STAGESET is used only to provide labels for the stages should
-they be required.
+set expression {\tt STAGESET} is used only to provide labels for the stages
+should they be required.
+It is assumed that the number of levels thus defined in the tree matches the
+cardinality of tht {\tt STAGESET} set.
 
 Entities defined within the stochastic block are either {\it stochastic} and
 are repeated for nodes in their {\it stageset}, or are {\it deterministic} and
-are repeated only once for each stage. By default entities are stochastic
-and their stageset is the full set STAGESET. Entities within a {\tt stages}
+are repeated only once for each stage. By default entities are stochastic and
+their stageset is the full set {\tt STAGESET}. Entities within a {\tt stages}
 block are by default stochastic with their stageset determined by the
 {\tt stages} set expression.
 The nature of an entity may be changed from the default through the use of the
@@ -610,7 +616,7 @@ special attributes {\tt deterministic} and {\tt stages set\_expr} in their
 declaration.
 
 The dummy indices of the {\tt NODES} and {\tt STAGESET} set expressions allow
-the particualr refence of the particular node or stage within the block through
+the reference of the particular node or stage within the block through
 the normal indexing mechanism.
 
 Relations between different stages can be expressed by using the 
@@ -620,7 +626,12 @@ stage. Variables of the ancestor can be referenced using the normal SML syntax,
 
 Expectations may also be handled through a special new syntax. Within a
 stochastic block the expression {\tt Exp(expr)} is equivalent to the expression
-{\tt sum\{nd in NODES: nd in \textit{currentstage}\} PROBS[nd] * expr[nd]}.
+\begin{Verbatim}[commandchars=\\\{\}]
+   sum\{nd in NODES: nd in \textit{currentstage}\} PROBS[nd] * expr[nd]
+\end{Verbatim}
+where \textit{currentstage} is a list of nodes in the scope
+of the current {\tt stages} block.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Advanced Topics}
