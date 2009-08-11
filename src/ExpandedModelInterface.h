@@ -187,6 +187,7 @@ class ExpandedModelInterface {
   virtual void outputSolution(std::ostream &out, int indent=0) = 0;
 
  protected:
+  ExpandedModelInterface() : parent(NULL) {}
   virtual ~ExpandedModelInterface() {}
 };
 

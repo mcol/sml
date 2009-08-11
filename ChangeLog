@@ -5,6 +5,7 @@
   * Add routines to return list of symbols that are objectives
   * When reading row file skip dummy, objective and empty lines
   * Remove output processing that used to to the above
+  * Fix unitialised parent value in ExpandedModelInterface
 
 2009-08-08  Jonathan Hogg  <J.Hogg@ed.ac.uk>
 
