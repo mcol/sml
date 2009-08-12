@@ -24,7 +24,7 @@ StochModelComp::StochModelComp():
   ModelComp()
 {}
 
-StochModelComp::StochModelComp(char *id, compType type, 
+StochModelComp::StochModelComp(const char *id, compType type,
                                SyntaxNode *indexing, SyntaxNode *attrib):
   ModelComp(id, type, indexing, attrib)
 {}

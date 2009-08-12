@@ -145,7 +145,7 @@ class AmplModel{
   void check();    //< checks instance for consistency
 
   /** Recursive detailed debugging output */
-  void dump(char *filename);
+  void dump(const char *filename);
 
   /** Recursive detailed debugging output */
   void dump(ostream &fout);

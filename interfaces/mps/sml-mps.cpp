@@ -46,7 +46,7 @@ class mps_bound {
    int id;
    double value;
 
-   mps_bound(char type_[3], int id_, double value_) :
+   mps_bound(const char type_[3], int id_, double value_) :
       type(type_), id(id_), value(value_) {}
 };
 

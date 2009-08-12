@@ -51,7 +51,8 @@ class StochModelComp: public ModelComp {
   StochModelComp();  //!< constructor that sets everything to default values
 
   //! Constructor
-  StochModelComp(char *id, compType type, SyntaxNode *indexing, SyntaxNode *attrib);
+  StochModelComp(const char *id, compType type,
+                 SyntaxNode *indexing, SyntaxNode *attrib);
 
   //! Transcribe a StochModelComp in a StochModel into a ModelComp 
   ModelComp *transcribeToModelComp(AmplModel *current_model, string nodedummy, 

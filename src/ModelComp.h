@@ -91,8 +91,9 @@ class ModelComp{
   static list<ModelComp*> global_list; //!< global list of all defined comps
   static int tt_count;    //!< number of ModelComps defined
   // ------------------------- METHODS ----------------------------------
-  // constructor
-  ModelComp(char *id, compType type, SyntaxNode *indexing, SyntaxNode *attrib);
+  /** constructor */
+  ModelComp(const char *id, compType type,
+            SyntaxNode *indexing, SyntaxNode *attrib);
   ModelComp();  //< constructor that sets everything to default values
   virtual ~ModelComp() {}
 

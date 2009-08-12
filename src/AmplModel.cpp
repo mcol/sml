@@ -84,7 +84,6 @@ AmplModel::~AmplModel()
 }
 
 
-
 /* ---------------------------------------------------------------------------
 AmplModel::setGlobalName()
 ---------------------------------------------------------------------------- */
@@ -489,11 +488,12 @@ AmplModel::print()
     }
   }
 }
+
 /* ---------------------------------------------------------------------------
-AmplModel::dump(char *filename)
+AmplModel::dump(const char *filename)
 ---------------------------------------------------------------------------- */
 void 
-AmplModel::dump(char *filename)
+AmplModel::dump(const char *filename)
 {
   ofstream fout(filename);
   dump(fout);

@@ -63,9 +63,6 @@ extern void modified_write(ostream &fout, ModelComp *comp);
 
 list<ModelComp*> ModelComp::global_list;
 
-/* --------------------------------------------------------------------------
-ModelComp::ModelComp(char* is, compType type, SyntaxNode *ix, SyntaxNode *attr)
----------------------------------------------------------------------------- */
 /** Construct a model component given its name, id, indexing and attribute
  *  sections.
  *  Also analyses dependencies in indexing and attribute and set the 
@@ -77,7 +74,7 @@ ModelComp::ModelComp(char* is, compType type, SyntaxNode *ix, SyntaxNode *attr)
  *  @param attrib      root node of the attribute expression.
  *                     IDs should have been replaced by IDREFs 
  */
-ModelComp::ModelComp(char *id, compType type, 
+ModelComp::ModelComp(const char *id, compType type,
                        SyntaxNode *indexing, SyntaxNode *attrib)
 {
   value = NULL;
