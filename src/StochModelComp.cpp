@@ -249,10 +249,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           }
           SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref, 
              new IDNode((dv.front())->print()));
-          SyntaxNode *onmult = new OpNode('*', oncp, up);
-          up = onmult;
+          up = new OpNode('*', oncp, up);
         }
-        // up/onmult is now a pointer into the expression, this should
+        // up is now a pointer into the expression, this should
         // replace the EXP node?
         (*p)->opCode = 0;
         (*p)->clear();
@@ -292,8 +291,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           }
           SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref,
             new IDNode(dv.front()->print()));
-          SyntaxNode *onmult = new OpNode('*', oncp, up);
-          up = onmult;
+          up = new OpNode('*', oncp, up);
 
           // put together the sum expression 
           // => build the ix0 in almS0_indS0 (which is the indexing expression
@@ -306,7 +304,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           
           thisam = thisam->parent;
         }
-        // up/onmult is now a pointer into the expression, this should
+        // up is now a pointer into the expression, this should
         // replace the EXP node?
 
         // create the sum expression: first build comma separated list
