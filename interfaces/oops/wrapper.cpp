@@ -112,6 +112,8 @@ int main(int argc, char **argv) {
    }
 
    ExpandedModelInterface *em = sml_generate(modelfilename,datafilename,debug);
+   if (!em)
+     return 1;
 
    cout << "Calling OOPS..." << endl;
    SML_OOPS_driver(em);

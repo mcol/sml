@@ -33,7 +33,7 @@ int GlobalVariables::prtLvl = 0;
 
 extern int yydebug;
 void parse_data(AmplModel*, char*);
-void parse_model(char *);
+int parse_model(char *);
 
 string sml_version() {
    return PACKAGE_VERSION;
@@ -90,7 +90,7 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    if (errcode){
       cerr << "Could not change working directory to 'tmp/'\n";
       cerr << "Cannot continue\n";
-      exit(1);
+      return NULL;
    }
 
    // change working directory back to original for the parsing of files
@@ -98,12 +98,15 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    if (errcode){
       cerr << "Could not change working directory to '../'\n";
       cerr << "Cannot continue\n";
-      exit(1);
+      return NULL;
    }
    
    cout << "Reading model file '" << GlobalVariables::modelfilename << 
       "'..." << endl;
-   parse_model(GlobalVariables::modelfilename);
+   int rv = parse_model(GlobalVariables::modelfilename);
+   if (rv)
+     return NULL;
+
    cout << "Reading data file '" << GlobalVariables::datafilename << 
       "'..." << endl;
    parse_data(AmplModel::root, GlobalVariables::datafilename);
@@ -113,7 +116,7 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    if (errcode){
       cerr << "Could not change working directory to 'tmp/'\n";
       cerr << "Cannot continue\n";
-      exit(1);
+      return NULL;
    }
 
    AmplModel::root->addDummyObjective();

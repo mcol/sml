@@ -1037,12 +1037,12 @@ addStochInfo(StochModelComp *newmcs, SyntaxNode *stochopt)
    }
 }
 
-void parse_model(char *filename) {
+int parse_model(char *filename) {
    if (filename){
       yyin = fopen(filename, "r");
       if (yyin==NULL){
          cerr << "ERROR: file '" << filename << "' not found" << endl;
-         exit(1);
+         return 1;
       }
    }
 
@@ -1051,7 +1051,7 @@ void parse_model(char *filename) {
    if (errcode){
       cerr << "Could not change working directory to 'tmp/'\n";
       cerr << "Cannot continue\n";
-      exit(1);
+      return 1;
    }
 
 
@@ -1064,7 +1064,7 @@ void parse_model(char *filename) {
    errcode = yyparse();
    if (errcode!=0){
       cerr << "yyparse returns " << errcode << endl;
-      exit(1);
+      return 1;
    } 
 
    fclose(yyin);
@@ -1074,6 +1074,8 @@ void parse_model(char *filename) {
    if (errcode){
       cerr << "Could not change working directory to 'tmp/'\n";
       cerr << "Cannot continue\n";
-      exit(1);
+      return 1;
    }
+
+   return 0;
 }
