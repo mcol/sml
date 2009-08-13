@@ -325,6 +325,7 @@ process_model(AmplModel *model) /* should be called with model==root */
         fscript << "{\n";
       }
       l_addIndex.push_back(li);
+      //      delete li; // valgrind errors on alm_xi
     }
 
     /* FIXME: still need to take the "print card()" statement from the
@@ -502,6 +503,8 @@ process_model(AmplModel *model) /* should be called with model==root */
         }
       }
     }
+    pclose(ain);
+
     cout << endl;
     if (n_nocsobj+n_novar+n_other>0){
       printf("\nAMPL: ampl returned output\n");
@@ -830,6 +833,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
                submodel);
         SyntaxNode::default_model = thism;
         l_addIndex.pop_back();
+        //        delete li; // valgrind errors on alm_xi
       } /* end of (model on the current list branch) */
       else if (thislevel==0) {
         // we are in the current model and are 
