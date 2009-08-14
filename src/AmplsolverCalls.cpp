@@ -236,7 +236,8 @@ NlFile::getNoNonzerosAMPL(int nvar, int *lvar)
     printf("pfgh_read returns err=%d\n",err);
     exit(1);
   }
-  
+  free(A_vals);
+
   tt_nz = 0;
   for(int i=0;i<nvar;i++){
     int col = lvar[i];
@@ -323,7 +324,8 @@ NlFile::fillSparseAMPL(int nvar, int *lvar,
     }
   }
   colbeg[nvar] = tt_nz;
-
+  free(A_vals);
+  ASL_free(&asl);
 }
 
 
@@ -451,7 +453,6 @@ NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
     exit(1);
   }
   
-  
   if (n_obj>1){
     real *c = (real *)Malloc(n_var*sizeof(real));
     real objsign = objtype[n_obj-2] ? -1. : 1; //set to -1 for maximise
@@ -463,6 +464,7 @@ NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
       int ix = lvar[i];
       elts[i] = c[ix];
     }
+    free(c);
   }
 
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?

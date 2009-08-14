@@ -1,3 +1,6 @@
+2009-08-14  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Fixed several memory leaks, including the largest one.
+
 2009-08-12  Marco Colombo  <m.colombo@ed.ac.uk>
   * Version 0.7.1
 
