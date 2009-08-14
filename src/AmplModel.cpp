@@ -68,6 +68,7 @@ AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
   level(0),
   //first(NULL),
   //last(NULL),
+  node(NULL),
   parent(NULL),
   ix(NULL)
 {
@@ -77,10 +78,10 @@ AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
    setGlobalName();
 }
 
+/** Destructor */
 AmplModel::~AmplModel()
 {
-   // FIXME:
-   //free(name); // Allocated by strdup in constructor and needs freeing
+  free(name);
 }
 
 
