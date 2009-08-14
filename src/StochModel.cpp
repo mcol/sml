@@ -319,15 +319,15 @@ StochModel::expandToFlatModel()
       
       Can we write down what the nested AmplModel tree for the ALM problem
       would look like?
-      (Note that this model is never build in practice, but all the information
+      (Note that this model is never built in practice, but all the information
       - in particular the description of the indexing sets - need to be held
       in the AmplModel objects).
       
   This routine works in two passes: 
-   1) In the first pass the chain of AmplModel's is build. The StochModelComp
+   1) In the first pass the chain of AmplModel's is built. The StochModelComp
       components are just copied (references are copied), but dependencies
       are not resolved with respect to the new model chain. 
-      The chain of AmplModels is build from the leaves up
+      The chain of AmplModels is built from the leaves up
    2) In the second pass the StochModelComp components are transcribed into
       ModelComp's and their dependencies are resolved with respect to the
       new model chain. This passed is executed from root down to the leaves
@@ -592,7 +592,6 @@ StochModel::expandToFlatModel()
     }
   } // end loop over stages
 
-  
   am->parent = parent;
   am->setGlobalNameRecursive();
   am->node = node;
@@ -631,6 +630,7 @@ StochModel::expandToFlatModel()
       cout << " -----------------------------------------------------------\n";
     }
   }
+
   return am;
 }
 

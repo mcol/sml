@@ -87,7 +87,7 @@ class AmplModel{
   int n_total;     //!< total number of declarations
   int level;       //!< level of this model on the flat model tree (root=0)
 
-  /** the ModelComp node correspding to this model 
+  /** the ModelComp node corresponding to this model
    * (this is defined if this is not root) */
   ModelComp *node; 
 		       

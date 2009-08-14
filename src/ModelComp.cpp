@@ -882,7 +882,7 @@ ModelComp::moveUp(int level){
      of the blocks up to the current model in the model tree. Both indexing 
      expression together need to combine to get the correct global indexing
 
-     When moving a ModelComp up in the tree, we therefor need to do the 
+     When moving a ModelComp up in the tree, we therefore need to do the
      following to have correct global indexing:
        - all IDREFs to ModelComp's in models below the new model 
          (current.parent(level)) need to have the block indexing expressions
@@ -896,7 +896,6 @@ ModelComp::moveUp(int level){
   for(AmplModel *tmp=current;tmp->parent!=NULL;tmp=tmp->parent){
     mlist.push_back(tmp);
   }
-  
 
   list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
 
