@@ -49,7 +49,7 @@ DIGIT    [0-9]
    //              *dummy = strtol(yytext, NULL, 10);
    //              datalval.ival = dummy;
    //              if(errno == ERANGE)
-   //                 fprintf(stderr, "Value overflow on line %i with token:" \
+   //                 fprintf(stderr, "Value overflow on line %i with token:"
    //                       "\n\"%s\"\n", yylineno, yytext);
    //             myreturn(INT_VAL);
    //           }
@@ -58,7 +58,7 @@ DIGIT    [0-9]
    //              *dummy = strtod(yytext, NULL);
    //              datalval.fval = dummy;
    //              if(errno == ERANGE)
-   //                 fprintf(stderr, "Value overflow on line %i with token:" \
+   //                 fprintf(stderr, "Value overflow on line %i with token:"
    //                       "\n\"%s\"\n", yylineno, yytext);
    //              myreturn(FLOAT_VAL);
    //           }

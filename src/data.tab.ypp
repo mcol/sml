@@ -27,7 +27,7 @@
    #include "GlobalVariables.h"
    #define YYERROR_VERBOSE
    int datalex(void);
-   void dataerror(char *s);
+   void dataerror(const char *s);
    extern FILE *datain;
    extern int datalineno;
    static AmplModel *root;
@@ -253,7 +253,7 @@ valuetable: theader_row DEFINED object_list {
 
 %%
 
-void dataerror(char *s) {
+void dataerror(const char *s) {
   cerr << "DATA: " << s << " on line " << datalineno << "\n";
   //fprintf(stderr, "%s\n", s);
   exit(1);

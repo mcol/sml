@@ -42,7 +42,7 @@
 
    extern int yylineno;
    int yylex(void);
-   void yyerror(char *s);
+   void yyerror(const char *s);
 
    static AmplModel *current_model;    /* this is the model currently active */
                                        /* this is the GLOBAL context */
@@ -864,7 +864,7 @@ value:   INT_VAL {
 //         ;
 %%
 
-void yyerror(char *s) {
+void yyerror(const char *s) {
    cerr << "MODEL: " << s << " on line " << yylineno << "\n";
    //fprintf(stderr, "%s\n", s);
 }
