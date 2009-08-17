@@ -41,7 +41,7 @@ addItemToListNew
 SyntaxNode *SyntaxNode::push_back(SyntaxNode *newitem)
 {
   /* extend the size of the node by one */
-  SyntaxNode **newvalues = (SyntaxNode **)calloc(nval+1, sizeof(SyntaxNode *));
+  SyntaxNode **newvalues = new SyntaxNode*[nval + 1];
   int i;
 
   for (i=0;i<nval;i++){
@@ -49,7 +49,7 @@ SyntaxNode *SyntaxNode::push_back(SyntaxNode *newitem)
   }
   newvalues[nval] = newitem;
   nval++;
-  free(values);
+  delete[] values;
   values = newvalues;
   return this;
 }
@@ -59,7 +59,7 @@ addItemToListBeg
 SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
 {
   /* extend the size of the node by one */
-  SyntaxNode **newvalues = (SyntaxNode **)calloc(nval+1, sizeof(SyntaxNode *));
+  SyntaxNode **newvalues = new SyntaxNode*[nval + 1];
   int i;
 
   for (i=0;i<nval;i++){
@@ -67,7 +67,7 @@ SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
   }
   newvalues[0] = newitem;
   nval++;
-  free(values);
+  delete[] values;
   values = newvalues;
   return this;
 }
@@ -416,7 +416,7 @@ SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode
    if(val2) nval++;
    if(val3) nval++;
 
-   if(nval) values = (SyntaxNode **) malloc(nval*sizeof(SyntaxNode *));
+   if(nval) values = new SyntaxNode*[nval];
 
    int i = 0;
    if(val1) values[i++] = val1;
@@ -427,7 +427,10 @@ SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode
 }
 
 SyntaxNode::~SyntaxNode() {
-   if(values) free(values);
+
+  for (int i = 0; i < nval; ++i)
+    delete values[i];
+  delete[] values;
 }
 
 /* --------------------------------------------------------------------------
@@ -444,7 +447,7 @@ SyntaxNode::deep_copy()
   }
   newn->nval = nval;
   if (nval>0)
-    newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
+    newn->values = new SyntaxNode*[nval];
 
   /* Values are copied depending on the type of the SyntaxNode */
   /* ID/IDREF/INT_VAL/FLOAT_VAL/IDREFM are treated differently */
@@ -473,7 +476,7 @@ SyntaxNode::clone()
     exit(1);
   }
   newn->nval = nval;
-  newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
+  newn->values = new SyntaxNode*[nval];
   for(int i=0;i<nval;i++)
     newn->values[i] = values[i];
   return newn;
@@ -700,7 +703,7 @@ SyntaxNode::getArgumentList() const
  *  The items from src are prepended to this object's values.
  */
 SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
-   SyntaxNode **newvalues = (SyntaxNode **)calloc(src.nval+nval,sizeof(SyntaxNode *));
+   SyntaxNode **newvalues = new SyntaxNode*[src.nval + nval];
 
    SyntaxNode **ptr = newvalues;
    for(int i=0;i<src.nval;i++)
@@ -708,7 +711,7 @@ SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
    for(int i=0;i<nval;i++)
       *(ptr++) = values[i];
    nval += src.nval;
-   free(values);
+   delete[] values;
    values = newvalues;
 
    return (*this);
@@ -814,9 +817,9 @@ void SyntaxNodeIx::splitExpression()
   if (tmp->opCode==COMMA){
     ListNode *tmpl = static_cast<ListNode*>(tmp);
     ncomp = tmp->nchild();
-    this->sets = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
+    this->sets = new SyntaxNode*[ncomp];
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
-    this->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
+    this->dummyVarExpr = new SyntaxNode*[ncomp];
     i=0;
     for(ListNode::literator ti=tmpl->lbegin(); ti!=tmpl->lend(); ++ti, ++i){
       tmp2 = findKeywordinTree(*ti, IN);
@@ -840,9 +843,9 @@ void SyntaxNodeIx::splitExpression()
     }
   }else{
     ncomp = 1;
-    this->sets = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
+    this->sets = new SyntaxNode*[1];
     this->sets_mc = (ModelComp**)calloc(1, sizeof(ModelComp*));
-    this->dummyVarExpr = (SyntaxNode**)calloc(1, sizeof(SyntaxNode*));
+    this->dummyVarExpr = new SyntaxNode*[1];
     tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
       SyntaxNode::iterator tj = tmp2->begin();
@@ -925,7 +928,7 @@ SyntaxNodeIx::deep_copy()
   SyntaxNodeIx *onix = new SyntaxNodeIx(opCode);
   
   onix->nval = nval;
-  onix->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
+  onix->values = new SyntaxNode*[nval];
   for(int i=0;i<nval;i++)
     onix->values[i] = values[i]->deep_copy();
   
@@ -934,8 +937,9 @@ SyntaxNodeIx::deep_copy()
   if (qualifier) onix->qualifier = qualifier->deep_copy();
     
   onix->ncomp = ncomp;
-  onix->sets = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
-  onix->dummyVarExpr = (SyntaxNode**)calloc(ncomp, sizeof(SyntaxNode*));
+  onix->sets = new SyntaxNode*[ncomp];
+  onix->dummyVarExpr = new SyntaxNode*[ncomp];
+  memset(onix->dummyVarExpr, 0, ncomp*sizeof(SyntaxNode*));
   
   for(int i=0;i<ncomp;i++){
     onix->sets[i] = sets[i]->deep_copy();
@@ -970,7 +974,7 @@ SyntaxNodeIDREF::deep_copy()
 
   newn->nval = nval;
   if (nval>0){
-    newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
+    newn->values = new SyntaxNode*[nval];
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i]->deep_copy();
   }
@@ -993,7 +997,7 @@ SyntaxNodeIDREF::clone()
 
   newn->nval = nval;
   if (nval>0){
-    newn->values = (SyntaxNode **)calloc(nval, sizeof(SyntaxNode *));
+    newn->values = new SyntaxNode*[nval];
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i];
   }

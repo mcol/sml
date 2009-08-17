@@ -84,7 +84,7 @@ class SyntaxNode {
   iterator end() const { return iterator(values+nval); }
 
   /** Clear the child list */
-  virtual void clear() { nval = 0; if(values) free(values); values = NULL; }
+  virtual void clear() { nval = 0; delete[] values; values = NULL; }
 
   /** ID CODE of this node (a list can be found in ampl.tab.h) */
   int opCode;
