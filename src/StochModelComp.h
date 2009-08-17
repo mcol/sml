@@ -55,8 +55,10 @@ class StochModelComp: public ModelComp {
                  SyntaxNode *indexing, SyntaxNode *attrib);
 
   //! Transcribe a StochModelComp in a StochModel into a ModelComp 
-  ModelComp *transcribeToModelComp(AmplModel *current_model, string nodedummy, 
-      string stagedummy, int level);
+  ModelComp *transcribeToModelComp(AmplModel *current_model,
+                                   const string &nodedummy,
+                                   const string &stagedummy,
+                                   const int level);
 
   //! Shallow copy, only copies pointers
   StochModelComp *clone();

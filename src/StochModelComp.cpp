@@ -57,7 +57,9 @@ StochModelComp::transcribeToModelComp()
 
 ModelComp *
 StochModelComp::transcribeToModelComp(AmplModel *current_model,
-   string nodedummy, string stagedummy, int level)
+                                      const string &nodedummy,
+                                      const string &stagedummy,
+                                      const int level)
 {
   /* The routine works as follows:
      (1)  create a deep copy of the StochModelComp
@@ -354,8 +356,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       exit(1);
     }
   }
-
-
 
   delete(idrefnodes);
   return newmc;
