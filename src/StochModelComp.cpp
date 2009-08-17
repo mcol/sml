@@ -30,10 +30,8 @@ StochModelComp::StochModelComp(const char *id, compType type,
 {}
 
 
-/* ---------------------------------------------------------------------------
-StochModelComp::transcribeToModelComp()
----------------------------------------------------------------------------- */
-/**
+/** Transcribe a StochModelComp in a StochModel into a ModelComp.
+ *
  *  This function takes a StochModelComp as read in by the parses and
  *  transcribes it into a corresponding ModelComp of the current
  *  FlatModel. It does this by:
@@ -46,15 +44,20 @@ StochModelComp::transcribeToModelComp()
  *   - Objective components have a term for the node probability added
  *   - replacing special StochModel constructs (i.e. Exp(...) by their
  *     corresponding constructs in the FlatModel
- *  @param[in] current_model The current AmplModel that all references should
- *         be resolved to
- *  @param[in] level The level of this AmplModel within the StochModel
-                     (root is 0).
- *  @remarks the gloabl variables SyntaxNode::stage and SyntaxNode::node are used to 
- *           replace all NODE and STAGE nodes in the attribute list
+ *  @param[in] current_model
+ *             The current AmplModel that all references should be resolved to.
+ *  @param[in] nodedummy
+ *             The name of the dummy index for the node set.
+ *  @param[in] stagedummy
+ *             The name of the dummy index for the stage set.
+ *  @param[in] level
+ *             The level of this AmplModel within the StochModel (root is 0).
+ *
  *  @pre SyntaxNode::stage and SyntaxNode::node need to be set.
+ *
+ *  @note The gloabl variables SyntaxNode::stage and SyntaxNode::node are used
+ *  to replace all NODE and STAGE nodes in the attribute list.
  */
-
 ModelComp *
 StochModelComp::transcribeToModelComp(AmplModel *current_model,
                                       const string &nodedummy,
@@ -192,9 +195,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
    *      subject to almS0_ExpCons:
    *         (1-tc)*(sum{ix0 in almS0_indS0, ix1 in almS0_S1_indS1[ix0]}
    *              CP[ix0]*CP[ix1]*(sum{i in ASSETS}almS0_S1_S2_xh[ix0,ix1,i]));
-   *
    */
-
 
   // find all STAGE & NODE nodes
   idrefnodes->clear();

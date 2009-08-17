@@ -20,8 +20,7 @@ class OOPSBlock;
 #include "AmplsolverCalls.h"
 
 /** @class OOPSBlock
- * @brief  
- * OOPSBlock is an object that directly corresponds to a node in the
+ *  OOPSBlock is an object that directly corresponds to a node in the
  *  OOPS Algebra Tree. 
  *  
  * It is characterized by 

@@ -22,7 +22,7 @@
 
 /* ------------------------------------------------------------------------ */
 /** @class StochModel
- *  @brief This class describes a stochastic model (block).
+ *  This class describes a stochastic model (block).
  *
  *  It will gather the information present in the SML model file for this
  *  block much in the same way that AmplModel does for ordinary blocks.
@@ -42,11 +42,19 @@
 class StochModel: public AmplModel{
  public:
   // FIXME: stage should be replaced by a Set (decribing the elements)
-  SyntaxNode *stageset;  //!< The set of STAGES
+
+  //! The set of STAGES
+  SyntaxNode *stageset;
   IDNode *stagedummy;
-  vector <string> stagenames; //!< explicit set of STAGES 
-  bool is_symbolic_stages; //!< if stage names are symbolic or numeric
-  SyntaxNode *nodeset;   //!< The set of NODES 
+
+  //! Explicit set of STAGES
+  vector <string> stagenames;
+
+  //! Whether stage names are symbolic or numeric
+  bool is_symbolic_stages;
+
+  //! The set of NODES
+  SyntaxNode *nodeset;
   IDNode *nodedummy;
   SyntaxNode *anc;       //!< The parameter array of ancestors
   SyntaxNode *prob;      //!< The parameter array of probabilities
@@ -56,13 +64,13 @@ class StochModel: public AmplModel{
   StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
 	     SyntaxNode *onProb, AmplModel *parent);
 
-  //! Expand the StochModel to a nested set of FlatModels 
+  //! Expand the StochModel to a nested set of flat models
   AmplModel *expandToFlatModel();
 
-  //! Expand the STAGES set into the actual elements and stores them in stagenames
+  //! Expand the STAGES set into the actual elements to be stored in stagenames
   void expandStages();
 
-  //!< Expand STAGES set of all StochModelComps in this model
+  //! Expand STAGES set of all StochModelComps in this model
   void expandStagesOfComp(); 
 
   /** Expand on AmplModel::addComp to setup stochmodel of component too */

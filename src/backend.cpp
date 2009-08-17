@@ -125,9 +125,7 @@ print_model(AmplModel *model)
   
   cout << "---END-------------------- backend::print_model -------------"
      "-------------\n";
-
 }
-
 
 
 /* ---------------------------------------------------------------------------
@@ -894,32 +892,32 @@ write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
 /* ---------------------------------------------------------------------------
 modified_write
 --------------------------------------------------------------------------- */
-/** writes out a component of a model 
+/** Writes out a component of a model.
  *
- * components can be modified: if this is down into a submodel, then
+ *  Components can be modified: if this is down into a submodel, then
  *  - all declarations get new indexing expressions appended to it
  *  - all references to entities get new subscripts attached to it.
  *
- * @param[in] fout  The file to write to
- * @param[in] comp  The component definition to write out
- * @pre depends on l_addIndex: currently applicable indexing expresssions
+ *  @param[in] fout
+ *             The file to write to.
+ *  @param[in] comp
+ *             The component definition to write out.
+ *  @pre Depends on l_addIndex: currently applicable indexing expresssions.
  *   
- *  prints the global definition of the given ModelComponent to the given 
- *  file.
+ *  Prints the global definition of the given ModelComponent to the given file.
  *
- * - 1) get the global name of the model component
- * - 2) prepend all indexing expressions on the stack to the indexing 
+ *  -# get the global name of the model component
+ *  -# prepend all indexing expressions on the stack to the indexing
  *      expression of this entity
- * - 3) for all components that are referenced in the definition
- *   - a) use their global name
- *   - b) prepend the dummy variables for all indexing expressions on the stack
+ *  -# for all components that are referenced in the definition
+ *    -# use their global name
+ *    -# prepend the dummy variables for all indexing expressions on the stack
  *        to the argument list
  *
- * part 3) is simply done by a call to (comp->attributes)->print() 
- * (SyntaxNode::print)
- * (with SyntaxNode::use_global_names set to true 
+ *  The last part is simply done by a call to (comp->attributes)->print()
+ *  (SyntaxNode::print)
+ *  (with SyntaxNode::use_global_names set to true
  *   => the argument list version of ModelComp::getGlobalName is called)  
- *
  */
 void
 modified_write(ostream &fout, ModelComp *comp)

@@ -26,7 +26,7 @@
 enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
 
 /** @class changeitem
- *  @brief Simple struct that stores a queued change to the model tree
+ *  Simple struct that stores a queued change to the model tree.
  *
  *  This is needed to treat expectation constraints that in the postprocessing
  *  need to be removed from the model in which they are defined and added
@@ -43,7 +43,7 @@ class changeitem{
 
 
 /** @class AmplModel
- *  @brief This class describes a model (block) in the flat model tree.
+ *  This class describes a model (block) in the flat model tree.
  *
  *  It should really be called FlatModelNode (or something like that).
  *  It keeps track of the components (vars/cons/sets/params/submodels) 
@@ -59,23 +59,25 @@ class changeitem{
 class AmplModel{
  public:
   
-  /** hash table of entries in this model. The symb_entry encodes name and
+  /** Hash table of entries in this model. The symb_entry encodes name and
    *  type of the model component. 
-   *  @attention this does not seem to be ever used to lookup model comonents
-   *             by name.
-   *  @attention should have a global hash table of *all* defined model 
-   *             components. Could be used in find_var_ref_in_context which
-   *             does the job of finding the ModelComponent object reference
-   *             for components refered to in expressions.
+   *
+   *  @attention This does not seem to be ever used to lookup model components
+   *  by name.
+   *
+   *  @attention Should have a global hash table of *all* defined model
+   *  components. Could be used in find_var_ref_in_context which does the job
+   *  of finding the ModelComponent object reference for components refered to
+   *  in expressions.
    *             => Need a way to only look for a match in the current part
    *                of the model tree.
    */
   SymbolTable symbol_table;
 
-  /** name of the block defining this (sub)model */
+  /** Name of the block defining this (sub)model */
   char *name;          
 
-  /** name with ancenstors name prepended (excluding root) */
+  /** Name with ancestors name prepended (excluding root) */
   string global_name;  
 
   int n_vars;      //!< number of variable declarations 
@@ -87,25 +89,27 @@ class AmplModel{
   int n_total;     //!< total number of declarations
   int level;       //!< level of this model on the flat model tree (root=0)
 
-  /** the ModelComp node corresponding to this model
-   * (this is defined if this is not root) */
+  /** The ModelComp node corresponding to this model (defined if this is not
+   *  root) */
   ModelComp *node; 
-		       
 
-  /** The list of components of this model 
-   */
+  /** The list of components of this model */
   list<ModelComp*> comps;
 
-  AmplModel *parent; /**< the parent if this is a submodel of another model */
-  // all models except root might have an indexing expression:
-  // block name{i in SET}:
-  // this is taken apart and stored in the next two variables
-  SyntaxNodeIx *ix;       ///< indexing expression
+  /** The parent if this is a submodel of another model */
+  AmplModel *parent;
+
+  /** Indexing expression.
+   *
+   *  All models except root might have an indexing expression:
+   *  block name{i in SET}.
+   */
+  SyntaxNodeIx *ix;
     
-  /** list of changes that should be applied to the models */
+  /** List of changes that should be applied to the models */
   static list<changeitem*> changes;
 
-  /** the root model of the AmplModel tree */
+  /** The root model of the AmplModel tree */
   static AmplModel *root;
 
   // -------------------------- methods ----------------------------------
@@ -116,10 +120,10 @@ class AmplModel{
   /** Destructor */
   virtual ~AmplModel();
 
-  /** Set global name by concatenating ancestor names */
+  /** Set the global name by concatenating ancestor names */
   void setGlobalName();      
 
-  /** Set global name recursively for this and all submodels */
+  /** Set the global name recursively for this and all submodels */
   void setGlobalNameRecursive();      
 
   /** Recursively write out all tagged model components in this model and 
@@ -129,7 +133,7 @@ class AmplModel{
   /** Recursively creates an ExpandedModel tree from the flat AmplModel */
   ExpandedModel* createExpandedModel(string smodelname, string sinstanceStub);
 
-  /** Add dummy objective that uses (sums up) all variables in the model */
+  /** Add a dummy objective that uses (sums up) all variables in the model */
   void addDummyObjective();
 
   /** Add a model component to the model */
@@ -157,7 +161,5 @@ class AmplModel{
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
 };
-
-
 
 #endif

@@ -120,10 +120,9 @@ AmplModel::setGlobalNameRecursive()
   }
 }
 
-/**
- *  Write all tagged model components in this model and submodels to a file.
+/** Write all tagged model components in this model and submodels to a file.
  *
- *  @param fout:
+ *  @param fout
  *         Name of the file to which to write. If not indicated, the writing
  *         will be directed to the standard output.
  */
@@ -196,9 +195,9 @@ list<string> *getListOfInstances(istream &file);
  *  the instance names of the nodes in the next level from the corresponding
  *  *.set file.
  *
- *  @attention It seems that the first parameter (name of flat model tree 
- *             node is redundant, since this could be obtained from the  
- *             current AmplModel instance.
+ *  @attention It seems that the first parameter (name of flat model tree node
+ *  is redundant, since this could be obtained from the current AmplModel
+ *  instance.
  */
 ExpandedModel*
 AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
@@ -383,13 +382,11 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
         subem->parent = em;
         (em->children).push_back(subem);
       }
-
     }
   }
   
   return em;
 }
-
 
 
 /* ---------------------------------------------------------------------------
@@ -591,20 +588,21 @@ AmplModel::check()
     cerr << "AmplModel " << name << " is not root but has no parent\n";
     exit(1);
   }
-  
 }
 
 
 /* ---------------------------------------------------------------------------
 AmplModel::addDummyObjective()
 ---------------------------------------------------------------------------- */
-/** AMPL will remove variables from the model that are not used in any
+/** Add a dummy objective that uses (sums up) all variables in the model.
+ *
+ *  AMPL will remove variables from the model that are not used in any
  *  constraint/objective within the model. In order to prevent this,
  *  we need to add a dummy objective that uses every defined variable
- *  (by simply summing them up)
+ *  (by simply summing them up).
  *
  *  This routine creates a list of all variable declaration in the 
- *  model and creates a dummy objective function that uses them all
+ *  model and creates a dummy objective function that uses them all.
  */
 void
 AmplModel::addDummyObjective()
@@ -812,7 +810,9 @@ AmplModel::applyChanges()
 /* --------------------------------------------------------------------------
 AmplModel::reassignDependencies()
 ---------------------------------------------------------------------------- */
-/** In the process of building the AmplModel tree from the StochModelTree
+/** Recursively recalculate dependency list and re-resolve IDREF nodes.
+ *
+ *  In the process of building the AmplModel tree from the StochModelTree
  *  some of the IDREF dependency nodes still point to the StochModelComp
  *  nodes from the StochModel tree (or the intermediate tree)
  *
@@ -838,9 +838,9 @@ AmplModel::reassignDependencies()
 AmplModel::findComponent(string id)
 ---------------------------------------------------------------------------- */
 /** Finds a component with name id in correct scoping order.
- * That is to say it will first search this model's SymbolTable, and if it
- * cannot find the component it will recurse to its parental node and so on
- * up to the root.
+ *
+ *  It will first search this model's SymbolTable, and if it cannot find
+ *  the component it will recurse to its parent node and so on up to the root.
  */
 SymbolTable::Entry *AmplModel::findComponent(string id) {
    SymbolTable::Entry *ent = symbol_table.findSymbol(id);
@@ -848,11 +848,7 @@ SymbolTable::Entry *AmplModel::findComponent(string id) {
    return ent;
 }
 
-/* --------------------------------------------------------------------------
-AmplModel::findComponent()
----------------------------------------------------------------------------- */
-/** returns a list of all objective functions in context
- */
+/** Returns a list of all objective functions in context */
 list<SymbolTable::Entry> AmplModel::getObjList() const {
    list<SymbolTable::Entry> result = 
       symbol_table.getListByType(SymbolTable::ST_OBJ);
@@ -867,9 +863,7 @@ list<SymbolTable::Entry> AmplModel::getObjList() const {
 /* ---------------------------------------------------------------------------
 bool is_int(char *tok)
 ---------------------------------------------------------------------------- */
-/** Utility function that checks is a cstring represents a natural number
- *  (i.e [0-9]*) or not
- */
+/** Checks if a cstring represents a natural number (i.e [0-9]*) or not */
 bool 
 is_int(const char *tok){
   int pos = 0;

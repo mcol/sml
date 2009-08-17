@@ -86,8 +86,8 @@ vector<string> expandSet(SyntaxNode *set) {
   }
 
   /* Also tag all global set and parameter definitions */
-  /** \bug this is just so that the global data file can be read, eventually
-     this should be removed */
+  /** @bug this is just so that the global data file can be read, eventually
+      this should be removed. */
   {
     list<ModelComp*> &comps = AmplModel::root->comps;
     
@@ -155,12 +155,12 @@ StochModel::expandStages()
 ---------------------------------------------------------------------------- */
 /** Expand the set used for the STAGES part in the sblock ... using (...)
  *  expression. 
+ *
  *  An AMPL model file and correspoding script file is created that
  *  when executed writes the components of the set to disk. This routine
  *  also reads in that file and stores the set members in the
  *  StochModel::stagenames list.
  */ 
-
 void
 StochModel::expandStages()
 {
@@ -172,6 +172,7 @@ StochModel::expandStagesOfComp()
 ---------------------------------------------------------------------------- */
 /** Expand the sets used in 'stages' qualifiers for all model components of 
  *  this model.
+ *
  *  An AMPL model file and corresponding script file is created that
  *  when executed writes the components of the set to disk. This routine
  *  also reads in that file and stores the set members in the
@@ -180,7 +181,6 @@ StochModel::expandStagesOfComp()
  *  This is a StochModel method rather than a StochModelComp method in 
  *  order to gather all expansions into a single call to AMPL.
  */ 
-
 void
 StochModel::expandStagesOfComp()
 {
@@ -212,10 +212,8 @@ StochModel::expandStagesOfComp()
       ModelComp *q = *p;
       if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
     }
-
   }
 
-  
   ofstream out("tmp.mod");
   ModelComp::modifiedWriteAllTagged(out);
   cnt=0;
@@ -298,8 +296,6 @@ StochModel::expandStagesOfComp()
   }
 
   //exit(1);
-
-
 }
 
 
@@ -322,17 +318,19 @@ StochModel::expandToFlatModel()
       (Note that this model is never built in practice, but all the information
       - in particular the description of the indexing sets - need to be held
       in the AmplModel objects).
-      
-  This routine works in two passes: 
-   1) In the first pass the chain of AmplModel's is built. The StochModelComp
-      components are just copied (references are copied), but dependencies
-      are not resolved with respect to the new model chain. 
-      The chain of AmplModels is built from the leaves up
-   2) In the second pass the StochModelComp components are transcribed into
-      ModelComp's and their dependencies are resolved with respect to the
-      new model chain. This passed is executed from root down to the leaves
 */
 
+/** Expand the StochModel to a nested set of flat models.
+ *
+ *  This routine works in two passes:
+ *  -# In the first pass the chain of AmplModel's is built. The StochModelComp
+ *     components are just copied (references are copied), but dependencies
+ *     are not resolved with respect to the new model chain.
+ *     The chain of AmplModels is built from the leaves up
+ *  -# In the second pass the StochModelComp components are transcribed into
+ *     ModelComp's and their dependencies are resolved with respect to the
+ *     new model chain. This passed is executed from root down to the leaves.
+ */
 AmplModel *
 StochModel::expandToFlatModel()
 {
@@ -639,17 +637,18 @@ StochModel::expandToFlatModel()
 StochModel::_transcribeComponents(AmplModel *current, int level)
 -----------------------------------------------------------------------------*/
 /** This routine recursively calls StochModelComp::transcribeToModelComp
- *  for all components of this StochModel
+ *  for all components of this StochModel.
  *
- *  It sets SyntaxNode::stage and SyntaxNode::node to the correct values for each
- *  new AmplModel encountered in the recursion
+ *  It sets SyntaxNode::stage and SyntaxNode::node to the correct values
+ *  for each new AmplModel encountered in the recursion.
  *
- *  @param current The AmplModel that is currently worked on. I.e. in
- *       the current level of the recursion the routine is working on
- *       AmplModel current within this StochModel.
- *  @param level The recursion level (to work out the correct way to resolve
- *       the 'stage' and 'node' keywords and 'ancestor' references)
- * 
+ *  @param current
+ *         The AmplModel that is currently worked on. I.e. in the current
+ *         level of the recursion the routine is working on AmplModel current
+ *          within this StochModel.
+ *  @param level
+ *         The recursion level (to work out the correct way to resolve the
+ *         'stage' and 'node' keywords and 'ancestor' references).
  */
 void
 StochModel::_transcribeComponents(AmplModel *current, int level)
@@ -770,4 +769,5 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
     }
   }
 }
+
 #endif

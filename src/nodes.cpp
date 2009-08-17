@@ -99,17 +99,14 @@ addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem)
   }
 }
 
-
 /* --------------------------------------------------------------------------
 SyntaxNode::print()
 --------------------------------------------------------------------------- */
-/* Thie routine recursively prints the expression routed at the current
-   node in the expression tree.
-
-   IN: use_global_names influences how nodes of type IDREF are printed
-
-*/
-
+/** Recursively prints the expression rooted at the current node in the
+ *  expression tree.
+ *
+ *  @note use_global_names influences how nodes of type IDREF are printed.
+ */
 ostream&
 operator<<(ostream&s, const SyntaxNode *node) {
    if(node == NULL) return s;
@@ -264,7 +261,6 @@ ostream& StageNodeNode::put(ostream &s) const {
    }
    return s;
 }
-
 
 ostream& OpNode::put(ostream &s) const {
   if(left) s << left;
@@ -434,7 +430,6 @@ SyntaxNode::~SyntaxNode() {
    if(values) free(values);
 }
 
-
 /* --------------------------------------------------------------------------
 SyntaxNode *SyntaxNode::deep_copy()
 ---------------------------------------------------------------------------- */
@@ -517,7 +512,7 @@ SyntaxNode::printDummyVar()
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF()
 ---------------------------------------------------------------------------- */
-/* find the list of all the IDREF nodes at or below the current node */
+/** Find the list of all the IDREF nodes at or below the current node */
 void
 SyntaxNode::findIDREF()
 {
@@ -539,7 +534,7 @@ SyntaxNode::findIDREF()
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<ModelComp> *lmc)
 ---------------------------------------------------------------------------- */
-/* find the list of all the IDREF nodes at or below the current node */
+/** Find the list of all the IDREF nodes at or below the current node */
 void
 SyntaxNode::findIDREF(list<ModelComp*> &lmc)
 {
@@ -562,7 +557,7 @@ SyntaxNode::findIDREF(list<ModelComp*> &lmc)
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
-/* find the list of all the IDREF nodes at or below the current node */
+/** Find the list of all the IDREF nodes at or below the current node */
 void
 SyntaxNode::findIDREF(list<SyntaxNode*> *lnd)
 {
@@ -590,7 +585,7 @@ SyntaxNode::findIDREF(list<SyntaxNode*> *lnd)
 /* --------------------------------------------------------------------------
 SyntaxNode::findOpCode(int oc, list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
-/* find the list of all nodes with opCode==oc at or below the current node */
+/** Find the list of all nodes with opCode==oc at or below the current node */
 void
 SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd)
 {
@@ -615,11 +610,11 @@ SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd)
 /* --------------------------------------------------------------------------
 SyntaxNode::findModelComp()
 ---------------------------------------------------------------------------- */
-/* find the ModelComp (if any) refered to by this SyntaxNode 
- * Only return the ModelComp if the expression given by this SyntaxNode is an
- * immediate reference to a ModelComp. Otherwise return NULL
+/** Find the ModelComp (if any) refered to by this SyntaxNode.
+ *
+ *  @return The ModelComp only if the expression given by this SyntaxNode is
+ *          an immediate reference to a ModelComp, otherwise NULL.
  */
-
 ModelComp *SyntaxNode::findModelComp()
 {
   SyntaxNode *on = this;
@@ -633,7 +628,6 @@ ModelComp *SyntaxNode::findModelComp()
   }
   return NULL;
 }
-
 
 /* --------------------------------------------------------------------------
 SyntaxNodeIx::getIndexingSet()
@@ -657,18 +651,16 @@ SyntaxNode *SyntaxNodeIx::getIndexingSet()
     set = ix;
   }
   return set;
-
 }
 
 /* --------------------------------------------------------------------------
 SyntaxNode::getArgumentList()
 ---------------------------------------------------------------------------- */
 /** This is for an SyntaxNode of type IDREF (and should eventually be moved
- *  to SyntaxNodeIDREF:getArgumentList()):
- *  returns a comma separated list of the arguments (the bit in [..] brackets)
+ *  to SyntaxNodeIDREF:getArgumentList()).
  *
+ *  @return A comma separated list of the arguments (the bit in [..] brackets).
  */
-
 string
 SyntaxNode::getArgumentList() const
 {
@@ -703,10 +695,9 @@ SyntaxNode::getArgumentList() const
   return arglist;
 }
 
-
 /** Merges the values list of src into that of this object.
  *
- * The items from src are prepended to this object's values
+ *  The items from src are prepended to this object's values.
  */
 SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
    SyntaxNode **newvalues = (SyntaxNode **)calloc(src.nval+nval,sizeof(SyntaxNode *));
@@ -723,8 +714,6 @@ SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
    return (*this);
 }
 
-
-//void SyntaxNode::foo(){}
 
 /* ==========================================================================
 SyntaxNodeix Methods to follow
@@ -874,19 +863,17 @@ void SyntaxNodeIx::splitExpression()
   }
 }
 
-
 /*----------------------------------------------------------------------------
 SyntaxNodeIx::hasDummyVar
 ---------------------------------------------------------------------------- */
 /** Sees if the indexing Expression given by SyntaxNodeIx defines the 
- *  dummy variable given by name 
+ *  dummy variable given by name.
  *
- *  @param name The name of the dummy variable to look for
+ *  @param name
+ *         The name of the dummy variable to look for.
  *  @return The ("ID") SyntaxNode representing the dummy Variable (if found) or
  *          NULL (if not found)
- *
  */
-
 SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
 {
   int i;
@@ -923,14 +910,15 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
   }
   return ret;
 }
+
 /*----------------------------------------------------------------------------
 SyntaxNodeIx::deep_copy
 ---------------------------------------------------------------------------- */
-/** Makes a recursive copy of this node that uses all new data structures
+/** Makes a recursive copy of this node that uses all new data structures.
+ *
  *  SyntaxNodeIDREF nodes will also be duplicated, however they will point
- *  to the original ModelComp's (rather than duplicates of them)
+ *  to the original ModelComp's (rather than duplicates of them).
  */
-
 SyntaxNodeIx *
 SyntaxNodeIx::deep_copy()
 {
@@ -994,6 +982,7 @@ SyntaxNodeIDREF::deep_copy()
 
   return newn;
 }
+
 /* --------------------------------------------------------------------------
 SyntaxNodeIDREF *SyntaxNodeIDREF::clone()
 ---------------------------------------------------------------------------- */
@@ -1093,13 +1082,12 @@ OpNode *OpNode::clone() {
    }
 }
 
-
 /* ----------------------------------------------------------------------------
 findKeywordinTree
 ---------------------------------------------------------------------------- */
-/* this routine traverses down the tree and returns the top most reference to 
-   the keyword in the Tree */
-
+/** Traverses down the tree and returns the topmost reference to the keyword
+ *  in the Tree.
+ */
 SyntaxNode *
 findKeywordinTree(SyntaxNode *root, int oc)
 {
@@ -1126,18 +1114,21 @@ find_var_ref_in_context
  *  of the dot'd expression parsed so far. 'ref' is the new part that
  *  should be added.
  *
- * @param ref A pointer to an expression that evaluates to a ModelComp
- *            this can be given by an ID a dotted expression ID.ID
- *            or a reference to a parent stage (in StochProg) such as 
- *            ID(-1;...).
- *            It can also carry an indexing expressinon ID[.,.,.] in
- *            which case the indexing is attached to the returned IDREF node
- * @param context A pointer to the current AmplModel that defines the scope
- *                in which the ID expressions should be resolved
- * @return An SyntaxNode of type IDREF that points to the correct ModelComp
- * @bug Should return an SyntaxNodeIDREF* 
+ *  @param context
+ *         A pointer to the current AmplModel that defines the scope in which
+ *         the ID expressions should be resolved.
+ *  @param ref
+ *         A pointer to an expression that evaluates to a ModelComp: this can
+ *         be given by an ID a dotted expression ID.ID or a reference to a
+ *         parent stage (in StochProg) such as ID(-1;...).
+ *         It can also carry an indexing expressinon ID[.,.,.] in which case
+ *         the indexing is attached to the returned IDREF node.
  *
- *  An SyntaxNode of type IDREF looks like this
+ *  @return An SyntaxNode of type IDREF that points to the correct ModelComp.
+ *
+ *  @bug Should return a SyntaxNodeIDREF*.
+ *
+ *  A SyntaxNode of type IDREF looks like this
  *       ->opCode = IDREF;
  *       ->nval = # of arguments
  *       ->values[0] = pointer to entity in model list
@@ -1153,7 +1144,6 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       - a LSBRACKET node, where values[0] is ID and values[1] is CSL
       in the second case the CSL should be added as further arguments
       to the resulting IDREF node
-
    */
   
    /* returns: pointer */
@@ -1254,19 +1244,17 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
 /* ---------------------------------------------------------------------------
 find_var_ref_in_indexing
 ---------------------------------------------------------------------------- */
-/* scan through the current set of active indexing expressions and see if
-   any of them define the dummy variable  given by 'name' 
-
-   IN: 
-    char *name                 the name of identifier to look for
-    
-    int n_indexing             the currently active indexing expressions
-    SyntaxNode *list_of_indexing
-   RETURN:
-    The Indexing expression in which the name occurs 
-    (or NULL if there is no match)
-                                                                      */
-
+/** Scan through the current set of active indexing expressions and see if
+ *  any of them defines the dummy variable given by 'name'.
+ *
+ *  @param name
+ *         The name of identifier to look for.
+ *
+ *   int n_indexing             the currently active indexing expressions
+ *   SyntaxNode *list_of_indexing
+ *  @return The Indexing expression in which the name occurs (or NULL if there
+ *          is no match).
+ */
 SyntaxNode *
 find_var_ref_in_indexing(const char *const name)
 {

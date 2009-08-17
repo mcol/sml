@@ -21,26 +21,27 @@
 #include <list>
 
 /** 
- * @class ExpandedModelInterface
- * @brief The representation of a a submodel (block) in the expanded model 
- * which is passed to the solver to allow it to calculate values.
- * 
- * We offer two iterators:
- * child_iterator - iterates over descenants in depth-first order
- * ancestor_iterator - iterates back to root
- * These allow access to all nodes we may interact with.
- * Descendants are submodels contained within this one, and ancestors are
- * models in which this model is contained.
+ *  The representation of a a submodel (block) in the expanded model
+ *  which is passed to the solver to allow it to calculate values.
  *
+ *  The class offers two iterators to allow access to all nodes we may
+ *  interact with:
+ *  -# child_iterator: iterates over descendants in depth-first order
+ *  -# ancestor_iterator: iterates back to root
+ *  Descendants are submodels contained within this one, and ancestors are
+ *  models in which this model is contained.
  */
 class ExpandedModelInterface {
  friend class AmplModel;
  public:
- std::vector <ExpandedModelInterface*> children;  //!< list of children
+
+  /** List of child nodes (vector, so that it can be indexed) */
+  std::vector <ExpandedModelInterface*> children;
 
  protected:
-  /** list of child nodes (vector, so that it can be indexed) */
-  ExpandedModelInterface *parent;         //!< parent node 
+
+  /** Parent node */
+  ExpandedModelInterface *parent;
 
  public:
   /** Depth first iterator */
@@ -134,22 +135,22 @@ class ExpandedModelInterface {
   ancestor_iterator abegin() { return ancestor_iterator(parent); }
   ancestor_iterator aend() { return ancestor_iterator(NULL); }
   
-  //! Return nb local vars.
+  //! Returns the number of local variables
   virtual int getNLocalVars() = 0;
 
-  //! Return names of local variables.
+  //! Returns the names of local variables
   virtual const std::list<std::string>& getLocalVarNames() = 0;
 
-  //! Return nb local cons.
+  //! Returns the number of local constraints.
   virtual int getNLocalCons() = 0;
 
-  //! Return names of local constraints.
+  //! Returns the names of local constraints
   virtual const std::list<std::string>& getLocalConNames() = 0;
 
-  //! Returns the nonzeros in the Jacobian of a section of the model.
+  //! Returns the nonzeros in the Jacobian of a section of the model
   virtual int getNzJacobianOfIntersection(ExpandedModelInterface *emcol) = 0;
 
-  //! Returns the nonzeros in the Jacobian of a section of the model.
+  //! Returns the nonzeros in the Jacobian of a section of the model
   virtual void getJacobianOfIntersection(ExpandedModelInterface *emcol, int *colbeg,
 				 int *collen, int *rownbs, double *el) = 0;
 
@@ -180,7 +181,7 @@ class ExpandedModelInterface {
   //! Upload the local constraints duals (multipliers on constraints)
   virtual void setDualSolRows(double *elts) = 0; 
 
-  //! Returns unique name of this block
+  //! Returns the unique name of this block.
   virtual std::string getName() const = 0;
 
   //! Outputs the solution to the supplied stream at given indent 

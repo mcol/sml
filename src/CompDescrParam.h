@@ -30,16 +30,25 @@
  */  
 class CompDescrParam: public CompDescr{
  public:
-  int nix; //!< number of indices
-  int nsets; //!< number of indexing sets (different to nix) 
-  Set **indices; //!< pointers to the indexing sets
+
+  /** Number of indices */
+  int nix;
+
+  /** Number of indexing sets (different to nix) */
+  int nsets;
+
+  /** Pointers to the indexing sets */
+  Set **indices;
 
   /** Total number of entries: product of the number of elements in all 
    *  indexing sets */
-  int n; //!< total number of entries
-  int nread; //!< number of values that are given so far
+  int n;
 
-  double *values; //!< the array of values
+  /** Number of values that are given so far */
+  int nread;
+
+  /** The array of values */
+  double *values;
 
   // ------------------ constructors ---------------------
   
@@ -49,8 +58,10 @@ class CompDescrParam: public CompDescr{
   string printToString();
 
  private:
+
   /** Service routine that processes a tree below a TOKVALUETABLELIST node */
   void processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix);
 
 };
+
 #endif

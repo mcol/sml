@@ -25,13 +25,17 @@
 /* ---------------------------------------------------------------------------
 CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc)
 ---------------------------------------------------------------------------- */
-/** Parses the parameter description given in a data file
+/** Parses the parameter description given in a data file.
+ *
  *  This routine constructs a CompDescrParam (the actual parameter values)
- *  from a tree of SyntaxNodes originating from the data file
- *  @param mc   Reference to the Component in the model file
- *               (so we can get indexing sets and dimension)
- *  @param desc  The SyntaxNode tree giving the parameter value description as
- *               expressed in the data file
+ *  from a tree of SyntaxNodes originating from the data file.
+ *
+ *  @param mc
+ *         Reference to the Component in the model file (so we can get indexing
+ *         sets and dimension).
+ *  @param desc
+ *         The SyntaxNode tree giving the parameter value description as
+ *         expressed in the data file.
  */
 CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   nix(-1),
@@ -232,11 +236,13 @@ CompDescrParam::printToString()
 /* ---------------------------------------------------------------------------
 CompDescrParam::processValueTableList
 ---------------------------------------------------------------------------- */
-/** processes a part of a SyntaxNode-tree representing a value_table_list 
- *  @param node  The SyntaxNode of type TOKVALUETABLELIST that describes the
- *               values
- *  @param ix    The indexing expression of the ModelComp that represents the
- *               parameter (to get ix->sets_mc).
+/** Processes a part of a SyntaxNode-tree representing a value_table_list.
+ *
+ *  @param node
+ *         The SyntaxNode of type TOKVALUETABLELIST that describes the values.
+ *  @param ix
+ *         The indexing expression of the ModelComp that represents the
+ *         parameter (to get ix->sets_mc).
  */
 void
 CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
@@ -281,7 +287,6 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
      + a third (dummy) argument to TOKVALUETABLE?
      - 
   */
-  
 
   // loop through all value_table's
   for(SyntaxNode::iterator i=node->begin(); i!=node->end(); ++i){
@@ -338,7 +343,6 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
         // this is a set of dim 1
         colpos[jj] = indices[ixcolset]->findPos(SetElement(1,(IDNode **) &cl));
       }
-      
     }
     
     // also do the same loop for row_labels
@@ -383,6 +387,4 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
       }
     }
   }
-
-
 }

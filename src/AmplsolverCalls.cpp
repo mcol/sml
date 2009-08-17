@@ -199,9 +199,11 @@ getNoNonzerosAMPL
 /** Returns the number of nonzeros for a (vertical) slice of the
  *  constraint matrix (Jacobian) defined in this file.
  *
- *  @param nvar Number of variables (columns) in the slice
- *  @param lvar The indices of the variables in the slice
- *  @return Number of nonzeros in the slice of the jacobian
+ *  @param nvar
+ *         Number of variables (columns) in the slice.
+ *  @param lvar
+ *         The indices of the variables in the slice.
+ *  @return Number of nonzeros in the slice of the jacobian.
  *
  *  For the part of the problem defined by the intersection of all the
  *  constraints in the *.nl file and the variables given by nvar, lvar
@@ -264,12 +266,18 @@ fillSparseAMPL
  *  defined in this file in (columnwise) sparse matrix format (by
  *  filling in the memory locations provided).
  *
- *  @param[in] nvar Number of variables (columns) in the slice
- *  @param[in] lvar The indices of the variables in the slice
- *  @param[out] colbeg Pointer to column starts in rownbs, el
- *  @param[out] collen Vector of column lengths (can be NULL)
- *  @param[out] rownbs Row indices for the sparse elements
- *  @param[out] el The actual nonzero elements.
+ *  @param[in] nvar
+ *             Number of variables (columns) in the slice.
+ *  @param[in] lvar
+ *             The indices of the variables in the slice.
+ *  @param[out] colbeg
+ *             Pointer to column starts in rownbs, el.
+ *  @param[out] collen
+ *             Vector of column lengths (can be NULL).
+ *  @param[out] rownbs
+ *             Row indices for the sparse elements.
+ *  @param[out] el
+ *             The actual nonzero elements.
  *  
  *  For the part of the problem defined by the intersection of all the
  *  constraints in the *.nl file and the variables given by nvar, lvar
@@ -335,10 +343,9 @@ getRowLowBoundsAMPL
 /** Returns the constraint (row) lower bounds for the constraints
  *  defined in this *.nl file.
  *
- *  @param[out] elts The row lower limits as a dense vector.
- *
+ *  @param[out] elts
+ *              The row lower limits as a dense vector.
  */
-
 void 
 NlFile::getRowLowBoundsAMPL(double *elts)
 {
@@ -374,10 +381,9 @@ getRowUpBoundsAMPL
 /** Returns the constraint (row) upper bounds for the constraints
  *  defined in this *.nl file.
  *
- *  @param[out] elts The row upper limits as a dense vector.
- *
+ *  @param[out] elts
+ *              The row upper limits as a dense vector.
  */
-
 void 
 NlFile::getRowUpBoundsAMPL(double *elts)
 {
@@ -413,14 +419,16 @@ getObjAMPL
 /** Evaluates the objective gradient (linear coefficients) for a
  *  (vertical) slice of the problem stored in the *.nl file.
  *
- *  @param[in] nvar Number of variables defining the slice
- *  @param[in] lvar The indices of the variables defining the slice
- *  @param[out] elts The objective gradient vector w.r.t. the variables 
- *  defined in nvar/lvar
+ *  @param[in] nvar
+ *             Number of variables defining the slice.
+ *  @param[in] lvar
+ *             The indices of the variables defining the slice.
+ *  @param[out] elts
+ *             The objective gradient vector w.r.t. the variables defined in
+ *             nvar/lvar.
  *
- *  @bug This only works for linear objective functions: 
- *     No vector x at which the objective should be evaluated is passed in
- *
+ *  @bug This only works for linear objective functions: no vector x at which
+ *  the objective should be evaluated is passed in.
  *
  *  @attention This routine evaluates the second last objective
  *  function defined in the *.nl file. Standard AMPL behaviour is to
@@ -476,12 +484,13 @@ getColUpBoundsAMPL
 /** Returns upper variable (column) bounds for a selection of the
  *  variables in the *.nl file.
  *
- *  @param[in] nvar Number of variables defining the slice
- *  @param[in] lvar The indices of the variables defining the slice
- *  @param[out] elts The upper bounds for the defined variables. 
- *
+ *  @param[in] nvar
+ *             Number of variables defining the slice.
+ *  @param[in] lvar
+ *             The indices of the variables defining the slice.
+ *  @param[out] elts
+ *             The upper bounds for the defined variables.
  */
- 
 void 
 NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
 {
@@ -519,12 +528,13 @@ getColLowBoundsAMPL
 /** Returns lower variable (column) bounds for a selection of the
  *  variables in the *.nl file.
  *
- *  @param[in] nvar Number of variables defining the slice
- *  @param[in] lvar The indices of the variables defining the slice
- *  @param[out] elts The lower bounds for the defined variables. 
- *
+ *  @param[in] nvar
+ *             Number of variables defining the slice.
+ *  @param[in] lvar
+ *             The indices of the variables defining the slice.
+ *  @param[out] elts
+ *             The lower bounds for the defined variables.
  */
- 
 void 
 NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
 {
@@ -558,14 +568,15 @@ NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
 /* -------------------------------------------------------------------------
 NlFile::findIxOfLocalVarsInNlFile
 -------------------------------------------------------------------------- */
-/** Find the indices of the local variables of a given model in this nlfile
+/** Find the indices of the local variables of a given model in this nlfile.
  *
- * @param[in] em  The model that defines the local variables
- * @param[out] lvar Assumed to be allocated with em->nLocalVar elements
- *     lvar[i] is the the index of the ith local variable in em in the 
- *     nlfile.
+ *  @param[in] em
+ *             The model that defines the local variables.
+ *  @param[out] lvar
+ *             Assumed to be allocated with em->nLocalVar elements: lvar[i]
+ *             is the the index of the ith local variable in em in the nlfile.
  *
- * @return The number of matches found
+ *  @return The number of matches found.
  *
  * The given nlfile will define variables spanning different column blocks.
  * This routine scans through those variables and sees if any of them match
@@ -577,7 +588,6 @@ NlFile::findIxOfLocalVarsInNlFile
  * return the lvar stored on the map. Probably lvar should be returned as a 
  * C++ vector.
  */
-
 int
 NlFile::findIxOfLocalVarsInNlFile(ExpandedModel *em, int *lvar)
 {

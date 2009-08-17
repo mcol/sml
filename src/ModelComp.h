@@ -41,15 +41,15 @@ using namespace std;
 		  "subject to" components)
 */
 class AmplModel;
-/** 
- * @class ModelComp
- * @brief Object to represent a component of an AMPL/SML model/block.
+
+/** @class ModelComp
+ *  Object to represent a component of an AMPL/SML model/block.
  *
  * The ModelComp object represents a component of an SML model/block.
  * It usually represents one line of AMPL/SML which is a definition of a
  * variable/parameter/set/constraint/objective/block.
  * A model component is broken down into the following parts:
- * - \<TYPE\> \<name\>\<indexing\>_opt \<attributes\>_opt
+ * - <typo\> <name\> <indexing\>_opt <attributes\>_opt
  */
 class ModelComp{
  private:
@@ -57,14 +57,18 @@ class ModelComp{
   static const string nameTypes[];
   static const string compTypes[];
 
-  compType type;   //!< the type of the component
-  char *id;        //!< the name of the component
+  /** Type of the component */
+  compType type;
+
+  /** Name of the component */
+  char *id;
 
   /** this is a tree of specifications, this includes
    * :=, within, default, >=                                               */
   SyntaxNode *attributes;   
 			 
-  SyntaxNodeIx *indexing; //!< indexing expression 
+  /**  Indexing expression */
+  SyntaxNodeIx *indexing;
   
   /** List of all entities that this model component depends on:
    *  Basically a list of all model components used in the definition of
@@ -74,10 +78,11 @@ class ModelComp{
   AmplModel *model;    //!< The model this belongs to 
 
   /** A pointer to an AmplModel structure for components of type MODEL
-   *  @attention Better implemented as a subclass of ModelComp  */
+   *  @attention Better implemented as a subclass of ModelComp. */
   void *other;      
 
-  int count;           //!< instance number of ModelComp
+  /** Instance number of ModelComp */
+  int count;
 
   /** Components can be tagged by the tagDependencies method which sets
    *  this tag for this components and everything that it depends on 
@@ -88,25 +93,31 @@ class ModelComp{
    *  values and further specific information (Set for sets)
    */
   CompDescr *value;   //!< value (for sets and parameters)
-  static list<ModelComp*> global_list; //!< global list of all defined comps
-  static int tt_count;    //!< number of ModelComps defined
+
+  /** Global list of all defined ModelComps */
+  static list<ModelComp*> global_list;
+
+  /** Number of ModelComps defined */
+  static int tt_count;
+
   // ------------------------- METHODS ----------------------------------
-  /** constructor */
+  /** Constructor */
   ModelComp(const char *id, compType type,
             SyntaxNode *indexing, SyntaxNode *attrib);
   ModelComp();  //< constructor that sets everything to default values
   virtual ~ModelComp() {}
 
-  /** set up an existing model comp to specified values   */
+  /** Set up an existing model comp to specified values */
   void setTo(char *id, compType type, SyntaxNodeIx *indexing, SyntaxNode *attrib); 
 
-  /** set up list of dependencies for this component */
+  /** Set up list of dependencies for this component */
   void setUpDependencies();
   void dump(ostream &fout);   //!< detailed debugging output
   void print();   //!< prints elements of the class
   void printBrief();   //!< prints one liner
-  void tagDependencies();  //!< tag this components and all its dependencies
-                           // recursively
+
+  /** Tag this components and all its dependencies recursively */
+  void tagDependencies();
 
   /** Recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();

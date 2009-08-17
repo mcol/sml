@@ -18,13 +18,14 @@
 #define COMPDESCR
 
 #include <string>
-/** @class CompDescr
- *  This is a superclass for all Component Description classes such as
- *  Set, CompDescrParam
- *  Its main purpose is to provide a type (other than void*) that can be
- *  used in the ->value field of ModelComp
- */
 
+/** @class CompDescr
+ *  A superclass for all Component Description classes such as Set and
+ *  CompDescrParam.
+ *
+ *  Its main purpose is to provide a type (other than void*) that can be
+ *  used in the ->value field of ModelComp.
+ */
 class CompDescr{
  public:
   virtual ~CompDescr() {}

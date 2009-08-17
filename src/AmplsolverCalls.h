@@ -50,11 +50,9 @@ inline IndexListValue::IndexListValue(int new_nvar, int *new_lvar,
 
 
 /** @class NlFile 
-
- *  @brief This object represents a *.nl file. It is associated with
+ *  This object represents a *.nl file: it is associated with
  *  an ExpandedModel object and provides routines to access the *.nl
  *  file through the amplsolver library.
- *
  *
  *  @note The main reason for having the class is that the use of
  *  amplsolver (AMPL's nl-file reading library) requires the inclusion
@@ -133,14 +131,12 @@ class NlFile {
   void getColUpBoundsAMPL(int nvar, int *lvar, double *elts);
   int findIxOfLocalVarsInNlFile(ExpandedModel *em, int *lvar);
 
-  
   // Here follow stuff for which wrapper routines in ExpandedModel do not
   // exist yet.
  public:
   // this is here since createQ accesses it directly
   //! return number of variables defined in this *.nl file 
   int getNoVariables();
-
 
   //! return number of Hessian entries defined in this *.nl file 
   int getNoHessianEntries();
@@ -157,10 +153,6 @@ class NlFile {
    */
   void getHessianEntries(int *colbeg, int *rownbs, double *el);
 
-
 };
-
-
-
 
 #endif

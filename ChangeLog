@@ -1,3 +1,6 @@
+2009-08-17  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Updates, reformatting and small corrections to the doxygen documentation.
+
 2009-08-14  Marco Colombo  <m.colombo@ed.ac.uk>
   * Fixed several memory leaks, including the largest one.
 

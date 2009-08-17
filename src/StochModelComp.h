@@ -16,15 +16,18 @@
  */
 #include "ModelComp.h"
 #include "StochModel.h"
+
 /** @class StochModelComp
- *  @brief The class describes an entity in a stochastic model
+ *  The class describes an entity in a stochastic model.
  *
  *  The class stores information that is read in from a stochastic block
  *  It is equivalent to the ModelComp class, the only difference is that
  *  is also stores an expression corresponding to the applicable stageset
  *  and a possible deterministic attribute.
+ *
+ *  This component is repeated over all nodes belonging to stages that are
+ *  listed in the stageset.
  */
-
 class StochModelComp: public ModelComp {
  public:
   /* FIXME: No good idea, hides the AmplModel *model in ModelComp */
@@ -36,17 +39,17 @@ class StochModelComp: public ModelComp {
    * A deterministic component only varies over stages, not over nodes */
   bool is_deterministic;  //!< if component is deterministic
 
-  /** This component is repeated over all nodes belonging to stages that 
-   *  are listed in the stageset
-   *  stageset is a SyntaxNode giving a set expression (to be expanded by AMPL) */
-  SyntaxNode *stageset;       //!< set of stages in which component is present
+  /** Set of stages in which component is present.
+   *  stageset is a SyntaxNode giving a set expression to be expanded by AMPL */
+  SyntaxNode *stageset;
 
-  /** This component is repeated over all nodes belonging to stages that 
-   *  are listed in the stageset
-   *  stagenames is the expanded list of stage set members */
-  vector<string> *stagenames; //!< list of stages in which component is present
+  /** List of stages in which this component is present.
+   *  stagenames is the expanded list of stage set members. */
+  vector<string> *stagenames;
 
-  StochModel *stochmodel; //!< points to the StochModel that this belongs to
+  /** StochModel that this belongs to */
+  StochModel *stochmodel;
+
   /* ======================== methods =================================== */
   StochModelComp();  //!< constructor that sets everything to default values
 

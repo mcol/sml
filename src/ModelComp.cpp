@@ -176,7 +176,6 @@ ModelComp::setTo()
  *  @param attrib      root node of the attribute expression.
  *                     IDs should have been replaced by IDREFs 
  */
-
 void
 ModelComp::setTo(char *id, compType type, 
                        SyntaxNodeIx *indexing, SyntaxNode *attrib)
@@ -249,10 +248,11 @@ ModelComp::untagAll()
 /* ---------------------------------------------------------------------------
 ModelComp::untagAll(AmplModel *start)
 ---------------------------------------------------------------------------- */
-/** Recursively set tag=false for all model components 
- *  @param start The AmplModel where to start the recursion
+/** Recursively set tag=false for all model components.
+ *
+ *  @param start
+ *         The AmplModel where to start the recursion.
  */
-
 void 
 ModelComp::untagAll(AmplModel *start)
 {
@@ -269,8 +269,10 @@ ModelComp::untagAll(AmplModel *start)
 /* ---------------------------------------------------------------------------
 ModelComp::writeAllTagged(AmplModel *start)
 ---------------------------------------------------------------------------- */
-/** Recursively write out a list of all model components that have the tag set 
- *  @param start The AmplModel where to start the recursion
+/** Recursively write out a list of all model components that have the tag set.
+ *
+ *  @param start
+ *         The AmplModel where to start the recursion.
  */
 void 
 ModelComp::writeAllTagged(AmplModel *start)
@@ -290,13 +292,17 @@ ModelComp::writeAllTagged(AmplModel *start)
 /* ---------------------------------------------------------------------------
 ModelComp::modifiedWriteAllTagged()
 ---------------------------------------------------------------------------- */
-/** Write out a list of all model components that have the tag set:
- write every component how it would appear in the global model file 
- @bug modified_write should be called within the model writing process:
-  it depends on addIndex/l_addIndex, i.e. some indexing expressions (and
-  subbmodel names) should be added to entity names depending on where in the
-  model it is called 
-*/
+/** Recursively write name of all tagged components.
+ *
+ *  Write out a list of all model components that have the tag set: write
+ *  every component how it would appear in the global model file.
+ *
+ *  @bug
+ *  modified_write should be called within the model writing process:
+ *  it depends on addIndex/l_addIndex, i.e. some indexing expressions (and
+ *  subbmodel names) should be added to entity names depending on where in
+ *  the model it is called.
+ */
 void 
 ModelComp::modifiedWriteAllTagged(ostream &fout)
 {
@@ -366,7 +372,7 @@ ModelComp::dump(ostream &fout)
 /* ---------------------------------------------------------------------------
 ModelComp::printBrief()
 ---------------------------------------------------------------------------- */
-/** Print a one line description of the object: type and name                */
+/** Print a one line description of the object: type and name */
 void
 ModelComp::printBrief()
 {
@@ -375,8 +381,11 @@ ModelComp::printBrief()
 /* ---------------------------------------------------------------------------
 ModelComp::tagDependencies()
 ---------------------------------------------------------------------------- */
-/** Recursively set tag=true for this model component and all components that  
- *  it depends on (i.e. everything listed in its dependency list           */
+/** Tag this components and all its dependencies recursively.
+ *
+ *  Recursively set tag=true for this model component and all components that
+ *  it depends on (i.e. everything listed in its dependency list.
+ */
 void
 ModelComp::tagDependencies()
 {
@@ -390,7 +399,8 @@ ModelComp::tagDependencies()
 /* ---------------------------------------------------------------------------
 ModelComp::deep_copy()
 ---------------------------------------------------------------------------- */
-/** Create a deep-copy of the ModelComp object: 
+/** Create a deep-copy of the ModelComp object.
+ *
  *  The tree of attributes and indexing expressions is recreated using 
  *  entirely new objects.
  */
@@ -456,12 +466,14 @@ getGlobalName
  *   included in the argument list of the ModelComp. Anything below needs to
  *   be prepended to the argument list
  *
- * @param[in] node           The model component in question 
- * @param[in] opn            The node (IDREF) of the model component
- *                           (needed for the (local) argument list)
- * @param[in] current_model:  The block for which this is written:
- *              indexing is given in the original SML model wrt a 
- *              given node in the model tree. 
+ *  @param[in] node
+ *             The model component in question.
+ *  @param[in] opn
+ *             The node (IDREF) of the model component (needed for the (local)
+ *             argument list).
+ *  @param[in] current_model
+ *             The block for which this is written: indexing is given in the
+ *             original SML model wrt a given node in the model tree.
  *      FIXME: what happens if the component referenced in the definition is
  *             not in the same model_tree node as the component to be defined?
  *             In the original ampl file this is correct, since the indexing
@@ -469,17 +481,15 @@ getGlobalName
  *             However the local indexing is lost(?) in the node representation
  *             => I don't think so, it is still encoded in the rest of the
  *                SyntaxNode structure
- * @param[in] witharg    WITHARG if the argument list should be processed, 
- *                       NOARG   only the global name
- *                       ONLYARG only the argument list
+ *  @param[in] witharg
+ *             WITHARG: if the argument list should be processed,
+ *             NOARG:   only the global name,
+ *             ONLYARG: only the argument list.
  *
- * @pre
- *   l_addIndex   Needs to be set. It is assumed that this is a stack of 
- *                indexing expressions from the root at least to the common
- *                ancestor node (likely set up to the current_model)
- *
+ *  @pre l_addIndex needs to be set. It is assumed that this is a stack of
+ *       indexing expressions from the root at least to the common ancestor
+ *        node (likely set up to the current_model).
  */
-
 char *
 getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
@@ -599,7 +609,6 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
       }
     }
   }
-  
 
   /* work on the argument list */
   /* opn->nval is the number of arguments (at this level),
@@ -661,16 +670,18 @@ getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model,
  *  but creates the modified argument list by looking at the indexing
  *  expressions of the submodel tree leading to this ModelComp
  *
- * @param[in] node           The model component in question 
- * @param[in] opn            The node (IDREF) of the model component
- *                           (needed for the (local) argument list)
- * @param[in] current_model:  The block for which this is written:
- *              indexing is given in the original SML model wrt a 
- *              given node in the model tree. 
- * @param[in] witharg    WITHARG if the argument list should be processed, 
- *                       NOARG   only the global name
- *                       ONLYARG only the argument list
- *
+ *  @param[in] node
+ *             The model component in question.
+ *  @param[in] opn
+ *             The node (IDREF) of the model component (needed for the (local)
+ *             argument list).
+ *  @param[in] current_model
+ *             The block for which this is written: indexing is given in the
+ *             original SML model wrt a given node in the model tree.
+ *  @param[in] witharg
+ *             WITHARG: if the argument list should be processed,
+ *             NOARG:   only the global name,
+ *             ONLYARG: only the argument list.
  *
  *  Find the global name of the model component pointed to by 'node':
  * - Generate the global name of a model component by pre-pending the names of 
@@ -689,9 +700,7 @@ getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model,
  *   block indexing expressions between here and the model_of_comp are already 
  *   included in the argument list of the ModelComp. Anything below needs to
  *   be prepended to the argument list
- *
  */
-
 char *
 getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
@@ -956,14 +965,15 @@ ModelComp::moveUp(int level){
 /* --------------------------------------------------------------------------
 ModelComp::reassignDependencies()
 ---------------------------------------------------------------------------- */
-/** In the process of building the AmplModel tree from the StochModelTree
+/** Recalculate dependency list and re-resolve IDREF nodes.
+ *
+ *  In the process of building the AmplModel tree from the StochModelTree
  *  some of the IDREF dependency nodes still point to the StochModelComp
- *  nodes from the StochModel tree (or the intermediate tree)
+ *  nodes from the StochModel tree (or the intermediate tree).
  *
  *  This routine makes sure that IDREF nodes are resolved with respect to the 
  *  correct ModelComp and rebuilds the dependency lists.
  */
-
 void
 ModelComp::reassignDependencies()
 {

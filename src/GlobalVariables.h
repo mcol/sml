@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 /** @class GlobalVariables 
- *  @brief This class provides some static global variables
+ *  This class provides some static global variables.
  *
  *  This class provides global variables that control the level of debug
  *  printing and logging.
@@ -23,7 +24,6 @@
  *  The initial values for these variables is set in ampl.ypp. Any class
  *  that wishes to use this variables must include "GlobalVariables.h".
  */
-
 class GlobalVariables{
  public:
   static char *modelfilename; //!< The name of the model file 
