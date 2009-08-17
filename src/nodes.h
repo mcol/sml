@@ -210,7 +210,9 @@ class SyntaxNodeIx : public SyntaxNode {
 
  private:
   SyntaxNodeIx(const int opCode) :
-    SyntaxNode(opCode), done_split(0) {}
+    SyntaxNode(opCode), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
+    dummyVarExpr(NULL), done_split(0) {};
+
  public:
 
   SyntaxNode *qualifier;    //!< the stuff to the right of ':' (if present)
