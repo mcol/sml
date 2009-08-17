@@ -277,10 +277,10 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
       // => Can be done by a gobal stack associated with ExpandedModel
       //    (similar to addIndex, but this time a C++ implementation
       //printf("Stack of path instances is: \n");
-      for(list<string>::iterator p = ExpandedModel::pathToNodeStack.begin();
-          p!=ExpandedModel::pathToNodeStack.end();p++){
+      for(list<string>::iterator q = ExpandedModel::pathToNodeStack.begin();
+          q!=ExpandedModel::pathToNodeStack.end();q++){
         // separator is '[' for first item, ',' thereafter
-        if (p==ExpandedModel::pathToNodeStack.begin()){
+        if (q==ExpandedModel::pathToNodeStack.begin()){
           globname += '[';
         }else{
           globname += ',';
@@ -294,8 +294,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
         // instances of the dummyVariables rather than the dummy variables 
         // themselves. The expressions come from AMPL output so they have not
         // been parsed by the lexer/yacc. Need to do te parsing by hand
-        if ((*p).at(0)=='('){
-          char *token = strdup((*p).c_str());
+        if ((*q).at(0)=='('){
+          char *token = strdup((*q).c_str());
           // remove first and last character
           int len = strlen(token);
           assert(token[len-1]==')');
@@ -314,13 +314,13 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
           token--;
           free(token);
         }else{
-          if (is_int((*p).c_str())){
-            globname += (*p);
+          if (is_int((*q).c_str())){
+            globname += (*q);
           }else{
-            globname += "'"+(*p)+"'";
+            globname += "'"+(*q)+"'";
           }
         }
-        //printf("->%s",(*p).c_str());
+        //printf("->%s",(*q).c_str());
       }
       //printf("\n");
       //cout << globname+'\n';
@@ -358,15 +358,15 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
 
         list<string>* li = getListOfInstances(fset);
 
-        for(list<string>::iterator p=li->begin();p!=li->end();p++){
+        for(list<string>::iterator q=li->begin();q!=li->end();q++){
           string subModelName = smodelname+"_"+string(mc->id);
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
-          subModelInst += crush((*p).c_str());
+          subModelInst += crush((*q).c_str());
           if(GlobalVariables::prtLvl>=1)
             cout << subModelName << ":" << subModelInst << endl;
           AmplModel *subampl = (AmplModel*)mc->other;
-          ExpandedModel::pathToNodeStack.push_back(*p);
+          ExpandedModel::pathToNodeStack.push_back(*q);
           ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
           ExpandedModel::pathToNodeStack.pop_back();
           subem->parent = em;
