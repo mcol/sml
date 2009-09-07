@@ -30,7 +30,7 @@ ACX_AMPL( [], AC_ERROR([Ampl Solver Library Required]) )
 
 # OOPS interface requires OOPS and dependant libraries
 ACX_BLAS(HAVE_BLAS=yes,HAVE_BLAS=no)
-ACX_LAPACK(HAVE_LAPACK=yes,HAV_LAPACK=no)
+ACX_LAPACK(HAVE_LAPACK=yes,HAVE_LAPACK=no)
 IMMDX_LIB_METIS( [HAVE_METIS=yes], [] )
 ACX_OOPS( [HAVE_OOPS=yes], [] )
 if test "$HAVE_OOPS" = "yes" ; then
