@@ -109,9 +109,9 @@ and Xpress-Mosel \cite{mybib:Mosel}.
 
 SML (Structured Modelling Language) attempts build on these traditional
 approaches while encapsulating the {\bf structure} of the problem. As such
-it encapsulates the AMPL syntax in an object orientated fashion.
+it encapsulates the AMPL syntax in an object oriented fashion.
 %
-We believe that objec- orientated modelling will eventually confer the
+We believe that objec-oriented modelling will eventually confer the
 following benefits:
 \begin{description}
    \item[Clarity] of modelling, reducing the apparent complexity of models
@@ -126,8 +126,10 @@ following benefits:
 It would be greatly appreciated if users would cite the following references
 in work that uses SML:
 \begin{itemize}
-  \item {\sc Marco Colombo, Andreas Grothey, Jonathan Hogg, Kristian Woodsend and Jacek Gondzio}, {\it A Structure-Conveying Modelling Language for Mathematical and Stochastic Programming}, {Technical Report ERGO 09-003, School of Mathematics, submitted.}
-   \item {\sc Andreas Grothey, Jonathan Hogg, Kristian Woodsend, Marco Colombo and Jacek Gondzio}, {\it A Structure Conveying Parallelizable Modelling Language for Mathematical Programming}, {Springer Optimization and Its Applications Vol. 27: Parallel Scientific Computing and Optimization ed: R.Ciegis, D.Henty, B.K\r{a}gstr\"{o}m, and J.\v{Z}ilinska. 2009.}
+  \item {\sc Marco Colombo, Andreas Grothey, Jonathan Hogg, Kristian Woodsend and Jacek Gondzio}, {\it A Structure-Conveying Modelling Language for Mathematical and Stochastic Programming}, {Technical Report ERGO 09-003, School of Mathematics.
+    Accepted for publication in {\it Mathematical Programming Computation}.}
+   \item {\sc Andreas Grothey, Jonathan Hogg, Kristian Woodsend, Marco Colombo and Jacek Gondzio}, {\it A Structure Conveying Parallelizable Modelling Language for Mathematical Programming}, {Springer Optimization and Its Applications Vol.~27: Parallel Scientific Computing and Optimization ed: R.~\v{C}iegis, D.~Henty,
+     B.~K\r{a}gstr\"{o}m, and J.~\v{Z}ilinska. 2009.}
 \end{itemize}
 
 \section*{Reproduction}
@@ -176,7 +178,7 @@ post-processor to AMPL you will need an installed version of AMPL.
    }
 \end{table}
 
-OOPS is the Object-Orientated Parallel Solver by Gondzio and Grothey
+OOPS is the Object-Oriented Parallel Solver by Gondzio and Grothey
 \cite{mybib:oops}. 
 
 If you wish to use the OOPS solver then you will also need the OOPS library.
@@ -198,9 +200,9 @@ available implementations available from the Netlib archive.
 The following configuration options are available:
 
 \begin{tabular}{ll}
-   \tt --with-ampl=path & Path to directory containing libamplsolver.a \\
-   \tt --with-oops=path & Path to OOPSHOME directory \\
-   \tt --with-metis=path & Path to MeTiS directory \\
+   \tt --with-ampl=path & Absolute path to directory containing libamplsolver.a \\
+   \tt --with-oops=path & Absolute path to OOPSHOME directory \\
+   \tt --with-metis=path & Absolute path to MeTiS directory \\
    \tt --with-blas=library & BLAS library to use \\
    \tt --with-lapack=library & LAPACK library to use \\
    \tt --with-mps=[yes|no] & Enable/disable MPS interface
