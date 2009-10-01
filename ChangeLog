@@ -1,4 +1,5 @@
 2009-10-01  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Added the Cplex interface to SML.
   * Added destructors for the NlFile and IndexListValue classes.
   * Changed analyseOptions() in the mps and oops interfaces to return a failure
     code rather than calling exit().

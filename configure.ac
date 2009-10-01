@@ -37,6 +37,12 @@ if test "$HAVE_OOPS" = "yes" ; then
   AC_SUBST(OOPS_INTERFACE, [oops])
 fi
 
+# Cplex interface
+ACX_OOPS( [HAVE_CPLEX=yes], [] )
+if test "$HAVE_CPLEX" = "yes" ; then
+  AC_SUBST(CPLEX_INTERFACE, [cplex])
+fi
+
 AC_ARG_WITH(
    [mps],
    [AC_HELP_STRING([--with-mps],
@@ -53,9 +59,10 @@ AC_ARG_WITH(
 
 
 AC_CONFIG_FILES([Makefile src/Makefile interfaces/Makefile
-                 interfaces/oops/Makefile interfaces/mps/Makefile])
+                 interfaces/oops/Makefile interfaces/mps/Makefile
+                 interfaces/cplex/Makefile])
 AC_OUTPUT
 
 echo "==========================================="
 echo "Summary:"
-echo "Interfaces to build: $MPS_INTERFACE $OOPS_INTERFACE"
+echo "Interfaces to build: $MPS_INTERFACE $OOPS_INTERFACE $CPLEX_INTERFACE"
