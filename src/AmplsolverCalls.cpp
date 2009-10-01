@@ -41,6 +41,16 @@ NlFile::NlFile(string nlfilename)
   nzH = -1;
   nzA = -1;
 }
+
+/* Destructor */
+NlFile::~NlFile() {
+
+  map<ExpandedModel*, IndexListValue*>::iterator it;
+  for (it = indexList.begin(); it != indexList.end(); ++it)
+    delete (*it).second;
+}
+
+
 /* ===========================================================================
 methods
 ============================================================================ */

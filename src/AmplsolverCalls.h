@@ -37,6 +37,11 @@ class IndexListValue {
   // provide a constructor that just sets everything to nonsensical values.
   IndexListValue();
   IndexListValue(int nvar, int *lvar, int count);
+
+  // destructor
+  ~IndexListValue() {
+   delete[] lvar;
+  }
 };
 
 inline IndexListValue::IndexListValue():nvar(-1),lvar(NULL),count(-1){}
@@ -108,6 +113,7 @@ class NlFile {
   // -------------------------- methods ------------------------------------
  public:
   NlFile(string nlfilename);
+  ~NlFile();
 
  private:
 
