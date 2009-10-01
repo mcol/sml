@@ -38,8 +38,8 @@ void writeHelp(ostream &out, string progname) {
    out << " mpsfile       Filename of MPS file to write." << endl;
 }
 
-void analyseOptions(int argc, char **argv, string &modelfilename, 
-      string &datafilename, string &mpsfilename, bool &debug) {
+int analyseOptions(int argc, char **argv, string &modelfilename,
+                   string &datafilename, string &mpsfilename, bool &debug) {
    int found = 0;
 
    for (int i=1;i<argc;i++){
@@ -72,8 +72,10 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
       cerr << "ERROR: all of modelfile, datafile and mpsfile " 
          "must be supplied." << endl << endl;
       writeHelp(cerr, progname);
-      exit(1);
+      return 1;
    }
+
+   return 0;
 }
 
 /* ----------------------------------------------------------------------------
@@ -89,7 +91,10 @@ int main(int argc, char **argv) {
    cout << "(c) Andreas Grothey and Jonathan Hogg, "
       "University of Edinburgh 2009" << endl << endl;
 
-   analyseOptions(argc, argv, modelfilename, datafilename, mpsfilename, debug);
+   int rv = analyseOptions(argc, argv,
+                           modelfilename, datafilename, mpsfilename, debug);
+   if (rv)
+     return rv;
 
    if(debug) 
       cout << "======================================================" << endl;

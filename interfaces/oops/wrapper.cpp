@@ -41,8 +41,8 @@ void writeHelp(ostream &out, string progname) {
    out << " datafile            File containing SML data." << endl;
 }
 
-void analyseOptions(int argc, char **argv, string &modelfilename, 
-      string &datafilename, string &outfilename, bool &debug) {
+int analyseOptions(int argc, char **argv, string &modelfilename,
+                   string &datafilename, string &outfilename, bool &debug) {
    int found = 0;
    for (int i=1;i<argc;i++){
       if (strcmp(argv[i], "-d")==0){
@@ -55,12 +55,12 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
       else if(strcmp(argv[i], "-o")==0) {
          if(i+1==argc) {
             cerr << "-o supplied without filename" << endl;
-            exit(1);
+            return 1;
          }
          outfilename = argv[++i];
          if(outfilename.at(0)=='-') {
             cerr << "-o supplied without filename" << endl;
-            exit(1);
+            return 1;
          }
       }
       else if(strncmp(argv[i], "--output=", 9)==0) {
@@ -68,7 +68,7 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
       }
       else if(*(argv[i]) == '-') {
          cerr << "Unrecognised option '" << argv[i] << "'" << endl;
-         exit(1);
+         return 1;
       }
       else {
          if (found==0){
@@ -82,7 +82,7 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
          }else{
             cerr << "Error, too many filenames." << endl;
             writeHelp(cerr, progname);
-            exit(1);
+            return 1;
          }
       }
    }
@@ -91,8 +91,10 @@ void analyseOptions(int argc, char **argv, string &modelfilename,
       cerr << "ERROR: both modelfile and datafile " 
          "must be supplied." << endl << endl;
       writeHelp(cerr, progname);
-      exit(1);
+      return 1;
    }
+
+   return 0;
 }
 
 /* ----------------------------------------------------------------------------
@@ -104,7 +106,10 @@ int main(int argc, char **argv) {
    string outfilename = "";
    bool debug = false;
 
-   analyseOptions(argc, argv, modelfilename, datafilename, outfilename, debug);
+   int rv = analyseOptions(argc, argv,
+                           modelfilename, datafilename, outfilename, debug);
+   if (rv)
+     return rv;
 
    if(debug) {
       cout << "======================================================" << endl;

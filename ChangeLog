@@ -1,3 +1,7 @@
+2009-10-01  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Changed analyseOptions() in the mps and oops interfaces to return a failure
+    code rather than calling exit().
+
 2009-08-17  Marco Colombo  <m.colombo@ed.ac.uk>
   * Uniform the allocations of SyntaxNode objects to use new.
   * Updates, reformatting and small corrections to the doxygen documentation.
