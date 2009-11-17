@@ -240,20 +240,16 @@ StochModel::expandStagesOfComp()
     }
   }
   out.close();
+
   {
-    if(strlen(GlobalVariables::amplcommand)+9>500) {
-       // Avoid buffer overflow
-       cerr << "buffer too short to accomodate amplcommand length.\n";
-       exit(1);
-    }
-    strcpy(buffer, GlobalVariables::amplcommand);
+    string command = GlobalVariables::amplcommand;
+    command += " tmp.scr";
     if(GlobalVariables::prtLvl>=1) {
-      strcat(buffer, " tmp.scr");
-      cout << "Executing `" << buffer << "`\n";
+      cout << "Executing `" << command << "`\n";
     } else {
-      strcat(buffer, " tmp.scr 2> /dev/null");
+      command += " 2> /dev/null";
     }
-    int errc = system(buffer);
+    int errc = system(command.c_str());
     if (errc!=0){
       printf("ERROR: Call to AMPL returns errc=%d\n",errc);
       exit(1);
