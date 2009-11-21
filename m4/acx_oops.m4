@@ -24,7 +24,7 @@
 # COPYLEFT
 #
 #   Copyright (c) 2009 Jonathan Hogg <J.Hogg@ed.ac.uk>
-#   based loosely on immdx_lib_oops.m4 by
+#   based loosely on immdx_lib_metis.m4 by
 #   Copyright (c) 2008 Ben Bergen <ben@cs.fau.de>
 #
 #   Copying and distribution of this file, with or without modification, are
