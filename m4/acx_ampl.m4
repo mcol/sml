@@ -61,7 +61,7 @@ AC_PREREQ(2.50)
 acx_ampl_ok=no
 
 AC_ARG_WITH(ampl,
-	[AC_HELP_STRING([--with-ampl=<dir>], [use AMPL library directory<dir>])])
+	[AC_HELP_STRING([--with-ampl=<dir>], [path to the AmplSolver library])])
 case $with_ampl in
 	yes | "") ;;
 	no) acx_ampl_ok=disable ;;

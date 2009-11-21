@@ -46,8 +46,8 @@ AC_DEFUN([IMMDX_LIB_METIS], [
 	#
 	AC_ARG_VAR([METIS], [METIS library location])
 	AC_ARG_WITH([metis],
-		[AC_HELP_STRING([--with-metis],
-		[user defined path to METIS library])],
+		[AC_HELP_STRING([--with-metis=<dir>],
+		[user-defined path to the METIS library])],
 		[
 			if test -n "$METIS" ; then
 				AC_MSG_RESULT(yes)

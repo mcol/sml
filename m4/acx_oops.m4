@@ -38,8 +38,8 @@ AC_DEFUN([ACX_OOPS], [
 	#
 	AC_ARG_VAR([OOPSHOME], [OOPS library location])
 	AC_ARG_WITH([oops],
-		[AC_HELP_STRING([--with-oops],
-		[user defined path to OOPS library])],
+		[AC_HELP_STRING([--with-oops=<dir>],
+		[user-defined path to the OOPS library])],
 		[
 			if test -n "$OOPSHOME" ; then
 				with_oops=$OOPSHOME
