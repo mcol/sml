@@ -1,6 +1,5 @@
 On initial checkout do the following:
-ln -s todo.txt NEWS
-autoreconf -fvi
+   autoreconf -fvi
 
 Then to build:
 1. Configure:
