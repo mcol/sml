@@ -21,6 +21,10 @@
 #include "AmplModel.h"
 #include "backend.h"
 
+#ifdef MINGW
+#include <direct.h> // for mkdir() under MinGW
+#endif
+
 using namespace std;
 
 /* global variables */
@@ -62,7 +66,11 @@ void createSubdirTmpIfNotExist(void)
    }
    if (!fl_exists){
       int err;
+#ifdef MINGW
+      err = mkdir("tmp");
+#else
       err = mkdir("tmp", S_IRWXU);
+#endif
       if (err){
          cerr << "Failed to create temporary directory 'tmp/'\n";
          cerr << "Cannot continue\n";

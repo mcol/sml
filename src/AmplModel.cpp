@@ -418,6 +418,26 @@ getListOfInstances(istream &file)
   return li;
 }
 
+#ifdef MINGW
+char *strtok_r(char *str, const char *delim, char **saveptr) {
+
+  char *token;
+
+  if (str)
+    *saveptr = str;
+  token = *saveptr;
+
+  if (!token)
+    return NULL;
+
+  token += strspn(token, delim);
+  *saveptr = strpbrk(token, delim);
+  if (*saveptr)
+    *(*saveptr)++ = '\0';
+
+  return *token ? token : NULL;
+}
+#endif
 
 /* ---------------------------------------------------------------------------
 crush

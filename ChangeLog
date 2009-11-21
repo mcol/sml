@@ -1,5 +1,7 @@
 2009-11-21  Marco Colombo  <m.colombo@ed.ac.uk>
   * Compilation fixes for gcc 4.4.
+  * Fixed some portability problems to allow the compilation under MinGW
+    (which is still not automated and requires manual fiddling).
 
 2009-10-01  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added the Cplex interface to SML.
