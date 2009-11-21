@@ -31,7 +31,7 @@ class GlobalVariables{
   static char *modelfilename; //!< The name of the model file 
   static char *datafilename;  //!< The name of the data file
 
-  static char *amplcommand; //!< Command for invoking ampl
+  static const char *amplcommand; //!< Command for invoking ampl
 
   /** prtLvl is 0: no printing
                 1: log: just phases and statistics for every phase

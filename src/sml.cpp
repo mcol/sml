@@ -26,7 +26,7 @@ using namespace std;
 /* global variables */
 char *GlobalVariables::modelfilename = NULL;
 char *GlobalVariables::datafilename = NULL;
-char *GlobalVariables::amplcommand = "ampl";
+const char *GlobalVariables::amplcommand = "ampl";
 
 bool GlobalVariables::logParseModel = false;
 int GlobalVariables::prtLvl = 0;
