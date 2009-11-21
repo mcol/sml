@@ -16,6 +16,7 @@
  */
 #include "Set.h"
 #include <map>
+#include <cstdio>
 #include <string>
 #include <assert.h>
 #include "data.tab.h"

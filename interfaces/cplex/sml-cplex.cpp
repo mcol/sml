@@ -18,6 +18,7 @@
 /* This is a Cplex driver for the Structured Modelling Language (SML) */
 
 #include <map>
+#include <cstdio>
 #include <iostream>
 #include <limits> // for numeric_limits
 #include "/usr/local/ilog/cplex/include/ilcplex/cplex.h" // XXX Hardcoded path!
