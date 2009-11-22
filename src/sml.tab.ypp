@@ -1050,6 +1050,15 @@ int parse_model(const char *filename) {
       }
    }
 
+   // check that we can access the datafile, otherwise we get an ugly message
+   // from amplsolver in case the file cannot be accessed
+   FILE *fin = fopen(GlobalVariables::datafilename, "r");
+   if (!fin) {
+     cerr << "Cannot open file: '" << GlobalVariables::datafilename << "'.\n";
+     return 1;
+   }
+   fclose(fin);
+
    // Change directory to make things work
    int errcode = chdir("tmp");
    if (errcode){
