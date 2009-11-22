@@ -496,7 +496,8 @@ process_model(AmplModel *model) /* should be called with model==root */
         } else if (strncmp(buffer, "AMPL Version",12)==0){
           // Do nothing version string
           // eg AMPL Version 20051214 (Linux 2.6.9-5.ELsmp)
-        }else{
+        } else if (strncmp(buffer, "Error", 5) == 0) {
+          // eg Error executing "write" command
           n_other++;
         }
       }
