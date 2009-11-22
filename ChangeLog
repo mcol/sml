@@ -1,4 +1,5 @@
 2009-11-22  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Fixes and reformatting to the alm_xi test example.
   * Check for the existence of the data file before passing it to AMPL.
   * Switch off the call to parse_data() since at the moment we use AMPL to
     process the data file, and these calls only contribute to quite large
