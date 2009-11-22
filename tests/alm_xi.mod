@@ -2,33 +2,34 @@
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty.
 
-# First ALM model with Stochastic dominance constraints
-# written in SML
+#
+# ALM model with Stochastic dominance constraints written in SML
 # 30/05/2008
 
 param T;
-set ASSETS;
 set TIME ordered := 0..T;
 set NODES;
-set BENCHMARK; # set of benchmarks
-
 param Parent{NODES} symbolic; # parent of nodes
-param Price{ASSETS}; # prices of assets
-param Return{ASSETS,NODES}; # returns of assets at each node
-param Vbenchmk{BENCHMARK}; # values of benchmarks
-param Bench2nd{BENCHMARK}; # 2nd order SD values of benchmarks
-param Gamma; # transaction fee
-
-param InitialWealth;
 param Probs{NODES}; # probability distribution of nodes
 
-var slack2{BENCHMARK, TIME} >=0;
+set ASSETS;
+param Price{ASSETS}; # prices of assets
+param Return{ASSETS, NODES}; # returns of assets at each node
 
-block alm stochastic using(nd in NODES, Parent, Probs, st in TIME): {
+set BENCHMARK;
+param Vbenchmk{BENCHMARK}; # values of benchmarks
+param Bench2nd{BENCHMARK}; # 2nd order SD values of benchmarks
+param Gamma; # transaction costs
 
-  var x_hold{ASSETS} >=0;
-  var risk{BENCHMARK} >=0;
-  var cash >=0;
+param InitialWealth;
+
+var slack2{BENCHMARK, TIME} >= 0;
+
+block alm stochastic using (nd in NODES, Parent, Probs, st in TIME): {
+
+  var x_hold{ASSETS} >= 0;
+  var risk{BENCHMARK} >= 0;
+  var cash >= 0;
 
   stages {0}: {
     subject to StartBudget:
@@ -39,7 +40,7 @@ block alm stochastic using(nd in NODES, Parent, Probs, st in TIME): {
 
     var x_sold{ASSETS} >= 0;
     var x_bought{ASSETS} >= 0;
-    var slack1{BENCHMARK} >=0;
+    var slack1{BENCHMARK} >= 0;
 
     subject to CashBalance:
       cash + (1+Gamma) * sum{j in ASSETS} Price[j] * x_bought[j] =
