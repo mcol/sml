@@ -926,6 +926,6 @@ SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
 
    /* need also to look through list of local variables */
 
-   cerr << "Could not find ref " << ref->name << " in context\n";
+   cerr << "ERROR: Could not find ref '" << ref->name << "' in context\n";
    exit(1);
 }
