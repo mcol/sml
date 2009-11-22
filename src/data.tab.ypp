@@ -259,7 +259,7 @@ void dataerror(const char *s) {
   exit(1);
 }
 
-void parse_data(AmplModel *current_model, char *datafilename){
+void parse_data(AmplModel *current_model, const char *datafilename) {
         
   if(GlobalVariables::prtLvl>=1) {
     cout << "===============================================================\n";

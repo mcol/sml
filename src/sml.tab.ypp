@@ -1041,7 +1041,7 @@ addStochInfo(StochModelComp *newmcs, SyntaxNode *stochopt)
    }
 }
 
-int parse_model(char *filename) {
+int parse_model(const char *filename) {
    if (filename){
       yyin = fopen(filename, "r");
       if (yyin==NULL){

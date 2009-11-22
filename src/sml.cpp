@@ -36,8 +36,8 @@ bool GlobalVariables::logParseModel = false;
 int GlobalVariables::prtLvl = 0;
 
 extern int yydebug;
-void parse_data(AmplModel*, char*);
-int parse_model(char *);
+void parse_data(AmplModel*, const char*);
+int parse_model(const char *);
 
 string sml_version() {
    return PACKAGE_VERSION;
