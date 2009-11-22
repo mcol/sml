@@ -115,9 +115,15 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    if (rv)
      return NULL;
 
+#ifdef PARSE_DATA
+   /** @todo At the moment we are using AMPL to process the data file (see
+    *  process_model() in backend.cpp or expandSet() expandStagesOfComp()
+    *  in StochModel.cpp). Eventually, we will do it ourselves.
+    */
    cout << "Reading data file '" << GlobalVariables::datafilename << 
       "'..." << endl;
    parse_data(AmplModel::root, GlobalVariables::datafilename);
+#endif
 
    // change working directory back to tmp/ for processing model
    errcode = chdir("tmp");

@@ -1,3 +1,8 @@
+2009-11-22  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Switch off the call to parse_data() since at the moment we use AMPL to
+    process the data file, and these calls only contribute to quite large
+    memory leaks.
+
 2009-11-21  Marco Colombo  <m.colombo@ed.ac.uk>
   * Compilation fixes for gcc 4.4.
   * Fixed some portability problems to allow the compilation under MinGW
