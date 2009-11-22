@@ -19,5 +19,3 @@ param Gama := 0.05;
 
 param Init :=1000;
 param Probs := 1 1 2 0.6 3  0.4 4 0.36 5 0.24 6 0.24 7 0.16 ;
-
- 

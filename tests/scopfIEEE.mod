@@ -49,4 +49,3 @@ end block;
 #    extrag[b] = 0;
 
 minimize Total_Cost:  sum {g in ExistingGeneratorName} Cost[g]*power[g];
-
