@@ -496,8 +496,7 @@ process_model(AmplModel *model) /* should be called with model==root */
         } else if (strncmp(buffer, "AMPL Version",12)==0){
           // Do nothing version string
           // eg AMPL Version 20051214 (Linux 2.6.9-5.ELsmp)
-        } else if (strncmp(buffer, "Error", 5) == 0) {
-          // eg Error executing "write" command
+        } else {
           n_other++;
         }
       }
@@ -505,15 +504,15 @@ process_model(AmplModel *model) /* should be called with model==root */
     pclose(ain);
 
     cout << endl;
-    if (n_nocsobj+n_novar+n_other>0){
-      printf("\nAMPL: ampl returned output\n");
+    if (n_nocsobj + n_novar) {
       cout << "AMPL: Model without constraints and objectives: " <<
         n_nocsobj << "\n";
       cout << "AMPL: Model without variables                 : " <<
         n_novar << "\n";
-      cout << "AMPL: Other errors                            : " <<
-        n_other << "\n";
-      if (n_other>0) exit(1);
+    }
+    if (n_other > 0) {
+      cout << "AMPL: Unrecoverable error\n";
+      exit(1);
     }
   }
   if(GlobalVariables::prtLvl>=1)
