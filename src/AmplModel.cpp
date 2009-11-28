@@ -864,7 +864,8 @@ AmplModel::findComponent(string id)
  */
 SymbolTable::Entry *AmplModel::findComponent(string id) {
    SymbolTable::Entry *ent = symbol_table.findSymbol(id);
-   if(!ent && parent) parent->findComponent(id);
+   if (!ent && parent)
+     ent = parent->findComponent(id);
    return ent;
 }
 
