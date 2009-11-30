@@ -24,6 +24,7 @@ DOC_FILES  = doc/userguide.pdf doc/userguide.bib doc/userguide.tex \
 				 doc/Makefile
 TEST_FILES = tests/alm_xi.dat tests/alm_xi.mod \
 		tests/alm.mod tests/alm.dat \
+		tests/newsvendor.mod tests/newsvendor.dat \
 		tests/ampl_msnd_test_slck.mod tests/ampl_msnd_test_slck.dat
 # scopfIEEE model does not converge under OOPS due to numeric
 # issues in the dual space. Not distributed as a good example.
