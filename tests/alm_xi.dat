@@ -1,4 +1,4 @@
-# This file is (c) 2008 Andreas Grothey, University of Edinburgh
+# This file is (c) 2008 Xi Yang, Andreas Grothey, University of Edinburgh
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty.
 
@@ -23,11 +23,11 @@ param Probs := 1 1
 param Gamma := 0.05;
 param InitialWealth := 1000;
 
-set ASSETS := aaa bbb;
-param Price := aaa 12 bbb  20;
+set ASSETS := risky safe;
+param Price := risky 12 safe  20;
 param Return : 1    2    3    4    5    6    7 :=
-      aaa      0  0.3 -0.2  0.3 -0.2  0.3 -0.2
-      bbb      0  0.2 -0.1  0.2 -0.1  0.2 -0.1;
+      risky    0  0.3 -0.2  0.3 -0.2  0.3 -0.2
+      safe     0  0.2 -0.1  0.2 -0.1  0.2 -0.1;
 
 set BENCHMARK := b1 b2 b3;
 param Vbenchmk := b1 600

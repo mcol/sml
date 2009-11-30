@@ -25,8 +25,6 @@ var makemodelrun >= 0; # at the moment we must have at least one variable here
 block alm stochastic using (nd in NODES, Parent, Probs, st in TIME): {
 
   var x_hold{ASSETS} >= 0;
-  var x_bought{ASSETS} >= 0;
-  var x_sold{ASSETS} >= 0;
   var cash >= 0;
 
   stages {0}: {
@@ -35,6 +33,9 @@ block alm stochastic using (nd in NODES, Parent, Probs, st in TIME): {
   }
 
   stages (1..T): {
+
+    var x_bought{ASSETS} >= 0;
+    var x_sold{ASSETS} >= 0;
 
     subject to Inventory{j in ASSETS}:
       x_hold[j] =

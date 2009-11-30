@@ -27,11 +27,11 @@ param Probs := 1 1
 param Gamma := 0.05;
 param InitialWealth := 1000;
 
-set ASSETS := aaa bbb;
-param Price := aaa 12 bbb  20;
+set ASSETS := risky safe;
+param Price := risky 12 safe 20;
 param Return : 1    2    3    4    5    6    7 :=
-      aaa      0  0.3 -0.2  0.3 -0.2  0.3 -0.2
-      bbb      0  0.2 -0.1  0.2 -0.1  0.2 -0.1;
+      risky    0  0.3 -0.2  0.3 -0.2  0.3 -0.2
+      safe     0  0.2 -0.1  0.2 -0.1  0.2 -0.1;
 param Liability := 0 0
                    1 80
                    2 80;
