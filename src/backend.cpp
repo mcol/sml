@@ -50,7 +50,7 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
    the tree the block-indexing expressions are added to the tree           */
 
 // FIXME: this is fairly dumb at the moment: it cannot deal with 
-//         mulitple dimensions {i in SET1,j in SET2} 
+//         multiple dimensions {i in SET1,j in SET2}
 //         SET valued expressions: {i in SET1 cross SET2} 
 //         or conditions:    {(i,j) in SET1:i<j}
 vector <list <add_index *>* > l_addIndex;  /* to add to all statements */
