@@ -418,7 +418,7 @@ getListOfInstances(istream &file)
   return li;
 }
 
-#ifdef MINGW
+#ifndef HAVE_STRTOK_R
 char *strtok_r(char *str, const char *delim, char **saveptr) {
 
   char *token;

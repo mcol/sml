@@ -33,7 +33,7 @@
    #include "SetNode.h"
    #include "AmplModel.h"
 
-   #ifdef MINGW
+   #ifdef HAVE_DIRECT_H
    #include <direct.h> // for chdir() under MinGW
    #endif
 

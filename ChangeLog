@@ -1,5 +1,7 @@
 2009-11-30  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added the newsvendor test example.
+  * Improved the compilation under MinGW by adding appropriate header and
+    function checks in the configure step.
 
 2009-11-22  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added a basic ALM test example.

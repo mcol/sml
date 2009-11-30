@@ -21,7 +21,7 @@
 #include "AmplModel.h"
 #include "backend.h"
 
-#ifdef MINGW
+#ifdef HAVE_DIRECT_H
 #include <direct.h> // for mkdir() under MinGW
 #endif
 
@@ -66,7 +66,7 @@ void createSubdirTmpIfNotExist(void)
    }
    if (!fl_exists){
       int err;
-#ifdef MINGW
+#ifdef HAVE_DIRECT_H
       err = mkdir("tmp");
 #else
       err = mkdir("tmp", S_IRWXU);
