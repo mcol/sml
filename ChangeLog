@@ -1,3 +1,6 @@
+2009-12-07  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Added the acx_cplex.m4 macro to configure the Cplex interface.
+
 2009-11-30  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added the newsvendor test example.
   * Improved the compilation under MinGW by adding appropriate header and

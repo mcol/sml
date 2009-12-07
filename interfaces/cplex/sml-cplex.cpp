@@ -21,7 +21,7 @@
 #include <cstdio>
 #include <iostream>
 #include <limits> // for numeric_limits
-#include "/usr/local/ilog/cplex/include/ilcplex/cplex.h" // XXX Hardcoded path!
+#include <ilcplex/cplex.h>
 #include "sml-cplex.h"
 
 using namespace std;

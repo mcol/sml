@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see http://www.gnu.org/licenses/.
 
-AM_CXXFLAGS = -I$(srcdir)/../../src
+AM_CXXFLAGS = -I$(srcdir)/../../src @CPLEX_INCLUDE@
 
 bin_PROGRAMS = smlcplex
 smlcplex_SOURCES = sml-cplex.cpp sml-cplex.h wrapper.cpp
-smlcplex_LDADD = 	../../src/libsml.a @AMPL_LIBS@ -lfl -ldl -L /usr/local/ilog/cplex/lib/x86_debian4.0_4.1/static_pic -lilocplex -lcplex -lpthread
+smlcplex_LDADD = ../../src/libsml.a @AMPL_LIBS@ -lfl -ldl @CPLEX_LIBS@

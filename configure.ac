@@ -43,7 +43,7 @@ if test "$HAVE_OOPS" = "yes" ; then
 fi
 
 # Cplex interface
-ACX_OOPS( [HAVE_CPLEX=yes], [] )
+ACX_CPLEX( [HAVE_CPLEX=yes], [] )
 if test "$HAVE_CPLEX" = "yes" ; then
   AC_SUBST(CPLEX_INTERFACE, [cplex])
 fi
