@@ -58,46 +58,41 @@ AC_DEFUN([ACX_OOPS], [
 	#
 	# locate OOPS library
 	#
-		if test -n "$with_oops" ; then
-			old_CFLAGS=$CFLAGS
-			old_LDFLAGS=$LDFLAGS
-			CFLAGS="-I$with_oops/include"
-			LDFLAGS="-L$with_oops/lib"
-
-			AC_CHECK_LIB(oops, OOPSSetup,	[oops_lib=yes], [oops_lib=no])
-			AC_CHECK_HEADER(oops/OopsInterface.h, [oops_h=yes],
+	if test -n "$with_oops" ; then
+		old_CXXFLAGS=$CXXFLAGS
+		CXXFLAGS="-I$with_oops/include"
+		AC_LANG_PUSH(C++)
+		AC_CHECK_HEADER(oops/OopsInterface.h, [oops_h=yes],
 				[oops_h=no], [/* check */])
+		AC_LANG_POP(C++)
+		CXXFLAGS=$old_CXXFLAGS
 
-			CFLAGS=$old_CFLAGS
-			LDFLAGS=$old_LDFLAGS
-
-			AC_MSG_CHECKING(OOPS in $with_oops)
-			if test "$oops_lib" = "yes" -a "$oops_h" = "yes" ; then
-            OOPS_INCLUDE="-I$with_oops/include"
-            OOPS_LIB_DIR="-L$with_oops/lib"
-				OOPS_LIB="$OOPS_LIB_DIR -loops"
-				AC_MSG_RESULT(ok)
-			else
-				AC_MSG_RESULT(failed)
-			fi
+		if test "$oops_h" = "yes" ; then
+			OOPS_INCLUDE="-I$with_oops/include"
 		fi
+	fi
+
       #
       #
       #
       # Now check for complex linking
       AC_MSG_CHECKING(OOPS linking requirements)
+      OOPS_INCLUDE="-I$with_oops/include"
+      OOPS_LIB="-L$with_oops/lib -loops"
       if test "$HAVE_BLAS" = "yes" -a "$HAVE_LAPACK" = "yes"; then
          old_LIBS=$LIBS
+         old_CXXFLAGS=$CXXFLAGS
          LIBS="$LIBS $OOPS_LIB $METIS_LIB $LAPACK_LIBS $BLAS_LIBS -lm"
+         CXXFLAGS="$OOPS_INCLUDE"
          AC_LANG_PUSH(C++)
          AC_LINK_IFELSE(
-            [AC_LANG_PROGRAM([[#include <stdio.h>
-                              FILE *globlog=NULL;
-                              extern "C" char hopdm();]],
-                             [[hopdm();]])],
+            [AC_LANG_PROGRAM([[#include <oops/OopsInterface.h>
+                               FILE *printout = stdout;]],
+                             [[PrintOptions Prt(1);]])],
             [oops_full_link="yes"], [oops_full_link="no"])
          AC_LANG_POP(C++)
          LIBS=$old_LIBS 
+         CXXFLAGS=$old_CXXFLAGS
 
          if test "$oops_full_link" = "yes"; then
             AC_MSG_RESULT(ok)
