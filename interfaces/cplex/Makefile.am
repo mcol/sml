@@ -18,4 +18,4 @@ AM_CXXFLAGS = -I$(srcdir)/../../src @CPLEX_INCLUDE@
 
 bin_PROGRAMS = smlcplex
 smlcplex_SOURCES = sml-cplex.cpp sml-cplex.h wrapper.cpp
-smlcplex_LDADD = ../../src/libsml.a @AMPL_LIBS@ -lfl -ldl @CPLEX_LIBS@
+smlcplex_LDADD = ../../src/libsml.a @AMPL_LIBS@ -lfl @CPLEX_LIBS@

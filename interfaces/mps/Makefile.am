@@ -18,4 +18,4 @@ AM_CXXFLAGS = -I$(srcdir)/../../src
 
 bin_PROGRAMS = smlmps
 smlmps_SOURCES = sml-mps.cpp sml-mps.h wrapper.cpp
-smlmps_LDADD = 	../../src/libsml.a @AMPL_LIBS@ -lfl -ldl
+smlmps_LDADD = ../../src/libsml.a @AMPL_LIBS@ -lfl

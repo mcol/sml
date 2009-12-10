@@ -1,3 +1,8 @@
+2009-12-10  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Removed the hardcoded -ldl from the makefiles, which used to break building
+    under MinGW. This is replaced by a check for the presence of this library
+    in acx_ampl.m4.
+
 2009-12-07  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added the acx_cplex.m4 macro to configure the Cplex interface.
 

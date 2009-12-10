@@ -22,7 +22,7 @@
 #
 # LAST MODIFICATION
 #
-#   2009-02-20
+#   2009-12-10
 #
 # COPYLEFT
 #
@@ -68,8 +68,8 @@ case $with_ampl in
 	*) AMPL_LIBS="$with_ampl/amplsolver.a"; AMPL_INCLUDE="-I$with_ampl" ;;
 esac
 
-acx_ampl_save_LIBS="$LIBS"
-LIBS="$LIBS -ldl"
+# Add -ldl to LIBS
+AC_SEARCH_LIBS(dlopen, dl)
 
 # First, check AMPL_LIBS environment variable
 if test $acx_ampl_ok = no; then
@@ -89,8 +89,6 @@ fi
 
 AC_SUBST(AMPL_LIBS)
 AC_SUBST(AMPL_INCLUDE)
-
-LIBS="$acx_ampl_save_LIBS"
 
 # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$acx_ampl_ok" = xyes; then
