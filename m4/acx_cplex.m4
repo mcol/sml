@@ -79,7 +79,7 @@ if test -n "${CPLEX_LIB_DIR}" ; then
     CFLAGS=$CPLEX_INCLUDE
     LDFLAGS=$CPLEX_LIB_DIR
 
-    AC_CHECK_HEADER(ilcplex/cplex.h, [cplex_header_ok=yes])
+    AC_CHECK_HEADER(ilcplex/cplex.h, [cplex_header_ok=yes], , [/* quiet */])
     AC_CHECK_LIB(cplex, CPXversion, [cplex_library_ok=yes], , -lm -lpthread)
 
     CFLAGS=$old_CFLAGS
