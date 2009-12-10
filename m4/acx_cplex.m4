@@ -17,7 +17,7 @@
 #
 # LAST MODIFICATION
 #
-#   2009-12-07
+#   2009-12-10
 #
 # COPYLEFT
 #
@@ -34,8 +34,8 @@ AC_ARG_WITH([cplex],
                             [path to the Cplex installation])])
 
 case $with_cplex in
-    no) ;;
-    yes | "") AC_MSG_WARN([Cplex installation path missing in --with-cplex]) ;;
+    no | "") ;;
+    yes) AC_MSG_WARN([Cplex installation path missing in --with-cplex]) ;;
     *) CPLEX_DIR=$with_cplex ;;
 esac
 
