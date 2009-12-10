@@ -97,8 +97,11 @@ typedef struct GlobalOpt
      hopdm->use_start_point option) */
   int WS_do;         
 
-  /* Gap of advanced starting point to return */
+  /** Gap of advanced starting point to return */
   double WS_gap_adv_cen;
+
+  /** Target mu-value of advanced starting point to return */
+  double WS_target_mu;
 
   /** Number of additional centering iterations before returning an
       advanced point */

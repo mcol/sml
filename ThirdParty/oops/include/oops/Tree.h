@@ -32,17 +32,17 @@ struct Algebra;
 #include <stdio.h>
 #include "oops/parutil.h"
 
-typedef struct Tree *Ptrtree;
 
 #define   ON_EVERY_HOST         -1
 #define   ID_TREE_NOT_SET       -99
 
 
 /** A Tree */
-typedef struct Tree {
+class Tree {
+ public: 
 
   /** Array of child nodes */
-  Ptrtree *sons;
+  Tree **sons;
 
   /** Number of child nodes */
   int nb_sons;
@@ -62,14 +62,14 @@ typedef struct Tree {
 
   /** = 1 if dense vector information is available at this node.
       Set for all leaves in serial mode, local leaves in parallel mode */
-  short local;
+  bool local;
 
   /** Pointer to next local node above this node  
       if the vector is a subvector of a local vector,
       this is where dense info can be found
       NOT SUPPORTED (?)
       null otherwise */
-  Ptrtree above;
+  Tree *above;
   
   /** Pointer to corresponding  diagonal node on the Algebra Tree
    *  When the Tree is defined this pointer points back to the Algebra Tree  
@@ -150,53 +150,94 @@ typedef struct Tree {
     /* single_* are never used
        share_* are used in Vector2/ReduceVector which IS USED */
 
-} Tree;
+    
+    /* ---------------------- constructors/destructors --------------------- */
 
-
-/* ------------------------ constructors/destructors ----------------------- */
-
-/** Allocate and set a node in the tree */
-Tree* 
-NewTree(int begcol, int begrow, int nbsons);
-
+    /** Allocate and set a node in the tree */
+    Tree(int begin = -1, int end = -1, int nbsons = 0);
+    
 #ifdef REDUNDANT
-Tree *
-NewDenseTree (int nb_sons, int mainbeg, int mainend, int *begin, int *end);
-/* Allocates (sons/bcast_type) and initialises (nb_sons/begin/end/index/local)
-   this node and all its sons (but no further) */
-/* REDUNDANT: used in msnd/MultflowSparse (red), drivers/test, lpsolver/hmain*/
-
-Tree *
-NewTreeOfTree (int nb_sons, Tree **Ti, int begin, int end);
-/* NOT USED: Allocates (sons/NOT bcast_types) and initialises (nb_sons/begin/
-   end/local/index) this node which has trees Ti as sons */
+    Tree *
+      NewDenseTree (int nb_sons, int mainbeg, int mainend, int *begin, int *end);
+    /* Allocates (sons/bcast_type) and initialises 
+       (nb_sons/begin/end/index/local)
+       this node and all its sons (but no further) */
+    /* REDUNDANT: used in msnd/MultflowSparse (red), drivers/test, 
+                  lpsolver/hmain*/
+    
+    Tree *
+      NewTreeOfTree (int nb_sons, Tree **Ti, int begin, int end);
+    /* NOT USED: Allocates (sons/NOT bcast_types) and initialises 
+       (nb_sons/begin/end/local/index) this node which has trees Ti as sons */
 #endif /* REDUNDANT */
 
-void
-FreeTree(Tree* T);
-/* frees sons arrary and node itself recursively 
-   DOES NOT free bcast_type array */
+    /* frees sons arrary and node itself recursively 
+       DOES NOT free bcast_type array */
+    ~Tree();
 
-/* ------------------------- Utility functions ----------------------------- */
+    /* ----------------------- Utility functions --------------------------- */
 
-/** Print a Tree recursively depth-first, from front */
-void
-PrintTree(FILE *out, Tree *T, const char *name);
+    /** Print a Tree recursively depth-first, from front */
+    void print(FILE *out, const char *name);
+    
+    
+    /** Write the Tree to a file in format required by ReadTree() */
+    int writeToFile(FILE*);
 
-/** Generate a Tree by reading it from a file */
-Tree*
-ReadTree(FILE *f);
-/* Reads tree from file: beg, end, local, index, nb_sons
-   depth first, from front */
+    /** Generate a Tree by reading it from a file */
+    static Tree* readFromFile(FILE *f);
+    /* Reads tree from file: beg, end, local, index, nb_sons
+       depth first, from front */
+    
+    void check();
+    /* check that division of indices (begin/end) matches in the tree */
+    /* uses asserts and warns if node has zero block (begin==end) */
 
-/** Write the Tree to a file in format required by ReadTree() */
-int
-WriteTree(Tree*, FILE*);
+    /** Check whether two trees are identical, by recursively comparing
+	nb_sons, begin, end. */
+    bool isIdentical(Tree *T2);
 
-void
-CheckTree (Tree *T);
-/* check that division of indices (begin/end) matches in the tree */
-/* uses asserts and warns if node has zero block (begin==end) */
+    /* --------------------- Initialization functions ---------------------- */
+
+    void setIndex();
+    /* Called with root node: set index of nodes (depth first (from back)),
+       above and t->nb_nodes (only for root) */
+    /* Called from Init(Par)Algebras */
+
+
+    void setLeavesLocal(Tree *Parent);
+    /* Sets local=1 in all leaves (and if already marked local=1) - 
+       sets local=0 elsewhere) and above if a node above is local
+       Called from Init(Par)Algebras */ 
+
+#ifdef WITH_MPI
+    void setProcLocal();
+/* Sets local==1 nodes to local=0 if they don't live on this processor
+   Assumes that LeavesAreLocalTree and AllocateProcessors have been called 
+   already, i.e. fields ->local, ->id_first, ->id_last are set              */
+
+    void setAllNodesBelow(bool local, int id, host_stat_type host_stat);
+    /* Sets the ->local, ->id, ->host_stat, ->above entries of this node and 
+       all nodes below: 
+       Called from DelayExecute: Delay specifies processor splits on top
+       level, this function sets them on all lower levels */
+
+    void setParBcastTypes();
+    /* Assumes host_stat is set in all nodes +id is set in all HostSingle nodes
+       */
+    /* Sets: bcast_type[nb_proc], reduce_type 
+       single_first, single_last, share_first, share_last, share_sz */
+
+    void setParBcastTypesNew();
+
+#endif
+};
+
+
+
+
+
+
 
 #ifdef REDUNDANT
 int
@@ -211,49 +252,7 @@ static int
 NbNodesTree(Tree *T) */
 /* Counts number of nodes in the tree */
 
-/** Check whether two trees are identical, by recursively comparing
-    nb_sons, begin, end. */
-int 
-TreesAreIdentical(Tree *T1, Tree *T2);
 
-/* ----------------------- Initialization functions ------------------------ */
-
-void
-SetIndexTree (Tree *T);
-/* Called with root node: set index of nodes (depth first (from back)),
-   above and t->nb_nodes (only for root) */
-/* Called from Init(Par)Algebras */
-
-
-void 
-LeavesAreLocalTree(Tree* T, Tree *Parent);
-/* Sets local=1 in all leaves (and if already marked local=1) - 
-   sets local=0 elsewhere) and above if a node above is local
-   Called from Init(Par)Algebras */ 
-
-
-#ifdef WITH_MPI
-void 
-SetProcLocalTree(Tree* T);
-/* Sets local==1 nodes to local=0 if they don't live on this processor
-   Assumes that LeavesAreLocalTree and AllocateProcessors have been called 
-   already, i.e. fields ->local, ->id_first, ->id_last are set              */
-
-void
-SetAllNodesBelow(Tree *T, short local, int id, host_stat_type host_stat);
-/* Sets the ->local, ->id, ->host_stat, ->above entries of this node and 
-   all nodes below: 
-   Called from DelayExecute: Delay specifies processor splits on top
-   level, this function sets them on all lower levels */
-
-void
-SetParBcastTypes(Tree *T);
-/* Assumes host_stat is set in all nodes + id is set in all HostSingle nodes */
-/* Sets: bcast_type[nb_proc], reduce_type 
-         single_first, single_last, share_first, share_last, share_sz */
-
-void
-SetParBcastTypesNew(Tree *T);
 
 /* ---------------------------- others ------------------------------------- */
 
@@ -272,7 +271,7 @@ comp_nodes(Tree *T1, Tree *T2);
 
 #endif
 
-#endif
+
 
 /* Others: CyclicSetHost : Never Used
            LocalLeafesTree: Never Used (same as LeavesAreLocal)

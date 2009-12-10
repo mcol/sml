@@ -31,34 +31,79 @@
 #include "oops/Algebra.h"
 #include "oops/GlobalOpt.h"
 
-/* temporary definition while usage of hopdm_opt_type still exists */
+
+/* temporary definitions while their usage may still exist */
 #define hopdm_opt_type HopdmOptions
+#define hopdm_prt_type PrintOptions
+#define primal_dual_pb PDProblem
 
 /**
  *  Parameters that control the behaviour of the solver.
  */
-typedef struct {
+class HopdmOptions {
+
+ public:
+
+  /** Constructor */
+  HopdmOptions();
+
+  /** Destructor */
+  ~HopdmOptions();
+
+  /** Read the global options file */
+  int readGlobalOptions();
 
   /** Use the supplied starting point */
   int use_start_point;
 
   /** Use Warm Start Heuristic */
   int use_wsh;
+
+  int use_presolve;
+
   int nb_beg_center_it;
   int nb_end_center_it;
-  int use_presolve;
   int ret_adv_center;
-  double ret_adv_center_gap;
   int nb_ret_adv_center_it;
+  double ret_adv_center_gap;
+  double ret_target_mu;
   int ret_path;
   GlobalOpt *glopt;
-  
-} hopdm_opt_type;
+
+};
+
+
+/** The amount of printing required. */
+enum PrintLevelValues {
+
+  /** Don't print anything */
+  PRINT_NONE,
+
+  /** Print one line per iteration */
+  PRINT_ITER,
+
+  /** Print one line per iteration, factorization, iterative refinement,
+      and residuals */
+  PRINT_INFO,
+
+  /** Print verbosely */
+  PRINT_VERBOSE,
+
+  /** Placeholder for the last item */
+  LAST_LEVEL
+};
+
 
 /**
  *  Parameters that control what is printed out.
  */
-typedef struct {
+class PrintOptions {
+
+ public:
+
+  /** Constructor */
+  PrintOptions(const int PrintLevel = PRINT_ITER);
+
    int PrtFact;
    int PrtIRSlv;
    int PrtInit;
@@ -71,7 +116,13 @@ typedef struct {
    int PrtMaxS;
    int PrtMakeS;
    int PrtTT;
-} hopdm_prt_type;
+
+ private:
+
+  /** Set the member variables for the amount of printing required */
+  void setPrintLevel(const int PrintLevel);
+
+};
 
 /**
  *  Information returned from the solver.
@@ -79,6 +130,7 @@ typedef struct {
 typedef struct {
 
   double val;
+  double dVal;
 
   /** Return code from the solver:
       -  0: OK;
@@ -99,10 +151,21 @@ typedef struct {
 
 } hopdm_ret;
 
+
 /**
  *  Information on the primal-dual problem.
  */
-typedef struct {
+class PDProblem {
+
+ public:
+
+  /** Constructor */
+  PDProblem(Algebra *AlgAug = NULL,
+            Vector *b = NULL, Vector *c = NULL, Vector *u = NULL,
+            Vector *x = NULL, Vector *y = NULL, Vector *z = NULL);
+
+  /** Destructor */
+  ~PDProblem();
 
   /** Algebra */
   Algebra *AlgAug;
@@ -149,10 +212,8 @@ typedef struct {
   /* for unmodified problem: is_feas=0, obj_fact = 1.0
      for unmodified problem: is_feas=1, obj_fact = 0.0                      */
 
-} primal_dual_pb;
+};
 
-/* A nicer name */
-typedef primal_dual_pb PDProblem;
 
 /**
  *  Inverse representation of the system matrix.
@@ -211,29 +272,30 @@ void
 MaxStep(FILE *out, PDPoint *pdPoint, PDPoint *pdDir,
 	double *alphaX, double *alphaZ, double *alphaS, double *alphaW,
 	Algebra *AlgA, LogiVector *vwhere_u, LogiVector *vwhere_l, Vector *vstep,
-	hopdm_prt_type *Prt);
+        PrintOptions *Prt);
 
 void
 CompPDRes(FILE *out, Algebra * AlgA, Algebra *AlgQ,
 	  Vector *vb, Vector *vc, Vector *vu, PDPoint *pdPoint,
 	  Vector *vxib, Vector *vxic, Vector *vxiu,
 	  double *err_b, double *err_c, double *err_u, 
-	  LogiVector *vwhere_u, hopdm_prt_type *Prt);
+          LogiVector *vwhere_u, PrintOptions *Prt);
 
 int
 DefTheta(FILE *out, Vector *vx, Vector *vs, Vector *vz, Vector *vw,
-	 Vector *vtheta, LogiVector *vwhere_u, LogiVector *vwhere_l, hopdm_prt_type *Prt);
+         Vector *vtheta, LogiVector *vwhere_u, LogiVector *vwhere_l,
+         PrintOptions *Prt);
 
 void
 pdFactor (FILE *out, Algebra *AlgAug, Vector *vtheta, Vector *vthetay, 
 	  Vector *vpdRegTh, Vector *vpdRegx, Vector *vpdRegy, 
-	  hopdm_prt_type *Prt);
+          PrintOptions *Prt);
 
 void
 IterRefSolveNew (FILE *out, InverseRep *ivr, int *Alarm,
 		 Vector *vrhs_x, Vector *vrhs_y, 
 		 Vector *vdel_xy, Vector *vdel_x, Vector *vdel_y,
-		 hopdm_prt_type *Prt, Vector *vNwrk3, Vector *vMwrk3,
+		 PrintOptions *Prt, Vector *vNwrk3, Vector *vMwrk3,
 		 double ireps);
 
 /** Compute higher-order primal-dual directions. */
@@ -243,25 +305,32 @@ HopdmDir(FILE *out, InverseRep *ivr, const int iDir, const int onlyCent,
 	 Vector *vxib, Vector *vxic, Vector *vxiu,
 	 Vector *vXrhs_x, Vector *target,
 	  PDPoint *pdPoint, PDPoint *pdPredDir, PDPoint *pdNewDir,
-	  LogiVector *vwhere_u, LogiVector *vwhere_l, hopdm_prt_type *Prt,
+         LogiVector *vwhere_u, LogiVector *vwhere_l, PrintOptions *Prt,
 	 Vector *vNw1, Vector *vMw1, const double ireps);
 
 /** Solve an LP with the higher-order primal-dual method. */
 hopdm_ret*
-hopdm(FILE *out, primal_dual_pb *P, hopdm_opt_type *opt, hopdm_prt_type *Prt);
+hopdm(FILE *out, PDProblem *P, HopdmOptions *opt, PrintOptions *Prt);
+
+hopdm_ret*
+hopdm_std(PDProblem *P, HopdmOptions *opt, PrintOptions *Prt);
 
 /** Solve an LP with the higher-order primal-dual method. */
 hopdm_ret*
-SolveOops(primal_dual_pb* pb);
+SolveOops(PDProblem* pb);
 
-/** Allocate space for for a primal_dual_pb structure. */
-primal_dual_pb*
+/** Allocate space for a PDProblem object on the heap.
+ *  @deprecated Use the PDProblem class directly instead.
+ */
+PDProblem*
 NewPDProblem(Algebra *AlgAug, Vector *b, Vector *c, Vector *u,
 	     Vector *x, Vector *y, Vector *z);
 
-/** Free the space allocated for the primal_dual_pb structure. */
+/** Free the space allocated for a PDProblem object on the heap.
+ *  @deprecated Use the PDProblem class directly instead.
+ */
 void
-FreePDProblem(primal_dual_pb *P);
+FreePDProblem(PDProblem *P);
 
 /** Set up a PDPoint structure */
 PDPoint*
@@ -271,17 +340,23 @@ NewPDPoint(Vector *x, Vector *y, Vector *z, Vector *s, Vector *w, Vector *xy);
 void
 FreePDPoint(PDPoint *P);
 
-/** Allocate space for for an hopdm_opt_type structure. */
-hopdm_opt_type*
+/** Allocate an HopdmOptions object on the heap.
+ *  @deprecated Use the HopdmOptions object directly.
+ */
+HopdmOptions*
 NewHopdmOptions(void);
 
-/** Free the space allocated for the hopdm_opt_type structure. */
+/** Free the space allocated for an HopdmOptions structure.
+ *  @deprecated If the HopdmOptions object is used directly, this is not
+ *              needed, the destructor will do the clean up.
+ */
 void
-FreeHopdmOptions(hopdm_opt_type *opt);
+FreeHopdmOptions(HopdmOptions *opt);
 
-/** Allocate space for for an hopdm_prt_type structure and set the
-    print level. */
-hopdm_prt_type*
+/** Allocate a PrintOptions object on the heap and set the print level.
+ *  @ deprecated Use the PrintOptions object directly.
+ */
+PrintOptions*
 NewHopdmPrt(const int level);
 
 #endif

@@ -31,8 +31,12 @@ int ParPrintf(const char *format, ...);
 /** Initialise MPI and set the global variables used for parallelism */
 int InitLippPar(const int argc, char *argv[]);
 
-/** Exit immediately from OOPS if something really wrong has happened */
-void LeaveOOPS(void);
+/** Exit immediately from OOPS, and provide an error code */
+void LeaveOOPSErr(int errcode); 
+
+/** Exit immediately from OOPS  if something really wrong has happened, giving the error code 1. */
+//inline void LeaveOOPS() {LeaveOOPSErr(1);}
+void LeaveOOPS();
 
 
 #ifdef WITH_MPI

@@ -37,16 +37,20 @@ typedef void    (*del_fct) (void *);
 #endif
 
 /** A dense Vector */
-typedef struct {
+class DenseVector {
+
+ private:
+
+  /** Memory allocated here (instead of pointing into someone else's memory) */
+  bool mem_alloc;
+
+ public:
+
+  /** Flag for a zero vector */
+  bool is_zero;
 
   /** Dimension of the vector */
   int dim;
-
-  /** Memory allocated here (instead of pointing into someone else's memory) */
-  short mem_alloc;
-
-  /** Flag for a zero vector */
-  short is_zero;
 
   /** Dense array of elements */
   double *elts;
@@ -54,9 +58,14 @@ typedef struct {
   /** Name of the vector */
   char *name;
 
-} DenseVector;
+  /** Constructor */
+  DenseVector(const int dim, const char *name, double *mem = NULL);
 
-/* --------------------- constructors/destructors -------------------------- */
+  /** Destructor */
+  ~DenseVector();
+
+};
+
 
 /** Create a DenseVector, allocate the space and unset the zero flag */
 DenseVector *
@@ -64,20 +73,12 @@ NewDenseVector(const int dim, const char *name);
 
 /** Create a DenseVector, using space starting at mem for elements */
 DenseVector *
-NewDenseVectorMem(const int dim, char *name, double* mem);
+NewDenseVectorMem(const int dim, const char *name, double* mem);
 
 /** Create a DenseVector that is a portion (begin, begin+dim) of another 
     DenseVector sharing its memory */
 DenseVector *
 SubDenseVector(DenseVector *Big, const int begin, const int dim);
-
-#ifdef OBSOLETE
-/** Create a DenseVector that is a portion of another DenseVector sharing
-    its memory (memory for the actual DenseVector structure is taken from mem)
-    NEVER USED: REDUNDANT */
-DenseVector *
-SubDenseMemVector(DenseVector *Big, const int begin, const int dim, char *mem);
-#endif /* OBSOLETE */
 
 /** Create a dense vector by reading it from a file */
 DenseVector*
@@ -124,10 +125,5 @@ void
 daxpyDenseVector(DenseVector* x, DenseVector*y, const double a);
 /* y += a*x */
 
-#ifdef OBSOLETE
-void
-SetDenseVector(DenseVector* V, int dim, double *elts);
-/* Never used: doesn't work: should wrap a DenseVector around elts[] */
-#endif /* OBSOLETE */
 
 #endif

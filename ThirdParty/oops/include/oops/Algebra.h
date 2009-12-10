@@ -270,11 +270,11 @@ typedef struct Algebra {
   /* Print(FILE *f, AlgMatrix *M, char *format):
      prints Matrix on f using format */
         AlgProdFunc                    MatrixTimesVect;
-  /* MatrixTimesVect(AlgMatrix *M, Vector *x, Vector *y, int add, 
+  /* MatrixTimesVect(Algebra *A, Vector *x, Vector *y, int add, 
                      double fact):  
      y = Mx; , if (add) => y += fact* Mx */
         AlgProdFunc                    MatrixTransTimesVect;
-  /* MatrixTimesTransVect(AlgMatrix *M, Vector *x, Vector *y, int add,
+  /* MatrixTimesTransVect(Algebra *A, Vector *x, Vector *y, int add,
                           double fact): 
      y = M'x, if (add) => y += fact* M'x */
         AlgFreeAlgebra                 FreeAlgebra;

@@ -16,10 +16,7 @@
  */
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
-extern "C" {
 #include "oops/OopsInterface.h"
-}
-
 #include <cmath>
 #include <iostream>
 #include <cassert>
@@ -27,10 +24,8 @@ extern "C" {
 #include "sml-oops.h"
 
 // C++ static variables defined in an *. file need to be declared here as well
-#ifdef __cplusplus
 FILE *printout;
 double tt_start, tt_end;
-#endif
 
 /** Wrapper round the Algebras A and Q. Return value for generateSML() */
 typedef struct SMLReturn_st {
@@ -97,25 +92,25 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   // FIXME: should the stuff below be included in OOPSSetup? 
   //        that would require OOPSSetup to return vectors as well
 
-  vb = NewVector(Pb->A->Trow, "vb");
-  vc = NewVector(Pb->A->Tcol, "vc");
-  vu = NewVector(Pb->A->Tcol, "vu");
-  vl = NewVector(Pb->A->Tcol, "vl");
+  vb = new Vector(Pb->A->Trow, "vb");
+  vc = new Vector(Pb->A->Tcol, "vc");
+  vu = new Vector(Pb->A->Tcol, "vu");
+  vl = new Vector(Pb->A->Tcol, "vl");
 
-  VectorFillCallBack(vc, FillObjVector);
-  VectorFillCallBack(vb, FillRhsVector);
-  VectorFillCallBack(vu, FillUpBndVector);
-  VectorFillCallBack(vl, FillLowBndVector);
+  vc->fillCallBack(FillObjVector);
+  vb->fillCallBack(FillRhsVector);
+  vu->fillCallBack(FillUpBndVector);
+  vl->fillCallBack(FillLowBndVector);
 
   if (1)
   {
     FILE *mout = fopen("mat.m","w");
     //PrintMatrixMatlab(mout, Pb->A, "A");
     //PrintMatrixMatlab(mout, Pb->Q, "Q");
-    PrintVectorMatlab(vb, mout, "b");
-    PrintVectorMatlab(vc, mout, "c");
-    PrintVectorMatlab(vu, mout, "bu");
-    PrintVectorMatlab(vl, mout, "bl");
+    vb->printMatlab(mout, "b");
+    vc->printMatlab(mout, "c");
+    vu->printMatlab(mout, "bu");
+    vl->printMatlab(mout, "bl");
     fclose(mout);
   }
 
@@ -129,14 +124,14 @@ SML_OOPS_driver(ExpandedModelInterface *root)
 
   Vector *vx, *vy, *vz;
   primal_dual_pb *Prob;
-  hopdm_prt_type *Prt = NewHopdmPrt(1);
+  PrintOptions Prt(1);
 
-  vx = NewVector(Pb->A->Tcol, "vx");
-  vy = NewVector(Pb->A->Trow, "vy");
-  vz = NewVector(Pb->A->Tcol, "vz");
+  vx = new Vector(Pb->A->Tcol, "vx");
+  vy = new Vector(Pb->A->Trow, "vy");
+  vz = new Vector(Pb->A->Tcol, "vz");
   Prob = NewPDProblem(AlgAug, vb, vc, vu, vx, vy, vz);
   Prob->l = vl;
-  hopdm (stdout, Prob, Opt, Prt);
+  hopdm (stdout, Prob, Opt, &Prt);
   
 
   /* hopdm returns the solution vector in Prob->x/y/z

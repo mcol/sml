@@ -128,6 +128,7 @@ void
 FreeSparseMatrix (SparseSimpleMatrix* N);
 
 /** Allocate a row_wise structure */
+
 void
 row_wise (SparseSimpleMatrix * A);
 
@@ -152,5 +153,9 @@ AddSparseSimpleMatrix(SparseSimpleMatrix *A, SparseSimpleMatrix *B, double f);
 void
 SchurSumSparse(SparseSimpleMatrix *M, MPI_Comm comm);
 #endif
+
+/** Used in WSPertNetlib.c */
+Algebra *
+MatrixSparseClone(SparseSimpleMatrix *M);
 
 #endif /* SPARSESIMPLEMATRIX_H */

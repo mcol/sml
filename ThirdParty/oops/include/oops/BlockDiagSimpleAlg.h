@@ -54,6 +54,7 @@ typedef struct {
 
   /** Number of columns */
   int      nb_col;
+
   /** First column of each block in the matrix (array of nb_block+1 entries) */
   int      *col_beg;
 
