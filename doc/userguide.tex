@@ -104,8 +104,8 @@ construction of models through a language that resembles mathematical
 notation, and offer convenient features such as automatic differentiation and
 direct interfacing to solvers. Their use vastly reduces the need for tedious
 and error-prone coding work. Examples of popular modelling languages
-are AMPL \cite{mybib:AMPL}, GAMS \cite{mybib:GAMS}, AIMMS \cite{mybib:AIMMS}
-and Xpress-Mosel \cite{mybib:Mosel}.
+are AIMMS \cite{mybib:AIMMS}, GAMS \cite{mybib:GAMS}, Xpress-Mosel
+\cite{mybib:Mosel} and AMPL \cite{mybib:AMPL}.
 
 SML (Structured Modelling Language) attempts build on these traditional
 approaches while encapsulating the {\bf structure} of the problem. As such
@@ -158,9 +158,16 @@ require.
 
 \section{Third-party software}
 
-The third-party software you will need is summarised in 
-Table~\ref{Third-party urls}. As SML is currently implemented as a pre- and
+As SML is currently implemented as a pre- and
 post-processor to AMPL you will need an installed version of AMPL.
+You will also need the Amplsolver library available from Netlib.
+These two components are sufficient to build and use SML through the
+{\tt smlmps} interface.
+Other two interfaces ({\tt smloops} and {\tt smlcplex}) can be built if
+additional software libraries are available.
+
+The third-party software you will need is summarised in 
+Table~\ref{Third-party urls}. 
 
 \begin{table}[ht]
    \begin{tabular}{lccl}
@@ -168,9 +175,12 @@ post-processor to AMPL you will need an installed version of AMPL.
       \bf Software & \bf Required? & \bf Free? & \bf URL \\
       \hline
       AMPL  & Yes & No      & http://www.ampl.com/vendors.html \\
-      {\tt libamplsolver.a} & Yes & Yes & http://www.netlib.org/ampl/solvers/ \\
+      {\tt amplsolver.a} & Yes & Yes & http://www.netlib.org/ampl/solvers/ \\
       OOPS  & No  & Limited & http://www.maths.ed.ac.uk/~gondzio/parallel/solver.html \\
-      MeTiS & No  & Yes     & http://glaros.dtc.umn.edu/gkhome/views/metis \\
+      BLAS  & for OOPS & Yes & http://www.netlib.org/blas/ \\
+      LAPACK& for OOPS & Yes & http://www.netlib.org/lapack/ \\
+      METIS & No  & Yes     & http://glaros.dtc.umn.edu/gkhome/views/metis \\
+      Cplex & No  & No      & http://ilog.com/products/cplex/ \\
       \hline
    \end{tabular}
    \caption{ \label{Third-party urls}
@@ -185,13 +195,14 @@ If you wish to use the OOPS solver then you will also need the OOPS library.
 A serial version, limited to 5000 constraints, is
 distributed with SML under a closed-source license and may only be linked with
 the LGPL SML library. See {\tt ThirdParty/oops/COPYING} for full terms. The
-version supplied is compiled using GNU {\tt g77} on a 32-bit Linux machine; if
+version supplied is compiled using GNU {\tt g++} and {\tt gfortran}
+on a 32-bit Linux machine; if
 your setup differs then mileage may vary.
 
 If you
 have a full version of OOPS (contact Andreas Grothey {\tt <A.Grothey@ed.ac.uk>}
 for further information) you may use this instead, though you may also need the
-MeTiS library. OOPS also requires LAPACK and BLAS routines; we advise that you
+METIS library. OOPS also requires LAPACK and BLAS routines; we advise that you
 use the ones supplied by your computer vendor, however there are freely
 available implementations available from the Netlib archive.
 
@@ -202,9 +213,10 @@ The following configuration options are available:
 \begin{tabular}{ll}
    \tt --with-ampl=path & Absolute path to directory containing libamplsolver.a \\
    \tt --with-oops=path & Absolute path to OOPSHOME directory \\
-   \tt --with-metis=path & Absolute path to MeTiS directory \\
+   \tt --with-cplex=path & Absolute path to the Cplex installation \\
    \tt --with-blas=library & BLAS library to use \\
    \tt --with-lapack=library & LAPACK library to use \\
+   \tt --with-metis=path & Absolute path to METIS directory \\
    \tt --with-mps=[yes|no] & Enable/disable MPS interface
 \end{tabular}
 
@@ -213,6 +225,26 @@ Running the command:
    ./configure --help
 \end{verbatim}
 will display a more comprehensive summary.
+
+\section{Running SML}
+
+You can find some small examples of problems modelled in SML in the {\tt tests}
+directory. There are two files for each problem: the model file and the data
+file. This forces the user to write a model that is general enough so that
+it can be reused with different data sets.
+
+The {\tt smlmps} interface parses the model and data files to produce an
+MPS file, which can then be used as input file to virtually any solver for
+solution. For example, this can be accomplished with the following command:
+\begin{verbatim}
+    smlmps alm.mod alm.dat alm.mps
+\end{verbatim}
+
+To see how an interface can be called and what options it supports, call
+it with the ``{\tt --help}'' option, such as:
+\begin{verbatim}
+    smlmps --help
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Structured Problems}
