@@ -75,10 +75,14 @@ AC_SEARCH_LIBS(dlopen, dl)
 if test $acx_ampl_ok = no; then
 if test "x$AMPL_LIBS" != x; then
 	save_LIBS="$LIBS"; LIBS="$AMPL_LIBS $LIBS"
+	save_CFLAGS="$CFLAGS"
+	CFLAGS="$AMPL_INCLUDE"
+	AC_CHECK_HEADER(asl_pfgh.h, , [AMPL_INCLUDE=""], [/* quiet */])
 	AC_MSG_CHECKING([for ASL_alloc in $AMPL_LIBS])
 	AC_TRY_LINK_FUNC(ASL_alloc, [acx_ampl_ok=yes], [AMPL_LIBS=""])
 	AC_MSG_RESULT($acx_ampl_ok)
 	LIBS="$save_LIBS"
+	CFLAGS="$save_CFLAGS"
 fi
 fi
 

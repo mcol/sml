@@ -1,3 +1,6 @@
+2009-12-11  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Added check for the presence of the asl_pfgh.h header for amplsolver.
+
 2009-12-10  Marco Colombo  <m.colombo@ed.ac.uk>
   * Removed the hardcoded -ldl from the makefiles, which used to break building
     under MinGW. This is replaced by a check for the presence of this library
