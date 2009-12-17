@@ -87,10 +87,9 @@ main
 ---------------------------------------------------------------------------- */
 ExpandedModelInterface* sml_generate(const string modelfilename, 
       const string datafilename, const bool debug) {
+
    int errcode;
-   GlobalVariables::modelfilename = strdup(modelfilename.c_str());
-   GlobalVariables::datafilename = strdup(datafilename.c_str());
-   //yydebug = debug ? 1 : 0;
+
    if(debug) GlobalVariables::prtLvl++;
 
    writeCopyright(cout);
@@ -99,6 +98,9 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    errcode = createTmpDirIfNotPresent();
    if (errcode)
      return NULL;
+
+   GlobalVariables::modelfilename = strdup(modelfilename.c_str());
+   GlobalVariables::datafilename = strdup(datafilename.c_str());
 
    cout << "Reading model file '" << GlobalVariables::modelfilename << 
       "'..." << endl;
@@ -119,8 +121,7 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    // change working directory back to tmp/ for processing model
    errcode = chdir("tmp");
    if (errcode){
-      cerr << "Could not change working directory to 'tmp/'\n";
-      cerr << "Cannot continue\n";
+      cerr << "ERROR: Failed to change working directory to 'tmp/'\n";
       return NULL;
    }
 
@@ -129,8 +130,6 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
 
    /* Write out and run ampl on ExpandedModels */
    process_model(AmplModel::root);
-
-   /* Call Solver */
 
    if(GlobalVariables::prtLvl>=1)
       cout << "------------- Generate ExpandedModel tree ------------ \n";
