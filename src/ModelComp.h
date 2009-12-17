@@ -105,7 +105,9 @@ class ModelComp{
   ModelComp(const char *id, compType type,
             SyntaxNode *indexing, SyntaxNode *attrib);
   ModelComp();  //< constructor that sets everything to default values
-  virtual ~ModelComp() {}
+
+  /** Destructor */
+  virtual ~ModelComp();
 
   /** Set up an existing model comp to specified values */
   void setTo(char *id, compType type, SyntaxNodeIx *indexing, SyntaxNode *attrib); 

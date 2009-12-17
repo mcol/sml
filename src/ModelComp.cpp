@@ -95,6 +95,11 @@ ModelComp::ModelComp(const char *id, compType type,
   global_list.push_back(this);
 }
 
+ModelComp::~ModelComp() {
+
+  free(id);
+}
+
 /* --------------------------------------------------------------------------
 ModelComp::setUpDependencies()
 ---------------------------------------------------------------------------- */
