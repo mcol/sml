@@ -64,14 +64,14 @@ Set::Set(const ListNode &list):
   // then place all the elements on the set
   for(SyntaxNode::iterator i=list.begin(); i!=list.end(); ++i){
     item = *i;
+    char **array = new char*[dim_];
+
     // and do some checking that all elements have the same dimension
     //    this->elements.push_back(item);
     if (dim_==1) {
-      char** array = (char**)calloc(1, sizeof(char*));
       array[0] = (char *) item->getValue().c_str();
       add(SetElement(1,array));
     }else{
-      char **array = (char**)calloc(dim_, sizeof(char*));
       assert(item->opCode==LBRACKET);
       item = (SyntaxNode*)*(item->begin());
       assert(item->opCode==COMMA);
