@@ -703,7 +703,7 @@ AmplModel::addDummyObjective()
       }
     }
     
-    newobj = new ModelComp(strdup("dummy"), TMIN, NULL, attr);
+    newobj = new ModelComp("dummy", TMIN, NULL, attr);
     this->addComp(newobj);
   }
 
