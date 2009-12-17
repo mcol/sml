@@ -174,7 +174,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
 /* ---------------------------------------------------------------------------
 AmplModel::createExpandedModel
 ---------------------------------------------------------------------------- */
-char *crush(const char *inst);
+static string crush(const string& inst);
 list<string> *getListOfInstances(istream &file);
 
 /** This method is given a location in the Expanded tree and the correspoding
@@ -361,7 +361,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
           string subModelName = smodelname+"_"+string(mc->id);
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
-          subModelInst += crush((*q).c_str());
+          subModelInst += crush(*q);
           if(GlobalVariables::prtLvl>=1)
             cout << subModelName << ":" << subModelInst << endl;
           AmplModel *subampl = (AmplModel*)mc->other;
@@ -443,10 +443,12 @@ char *strtok_r(char *str, const char *delim, char **saveptr) {
 crush
 ---------------------------------------------------------------------------- */
 /* helper routine: crushes a set element (N0,N1) into N0N1 */
-char *crush(const char *inst)
-{
-  if (inst[0]!='(') return strdup(inst);
-  char *token = strdup(inst);
+string crush(const string& inst) {
+
+  if (inst[0] != '(')
+    return inst;
+
+  char *token = strdup(inst.c_str());
   int len = strlen(token);
   assert(token[len-1]==')');
   token[len-1]=0;
@@ -457,13 +459,13 @@ char *crush(const char *inst)
     char *svptr2;
     char *tok2 = strtok_r(str2, ",", &svptr2);
     if (tok2==NULL) break;
-    crush += string(tok2);
+    crush += tok2;
   }
   //printf("Crushed mutidim token is: %s\n",crush.c_str());
   
   token--;
   free(token);
-  return strdup(crush.c_str());
+  return crush;
 }
 
 /* ---------------------------------------------------------------------------
