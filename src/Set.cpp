@@ -68,7 +68,7 @@ Set::Set(const ListNode &list):
     //    this->elements.push_back(item);
     if (dim_==1) {
       char** array = (char**)calloc(1, sizeof(char*));
-      array[0] = item->getValue();
+      array[0] = (char *) item->getValue().c_str();
       add(SetElement(1,array));
     }else{
       char **array = (char**)calloc(dim_, sizeof(char*));
@@ -153,9 +153,8 @@ Set::findPos(SetElement el)
   if( iter != elements.end() ) {
     return iter->second;
   }else{
-    printf("ERROR: Set.cpp: Trying to find element '%s' in Set %s\n",
-           el.toCharA(), printToString().c_str());
-    printf("Element %s is not in Set\n",el.toCharA());
+    cerr << "ERROR: Element '" << el.toString() << "' is not in Set "
+         << printToString() << endl;
     exit(1);
     return -1;
   }

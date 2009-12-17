@@ -2,8 +2,9 @@
   * Cleaned up createTmpDirIfNotPresent() and surrounding code.
   * Made process_model() return an error code instead of calling exit().
   * Defined a destructor for the ModelComp class.
-  * Changed the return type of getGlobalName() and getGlobalNameNew() to string
-    to remove some leaks caused by the use of strdup().
+  * Changed the return type of ModelComp::getGlobalName[New](),
+    SyntaxNode::getValue() and SetElement::toCharA() to string to remove some
+    leaks caused by the use of strdup().
 
 2009-12-11  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added check for the presence of the asl_pfgh.h header for amplsolver.

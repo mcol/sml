@@ -189,7 +189,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
         for(int k=0;k<nobj;k++){
           pos_in_array*= indices[k]->size();
           SyntaxNode *onid = (*((ListNode *)paramspec))[pos_in_paramspec+k];
-          char *obj = onid->getValue();
+          char *obj = (char *) onid->getValue().c_str();
           // FIXME: if we want to allow multidimensional indexing sets we
           //        need to gather indices[k]->dim entries together and 
           //        convert them into a string[]. This is then passed to

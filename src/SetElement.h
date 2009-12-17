@@ -38,7 +38,7 @@ class SetElement {
 
   bool operator()(const SetElement el1, const SetElement el2) const;
 
-  char* toCharA();
+  string toString() const;
 
 };
 #endif

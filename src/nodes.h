@@ -124,7 +124,7 @@ class SyntaxNode {
 
   /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
       the value of this node as a c_string */
-  virtual char *getValue() const { throw exception(); return strdup("(fail)"); }
+  virtual string getValue() const { throw exception(); return "(fail)"; }
 
   void dump(ostream &fout); //!< diagnostic printing
 
@@ -265,7 +265,7 @@ class IDNode : public SyntaxNode, virtual ValueNodeBase {
   public:
    IDNode(const char *const new_name, long stochparent=0);
    IDNode(const string name, long stochparent=0);
-   char *getValue() const { return strdup(name.c_str()); }
+   string getValue() const { return name; }
    void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for ID:
@@ -335,7 +335,7 @@ template<class T> class ValueNode : public SyntaxNode, virtual ValueNodeBase {
    ValueNode(const T new_value) :
       SyntaxNode(-99), value(new_value) {}
    double getFloatVal() const { return value; }
-   char *getValue() const ;
+   string getValue() const;
    void findIDREF(list<ModelComp*> &lmc) { return; }
    void findIDREF(list<SyntaxNode*> *lnd) { return; }
    // We never search for INT_VAL or FLOAT_VAL:
@@ -344,10 +344,10 @@ template<class T> class ValueNode : public SyntaxNode, virtual ValueNodeBase {
    SyntaxNode *deep_copy() { return new ValueNode<T>(value); }
    SyntaxNode *clone() { return deep_copy(); }
 };
-template<class T> char *ValueNode<T>::getValue() const {
+template<class T> string ValueNode<T>::getValue() const {
    ostringstream ost;
    ost << value;
-   return strdup(ost.str().c_str());
+   return ost.str();
 }
 
 /** @class ListNode

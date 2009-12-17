@@ -59,13 +59,14 @@ bool SetElement::operator()(const SetElement el1, const SetElement el2) const
   return false;
 }
 
-char* SetElement::toCharA()
-{
+string SetElement::toString() const {
+
   string str(val[0]);
   for(int i=1;i<n;i++){
     str += ",";
     str += val[i];
   }
-  return strdup(str.c_str());
+
+  return str;
 }
 
