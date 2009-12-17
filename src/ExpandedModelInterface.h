@@ -189,6 +189,8 @@ class ExpandedModelInterface {
 
  protected:
   ExpandedModelInterface() : parent(NULL) {}
+
+ public:
   virtual ~ExpandedModelInterface() {}
 };
 

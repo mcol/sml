@@ -191,7 +191,7 @@ ExpandedModel::setLocalVarInfo()
   //printf("Found %d variables\n",listColIx.size());
   
   nLocalVars = listColIx.size();
-  listOfVars = (int*)calloc(nLocalVars, sizeof(int));
+  listOfVars = new int[nLocalVars];
   int cnt;
   list<int>::iterator p;
   for(p=listColIx.begin(),cnt=0; p!=listColIx.end(); ++p,++cnt){
@@ -605,7 +605,7 @@ void ExpandedModel::setPrimalSolColumns(double *elts) {
       localVarInfoSet=true;
    }
    if(!pvar) {
-      pvar = (double*) calloc(nLocalVars, sizeof(double));
+     pvar = new double[nLocalVars];
    }
    for(double *src=elts,*dest=pvar; src<elts+nLocalVars; ++src,++dest)
       *dest = *src;
@@ -621,7 +621,7 @@ void ExpandedModel::setDualSolColumns(double *elts) {
       localVarInfoSet=true;
    }
    if(!dvar) {
-      dvar = (double*) calloc(nLocalVars, sizeof(double));
+     dvar = new double[nLocalVars];
    }
    for(double *src=elts,*dest=dvar; src<elts+nLocalVars; ++src,++dest)
       *dest = *src;
@@ -637,7 +637,7 @@ void ExpandedModel::setPrimalSolRows(double *elts) {
       localVarInfoSet=true;
    }
    if(!prow) {
-      prow = (double*) calloc(nLocalCons, sizeof(double));
+     prow = new double[nLocalCons];
    }
    for(double *src=elts,*dest=prow; src<elts+nLocalCons; ++src,++dest)
       *dest = *src;
@@ -653,7 +653,7 @@ void ExpandedModel::setDualSolRows(double *elts) {
       localVarInfoSet=true;
    }
    if(!drow) {
-      drow = (double*) calloc(nLocalCons, sizeof(double));
+     drow = new double[nLocalCons];
    }
    for(double *src=elts,*dest=drow; src<elts+nLocalCons; ++src,++dest)
       *dest = *src;
@@ -715,4 +715,19 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
 
 list<SymbolTable::Entry> ExpandedModel::getObjList() const {
    return src->getObjList();
+}
+
+/** Destructor */
+ExpandedModel::~ExpandedModel() {
+
+  delete[] pvar;
+  delete[] dvar;
+  delete[] prow;
+  delete[] drow;
+  delete[] listOfVars;
+
+  delete nlfile;
+
+  for (int i =0; i < children.size(); ++i)
+    delete children[i];
 }

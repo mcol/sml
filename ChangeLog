@@ -5,6 +5,7 @@
   * Changed the return type of ModelComp::getGlobalName[New](),
     SyntaxNode::getValue() and SetElement::toCharA() to string to remove some
     leaks caused by the use of strdup().
+  * Fix a major leak by adding a destructor to the ExpandedModel class.
 
 2009-12-11  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added check for the presence of the asl_pfgh.h header for amplsolver.

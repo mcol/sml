@@ -130,5 +130,8 @@ int main(int argc, char **argv) {
       cout << "Solution written to file '" << outfilename << "'" << endl;
    }
 
+   // clean up
+   delete em;
+
    return 0;
 }

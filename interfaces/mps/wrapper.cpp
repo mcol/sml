@@ -105,5 +105,8 @@ int main(int argc, char **argv) {
 
    SML_MPS_driver(em, mpsfilename);
 
+   // clean up
+   delete em;
+
    return 0;
 }

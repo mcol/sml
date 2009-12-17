@@ -165,6 +165,9 @@ class ExpandedModel : public ExpandedModelInterface {
   //! Constructor
   ExpandedModel(AmplModel *src_model);
 
+  //! Destructor
+  ~ExpandedModel();
+
   //! Recursively print contents of this instance
   void print();
   

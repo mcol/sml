@@ -103,5 +103,8 @@ int main(int argc, char **argv) {
    outfile.close();
    cout << "Solution written to file '" << solnfilename << "'" << endl;
 
+   // clean up
+   delete em;
+
    return 0;
 }
