@@ -145,6 +145,9 @@ process_model(AmplModel *model, const char *datafilename) {
   if(GlobalVariables::prtLvl>=1)
     cout << "-------------- start of process_model ----------------------\n";
 
+  /* should be called from the root model */
+  assert(model->parent == NULL);
+
   /* 1) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate list of all models */
 
   model->level=0; /* root is on level 0, fill_model_list also sets levels */
