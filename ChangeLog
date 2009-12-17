@@ -1,3 +1,6 @@
+2009-12-17  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Cleaned up createTmpDirIfNotPresent() and surrounding code.
+
 2009-12-11  Marco Colombo  <m.colombo@ed.ac.uk>
   * Added check for the presence of the asl_pfgh.h header for amplsolver.
 

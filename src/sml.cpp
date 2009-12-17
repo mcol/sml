@@ -50,33 +50,36 @@ void writeCopyright(ostream &out) {
    out << "Released under LGPL v3" << endl;
 }
 
-void createSubdirTmpIfNotExist(void)
-{
-   int fl_is_dir;
+int createTmpDirIfNotPresent() {
+
+   int err = 0;
    bool fl_exists;
    struct stat sbuf;
   
    fl_exists = !(stat("tmp", &sbuf) == -1);
-   fl_is_dir = S_ISDIR(sbuf.st_mode);
 
-   if (fl_exists && !fl_is_dir){
-      cerr << "'tmp/' exists but is no directory!\n";
-      cerr << "Cannot continue\n";
-      exit(1);
-   }
+   // check that it's a directory with RWX permissions
+   bool isusable = S_ISDIR(sbuf.st_mode) &&
+                   ((sbuf.st_mode & S_IRWXU) == S_IRWXU);
+
+   // tmp doesn't exist
    if (!fl_exists){
-      int err;
 #ifdef HAVE_DIRECT_H
       err = mkdir("tmp");
 #else
       err = mkdir("tmp", S_IRWXU);
 #endif
-      if (err){
-         cerr << "Failed to create temporary directory 'tmp/'\n";
-         cerr << "Cannot continue\n";
-         exit(1);
-      }
+      if (err)
+        cerr << "ERROR: Failed to create temporary directory 'tmp/'.\n";
    }
+
+   // tmp is present but it's not a directory or it's not usable
+   else if (!isusable) {
+     err = 1;
+     cerr << "ERROR: Cannot use 'tmp/' as temporary directory.\n";
+   }
+
+   return err;
 }
 
 /* ----------------------------------------------------------------------------
@@ -92,23 +95,11 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
 
    writeCopyright(cout);
 
-   /* make sure dir '/tmp' for temporary files exists */
-   createSubdirTmpIfNotExist();
-   errcode = chdir("tmp");
-   if (errcode){
-      cerr << "Could not change working directory to 'tmp/'\n";
-      cerr << "Cannot continue\n";
-      return NULL;
-   }
+   // ensure that the 'tmp/' dir for temporary files exists and can be used
+   errcode = createTmpDirIfNotPresent();
+   if (errcode)
+     return NULL;
 
-   // change working directory back to original for the parsing of files
-   errcode = chdir("..");
-   if (errcode){
-      cerr << "Could not change working directory to '../'\n";
-      cerr << "Cannot continue\n";
-      return NULL;
-   }
-   
    cout << "Reading model file '" << GlobalVariables::modelfilename << 
       "'..." << endl;
    int rv = parse_model(GlobalVariables::modelfilename);
