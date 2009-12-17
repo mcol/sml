@@ -137,7 +137,7 @@ process_model
 */
 void fill_model_list_(AmplModel *model, list<AmplModel*> &listam);
 
-void
+int
 process_model(AmplModel *model, const char *datafilename) {
 
   int j;
@@ -278,12 +278,12 @@ process_model(AmplModel *model, const char *datafilename) {
       //        => for now simply use the original dummy variable
       //        => REQUIRE a dummy variable in block indexing
       if (set && !dummyVar){
-        cerr << "Indexing expressions for block's need dummy variables!" <<endl;
+        cerr << "ERROR: Indexing expressions on blocks need dummy variables.\n";
         cerr << "Model: " << this_model->name << " level " << k << endl;
         cerr << "Node: " << node->id << endl;
         cerr << "Indexing: " << node->indexing << "(" <<
            (void*) node->indexing << ")" << endl;
-        exit(1);
+        return 1;
       }
       //for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
       //fprintf(fscript, "for {i%d in %s }{\n", k, print_SyntaxNode(set));
@@ -293,7 +293,7 @@ process_model(AmplModel *model, const char *datafilename) {
         SyntaxNodeIDREF *set_ref = dynamic_cast<SyntaxNodeIDREF*>(set);
         if (set_ref==NULL){
           cerr << "ERROR: set reference must be SyntaxNodeIDREF\n";
-          exit(1);
+          return 1;
         }
         for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
         fscript << "for {" << dummyVar << " in " << set << " }\n";
@@ -504,11 +504,13 @@ process_model(AmplModel *model, const char *datafilename) {
     }
     if (n_other > 0) {
       cout << "AMPL: Unrecoverable error\n";
-      exit(1);
+      return 1;
     }
   }
   if(GlobalVariables::prtLvl>=1)
     cout << "done\n";
+
+  return 0;
 }
 
 /* ---------------------------------------------------------------------------
