@@ -58,7 +58,9 @@ class Set: public CompDescr{
   //! Return the dimension of the set
   int dim();
 
-  int findPos(SetElement);  //!<find position of element in set
+  //! Find position of element in set
+  int findPos(SetElement el) const;
+
 };
 
 #endif

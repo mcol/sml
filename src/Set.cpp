@@ -147,9 +147,9 @@ Set::add(SetElement newel)
 Set::findPos(string *el)
 ---------------------------------------------------------------------------- */
 int
-Set::findPos(SetElement el)
-{ 
-  map<SetElement, int, SetElement>::iterator iter = elements.find(el);
+Set::findPos(SetElement el) const {
+
+  map<SetElement, int, SetElement>::const_iterator iter = elements.find(el);
   if( iter != elements.end() ) {
     return iter->second;
   }else{
