@@ -29,7 +29,8 @@
  *         i.e. a multidimensional array
  */  
 class CompDescrParam: public CompDescr{
- public:
+
+ private:
 
   /** Number of indices */
   int nix;
@@ -49,6 +50,8 @@ class CompDescrParam: public CompDescr{
 
   /** The array of values */
   double *values;
+
+ public:
 
   // ------------------ constructors ---------------------
   
