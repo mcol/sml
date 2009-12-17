@@ -58,7 +58,7 @@ class CompDescrParam: public CompDescr{
   /** Construct given data file description and model component */
   CompDescrParam(ModelComp *mc, SyntaxNode *desc); //!< Construct from data
 
-  string printToString();
+  string toString() const;
 
  private:
 

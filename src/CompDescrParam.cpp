@@ -211,11 +211,10 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
 }
 
 /* ---------------------------------------------------------------------------
-CompDescrParam::printToString
+CompDescrParam::toString
 ---------------------------------------------------------------------------- */
 string
-CompDescrParam::printToString()
-{
+CompDescrParam::toString() const {
   string str = "";
   
   if (nix==0) str += "scalar";
@@ -230,6 +229,7 @@ CompDescrParam::printToString()
     if (i>0) str += " ";
     str += to_string(values[i]);
   }
+
   return str;
 }
 

@@ -370,7 +370,7 @@ ModelComp::dump(ostream &fout)
   fout << "MCDP  count: " << count << "\n";
   fout << "MCDP  tag: " << tag << "\n";
   if (value) {
-    fout << "MCDP  value: " << value->printToString() << "\n";
+    fout << "MCDP  value: " << value->toString() << "\n";
   }
 }
 

@@ -114,12 +114,12 @@ Set::dim()
 
 
 /* ---------------------------------------------------------------------------
-Set::printToString
+Set::toString
 ---------------------------------------------------------------------------- */
 string 
-Set::printToString()
-{
-  map<SetElement,int,SetElement>::iterator iter;
+Set::toString() const {
+
+  map<SetElement, int, SetElement>::const_iterator iter;
   string str="";
   for( iter = elements.begin(); iter != elements.end(); ++iter ) {
     if (iter!=elements.begin()) str += " ";
@@ -128,8 +128,8 @@ Set::printToString()
     int pos = iter->second;
     str += (to_string(pos)+":"+element.val[0]);
   }
-  return str;
 
+  return str;
 }
 
 
@@ -154,7 +154,7 @@ Set::findPos(SetElement el)
     return iter->second;
   }else{
     cerr << "ERROR: Element '" << el.toString() << "' is not in Set "
-         << printToString() << endl;
+         << this->toString() << endl;
     exit(1);
     return -1;
   }

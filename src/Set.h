@@ -47,8 +47,10 @@ class Set: public CompDescr{
   // ---------------- methods -----------------
   void add(SetElement);     //!< add element to set
 
-  // virtal printToString inherited from CompDescr
-  string printToString(); //!< print to string  
+  // virtual method inherited from CompDescr
+  //! Return the set as a string
+  string toString() const;
+
  public:
   Set(const ListNode &list_of_els); //!< construct a set from a list of elements in an SyntaxNode
   int size(); //!< return size of Set

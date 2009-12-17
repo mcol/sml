@@ -29,7 +29,7 @@
 class CompDescr{
  public:
   virtual ~CompDescr() {}
-  virtual string printToString() {return "";};
+  virtual string toString() const {return "";}
 };
 
 #endif
