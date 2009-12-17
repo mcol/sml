@@ -150,7 +150,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
     // onto the stack
     
     //Place the indexing expression of the current model onto the addIndex stack 
-    add_index *ai = (add_index*)calloc(1, sizeof(add_index));
+    add_index *ai = new add_index;
     ai->dummyVar = ix->dummyVarExpr[0];
     ai->set = ix->sets[0];
     li->push_back(ai);
