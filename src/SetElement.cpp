@@ -15,10 +15,8 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 #include "SetElement.h"
-#include <string.h>
 #include <string>
-
-using namespace std;
+#include <cassert>
 
 SetElement::SetElement(int n, char **new_val) :
    n(n), val(NULL)
@@ -47,14 +45,12 @@ SetElement::~SetElement() {
   //if(val) delete [] val;
 }
 
-
-bool SetElement::operator()(const SetElement el1, const SetElement el2) const 
+bool SetElement::operator()(const SetElement& el1, const SetElement& el2) const
 {
   assert(el1.n==el2.n);
   for(int i=0;i<el1.n;i++){
-    int cmp = strcmp(el1.val[i].c_str(),el2.val[i].c_str());
-    if (cmp<0) return true;
-    if (cmp>0) return false;
+    int cmp = el1.val[i].compare(el2.val[i]);
+    return (cmp < 0) ? true : false;
   }
   return false;
 }

@@ -18,7 +18,6 @@
 #define SETELH
 
 #include <string>
-#include <assert.h>
 #include "nodes.h"
 
 /** @class SetElement
@@ -36,7 +35,7 @@ class SetElement {
   SetElement(int n, IDNode **val);
   ~SetElement();
 
-  bool operator()(const SetElement el1, const SetElement el2) const;
+  bool operator()(const SetElement& el1, const SetElement& el2) const;
 
   string toString() const;
 
