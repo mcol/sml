@@ -25,12 +25,9 @@
 #include "AmplModel.h"
 #include "nodes.h"
 #include "sml.tab.h"
-//#include <list>
 
 static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
-
-void print_model(AmplModel *model);
 
 void write_ampl_for_submodel(ostream &fout, AmplModel *submodel);
 void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
@@ -68,33 +65,34 @@ print_model(AmplModel *model)
   ModelComp *entry;
   AmplModel *submod;
   SyntaxNode::use_global_names=0;
+  list<ModelComp*>::iterator p;
+
   cout << "-------------------------- backend::print_model ----------------"
      "----------\n";
   cout << "Model: " << model->name << "\n";
   cout << "n_sets: " << model->n_sets << "\n";
-  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TSET){
       print_entry(entry);
     }
-    //entry = entry->next;
   }
   cout << "n_cons: " << model->n_cons << "\n";
-  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TCON){
       print_entry(entry);
     }
   }
   cout << "n_vars: " << model->n_vars << "\n";
-  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TVAR){
       print_entry(entry);
     }
   }
   cout << "n_params: " << model->n_params << "\n";
-  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TPARAM){
       print_entry(entry);
@@ -102,22 +100,18 @@ print_model(AmplModel *model)
   }
 
   cout << "n_obj: "<< model->n_objs;
-  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TMIN||entry->type==TMAX){
-      cout << "    " << entry->id << "\n";
-      cout << "       " << entry->indexing << "\n";
-      cout << "       " << entry->attributes << "\n";
+      print_entry(entry);
     }
   }
   
   cout << "submodels: " << model->n_submodels << "\n";
-  for(list<ModelComp*>::iterator p = model->comps.begin();p!=model->comps.end();p++){
+  for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TMODEL){
-      cout << "    " << entry->id << "\n";
-      cout << "       " << entry->indexing << "\n";
-      cout << "       " << entry->attributes << "\n";
+      print_entry(entry);
       submod = (AmplModel*)entry->other;
       print_model(submod);
     }
