@@ -141,10 +141,10 @@ class ModelComp{
   ModelComp *deep_copy(); //< duplicate the object: deep copy
 };
 
-char *
+string
 getGlobalName(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
-char *
+string
 getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
 #endif

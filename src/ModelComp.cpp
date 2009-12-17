@@ -495,7 +495,7 @@ getGlobalName
  *       indexing expressions from the root at least to the common ancestor
  *        node (likely set up to the current_model).
  */
-char *
+string
 getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 {
@@ -523,7 +523,9 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
     }
   }
   
-  if (witharg==NOARG) return strdup(globalName.c_str());
+  if (witharg==NOARG)
+    return globalName;
+
   /* FIXME: still need to add the argument list, every level down from root
             should have put a indexing expression on the l_addIndex list
             use the dummyVar parts from this
@@ -643,7 +645,8 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
     
     globalName += "[" + arglist + "]";
   }
-  return strdup(globalName.c_str());
+
+  return globalName;
 }
 
 /* FIXME: this is a stub for getGlobalNameNew, a version of getGlobalName
@@ -706,7 +709,7 @@ getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model,
  *   included in the argument list of the ModelComp. Anything below needs to
  *   be prepended to the argument list
  */
-char *
+string
 getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
               int witharg)
 {
@@ -734,7 +737,9 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
     }
   }
   
-  if (witharg==NOARG) return strdup(globalName.c_str());
+  if (witharg==NOARG)
+    return globalName;
+
   /* FIXME: still need to add the argument list, every level down from root
             should have put a indexing expression on the l_addIndex list
             use the dummyVar parts from this
@@ -858,9 +863,9 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
     }
     
     globalName += "[" + arglist + "]";
-
   }
-  return strdup(globalName.c_str());
+
+  return globalName;
 }
 
 /* --------------------------------------------------------------------------
