@@ -35,7 +35,7 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 /* Stack of indexing expressions that are applicable to all variables that
    are printed:
 
-   In the original AMPL-file variables are subscripted (and set are
+   In the original AMPL-file variables are subscripted (and sets are
    indexed) *relative* to the current location in the model tree.
    
    In the AMPL-subfiles a global naming of variables is used,
@@ -43,9 +43,9 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
    definitions leading to the current node in the model tree have to
    be added to all variables.
 
-   This is done by the addIndex stack: as the sub file writer traverses through
-   the tree the block-indexing expressions are added to the tree           */
-
+   This is done by the addIndex stack: as the sub file writer traverses
+   the tree the block-indexing expressions are added to the tree.
+*/
 // FIXME: this is fairly dumb at the moment: it cannot deal with 
 //         multiple dimensions {i in SET1,j in SET2}
 //         SET valued expressions: {i in SET1 cross SET2} 
@@ -127,7 +127,7 @@ process_model
 --------------------------------------------------------------------------- */
 /* This routine will output something useful
     1) generate list of all the (sub)models defined
-    2) output and AMPL file declaring each one of the submodels
+    2) output an AMPL file declaring each one of the submodels
    Other tasks
     3) generate the algebra tree
     4) generate the ampl script to generate a *.nl file for every
@@ -138,8 +138,8 @@ process_model
 void fill_model_list_(AmplModel *model, list<AmplModel*> &listam);
 
 void
-process_model(AmplModel *model) /* should be called with model==root */
-{
+process_model(AmplModel *model, const char *datafilename) {
+
   int j;
   
   if(GlobalVariables::prtLvl>=1)
@@ -183,9 +183,8 @@ process_model(AmplModel *model) /* should be called with model==root */
       /* this is root */
       filename = "root";
     }else{
-      /* find name if model file by concatenating the names of all ancestors */
-      AmplModel *tmp_model;
-      tmp_model = this_model;
+      /* find name of model file by concatenating the names of all ancestors */
+      AmplModel *tmp_model = this_model;
       filename = tmp_model->name;
       while (tmp_model->parent){
         tmp_model = tmp_model->parent;
@@ -198,11 +197,7 @@ process_model(AmplModel *model) /* should be called with model==root */
     /* ==================== write the script file ===================== */
 
     fscript << "\nreset;\noption auxfiles rc;\noption presolve 0;\n";
-    fscript << "model " << filename << ";\ndata ../" <<
-       GlobalVariables::datafilename << ";\n";
-    /* FIXME: need to know the name of the global data file 
-           this should be an argument to the parser that is passed
-           through to the backend                                           */
+    fscript << "model " << filename << ";\ndata ../" << datafilename << ";\n";
     
     /* the script file needs to look something like
 

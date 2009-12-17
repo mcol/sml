@@ -129,7 +129,7 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    AmplModel::root->dump("logModel.dat");
 
    /* Write out and run ampl on ExpandedModels */
-   process_model(AmplModel::root);
+   process_model(AmplModel::root, GlobalVariables::datafilename);
 
    if(GlobalVariables::prtLvl>=1)
       cout << "------------- Generate ExpandedModel tree ------------ \n";

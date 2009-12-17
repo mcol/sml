@@ -58,5 +58,5 @@ typedef struct add_index_st {
 //extern add_index *l_addIndex[5];  /* to add to all statements */
 extern vector <list <add_index*>* > l_addIndex;
 
-void process_model(AmplModel *model);
+void process_model(AmplModel *model, const char *datafilename);
 #endif
