@@ -20,6 +20,7 @@
    #include <stdio.h>
    #include <stdlib.h>
    #include <assert.h>
+   #include <iostream>
    #include "nodes.h"
    #include "CompDescrParam.h"
    #include "AmplModel.h"

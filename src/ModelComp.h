@@ -20,9 +20,6 @@
 enum {NOARG=0,WITHARG=1,ONLYARG=2};
 typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <list>
 #include "nodes.h"
 #include "CompDescr.h"

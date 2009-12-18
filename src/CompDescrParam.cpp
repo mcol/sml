@@ -14,6 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 #include "CompDescrParam.h"
 #include "GlobalVariables.h"
 #include "ModelComp.h"
@@ -303,9 +307,8 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
     int ncol = on_collabel->nchild();
     int nval = on_values->nchild();
     if (nval%(ncol+1)!=0){
-      printf("Error in processing value_table:\n");
-      printf("Number of values given (%d) is not divisable by",nval);
-      printf(" (col_labels+1) (=%d)\n",ncol+1);
+      cerr << "ERROR: Number of values (" << nval << ") not divisible by"
+           << " col_labels+1 (" << ncol + 1 << ").\n";
       exit(1);
     }
     // dimensions seem to tally, now get a list of row and column

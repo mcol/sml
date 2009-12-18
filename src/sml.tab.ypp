@@ -20,16 +20,13 @@
    #define YYERROR_VERBOSE
    #include <stdio.h>
    #include <stdlib.h>
-   #include <string.h>
    #include <assert.h>
-   #include <sys/stat.h>
    #include <iostream>
    #include "nodes.h"
    #include "GlobalVariables.h"
    #include "StochModel.h"
    #include "StochModelComp.h"
    #include "symtab.h"
-   #include "backend.h"
    #include "SetNode.h"
    #include "AmplModel.h"
 
