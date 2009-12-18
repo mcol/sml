@@ -81,14 +81,10 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   printout = stdout;
   
   SMLReturn *Pb = generateSML(root);
-  hopdm_opt_type *Opt = NewHopdmOptions();
+  HopdmOptions Opt;
 
   AlgAug = OOPSSetup(Pb->A, Pb->Q);
 
-  
-  //PrintTree(stdout, Pb->A->Tcol, "coltree");
-  //PrintTree(stdout, Pb->A->Trow, "rowtree");
-  
   // FIXME: should the stuff below be included in OOPSSetup? 
   //        that would require OOPSSetup to return vectors as well
 
@@ -123,26 +119,21 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   }
 
   Vector *vx, *vy, *vz;
-  primal_dual_pb *Prob;
   PrintOptions Prt(1);
 
   vx = new Vector(Pb->A->Tcol, "vx");
   vy = new Vector(Pb->A->Trow, "vy");
   vz = new Vector(Pb->A->Tcol, "vz");
-  Prob = NewPDProblem(AlgAug, vb, vc, vu, vx, vy, vz);
-  Prob->l = vl;
-  hopdm (stdout, Prob, Opt, &Prt);
-  
+  PDProblem Prob(AlgAug, vb, vc, vu, vx, vy, vz);
+  Prob.l = vl;
+  hopdm(stdout, &Prob, &Opt, &Prt);
 
   /* hopdm returns the solution vector in Prob->x/y/z
      => need to recurse through the vectors and upload each bit to the 
         corresponding ModelInterface.
   */
 
-  SML_OOPS_upload_sol(root, Prob->x, Prob->y, Prob->z);
-
-  // clean up
-  FreePDProblem(Prob);
+  SML_OOPS_upload_sol(root, Prob.x, Prob.y, Prob.z);
 }
 
 /* ==========================================================================
