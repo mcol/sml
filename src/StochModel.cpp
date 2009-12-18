@@ -357,9 +357,9 @@ StochModel::expandToFlatModel()
   // up from the beginning, so that they can be referred to
   indset = new StochModelComp*[stagenames.size()];
   for(unsigned int i=0;i<stagenames.size();i++) {
+    // @bug this introduces a memory leak
     indset[i] = new StochModelComp();
     // give it a dummy name just so that debugging routines work
-    // @bug this introduces a memory leak
     indset[i]->id = "indset";
   }
 
