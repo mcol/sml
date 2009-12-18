@@ -350,7 +350,7 @@ StochModel::expandToFlatModel()
 
   // we need to have the pointers to the submodel indexing sets all set
   // up from the beginning, so that they can be referred to
-  indset = (StochModelComp**)calloc(stagenames.size(),sizeof(StochModelComp*));
+  indset = new StochModelComp*[stagenames.size()];
   for(unsigned int i=0;i<stagenames.size();i++) {
     indset[i] = new StochModelComp();
     // give it a dummy name just so that debugging routines work
@@ -584,6 +584,7 @@ StochModel::expandToFlatModel()
     }
   } // end loop over stages
 
+  delete[] indset;
   am->parent = parent;
   am->setGlobalNameRecursive();
   am->node = node;
