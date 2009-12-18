@@ -23,6 +23,8 @@
 #include "GlobalVariables.h" //for GlobalVariables class
 #include "AmplModel.h"
 
+using namespace std;
+
 static bool prtAnaDep = false;
 
 int ModelComp::tt_count=0;  // initialise static class member

@@ -34,6 +34,8 @@
    #include <direct.h> // for chdir() under MinGW
    #endif
 
+   using namespace std;
+
    void add_indexing(SyntaxNodeIx *indexing);
    void rem_indexing(SyntaxNodeIx *indexing);
    void begin_model(char *name, SyntaxNode *indexing);

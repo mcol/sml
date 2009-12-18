@@ -26,6 +26,8 @@
 #include "nodes.h"
 #include "sml.tab.h"
 
+using namespace std;
+
 static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
 

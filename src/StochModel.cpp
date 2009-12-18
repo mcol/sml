@@ -27,6 +27,8 @@
 #include "sml.tab.h"
 #include "SetNode.h"
 
+using namespace std;
+
 static bool logSM = false;
 
 void splitIn(SyntaxNode *expr, IDNode **dummy, SyntaxNode **set) {

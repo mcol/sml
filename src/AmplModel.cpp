@@ -29,6 +29,8 @@
 #include "sml.tab.h"
 #include "GlobalVariables.h"
 
+using namespace std;
+
 list<changeitem*> AmplModel::changes; //initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
 

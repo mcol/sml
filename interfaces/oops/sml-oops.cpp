@@ -23,6 +23,8 @@
 #include "OOPSBlock.h"
 #include "sml-oops.h"
 
+using namespace std;
+
 // C++ static variables defined in an *. file need to be declared here as well
 FILE *printout;
 double tt_start, tt_end;

@@ -17,11 +17,13 @@
 #ifndef AMPLMODEL_H
 #define AMPLMODEL_H
 
+#include <list>
+#include <string>
+#include <iostream>
 #include "ModelComp.h"
 #include "nodes.h"
 #include "symtab.h"
 #include "ExpandedModel.h"
-#include <string>
 
 enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
 
@@ -75,10 +77,10 @@ class AmplModel{
   SymbolTable symbol_table;
 
   /** Name of the block defining this (sub)model */
-  string name;
+  std::string name;
 
   /** Name with ancestors name prepended (excluding root) */
-  string global_name;  
+  std::string global_name;
 
   int n_vars;      //!< number of variable declarations 
   int n_cons;      //!< number of constraint declarations 
@@ -94,7 +96,7 @@ class AmplModel{
   ModelComp *node; 
 
   /** The list of components of this model */
-  list<ModelComp*> comps;
+  std::list<ModelComp*> comps;
 
   /** The parent if this is a submodel of another model */
   AmplModel *parent;
@@ -107,7 +109,7 @@ class AmplModel{
   SyntaxNodeIx *ix;
     
   /** List of changes that should be applied to the models */
-  static list<changeitem*> changes;
+  static std::list<changeitem*> changes;
 
   /** The root model of the AmplModel tree */
   static AmplModel *root;
@@ -128,10 +130,11 @@ class AmplModel{
 
   /** Recursively write out all tagged model components in this model and 
       submodels to file */
-  void writeTaggedComponents(ostream &fout=cout);  
+  void writeTaggedComponents(std::ostream &fout = std::cout);
                                 
   /** Recursively creates an ExpandedModel tree from the flat AmplModel */
-  ExpandedModel* createExpandedModel(string smodelname, string sinstanceStub);
+  ExpandedModel* createExpandedModel(std::string smodelname,
+                                     std::string sinstanceStub);
 
   /** Add a dummy objective that uses (sums up) all variables in the model */
   void addDummyObjective();
@@ -152,12 +155,12 @@ class AmplModel{
   void dump(const char *filename);
 
   /** Recursive detailed debugging output */
-  void dump(ostream &fout);
+  void dump(std::ostream &fout);
 
   static void applyChanges(); //< apply the model changes stored in Q
 
-  SymbolTable::Entry *findComponent(string id);
-  list<SymbolTable::Entry> getObjList() const;
+  SymbolTable::Entry *findComponent(std::string id);
+  std::list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
 };

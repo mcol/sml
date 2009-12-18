@@ -20,6 +20,8 @@
 #include <sstream>
 #include "SetNode.h"
 
+using namespace std;
+
 SimpleSet::SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2) :
    SetNode(DOTDOT, bnd1, bnd2),
    lbc_(bnd1),

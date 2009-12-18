@@ -16,6 +16,7 @@
  */
 #ifndef AMPLSOLVERCALLS_H
 #define AMPLSOLVERCALLS_H
+
 #include <string>
 #include <map>
 #include <assert.h>
@@ -26,8 +27,6 @@
       amplsolver library (and that cannot use c++ lists
 
 */
-
-using namespace std;
 
 class IndexListValue {
  public:
@@ -78,8 +77,8 @@ inline IndexListValue::IndexListValue(int new_nvar, int *new_lvar,
 class NlFile {
   friend class ExpandedModel;
 
-  //public:
-  string nlfilename; //!< Filename of *.nl file without *.nl extension
+  //! Filename of *.nl file without *.nl extension
+  std::string nlfilename;
   int ncol;          //!< # constraints defined in this file
   int nrow;          //!< # variables defined in this file
   int nzH;           //!< # Hessian nonzeros 
@@ -109,10 +108,10 @@ class NlFile {
    *
    * @note I am not sure if this is the correct place to store this map.
    */
-  map<ExpandedModel*, IndexListValue*> indexList;
+  std::map<ExpandedModel*, IndexListValue*> indexList;
   // -------------------------- methods ------------------------------------
  public:
-  NlFile(string nlfilename);
+  NlFile(std::string nlfilename);
   ~NlFile();
 
  private:

@@ -27,6 +27,9 @@
    #include "DataNodes.h"
    #include "GlobalVariables.h"
    #define YYERROR_VERBOSE
+
+   using namespace std;
+
    int datalex(void);
    void dataerror(const char *s);
    extern FILE *datain;

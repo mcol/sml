@@ -34,11 +34,9 @@ This would still be in the Benders view.
 
 #include <string>
 #include <list>
-#include <vector>
+#include <iostream>
 #include "ExpandedModelInterface.h"
 #include "symtab.h"
-
-using namespace std;
 
 class AmplModel;
 class NlFile;
@@ -125,7 +123,7 @@ class ExpandedModel : public ExpandedModelInterface {
 
   // local information:
   /** Name of the *.nl file that describes the problem data */
-  string model_file;
+  std::string model_file;
 
   /** The NlFile object associated with model_file. 
    *
@@ -142,23 +140,26 @@ class ExpandedModel : public ExpandedModelInterface {
   //       class method
  
   //! list of global names of local variables 
-  list<string> listOfVarNames; 
+  std::list<std::string> listOfVarNames;
+
   //! list of local names of local variables 
-  list<string> listOfLocalVarNames; 
+  std::list<std::string> listOfLocalVarNames;
  
   //! list of global names of local constraints
-  list<string> listOfConNames; 
+  std::list<std::string> listOfConNames;
+
   //! list of local names of local constraints
-  list<string> listOfLocalConNames; 
+  std::list<std::string> listOfLocalConNames;
 
   //! indices of local variables in the corresponding *.nl file */
   int *listOfVars;        
 
-  list<string> localVarDef;  //!< the locally applicable variable declarations
+  //! the locally applicable variable declarations
+  std::list<std::string> localVarDef;
   
   /** A stack of block instances that encode the current path through the
    * ExpandedModel tree during the construction phase                     */
-  static list<string> pathToNodeStack;   //!< stack of instance names
+  static std::list<std::string> pathToNodeStack;   //!< stack of instance names
 
   // -------------------------- methods ------------------------------------
 
@@ -175,7 +176,7 @@ class ExpandedModel : public ExpandedModelInterface {
   int getNLocalVars();    
 
   //! Returns the names of local variables
-  const list<string>& getLocalVarNames();
+  const std::list<std::string>& getLocalVarNames();
 
   //! Returns the number of local constraints
   int getNLocalCons();
@@ -219,15 +220,15 @@ class ExpandedModel : public ExpandedModelInterface {
   int findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar);
 
   //! Returns unique name of this block
-  string getName() const { return model_file; }
+  std::string getName() const { return model_file; }
 
   //! Outputs the solution to the supplied stream, at given indent
-  void outputSolution(ostream &out, int indent=0);
+  void outputSolution(std::ostream &out, int indent=0);
 
  private: 
   //! Sets nLocalVar, listOfVars, nLocalCons, listOfVarNames
   void setLocalVarInfo(); 
-  list<SymbolTable::Entry> getObjList() const;
+  std::list<SymbolTable::Entry> getObjList() const;
 
 };
 

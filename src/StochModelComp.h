@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
+#include <vector>
+#include <string>
 #include "ModelComp.h"
 #include "StochModel.h"
 
@@ -45,7 +48,7 @@ class StochModelComp: public ModelComp {
 
   /** List of stages in which this component is present.
    *  stagenames is the expanded list of stage set members. */
-  vector<string> *stagenames;
+  std::vector<std::string> *stagenames;
 
   /** StochModel that this belongs to */
   StochModel *stochmodel;
@@ -59,8 +62,8 @@ class StochModelComp: public ModelComp {
 
   //! Transcribe a StochModelComp in a StochModel into a ModelComp 
   ModelComp *transcribeToModelComp(AmplModel *current_model,
-                                   const string &nodedummy,
-                                   const string &stagedummy,
+                                   const std::string& nodedummy,
+                                   const std::string& stagedummy,
                                    const int level);
 
   //! Shallow copy, only copies pointers

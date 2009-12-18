@@ -19,6 +19,7 @@
 
 #include <cassert>
 #include <vector>
+#include <string>
 #include "nodes.h"
 #include "CompDescr.h"
 #include "sml.tab.h"
@@ -49,7 +50,7 @@ private:
 
 public:
    SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2);
-   vector<string> members(AmplModel &context);
+   std::vector<std::string> members(AmplModel &context);
 };
 
 /** @class ListSet
@@ -57,7 +58,7 @@ public:
  */
 class ListSet: public SetNode {
 private:
-   vector<string> set;
+   std::vector<std::string> set;
 public:
    ListSet(SyntaxNode *list) :
       SetNode(LBRACE, list) {}

@@ -23,6 +23,8 @@
 #include "sml.tab.h"
 #include "misc.h"
 
+using namespace std;
+
 static bool prtSM = false;
 
 StochModelComp::StochModelComp():

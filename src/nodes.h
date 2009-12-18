@@ -20,9 +20,8 @@
 #include <sstream>
 #include <list>
 #include <vector>
-class ModelComp;
-using namespace std;
 
+class ModelComp;
 class AmplModel;
 
 
@@ -117,30 +116,33 @@ class SyntaxNode {
   // Destructor
   virtual ~SyntaxNode();
 
-  string print();              // recursive printing of expression
+  /** Recursive printing of expression */
+  std::string print();
 
   /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
       the value of this node as a c_string */
-  virtual string getValue() const { throw exception(); return "(fail)"; }
+  virtual std::string getValue() const { throw std::exception(); return "(fail)"; }
 
-  void dump(ostream &fout); //!< diagnostic printing
+  /** Diagnostic printing */
+  void dump(std::ostream &fout);
 
-  string printDummyVar();      // node is a dummy var -> remove (..) 
+  // node is a dummy var -> remove (..)
+  std::string printDummyVar();
 
   /** Return comma separated list of arguments for IDREF nodes */
-  string getArgumentList() const;  //< return comma separated list of arguments 
+  std::string getArgumentList() const;
 
   /** Find all IDREF's below current node and print to screen */
   void findIDREF();           
 
   /** Find all IDREFs below current node */
-  virtual void findIDREF(list<ModelComp*> &lmc);
+  virtual void findIDREF(std::list<ModelComp*> &lmc);
 
   /** Find all IDREF nodes below current node */
-  virtual void findIDREF(list<SyntaxNode*> *lnd);
+  virtual void findIDREF(std::list<SyntaxNode*> *lnd);
 
   /** Find all nodes of opCode oc below current node */
-  virtual void findOpCode(int oc, list<SyntaxNode*> *lnd);
+  virtual void findOpCode(int oc, std::list<SyntaxNode*> *lnd);
 
   /** Find ModelComp (if it exitst) refered to by this SyntaxNode.
    *
@@ -164,7 +166,7 @@ class SyntaxNode {
   /** Creates a copy of the node, reusing the pointer in the current node */
   virtual SyntaxNode *clone();
 
-  virtual ostream& put(ostream&s) const;
+  virtual std::ostream& put(std::ostream& s) const;
   virtual SyntaxNode *push_back(SyntaxNode *newitem);
   virtual SyntaxNode *push_front(SyntaxNode *newitem);
 };
@@ -173,23 +175,23 @@ class SyntaxNode {
  */
 class StageNodeNode : public SyntaxNode {
  private:
-  string value_;
+  std::string value_;
 
  public:
 
   /** Current replacement string for the 'node' keyword */
-  static string node;
+  static std::string node;
 
   /** Current replacement string for the 'stage' keyword */
-  static string stage;
+  static std::string stage;
 
-  StageNodeNode(int opCode, string value="") :
+  StageNodeNode(int opCode, std::string value="") :
      SyntaxNode(opCode), value_(value) {}
 
-  ostream& put(ostream&s) const;
+  std::ostream& put(std::ostream& s) const;
   SyntaxNode *clone() { return new StageNodeNode(opCode, value_); }
   SyntaxNode *deep_copy() { return clone(); }
-  void setValue(string value) { value_ = value; }
+  void setValue(std::string& value) { value_ = value; }
 };
 
 /** @class SyntaxNodeIx
@@ -226,7 +228,7 @@ class SyntaxNodeIx : public SyntaxNode {
   SyntaxNode *hasDummyVar(const char *const name); 
 
   //! returns list of all dummy variables defined by this index'g expression 
-  list<SyntaxNode *> getListDummyVars(); 
+  std::list<SyntaxNode *> getListDummyVars();
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
@@ -234,7 +236,8 @@ class SyntaxNodeIx : public SyntaxNode {
   //! copies node and all its subnodes into new datastructures 
   SyntaxNodeIx *deep_copy();    
 
-  void printDiagnostic(ostream &fout);   //!< diagnostic print of class variables
+  //!< diagnostic print of class variables
+  void printDiagnostic(std::ostream &fout);
 
   /** for nodes that are indexing expressions, get the set that is indexed over
    */
@@ -256,18 +259,18 @@ IDNode
  */
 class IDNode : public SyntaxNode, virtual ValueNodeBase {
   public:
-   string name;
+   std::string name;
    long stochparent;
   
   public:
    IDNode(const char *const new_name, long stochparent=0);
-   IDNode(const string name, long stochparent=0);
-   string getValue() const { return name; }
-   void findIDREF(list<ModelComp*> &lmc) { return; }
-   void findIDREF(list<SyntaxNode*> *lnd) { return; }
+   IDNode(const std::string name, long stochparent=0);
+   std::string getValue() const { return name; }
+   void findIDREF(std::list<ModelComp*> &lmc) { return; }
+   void findIDREF(std::list<SyntaxNode*> *lnd) { return; }
    // We never search for ID:
-   void findOpCode(int oc, list<SyntaxNode*> *lnd);
-   ostream& put(ostream&s) const { 
+   void findOpCode(int oc, std::list<SyntaxNode*> *lnd);
+   std::ostream& put(std::ostream& s) const {
       return s << name;
    }
    SyntaxNode *deep_copy() { 
@@ -318,7 +321,7 @@ class SyntaxNodeIDREF : public SyntaxNode {
   /** Creates a copy using all new datastructures (does not duplicate ref) */
   SyntaxNodeIDREF *deep_copy();
 
-  ostream& put(ostream&s) const;
+  std::ostream& put(std::ostream& s) const;
 };
 
 /** @class ValueNode
@@ -332,17 +335,17 @@ template<class T> class ValueNode : public SyntaxNode, virtual ValueNodeBase {
    ValueNode(const T new_value) :
       SyntaxNode(-99), value(new_value) {}
    double getFloatVal() const { return value; }
-   string getValue() const;
-   void findIDREF(list<ModelComp*> &lmc) { return; }
-   void findIDREF(list<SyntaxNode*> *lnd) { return; }
+   std::string getValue() const;
+   void findIDREF(std::list<ModelComp*> &lmc) { return; }
+   void findIDREF(std::list<SyntaxNode*> *lnd) { return; }
    // We never search for INT_VAL or FLOAT_VAL:
-   void findOpCode(int oc, list<SyntaxNode*> *lnd) { return; }
-   ostream& put(ostream&s) const { return s << this->value; }
+   void findOpCode(int oc, std::list<SyntaxNode*> *lnd) { return; }
+   std::ostream& put(std::ostream&s) const { return s << this->value; }
    SyntaxNode *deep_copy() { return new ValueNode<T>(value); }
    SyntaxNode *clone() { return deep_copy(); }
 };
-template<class T> string ValueNode<T>::getValue() const {
-   ostringstream ost;
+template<class T> std::string ValueNode<T>::getValue() const {
+   std::ostringstream ost;
    ost << value;
    return ost.str();
 }
@@ -351,16 +354,18 @@ template<class T> string ValueNode<T>::getValue() const {
  *  Represents a comma separated list of SyntaxNodes.
  */
 class ListNode: public SyntaxNode {
+
   public:
-   typedef vector<SyntaxNode*>::const_iterator literator;
+   typedef std::vector<SyntaxNode*>::const_iterator literator;
+
   private:
-   vector<SyntaxNode *> list_;
+   std::vector<SyntaxNode *> list_;
 
   public:
    ListNode(int opCode=',', SyntaxNode *val1=NULL, SyntaxNode *val2=NULL);
    literator lbegin() const { return list_.begin(); }
    literator lend() const { return list_.end(); }
-   ostream& put(ostream&s) const;
+   std::ostream& put(std::ostream& s) const;
    ListNode *deep_copy();
    ListNode *clone();
    ListNode *push_front(SyntaxNode *node) { 
@@ -391,28 +396,28 @@ class OpNode : public SyntaxNode {
 
   public:
    OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2=NULL);
-   ostream& put(ostream& s) const;
+   std::ostream& put(std::ostream& s) const;
    OpNode *deep_copy();
    OpNode *clone();
-   void findIDREF(list<ModelComp*> &lmc) { 
+   void findIDREF(std::list<ModelComp*>& lmc) {
       if(left) left->findIDREF(lmc);
       if(right) right->findIDREF(lmc);
    }
-   void findIDREF(list<SyntaxNode*> *lnd) { 
+   void findIDREF(std::list<SyntaxNode*> *lnd) {
       if(left) left->findIDREF(lnd);
       if(right) right->findIDREF(lnd);
    }
-   void findOpCode(int oc, list<SyntaxNode*> *lnd) {
+   void findOpCode(int oc, std::list<SyntaxNode*> *lnd) {
       if(left) left->findOpCode(oc, lnd);
       if(right) right->findOpCode(oc, lnd);
    }
 };
 
 ListNode *addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem);
-string print_SyntaxNodesymb(SyntaxNode *node);
+std::string print_SyntaxNodesymb(SyntaxNode *node);
 
-ostream& operator<<(ostream& s, const SyntaxNode &node);
-ostream& operator<<(ostream& s, const SyntaxNode *node);
+std::ostream& operator<<(std::ostream& s, const SyntaxNode &node);
+std::ostream& operator<<(std::ostream& s, const SyntaxNode *node);
 
 // Routines taken from ampl.h
 SyntaxNode *findKeywordinTree(SyntaxNode *root, int oc);

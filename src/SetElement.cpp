@@ -18,6 +18,8 @@
 #include <string>
 #include <cassert>
 
+using namespace std;
+
 SetElement::SetElement(int n, char **new_val) :
    n(n), val(NULL)
 {

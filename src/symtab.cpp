@@ -17,6 +17,8 @@
 #include <iostream>
 #include "symtab.h"
 
+using namespace std;
+
 /* Note: original symboltable also checked that this variable was not defined
  * in an enclosing scope, rather than just hiding the previously defined
  * variables as we do now. */

@@ -17,6 +17,8 @@
 #ifndef STOCHMODEL_H
 #define STOCHMODEL_H
 
+#include <vector>
+#include <string>
 #include "AmplModel.h"
 #include "SetNode.h"
 
@@ -48,7 +50,7 @@ class StochModel: public AmplModel{
   IDNode *stagedummy;
 
   //! Explicit set of STAGES
-  vector <string> stagenames;
+  std::vector <std::string> stagenames;
 
   //! Whether stage names are symbolic or numeric
   bool is_symbolic_stages;

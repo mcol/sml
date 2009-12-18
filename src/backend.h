@@ -58,8 +58,8 @@ typedef struct add_index_st {
 /* some global variables that change the behaviour of some printing routines */
 //extern int n_addIndex;           /* number and list of indexing expressions */
 //extern add_index *l_addIndex[5];  /* to add to all statements */
-extern vector <list <add_index*>* > l_addIndex;
+extern std::vector <std::list <add_index*>* > l_addIndex;
 
-int process_model(AmplModel *model, const string& datafilename);
+int process_model(AmplModel *model, const std::string& datafilename);
 
 #endif

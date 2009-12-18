@@ -26,6 +26,8 @@
 #include "data.tab.h"
 #include "misc.h"
 
+using namespace std;
+
 /* ---------------------------------------------------------------------------
 CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc)
 ---------------------------------------------------------------------------- */

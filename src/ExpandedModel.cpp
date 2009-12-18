@@ -25,6 +25,7 @@
 #include "AmplsolverCalls.h"
 #include "AmplModel.h"
 
+using namespace std;
 
 list<string> ExpandedModel::pathToNodeStack;
 const bool log_EM = false;

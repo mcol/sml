@@ -17,7 +17,6 @@
 #ifndef SET_H
 #define SET_H
 
-#include <vector>
 #include <map>
 #include <string>
 #include "nodes.h"
@@ -39,7 +38,7 @@ class Set: public CompDescr{
    *   - string[] for a multidimensional set 
    * look at http://www.cppreference.com/cppmap/map_constructors.html
    */
-  map<SetElement, int, SetElement> elements; //!< The elements of the set
+  std::map<SetElement, int, SetElement> elements; //!< The elements of the set
 
   //! Dimension: a set can be multidimensional
   int dim_;
@@ -49,7 +48,7 @@ class Set: public CompDescr{
 
   // virtual method inherited from CompDescr
   //! Return the set as a string
-  string toString() const;
+  std::string toString() const;
 
  public:
   Set(const ListNode &list_of_els); //!< construct a set from a list of elements in an SyntaxNode

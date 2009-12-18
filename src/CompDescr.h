@@ -29,7 +29,7 @@
 class CompDescr{
  public:
   virtual ~CompDescr() {}
-  virtual string toString() const {return "";}
+  virtual std::string toString() const {return "";}
 };
 
 #endif

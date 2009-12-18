@@ -26,6 +26,8 @@
 #include "ModelComp.h"    // for WITHARG
 #include "GlobalVariables.h"
 
+using namespace std;
+
 static bool logCreate = false;
 extern int n_indexing;
 extern SyntaxNodeIx *list_of_indexing[20];

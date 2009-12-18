@@ -26,9 +26,11 @@
  */
 
 class SetElement {
+
  public:
   const int n;
-  string *val;
+  std::string *val;
+
   /* ----------------------------- methods -------------------------------*/
 
   SetElement(int n=0, char **val=NULL);
@@ -37,7 +39,8 @@ class SetElement {
 
   bool operator()(const SetElement& el1, const SetElement& el2) const;
 
-  string toString() const;
+  std::string toString() const;
 
 };
+
 #endif

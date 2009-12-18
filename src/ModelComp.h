@@ -21,6 +21,8 @@ enum {NOARG=0,WITHARG=1,ONLYARG=2};
 typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 
 #include <list>
+#include <string>
+#include <iostream>
 #include "nodes.h"
 #include "CompDescr.h"
 
@@ -48,14 +50,14 @@ class AmplModel;
  */
 class ModelComp{
  public:
-  static const string nameTypes[];
-  static const string compTypes[];
+  static const std::string nameTypes[];
+  static const std::string compTypes[];
 
   /** Type of the component */
   compType type;
 
   /** Name of the component */
-  string id;
+  std::string id;
 
   /** this is a tree of specifications, this includes
    * :=, within, default, >=                                               */
@@ -90,7 +92,7 @@ class ModelComp{
  public:
 
   /** Constructor */
-  ModelComp(const string& id, compType type,
+  ModelComp(const std::string& id, compType type,
             SyntaxNode *indexing, SyntaxNode *attrib);
 
   /** Default constructor */
@@ -107,7 +109,7 @@ class ModelComp{
   void setUpDependencies();
 
   /** Detailed debugging output */
-  void dump(ostream& fout);
+  void dump(std::ostream& fout);
   void print();   //!< prints elements of the class
   void printBrief();   //!< prints one liner
 
@@ -127,7 +129,7 @@ class ModelComp{
   static void writeAllTagged(AmplModel *start);
 
   /** Write definition of all tagged components to file, using global_list */
-  static void modifiedWriteAllTagged(ostream &fout); 
+  static void modifiedWriteAllTagged(std::ostream &fout);
 
   /** Move this model component up in the model tree */
   void moveUp(int level);
@@ -153,10 +155,10 @@ class ModelComp{
 
 };
 
-string
+std::string
 getGlobalName(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
-string
+std::string
 getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
 
