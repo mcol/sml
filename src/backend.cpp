@@ -792,6 +792,8 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             //newmc->model = comp->model;
             newmc->model = setmc->model;
             modified_write(fout, newmc);
+
+            delete newmc;
           }
           
           SyntaxNode *setn = ai->set;
@@ -806,8 +808,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           /* newn is the new node, first copy the old one */
           SyntaxNodeIDREF *newn = ((SyntaxNodeIDREF *)setn)->clone();
           // clone the ModelComp that is referred to
-          newn->ref = (ModelComp *)calloc(1,sizeof(ModelComp));
-          memcpy(newn->ref, ((SyntaxNodeIDREF*)setn)->ref, sizeof(ModelComp));
+          newn->ref = ((SyntaxNodeIDREF*)setn)->ref->clone();
           // ???but associate this with the current model
           //newn->ref->model = thism;
 
