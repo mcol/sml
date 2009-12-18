@@ -75,7 +75,7 @@ class AmplModel{
   SymbolTable symbol_table;
 
   /** Name of the block defining this (sub)model */
-  char *name;          
+  string name;
 
   /** Name with ancestors name prepended (excluding root) */
   string global_name;  

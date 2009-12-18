@@ -286,7 +286,7 @@ ModelComp::writeAllTagged(AmplModel *start)
   for (list<ModelComp*>::iterator p=start->comps.begin();
        p!=start->comps.end();p++){
     if ((*p)->tag) {
-      printf("%s::%s\n",start->name, (*p)->id);
+      cout << start->name << "::" << (*p)->id << "\n";
     }
     if ((*p)->type==TMODEL){
       ModelComp::writeAllTagged((AmplModel*)(*p)->other);
@@ -511,12 +511,12 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
   if (witharg==NOARG||witharg==WITHARG){
     globalName = node->id;
     tmp = model_of_comp;
-    while(strcmp(tmp->name,"root")!=0){
+    while (tmp->name != "root") {
       /* work on name */
       globalName = tmp->name + ("_" + globalName);
       
       if (tmp->parent==NULL) {
-        printf("has no parent >%s<\n",tmp->name);
+        cerr << "has no parent >" << tmp->name << "<\n";
         exit(1);
       }
       tmp = tmp->parent;
@@ -725,12 +725,12 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
   if (witharg==NOARG||witharg==WITHARG){
     globalName = node->id;
     tmp = model_of_comp;
-    while(strcmp(tmp->name,"root")!=0){
+    while (tmp->name != "root") {
       /* work on name */
       globalName = tmp->name + ("_" + globalName);
       
       if (tmp->parent==NULL) {
-        printf("has no parent >%s<\n",tmp->name);
+        cerr << "has no parent >" << tmp->name << "<\n";
         exit(1);
       }
       tmp = tmp->parent;

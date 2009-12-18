@@ -368,11 +368,9 @@ StochModel::expandToFlatModel()
 
     // set name and global name for this ampl model
     if (stgcnt==0){
-      char buffer[30];
-      sprintf(buffer, "%s%s",name, (*st).c_str()); 
-      am->name = strdup(buffer);
+      am->name = name + *st;
     }else{
-      am->name = strdup((*st).c_str());
+      am->name = *st;
     }
 
     // FIXME: We just duplicate the symbol table. We should separate
@@ -572,7 +570,7 @@ StochModel::expandToFlatModel()
         on2 = new SyntaxNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 
-        ModelComp *newmc = new ModelComp(model_above->name, TMODEL, 
+        ModelComp *newmc = new ModelComp(model_above->name.c_str(), TMODEL,
                                            new SyntaxNodeIx(on2), NULL);
         //ModelComp *newmc = new ModelComp(strdup(((*st)++).c_str()), TMODEL, 
         //                                   new SyntaxNodeIx(on2), NULL);

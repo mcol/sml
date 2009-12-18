@@ -58,6 +58,7 @@ AmplModel::AmplModel() :
 // Note: just calling the other constructor is apparently insufficient
 // as this causes a bug for Marco's older version of g++
 AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
+  name(orig_name),
   n_vars(0),
   n_cons(0),
   n_params(0),
@@ -72,7 +73,6 @@ AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
   parent(NULL),
   ix(NULL)
 {
-   name = strdup(orig_name);
    parent = par;
 
    setGlobalName();
@@ -84,8 +84,6 @@ AmplModel::~AmplModel()
   for (list<ModelComp*>::iterator p = comps.begin(); p != comps.end(); p++) {
     delete *p;
   }
-
-  free(name);
 }
 
 
@@ -97,12 +95,11 @@ AmplModel::setGlobalName()
 {
   if (parent==NULL){
     global_name = "";
-  }else if (strcmp(parent->name,"root")==0){
-    global_name = string(name);
+  } else if (parent->name == "root") {
+    global_name = name;
   }else{
-    global_name = parent->global_name + "_" + string(name);
+    global_name = parent->global_name + "_" + name;
   }
-  //cout << "\n\ndefined model: " + global_name + "\n\n"; 
 }
 
 /* ---------------------------------------------------------------------------
@@ -237,7 +234,7 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
 
      - if we use the filename as 
   */
-  if (strcmp(name,"root")==0){
+  if (name == "root") {
     ExpandedModel::pathToNodeStack.clear();
   }
 
@@ -479,10 +476,10 @@ void
 AmplModel::print()
 {
   printf("AM: ------------------------------------------------------------\n");
-  printf("AM: This is AmplModel: %s\n",name);
+  printf("AM: This is AmplModel: %s\n", name.c_str());
   printf("AM: global name: %s\n",global_name.c_str());
   printf("AM: level: %d\n",level);
-  printf("AM: parent: %s\n",(parent)?parent->name:"NULL");
+  printf("AM: parent: %s\n", parent ? parent->name.c_str() : "NULL");
   if (ix){ 
     printf("AM: indexing: %s\n", ix->print().c_str());
   }else{
@@ -567,7 +564,7 @@ AmplModel::check()
 void
 AmplModel::check()
 {
-  if (name==NULL){
+  if (name == "") {
     cerr << "AmplModel::check: AmplModel has no name given\n";
     exit(1);
   }
@@ -575,7 +572,7 @@ AmplModel::check()
     cerr << "AmplModel has no global name set\n";
     exit(1);
   }
-  if (node==NULL && strcmp(name,"root")!=0){
+  if (node == NULL && name != "root") {
     cerr << "AmplModel " << name << " is not root but has no ModelComp "
        "node associated\n";
     exit(1);
@@ -610,7 +607,7 @@ AmplModel::check()
     exit(1);
   }
   
-  if (parent==NULL && strcmp(name,"root")!=0){
+  if (parent == NULL && name != "root") {
     cerr << "AmplModel " << name << " is not root but has no parent\n";
     exit(1);
   }
@@ -740,9 +737,8 @@ AmplModel::removeComp(ModelComp *comp)
     }
   }
   if (!found){
-    printf("Attempting to remove component %s from model %s:\n",
-           comp->id, name);
-    printf("Component is not in model!\n");
+    cerr << "ERROR: Attempting to remove component " << comp->id
+         << " from model " << name << ":\nComponent is not in model.\n";
     exit(1);
   }
   n_total--;

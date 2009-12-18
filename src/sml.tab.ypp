@@ -895,7 +895,7 @@ begin_model(char *name, SyntaxNode *indexing) {
   ModelComp *newmc;
   
   cout << "Start Model: " << name << "\n";
-  new_mod->name = strdup(name);
+  new_mod->name = name;
 
   /* FIXME: include attrib in definition */
   newmc = new ModelComp(name, TMODEL, indexing, NULL);
@@ -937,7 +937,7 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    cout << "   anc = " << anc << endl << "   prob = " << prob << endl;
    cout << "   stages = " << stages << endl;*/
    new_mod = new StochModel(stages, nodes, anc, prob, current_model);
-   new_mod->name = strdup(name);
+   new_mod->name = name;
   
    /* Fixme: include attrib in definition */
    newmc = new ModelComp(name, TMODEL, indexing, NULL);
@@ -958,7 +958,7 @@ end_model
 void
 end_model(char *name) {
   // Check end block name matches block name
-  if(name && strcmp(name,current_model->name)!=0) {
+  if (name && string(name) != current_model->name) {
     cerr << "end block '" << name << "' encountered in block '" << 
       current_model->name << "'" << endl;
     exit(1);
@@ -975,7 +975,7 @@ end_smodel(char *name){
   // current_model is a StochModel -> convert this into a tree a FlatModels
 
   // Check end block name matches block name
-  if(name && strcmp(name,current_model->name)!=0) {
+  if (name && name != current_model->name) {
     cerr << "end stochastic block '" << name << "' encountered in stochastic "
       "block '" << current_model->name << "'" << endl;
     exit(1);
@@ -991,7 +991,7 @@ end_smodel(char *name){
   // new (AmplModel) model. 
   // (this is a concatenation of the StochModel name and the name of the 
   // first stage)
-  mc->id = strdup(((StochModel*)mc->other)->name);
+  mc->id = strdup(((StochModel*)mc->other)->name.c_str());
 
   // and go back to the parent 
   current_model = current_model->parent;
