@@ -133,8 +133,10 @@ SML_OOPS_driver(ExpandedModelInterface *root)
 
   SML_OOPS_upload_sol(root, Prob.x, Prob.y, Prob.z);
 
+#if 0
   FreeAlgebraAlg(A);
   FreeAlgebraAlg(Q);
+#endif
 }
 
 /* ==========================================================================
