@@ -134,7 +134,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
   SyntaxNode::default_model = this;
   SyntaxNodeIx *ix = node->indexing;
 
-  list <add_index*>*li = new list<add_index*>;
+  list<add_index*> li;
   if (ix){
 
     if (!ix->done_split) {
@@ -154,9 +154,9 @@ AmplModel::writeTaggedComponents(ostream &fout)
     add_index *ai = new add_index;
     ai->dummyVar = ix->dummyVarExpr[0];
     ai->set = ix->sets[0];
-    li->push_back(ai);
+    li.push_back(ai);
   }
-  l_addIndex.push_back(li);
+  l_addIndex.push_back(&li);
 
   // loop through all model components
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
@@ -169,7 +169,6 @@ AmplModel::writeTaggedComponents(ostream &fout)
     }
   }
   l_addIndex.pop_back();
-
 }
 
 /* ---------------------------------------------------------------------------
@@ -372,6 +371,8 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
           subem->parent = em;
           (em->children).push_back(subem);
         }
+        delete li;
+
       }else{
         // if this node is not repeated over an indexing set
         string subModelName = smodelname+"_"+string(mc->id);
