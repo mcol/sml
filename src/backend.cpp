@@ -138,7 +138,7 @@ process_model
 void fill_model_list_(AmplModel *model, list<AmplModel*> &listam);
 
 int
-process_model(AmplModel *model, const char *datafilename) {
+process_model(AmplModel *model, const string& datafilename) {
 
   int j;
   

@@ -28,16 +28,15 @@
 using namespace std;
 
 /* global variables */
-char *GlobalVariables::modelfilename = NULL;
-char *GlobalVariables::datafilename = NULL;
+string GlobalVariables::datafilename = "";
 const char *GlobalVariables::amplcommand = "ampl";
 
 bool GlobalVariables::logParseModel = false;
 int GlobalVariables::prtLvl = 0;
 
 extern int yydebug;
-void parse_data(AmplModel*, const char*);
-int parse_model(const char *);
+void parse_data(AmplModel*, const string& datafilename);
+int parse_model(const string& modelfilename);
 
 string sml_version() {
    return PACKAGE_VERSION;
@@ -99,12 +98,10 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
    if (errcode)
      return NULL;
 
-   GlobalVariables::modelfilename = strdup(modelfilename.c_str());
-   GlobalVariables::datafilename = strdup(datafilename.c_str());
+   GlobalVariables::datafilename = datafilename;
 
-   cout << "Reading model file '" << GlobalVariables::modelfilename << 
-      "'..." << endl;
-   int rv = parse_model(GlobalVariables::modelfilename);
+   cout << "Reading model file '" << modelfilename << "'..." << endl;
+   int rv = parse_model(modelfilename);
    if (rv)
      return NULL;
 
@@ -113,9 +110,8 @@ ExpandedModelInterface* sml_generate(const string modelfilename,
     *  process_model() in backend.cpp or expandSet() expandStagesOfComp()
     *  in StochModel.cpp). Eventually, we will do it ourselves.
     */
-   cout << "Reading data file '" << GlobalVariables::datafilename << 
-      "'..." << endl;
-   parse_data(AmplModel::root, GlobalVariables::datafilename);
+   cout << "Reading data file '" << datafilename << "'..." << endl;
+   parse_data(AmplModel::root, datafilename);
 #endif
 
    // change working directory back to tmp/ for processing model

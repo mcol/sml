@@ -259,7 +259,7 @@ void dataerror(const char *s) {
   exit(1);
 }
 
-void parse_data(AmplModel *current_model, const char *datafilename) {
+void parse_data(AmplModel *current_model, const string& datafilename) {
         
   if(GlobalVariables::prtLvl>=1) {
     cout << "===============================================================\n";
@@ -267,7 +267,7 @@ void parse_data(AmplModel *current_model, const char *datafilename) {
     cout << "===============================================================\n";
   }
 
-  datain = fopen(datafilename,"r");
+  datain = fopen(datafilename.c_str(), "r");
   root = current_model;
   if (datain==NULL){
     cout << "ERROR: Data file '" << datafilename << "' not found\n";

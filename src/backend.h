@@ -20,6 +20,8 @@
 #include "nodes.h"
 #include <list>
 #include <vector>
+#include <string>
+
 /* this struct stores an indexing expression in an easy to modify form:
    the add_index below will be rendered as
    val(dummyVar) in val(set) 
@@ -58,5 +60,6 @@ typedef struct add_index_st {
 //extern add_index *l_addIndex[5];  /* to add to all statements */
 extern vector <list <add_index*>* > l_addIndex;
 
-int process_model(AmplModel *model, const char *datafilename);
+int process_model(AmplModel *model, const string& datafilename);
+
 #endif

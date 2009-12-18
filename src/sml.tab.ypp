@@ -1041,18 +1041,17 @@ addStochInfo(StochModelComp *newmcs, SyntaxNode *stochopt)
    }
 }
 
-int parse_model(const char *filename) {
-   if (filename){
-      yyin = fopen(filename, "r");
-      if (yyin==NULL){
-         cerr << "ERROR: file '" << filename << "' not found" << endl;
-         return 1;
-      }
+int parse_model(const string& filename) {
+
+   yyin = fopen(filename.c_str(), "r");
+   if (!yyin) {
+     cerr << "ERROR: Cannot open file '" << filename << "'.\n";
+     return 1;
    }
 
    // check that we can access the datafile, otherwise we get an ugly message
    // from amplsolver in case the file cannot be accessed
-   FILE *fin = fopen(GlobalVariables::datafilename, "r");
+   FILE *fin = fopen(GlobalVariables::datafilename.c_str(), "r");
    if (!fin) {
      cerr << "Cannot open file: '" << GlobalVariables::datafilename << "'.\n";
      return 1;

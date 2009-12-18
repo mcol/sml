@@ -17,6 +17,8 @@
 #ifndef GLOBALVARIABLES
 #define GLOBALVARIABLES
 
+#include <string>
+
 /** @class GlobalVariables 
  *  This class provides some static global variables.
  *
@@ -28,8 +30,9 @@
  */
 class GlobalVariables{
  public:
-  static char *modelfilename; //!< The name of the model file 
-  static char *datafilename;  //!< The name of the data file
+
+  //! Name of the data file
+  static std::string datafilename;
 
   static const char *amplcommand; //!< Command for invoking ampl
 
