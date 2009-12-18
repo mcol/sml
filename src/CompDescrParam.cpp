@@ -79,8 +79,9 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     for(int i=0;i<ix->ncomp;i++){
       indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->value);
       if (indices[i]==NULL){
-        printf("Value of parameter %s given, before indexing set: %s is defined\n",
-               mc->id, (ix->sets_mc[i])->id);
+        cerr << "ERROR: Value of parameter " << mc->id
+             << " given before indexing set " << (ix->sets_mc[i])->id
+             << " is defined\n";
         /* Of course it is possible to define the membership of the sets at 
            the same time as the parameters 
            Although a particular syntax needs to be used. Should probably have
@@ -324,7 +325,9 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
       // make the label into a SetElement
       if (indices[ixcolset]->dim()>1){
         if (cl->opCode!=LBRACKET){
-          printf("col_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixcolset]->id);
+          cerr << "ERROR: col_label for multidimensional set '"
+               << ix->sets_mc[ixcolset]->id
+               << "' must be a bracketed '(..,..)' expression.\n";
           exit(1);
         }
         if (cl->nchild()!=indices[ixcolset]->dim()){
@@ -356,7 +359,9 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
       // make the label into a SetElement
       if (indices[ixrowset]->dim()>1){
         if (rl->opCode!=LBRACKET){
-          printf("row_label for multidimensional set '%s' must be a bracketed '(..,..)' expression\n", ix->sets_mc[ixrowset]->id);
+          cerr << "ERROR: row_label for multidimensional set '"
+               << ix->sets_mc[ixrowset]->id
+               << "' must be a bracketed '(..,..)' expression.\n";
           exit(1);
         }
         if (rl->nchild()!=indices[ixrowset]->dim()){

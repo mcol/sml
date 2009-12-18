@@ -730,7 +730,7 @@ AmplModel::removeComp(ModelComp *comp)
   
   bool found = false;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    if (strcmp((*p)->id,comp->id)==0){
+    if ((*p)->id == comp->id) {
       comps.erase(p); // this invalidates the iterator => break from loop
       found = true;
       break;
@@ -903,7 +903,7 @@ is_int(const char *tok){
 SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
    for(list<ModelComp*>::iterator p=comps.begin(); p!=comps.end(); ++p){
       ModelComp *thismc = *p;
-      if (strcmp(ref->name.c_str(), thismc->id)==0){
+      if (ref->name == thismc->id) {
          /* this is a match */
          if (GlobalVariables::logParseModel){
             cout << "Found Match: " << ref->name << " refers to ";

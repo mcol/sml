@@ -991,7 +991,7 @@ end_smodel(char *name){
   // new (AmplModel) model. 
   // (this is a concatenation of the StochModel name and the name of the 
   // first stage)
-  mc->id = strdup(((StochModel*)mc->other)->name.c_str());
+  mc->id = ((StochModel*)mc->other)->name;
 
   // and go back to the parent 
   current_model = current_model->parent;

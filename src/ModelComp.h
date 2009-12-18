@@ -61,7 +61,7 @@ class ModelComp{
   compType type;
 
   /** Name of the component */
-  char *id;
+  string id;
 
   /** this is a tree of specifications, this includes
    * :=, within, default, >=                                               */
@@ -102,7 +102,7 @@ class ModelComp{
 
   // ------------------------- METHODS ----------------------------------
   /** Constructor */
-  ModelComp(const char *id, compType type,
+  ModelComp(const string& id, compType type,
             SyntaxNode *indexing, SyntaxNode *attrib);
   ModelComp();  //< constructor that sets everything to default values
 

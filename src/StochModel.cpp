@@ -196,7 +196,8 @@ StochModel::expandStagesOfComp()
     if (smc->stageset){
       smc->stageset->findIDREF(dep);
       for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
-        if (logSM) printf("dep: %s\n",(*q)->id);
+        if (logSM)
+          cout << "dep: " << (*q)->id << "\n";
         (*q)->tagDependencies();
       }
     }
@@ -355,7 +356,7 @@ StochModel::expandToFlatModel()
     indset[i] = new StochModelComp();
     // give it a dummy name just so that debugging routines work
     // @bug this introduces a memory leak
-    indset[i]->id = strdup("indset");
+    indset[i]->id = "indset";
   }
 
   // loop over all stages and create an AmplModel for every stage 

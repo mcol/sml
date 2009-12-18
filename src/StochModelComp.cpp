@@ -17,6 +17,7 @@
 #include "StochModelComp.h"
 #include "StochModel.h"
 #include "sml.tab.h"
+#include "misc.h"
 
 static bool prtSM = false;
 
@@ -85,7 +86,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     printf("SMC.transcribeToModelComp: this->stochmodel not set\n");
     exit(1);
   }
-  if (prtSM) printf("Call transcribe for %s level %d\n",id, level);
+  if (prtSM)
+    cout << "Call transcribe for " << id << " level " << level << "\n";
 
   // ---------- (1) make deep_copy of StochModelComp ------------------------
 
@@ -134,14 +136,15 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           p!=model->comps.end();p++){
         ModelComp *amc=*p;
         // all we can do is judge by name
-        if (strcmp(mc->id, amc->id)==0){
+        if (mc->id == amc->id) {
           onr->ref = amc;
           fnd = true;
           break;
         }
       }
       if (!fnd){
-        printf("ERROR: no entity named %s found in current model\n",mc->id);
+        cerr << "ERROR: no entity named '" << mc->id
+             << "' found in current model.\n";
         exit(1);
       }
     }
@@ -338,11 +341,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         //print();
         //exit(1);
         // actually queues this to be moved up
-        char *id2 = (char *)calloc(strlen(newmc->id)+5, sizeof(char));
-        strcpy(id2, newmc->id);
-        sprintf(id2+strlen(newmc->id), "_up%d",level);
-        free(newmc->id);
-        newmc->id = id2;
+        newmc->id = newmc->id + "_up" + to_string(level);
         newmc->moveUp(level);
       }
     }

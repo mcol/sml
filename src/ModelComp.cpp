@@ -74,12 +74,12 @@ list<ModelComp*> ModelComp::global_list;
  *  @param attrib      root node of the attribute expression.
  *                     IDs should have been replaced by IDREFs 
  */
-ModelComp::ModelComp(const char *id, compType type,
+ModelComp::ModelComp(const string& id, compType type,
                        SyntaxNode *indexing, SyntaxNode *attrib)
 {
   value = NULL;
   this->tag = false;
-  this->id = strdup(id);
+  this->id = id;
   this->type = type;
   this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing);
   if (indexing) (this->indexing)->splitExpression();
@@ -87,7 +87,7 @@ ModelComp::ModelComp(const char *id, compType type,
 
   this->count = ModelComp::tt_count++;
   if (GlobalVariables::prtLvl>0) 
-    printf("Defining model component (%4d): %s\n",this->count, id);
+    cout << "Defining model component (" << this->count << "): " << id << "\n";
 
   /* now set up the dependency list for the component */
   setUpDependencies();
@@ -97,7 +97,6 @@ ModelComp::ModelComp(const char *id, compType type,
 
 ModelComp::~ModelComp() {
 
-  free(id);
 }
 
 /* --------------------------------------------------------------------------
@@ -109,8 +108,8 @@ ModelComp::setUpDependencies()
   dependencies.clear();
   /* now set up the dependency list for this component */
   if (prtAnaDep){
-    printf("Analyse dependencies for %s\n",id);
-    printf(" dependencies in indexing: \n");
+    cout << "Analyse dependencies for " << id << "\n"
+         << " dependencies in indexing: \n";
   }
   if (indexing) {
     // get list of IDREF nodes in 'indexing'
@@ -147,7 +146,7 @@ ModelComp::setUpDependencies()
   if (prtAnaDep){
     for( list<ModelComp*>::iterator p=dependencies.begin(); 
          p!=dependencies.end(); ++p)
-      printf("  %s\n",(*p)->id);
+      cout << "  " << (*p)->id << "\n";
     printf("--------------------------------\n");
   }
 }
@@ -158,7 +157,7 @@ ModelComp::ModelComp()
 /** Default constructor: just sets all fields to -1/NULL/false               */
 ModelComp::ModelComp() :
   type(TNOTYPE),
-  id(NULL),
+  id(""),
   attributes(NULL),
   indexing(NULL),
   model(NULL),
@@ -187,7 +186,7 @@ ModelComp::setTo(char *id, compType type,
 {
   static int tt_count=0;
   this->tag = false;
-  this->id = strdup(id);
+  this->id = id;
   this->type = type;
   this->indexing = indexing;
   if (indexing) (this->indexing)->splitExpression();
@@ -230,7 +229,7 @@ ModelComp::setTo(char *id, compType type,
   if (prtAnaDep){
     for( list<ModelComp*>::iterator p=dependencies.begin(); 
          p!=dependencies.end(); ++p)
-      printf("  %s\n",(*p)->id);
+      cout << "  " << (*p)->id << "\n";
     printf("--------------------------------\n");
   }
 
@@ -415,7 +414,7 @@ ModelComp::deep_copy()
   ModelComp *newm = new ModelComp();
 
   newm->type = type;
-  newm->id = strdup(id);
+  newm->id = id;
   if (attributes) newm->attributes = attributes->deep_copy();
   if (indexing) newm->indexing = indexing->deep_copy();
   newm->dependencies = dependencies;
@@ -1003,12 +1002,12 @@ ModelComp::reassignDependencies()
     bool found = false;
     for(list<ModelComp*>::iterator q = model->comps.begin();
         q!=model->comps.end();q++){
-      if (strcmp((*q)->id, mc->id)==0){
+      if ((*q)->id == mc->id) {
         found = true;
         if ((*q)!=mc){
           if (GlobalVariables::prtLvl>1)
-            printf("Model comp %s referenced in %s is reassigned\n",mc->id,
-                 this->id);
+            cout << "Model component " << mc->id << " referenced in "
+                 << this->id << " is reassigned.\n";
           found = true;
           onidr->ref = (*q);
         }
@@ -1016,8 +1015,8 @@ ModelComp::reassignDependencies()
       }
     }
     if (!found){
-      printf("Model comp %s referenced in %s is not found\n",mc->id,
-             this->id);
+      cerr << "ERROR: Model component " << mc->id << " referenced in "
+           << this->id << " not found.\n";
       exit(1);
     }
   }

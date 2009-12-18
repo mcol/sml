@@ -785,7 +785,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               exit(1);
             }
             ModelComp *setmc = setnref->ref;
-            newmc->id = strdup((setmc->id+string("_SUB")).c_str());
+            newmc->id = setmc->id + "_SUB";
             
             // and build "within indset" as attribute tree
             newmc->attributes = new SyntaxNode(WITHIN, setn);
@@ -814,10 +814,8 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
 
           /* and finally set the new name (add _SUB) to the name */
           ModelComp *tmp = newn->ref;
-          char *newname = (char *)calloc(strlen(tmp->id)+5, sizeof(char));
-          strcpy(newname, tmp->id);
-          strcat(newname, "_SUB");
-          tmp->id = newname;
+          tmp->id = ((SyntaxNodeIDREF*)setn)->ref->id + "_SUB";
+
           /* and put this on the stack */
           ai->set = newn;
         }       
