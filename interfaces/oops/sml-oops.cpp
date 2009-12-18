@@ -27,12 +27,8 @@
 FILE *printout;
 double tt_start, tt_end;
 
-/** Wrapper round the Algebras A and Q. Return value for generateSML() */
-typedef struct SMLReturn_st {
-  Algebra *A;
-  Algebra *Q;
-} SMLReturn;
-
+static Algebra *createA(ExpandedModelInterface *em);
+static Algebra *createQ(ExpandedModelInterface *em);
 
 /* This NodeId is replaced by OOPSBlock which is a proper class carrying the 
    full information about a node in the OOPS Algebra Tree */
@@ -56,7 +52,6 @@ typedef struct NodeIdQ_st {
 } NodeIdQ;
 #endif
 
-SMLReturn *generateSML(ExpandedModelInterface *root);
 void FillRhsVector(Vector *vb);
 void FillObjVector(Vector *vc);
 void FillUpBndVector(Vector *vu);
@@ -74,24 +69,25 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   Algebra *AlgAug;
   Vector *vb, *vc, *vu, *vl;
 
-
   PARALLEL_CODE(
                 int    InitPar  = InitLippPar(argc, argv);
                 )
   printout = stdout;
   
-  SMLReturn *Pb = generateSML(root);
   HopdmOptions Opt;
 
-  AlgAug = OOPSSetup(Pb->A, Pb->Q);
+  Algebra *A = createA(root);
+  Algebra *Q = createQ(root);
+
+  AlgAug = OOPSSetup(A, Q);
 
   // FIXME: should the stuff below be included in OOPSSetup? 
   //        that would require OOPSSetup to return vectors as well
 
-  vb = new Vector(Pb->A->Trow, "vb");
-  vc = new Vector(Pb->A->Tcol, "vc");
-  vu = new Vector(Pb->A->Tcol, "vu");
-  vl = new Vector(Pb->A->Tcol, "vl");
+  vb = new Vector(A->Trow, "vb");
+  vc = new Vector(A->Tcol, "vc");
+  vu = new Vector(A->Tcol, "vu");
+  vl = new Vector(A->Tcol, "vl");
 
   vc->fillCallBack(FillObjVector);
   vb->fillCallBack(FillRhsVector);
@@ -101,8 +97,8 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   if (1)
   {
     FILE *mout = fopen("mat.m","w");
-    //PrintMatrixMatlab(mout, Pb->A, "A");
-    //PrintMatrixMatlab(mout, Pb->Q, "Q");
+    // PrintMatrixMatlab(mout, A, "A");
+    // PrintMatrixMatlab(mout, Q, "Q");
     vb->printMatlab(mout, "b");
     vc->printMatlab(mout, "c");
     vu->printMatlab(mout, "bu");
@@ -121,9 +117,9 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   Vector *vx, *vy, *vz;
   PrintOptions Prt(1);
 
-  vx = new Vector(Pb->A->Tcol, "vx");
-  vy = new Vector(Pb->A->Trow, "vy");
-  vz = new Vector(Pb->A->Tcol, "vz");
+  vx = new Vector(A->Tcol, "vx");
+  vy = new Vector(A->Trow, "vy");
+  vz = new Vector(A->Tcol, "vz");
   PDProblem Prob(AlgAug, vb, vc, vu, vx, vy, vz);
   Prob.l = vl;
   hopdm(stdout, &Prob, &Opt, &Prt);
@@ -134,35 +130,22 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   */
 
   SML_OOPS_upload_sol(root, Prob.x, Prob.y, Prob.z);
+
+  FreeAlgebraAlg(A);
+  FreeAlgebraAlg(Q);
 }
 
 /* ==========================================================================
 Here comes the generation with all subroutines
 =========================================================================== */
 
-Algebra *createA(ExpandedModelInterface *A);
 Algebra *createBottom(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
 Algebra *createRhs(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
 void SMLCallBack(CallBackInterfaceType *cbi);
-Algebra *createQ(ExpandedModelInterface *A);
 Algebra *createBottomQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
 Algebra *createRhsQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
 void SMLCallBackQ(CallBackInterfaceType *cbi);
 
-/* --------------------------------------------------------------------------
-generateSLM
---------------------------------------------------------------------------- */
-
-SMLReturn *
-generateSML(ExpandedModelInterface *root)
-{
-  SMLReturn *Ret = (SMLReturn*)calloc(1, sizeof(SMLReturn));
-
-  Ret->A = createA(root);
-  Ret->Q = createQ(root);
-  
-  return Ret;
-}
 
 /* --------------------------------------------------------------------------
 createA
@@ -236,11 +219,9 @@ createA(ExpandedModelInterface *em)
 
     Alg = NewAlgebraDblBordDiag(nblk, B, R, D, 
                                 (em->getName()+":"+em->getName()).c_str()); 
-
   }
 
   return Alg;
-
 }
 
 
@@ -281,7 +262,6 @@ createBottom(ExpandedModelInterface *diag, ExpandedModelInterface *nondiag)
                                (CallBackFunction)SMLCallBack, obl);
     Alg = NewAlgebraBlockDense(1, nblk+1, B, 
                       (diag->getName()+":"+nondiag->getName()).c_str());
-
   }
 
   return Alg;
@@ -322,7 +302,6 @@ createRhs(ExpandedModelInterface *diag, ExpandedModelInterface *nondiag)
 
     Alg = NewAlgebraBlockDense(nblk+1, 1, B, 
                        (nondiag->getName()+":"+diag->getName()).c_str());
-
   }
 
   return Alg;
@@ -498,7 +477,6 @@ createQ(ExpandedModelInterface *em)
   }
 
   return Alg;
-
 }
 
 #if 0
