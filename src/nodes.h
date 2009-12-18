@@ -263,7 +263,6 @@ class IDNode : public SyntaxNode, virtual ValueNodeBase {
    long stochparent;
   
   public:
-   IDNode(const char *const new_name, long stochparent=0);
    IDNode(const std::string name, long stochparent=0);
    std::string getValue() const { return name; }
    void findIDREF(std::list<ModelComp*> &lmc) { return; }

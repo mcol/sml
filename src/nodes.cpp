@@ -1010,8 +1010,6 @@ SyntaxNodeIDREF::clone()
   return newn;
 }
 
-IDNode::IDNode(const char *const new_name, long new_stochparent) :
-   SyntaxNode(ID), name(new_name), stochparent(new_stochparent) {}
 IDNode::IDNode(const string new_name, long new_stochparent) :
    SyntaxNode(ID), name(new_name), stochparent(new_stochparent) {}
 
