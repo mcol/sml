@@ -81,6 +81,10 @@ AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
 /** Destructor */
 AmplModel::~AmplModel()
 {
+  for (list<ModelComp*>::iterator p = comps.begin(); p != comps.end(); p++) {
+    delete *p;
+  }
+
   free(name);
 }
 
