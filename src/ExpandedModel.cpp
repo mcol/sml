@@ -29,7 +29,9 @@ const bool log_EM = false;
 
 ExpandedModel::ExpandedModel(AmplModel *src_model) :
    nLocalVars(-1), nLocalCons(-1), localVarInfoSet(false), pvar(NULL), 
-   dvar(NULL), prow(NULL), drow(NULL), src(src_model)
+   dvar(NULL), prow(NULL), drow(NULL), src(src_model),
+   nlfile(NULL),
+   listOfVars(NULL)
 {
   // Note: Setup of model is largely done in AmplModel::createExpandedModel()
 
