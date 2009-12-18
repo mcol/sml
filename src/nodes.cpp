@@ -879,8 +879,8 @@ SyntaxNodeIx::hasDummyVar
  *  @return The ("ID") SyntaxNode representing the dummy Variable (if found) or
  *          NULL (if not found)
  */
-SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
-{
+SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
+
   int i;
   SyntaxNode *ret = NULL;
 
@@ -892,7 +892,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
     if (tmp->opCode==ID){
       IDNode *tmpid = (IDNode *) tmp;
       if (logCreate) cout << "Found dummy variable: " << tmpid->name << "\n";
-      if (strcmp(name, tmpid->name.c_str())==0)
+      if (name == tmpid->name)
         ret = tmp;
     }else{
       /* This is a multidimensional dummy variable: */
@@ -908,7 +908,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const char *const name)
         IDNode *tmp2 = (IDNode *) *j;
         if (logCreate)
            cout << "Found dummy variable: " << tmp2->name << "\n";
-        if (strcmp(name, tmp2->name.c_str())==0)
+        if (name == tmp2->name)
           ret = tmp2;
       }
     }
@@ -1010,7 +1010,7 @@ SyntaxNodeIDREF::clone()
   return newn;
 }
 
-IDNode::IDNode(const string new_name, long new_stochparent) :
+IDNode::IDNode(const string& new_name, long new_stochparent) :
    SyntaxNode(ID), name(new_name), stochparent(new_stochparent) {}
 
 ostream& ListNode::put(ostream& s) const {
@@ -1198,7 +1198,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       cout << "--> search for matches of " << idNode->name << "\n";
  
    // see if this matches a dummy variable
-   tmp = find_var_ref_in_indexing(idNode->name.c_str());
+   tmp = find_var_ref_in_indexing(idNode->name);
    if (tmp) {
       if (GlobalVariables::logParseModel) 
          cout << idNode->name << " is matched by dummy var in " << *tmp << "\n";
@@ -1260,8 +1260,8 @@ find_var_ref_in_indexing
  *          is no match).
  */
 SyntaxNode *
-find_var_ref_in_indexing(const char *const name)
-{
+find_var_ref_in_indexing(const string& name) {
+
    int i;
    SyntaxNodeIx *tmp;
    SyntaxNode *ret = NULL;

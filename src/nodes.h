@@ -225,7 +225,7 @@ class SyntaxNodeIx : public SyntaxNode {
   SyntaxNodeIx(SyntaxNode *on); //!< initialise values from an SyntaxNode
 
   //! Finds if the indexing expression defines a given dummy variable 
-  SyntaxNode *hasDummyVar(const char *const name); 
+  SyntaxNode *hasDummyVar(const std::string& name);
 
   //! returns list of all dummy variables defined by this index'g expression 
   std::list<SyntaxNode *> getListDummyVars();
@@ -263,7 +263,7 @@ class IDNode : public SyntaxNode, virtual ValueNodeBase {
    long stochparent;
   
   public:
-   IDNode(const std::string name, long stochparent=0);
+   IDNode(const std::string& name, long stochparent=0);
    std::string getValue() const { return name; }
    void findIDREF(std::list<ModelComp*> &lmc) { return; }
    void findIDREF(std::list<SyntaxNode*> *lnd) { return; }
@@ -421,6 +421,6 @@ std::ostream& operator<<(std::ostream& s, const SyntaxNode *node);
 // Routines taken from ampl.h
 SyntaxNode *findKeywordinTree(SyntaxNode *root, int oc);
 SyntaxNode* find_var_ref_in_context(AmplModel *context, SyntaxNode *ref);
-SyntaxNode* find_var_ref_in_indexing(const char *const name);
+SyntaxNode* find_var_ref_in_indexing(const std::string& name);
 
 #endif
