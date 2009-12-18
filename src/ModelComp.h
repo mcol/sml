@@ -24,8 +24,6 @@ typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 #include "nodes.h"
 #include "CompDescr.h"
 
-
-using namespace std;
 /* ------------------------------------------------------------------------ */
 /* ModelComp describes a model component such as 
    var/subject to/param/set/minimize 
@@ -49,7 +47,6 @@ class AmplModel;
  * - <typo\> <name\> <indexing\>_opt <attributes\>_opt
  */
 class ModelComp{
- private:
  public:
   static const string nameTypes[];
   static const string compTypes[];
@@ -67,19 +64,18 @@ class ModelComp{
   /**  Indexing expression */
   SyntaxNodeIx *indexing;
   
-  /** List of all entities that this model component depends on:
-   *  Basically a list of all model components used in the definition of
-   *  this component                                                  */
-  list<ModelComp*> dependencies;     //!< list of dependencies:
+  /** List of all entities that this model component depends on.
+   *
+   *  This lists all model components used in the definition of this component.
+   */
+  std::list<ModelComp*> dependencies;
 
-  AmplModel *model;    //!< The model this belongs to 
+  /** The model this component belongs to */
+  AmplModel *model;
 
   /** A pointer to an AmplModel structure for components of type MODEL
    *  @attention Better implemented as a subclass of ModelComp. */
   void *other;      
-
-  /** Instance number of ModelComp */
-  int count;
 
   /** Components can be tagged by the tagDependencies method which sets
    *  this tag for this components and everything that it depends on 
@@ -91,27 +87,27 @@ class ModelComp{
    */
   CompDescr *value;   //!< value (for sets and parameters)
 
-  /** Global list of all defined ModelComps */
-  static list<ModelComp*> global_list;
+ public:
 
-  /** Number of ModelComps defined */
-  static int tt_count;
-
-  // ------------------------- METHODS ----------------------------------
   /** Constructor */
   ModelComp(const string& id, compType type,
             SyntaxNode *indexing, SyntaxNode *attrib);
-  ModelComp();  //< constructor that sets everything to default values
+
+  /** Default constructor */
+  ModelComp();
 
   /** Destructor */
   virtual ~ModelComp();
 
   /** Set up an existing model comp to specified values */
-  void setTo(char *id, compType type, SyntaxNodeIx *indexing, SyntaxNode *attrib); 
+  void setTo(char *id, compType type,
+             SyntaxNodeIx *indexing, SyntaxNode *attrib);
 
   /** Set up list of dependencies for this component */
   void setUpDependencies();
-  void dump(ostream &fout);   //!< detailed debugging output
+
+  /** Detailed debugging output */
+  void dump(ostream& fout);
   void print();   //!< prints elements of the class
   void printBrief();   //!< prints one liner
 
@@ -133,9 +129,28 @@ class ModelComp{
   /** Write definition of all tagged components to file, using global_list */
   static void modifiedWriteAllTagged(ostream &fout); 
 
-  void moveUp(int level);  //< move this model comp up in the model tree 
-  virtual ModelComp *clone();     //< duplicate the object: shallow copy
-  ModelComp *deep_copy(); //< duplicate the object: deep copy
+  /** Move this model component up in the model tree */
+  void moveUp(int level);
+
+  /** Duplicate the object: shallow copy */
+  virtual ModelComp *clone();
+
+  /** Duplicate the object: deep copy */
+  ModelComp *deep_copy();
+
+ protected:
+
+  /** Instance number of ModelComp */
+  int count;
+
+ private:
+
+  /** Global list of all defined ModelComps */
+  static std::list<ModelComp*> global_list;
+
+  /** Number of ModelComps defined */
+  static int tt_count;
+
 };
 
 string
@@ -144,4 +159,5 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn,
 string
 getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, 
 	      AmplModel *current_model, int witharg);
+
 #endif
