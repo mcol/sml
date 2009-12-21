@@ -960,9 +960,8 @@ SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r)
 SyntaxNodeIDREF::SyntaxNodeIDREF(ModelComp *r, SyntaxNode *val1) :
   SyntaxNode(IDREF, val1), ref(r), stochparent(0) {}
 
-SyntaxNodeIDREF::SyntaxNodeIDREF(int opCode, ModelComp *r) :
-  SyntaxNode(opCode), ref(r), stochparent(0) 
-{
+SyntaxNodeIDREF::SyntaxNodeIDREF(int opCode_, ModelComp *r) :
+  SyntaxNode(opCode_), ref(r), stochparent(0) {
    assert(opCode==IDREF||opCode==IDREFM);
 }
 
@@ -1049,15 +1048,15 @@ ListNode *ListNode::clone() {
    return copy;
 }
 
-ListNode::ListNode(int opCode, SyntaxNode *val1, SyntaxNode *val2) :
-   SyntaxNode(opCode, val1, val2) 
+ListNode::ListNode(int opCode_, SyntaxNode *val1, SyntaxNode *val2) :
+  SyntaxNode(opCode_, val1, val2)
 {
    if(val1) push_back(val1);
    if(val2) push_back(val2);
 }
 
-OpNode::OpNode(int opCode, SyntaxNode *op1, SyntaxNode *op2) :
-   SyntaxNode(opCode, op1, op2), left(NULL)
+OpNode::OpNode(int opCode_, SyntaxNode *op1, SyntaxNode *op2) :
+  SyntaxNode(opCode_, op1, op2), left(NULL)
 {
    assert(op1);
    if(!op2) {
