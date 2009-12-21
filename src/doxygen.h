@@ -80,12 +80,12 @@ ampl.ypp is the YACC/BISON grammar file. It specifies the grammar of
 SML in Backus-Naur form (BNF). Large parts of it follow the
 specification of the AMPL grammar in the appendix of the AMPL book. In
 YACC/BISON every "rule" returns a "value" that is computed from the
-values of its components. In SML most rules return a pointer to
-SyntaxNode. An SyntaxNode represents an AMPL/SML operator, and AMPL/SML
+values of its components. In SML most rules return a pointer to a
+SyntaxNode. A SyntaxNode represents an AMPL/SML operator, and an AMPL/SML
 expression is thus represented as a tree of SyntaxNodes. 
 
 The grammar processor recognizes the start and end of a block/submodel
-and creates a AmplModel object for each of these. It classifies all
+and creates an AmplModel object for each of these. It classifies all
 other lines into set/parameter/variable/constraint/objective/submodel
 declarations - which are stored in a ModelComp object - and attaches
 them to the appropriate (current) model.
@@ -110,15 +110,15 @@ found the reference in the SyntaxNode tree is replaced by a pointer to the
 appropriate ModelComp (done by find_var_ref_in_context()).
 \bug Currently no hashing is done in this search.
 
-Internally all names are represented by an SyntaxNode with
+Internally all names are represented by a SyntaxNode with
 SyntaxNode.opCode==ID. These are replaced by an object of subclass
 SyntaxNodeIDREF with SyntaxNodeIDREF.opCode==IDREF, which carry a pointer to
 the appropriate ModelComponent.
 
 The output of the frontend is a tree of AmplModel objects (each
 representing a node of the model tree), consisting of ModelComp
-objects (each representing on AMPL declaration). These in turn consist
-of several SyntaxNode trees representing the indexing and attribute(body)
+objects (each representing an AMPL declaration). These in turn consist
+of several SyntaxNode trees representing the indexing and attribute (body)
 section of the declaration
 
 \note Also need to describe the data file parser and its classes
@@ -127,25 +127,25 @@ section of the declaration
 /**
 \page stochmodel Processing of Stochastic Programming blocks
 
-An stochastic block definition is read in as a normal block definition (just
+A stochastic block definition is read in as a normal block definition (just
 that it creates a StochModel object rather than an AmplModel object).
 The difference is that StochModel carries information about the stochastic
-parameters of the block (STAGES, NODES, PROBABILITY, ANCENSTOR).
+parameters of the block (STAGES, NODES, PROBABILITY, PARENT).
 
 The components of a StochModel are StochModelComp objects (rather than
-ModelComp objects). The difference here is that a STochModelComp
+ModelComp objects). The difference here is that a StochModelComp
 carries information about which stages this component belongs to and
 if a component is "deterministic" (i.e. there is only one copy of it
-per stage, not one copy per node)
+per stage, instead of one copy per node).
 
 After the reading of the stochastic block is complete,
 the StochModel object is translated into a chain of
-AmplModel objects.  This is done by StochModel::expandToFlatModel
+AmplModel objects.  This is done by StochModel::expandToFlatModel().
 
 \section expFlat Expansion to flat model tree
 
 Expansion works in two passes. In the first pass the chain of
-AmplModel objects is build (whose components are still StochModelComp
+AmplModel objects is built (whose components are still StochModelComp
 objects) In the second pass the StochModelComp objects are translated
 to ModelComp objects (that is references to StochModelComp objects
 are resolved to references to ModelComp objects and special
@@ -421,7 +421,7 @@ variable Flow can be refered to as
  Net[k].Flow[j];
 \endcode
 
-Model components defined in sister blocks (i.e. blocks defined on the
+Model components defined in sibling blocks (i.e. blocks defined on the
 same level) or their child blocks cannot be used.
 
 \section sml_sp Stochastic Programming
