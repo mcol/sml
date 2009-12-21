@@ -212,10 +212,12 @@ StochModel::expandStagesOfComp()
   /** \bug this is just so that the global data file can be read, eventually
      this should be removed */
   {
-    AmplModel *root = this;
-    while (root->parent) root = root->parent;
+    AmplModel *amroot = this;
+    while (amroot->parent)
+      amroot = amroot->parent;
     
-    for(list<ModelComp*>::iterator p = root->comps.begin();p!=root->comps.end();p++){
+    for (list<ModelComp*>::iterator p = amroot->comps.begin();
+         p != amroot->comps.end(); p++) {
       ModelComp *q = *p;
       if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
     }
@@ -283,11 +285,11 @@ StochModel::expandStagesOfComp()
       // parse the set members
       smc->stagenames = new vector<string>;
       {
-        char *p, *p2;
-        p = strstr(buffer, ":=");
-        p+=2;
+        char *p1, *p2;
+        p1 = strstr(buffer, ":=");
+        p1 += 2;
         
-        p2 = strtok(p, " ;");
+        p2 = strtok(p1, " ;");
         while(p2!=NULL){
           if (logSM) printf("Member: %s\n",p2);
           smc->stagenames->push_back(p2);
@@ -405,9 +407,9 @@ StochModel::expandToFlatModel()
       
       if (smc->stageset){
         inc = false;
-        for(vector<string>::iterator p=(smc->stagenames)->begin();
-            p!=smc->stagenames->end();p++){
-          if (*st==*p) {
+        for(vector<string>::iterator q = (smc->stagenames)->begin();
+            q != smc->stagenames->end(); q++) {
+          if (*st==*q) {
             inc = true;
             break;
           }
@@ -634,7 +636,6 @@ StochModel::expandToFlatModel()
   return am;
 }
 
-
 /*-----------------------------------------------------------------------------
 StochModel::_transcribeComponents(AmplModel *current, int level)
 -----------------------------------------------------------------------------*/
@@ -648,13 +649,13 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
  *         The AmplModel that is currently worked on. I.e. in the current
  *         level of the recursion the routine is working on AmplModel current
  *          within this StochModel.
- *  @param level
+ *  @param lev
  *         The recursion level (to work out the correct way to resolve the
  *         'stage' and 'node' keywords and 'ancestor' references).
  */
 void
-StochModel::_transcribeComponents(AmplModel *current, int level)
-{
+StochModel::_transcribeComponents(AmplModel *current, int lev) {
+
   ModelComp *mc;
   list<SyntaxNode*> dv;
   // need to set stage and node for the current model
@@ -663,12 +664,12 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
      is symbolic. otherwise don't use quotation marks */
 
   if (is_symbolic_stages){
-    StageNodeNode::stage = "\""+stagenames.at(level)+"\"";
+    StageNodeNode::stage = "\"" + stagenames.at(lev) + "\"";
   } else {
-    StageNodeNode::stage = stagenames.at(level);
+    StageNodeNode::stage = stagenames.at(lev);
   }
 
-  if (level==0){
+  if (lev == 0) {
     StageNodeNode::node = "\"root\"";
   }else{
     SyntaxNodeIx *cnix = current->node->indexing;
@@ -683,7 +684,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
       p!=current->comps.end();p++){
     mc = *p;
     if (mc->type==TMODEL){
-      _transcribeComponents((AmplModel*)mc->other, level+1);
+      _transcribeComponents((AmplModel*) mc->other, lev + 1);
       newcomps.push_back(mc);
     }else{
       /* The component in question is just a pointer to the original
@@ -695,7 +696,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
       if (smc){
         string ndname = nodedummy ? nodedummy->name : "__INVALID__";
         string stname = stagedummy ? stagedummy->name : "__INVALID__";
-        mcnew = smc->transcribeToModelComp(current, ndname, stname, level);
+        mcnew = smc->transcribeToModelComp(current, ndname, stname, lev);
         newcomps.push_back(mcnew);
       }else{
         // This is not a StochModelComp: this should be an indexing set 

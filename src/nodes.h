@@ -185,8 +185,8 @@ class StageNodeNode : public SyntaxNode {
   /** Current replacement string for the 'stage' keyword */
   static std::string stage;
 
-  StageNodeNode(int opCode, std::string value="") :
-     SyntaxNode(opCode), value_(value) {}
+  StageNodeNode(int opCode_, std::string value="") :
+     SyntaxNode(opCode_), value_(value) {}
 
   std::ostream& put(std::ostream& s) const;
   SyntaxNode *clone() { return new StageNodeNode(opCode, value_); }
@@ -208,8 +208,8 @@ class StageNodeNode : public SyntaxNode {
 class SyntaxNodeIx : public SyntaxNode {
 
  private:
-  SyntaxNodeIx(const int opCode) :
-    SyntaxNode(opCode), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
+  SyntaxNodeIx(const int opCode_) :
+    SyntaxNode(opCode_), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
     dummyVarExpr(NULL), done_split(0) {};
 
  public:

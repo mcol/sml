@@ -20,8 +20,8 @@
 
 using namespace std;
 
-SetElement::SetElement(int n, char **new_val) :
-   n(n), val(NULL)
+SetElement::SetElement(int n_, char **new_val) :
+   n(n_), val(NULL)
 {
   if(n==0) return;
   assert(new_val);
@@ -31,8 +31,8 @@ SetElement::SetElement(int n, char **new_val) :
      val[i] = new_val[i];
 }
 
-SetElement::SetElement(int n, IDNode **new_val) :
-   n(n), val(NULL)
+SetElement::SetElement(int n_, IDNode **new_val) :
+   n(n_), val(NULL)
 {
   if(n==0) return;
   assert(new_val);

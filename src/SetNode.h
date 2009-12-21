@@ -32,8 +32,8 @@ protected:
    SetNode *within;
 
 public:
-   SetNode(int opCode, SyntaxNode *node1=NULL, SyntaxNode *node2=NULL) :
-      SyntaxNode(opCode, node1, node2), within(NULL) {}
+   SetNode(int opCode_, SyntaxNode *node1=NULL, SyntaxNode *node2=NULL) :
+      SyntaxNode(opCode_, node1, node2), within(NULL) {}
 };
 
 /** @class SimpleSet
@@ -69,10 +69,10 @@ public:
  */
 class CompositeSet: public SetNode {
 public:
-   CompositeSet(int opCode, SyntaxNode *set1, SyntaxNode *set2) :
-      SetNode(opCode, set1, set2)
+   CompositeSet(int opCode_, SyntaxNode *set1, SyntaxNode *set2) :
+      SetNode(opCode_, set1, set2)
    {
-      assert((opCode==CROSS) || (opCode==DIFF));
+      assert((opCode_ == CROSS) || (opCode_ == DIFF));
    }
 };
 

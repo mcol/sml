@@ -31,9 +31,9 @@ StochModelComp::StochModelComp():
   ModelComp()
 {}
 
-StochModelComp::StochModelComp(const char *id, compType type,
-                               SyntaxNode *indexing, SyntaxNode *attrib):
-  ModelComp(id, type, indexing, attrib)
+StochModelComp::StochModelComp(const string& id_, compType type_,
+                               SyntaxNode *indexing_, SyntaxNode *attrib):
+  ModelComp(id_, type_, indexing_, attrib)
 {}
 
 
@@ -138,9 +138,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       
       // search for this entity in the current model
       bool fnd = false;
-      for(list<ModelComp*>::iterator p = model->comps.begin();
-          p!=model->comps.end();p++){
-        ModelComp *amc=*p;
+      for(list<ModelComp*>::iterator q = model->comps.begin();
+          q != model->comps.end(); q++) {
+        ModelComp *amc = *q;
         // all we can do is judge by name
         if (mc->id == amc->id) {
           onr->ref = amc;

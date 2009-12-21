@@ -71,21 +71,25 @@ list<ModelComp*> ModelComp::global_list;
  *  sections.
  *  Also analyses dependencies in indexing and attribute and set the 
  *  dependencies list
- *  @param id          name of the component
- *  @param type        type of the component
- *  @param indexing    root node of the indexing expression. 
+ *  @param id_
+ *         Name of the component
+ *  @param type_
+ *         Type of the component
+ *  @param indexing_
+ *         Root node of the indexing expression
  *                     IDs should have been replaced by IDREFs 
- *  @param attrib      root node of the attribute expression.
+ *  @param attrib
+ *         Root node of the attribute expression
  *                     IDs should have been replaced by IDREFs 
  */
-ModelComp::ModelComp(const string& id, compType type,
-                       SyntaxNode *indexing, SyntaxNode *attrib)
-{
+ModelComp::ModelComp(const string& id_, compType type_,
+                     SyntaxNode *indexing_, SyntaxNode *attrib) {
+
   value = NULL;
   this->tag = false;
-  this->id = id;
-  this->type = type;
-  this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing);
+  this->id = id_;
+  this->type = type_;
+  this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing_);
   if (indexing) (this->indexing)->splitExpression();
   this->attributes = attrib;
 
@@ -166,9 +170,9 @@ ModelComp::ModelComp() :
   indexing(NULL),
   model(NULL),
   other(NULL),
-  count(-1),
   tag(false),
-  value(NULL) { }
+  value(NULL),
+  count(-1) { }
 
 /* --------------------------------------------------------------------------
 ModelComp::setTo()
@@ -177,22 +181,26 @@ ModelComp::setTo()
  *  sections.
  *  Also analyses dependencies in indexing and attribute and set the 
  *  dependencies list
- *  @param id          name of the component
- *  @param type        type of the component
- *  @param indexing    root node of the indexing expression. 
+ *  @param id_
+ *         Name of the component
+ *  @param type_
+ *         Type of the component
+ *  @param indexing_
+ *         Root node of the indexing expression
  *                     IDs should have been replaced by IDREFs 
- *  @param attrib      root node of the attribute expression.
+ *  @param attrib
+ *         Root node of the attribute expression
  *                     IDs should have been replaced by IDREFs 
  */
 void
-ModelComp::setTo(char *id, compType type, 
-                       SyntaxNodeIx *indexing, SyntaxNode *attrib)
-{
+ModelComp::setTo(char *id_, compType type_,
+                 SyntaxNodeIx *indexing_, SyntaxNode *attrib) {
+
   static int tt_count=0;
   this->tag = false;
-  this->id = id;
-  this->type = type;
-  this->indexing = indexing;
+  this->id = id_;
+  this->type = type_;
+  this->indexing = indexing_;
   if (indexing) (this->indexing)->splitExpression();
   this->attributes = attrib;
 
@@ -930,12 +938,12 @@ ModelComp::moveUp(int level){
       p!=idrefnodes->end();p++){
     SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
-    AmplModel *model = mc->model;
+    AmplModel *am = mc->model;
     
     // need to check if this model is below the new assigned model
     bool found = false;
     for(posm=0;posm<level;posm++){
-      if (mlist[posm]==model){
+      if (mlist[posm] == am) {
         found = true;
         break;
       }
@@ -1000,12 +1008,12 @@ ModelComp::reassignDependencies()
       p!=idrefnodes->end();p++){
     SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
-    AmplModel *model = mc->model;
+    AmplModel *am = mc->model;
     
     //check that this ModelComp belongs to this model
     bool found = false;
-    for(list<ModelComp*>::iterator q = model->comps.begin();
-        q!=model->comps.end();q++){
+    for(list<ModelComp*>::iterator q = am->comps.begin();
+        q != am->comps.end(); q++) {
       if ((*q)->id == mc->id) {
         found = true;
         if ((*q)!=mc){
