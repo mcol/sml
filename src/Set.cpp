@@ -131,7 +131,7 @@ Set::toString() const {
     // iter is of type 'pair*'
     SetElement element = iter->first;
     int pos = iter->second;
-    str += (to_string(pos)+":"+element.val[0]);
+    str += to_string(pos) + ":" + element.getVal();
   }
 
   return str;

@@ -27,10 +27,11 @@
 
 class SetElement {
 
- public:
+ private:
   const int n;
   std::string *val;
 
+ public:
   /* ----------------------------- methods -------------------------------*/
 
   SetElement(int n=0, char **val=NULL);
@@ -38,6 +39,10 @@ class SetElement {
   ~SetElement();
 
   bool operator()(const SetElement& el1, const SetElement& el2) const;
+
+  std::string getVal() const {
+    return val[0];
+  }
 
   std::string toString() const;
 
