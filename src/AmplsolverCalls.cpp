@@ -30,19 +30,15 @@ using namespace std;
 const bool log_NL=false;
 
 
-/* ===========================================================================
-constructors
-============================================================================ */
-NlFile::NlFile(string nlfilename)
-{
-  this->nlfilename = nlfilename;
-  ncol = -1;
-  nrow = -1;
-  nzH = -1;
-  nzA = -1;
-}
+/** Constructor */
+NlFile::NlFile(const string& name) :
+  nlfilename(name),
+  ncol(-1),
+  nrow(-1),
+  nzH(-1),
+  nzA(-1) {}
 
-/* Destructor */
+/** Destructor */
 NlFile::~NlFile() {
 
   map<ExpandedModel*, IndexListValue*>::iterator it;
@@ -78,7 +74,6 @@ NlFile::readCommonScalarValues()
 
   if(log_NL) printf("(%dx%d): %d nz\n",n_con, n_var,nzc);
   ASL_free((ASL**)&asl);
-
 }
 
 /* ----------------------------------------------------------------------------

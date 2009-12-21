@@ -111,7 +111,11 @@ class NlFile {
   std::map<ExpandedModel*, IndexListValue*> indexList;
   // -------------------------- methods ------------------------------------
  public:
-  NlFile(std::string nlfilename);
+
+  /** Constructor */
+  NlFile(const std::string& name);
+
+  /** Destructor */
   ~NlFile();
 
  private:

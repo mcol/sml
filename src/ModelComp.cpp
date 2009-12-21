@@ -83,17 +83,17 @@ list<ModelComp*> ModelComp::global_list;
  *                     IDs should have been replaced by IDREFs 
  */
 ModelComp::ModelComp(const string& id_, compType type_,
-                     SyntaxNode *indexing_, SyntaxNode *attrib) {
+                     SyntaxNode *indexing_, SyntaxNode *attrib) :
+  type(type_),
+  id(id_),
+  attributes(attrib),
+  model(NULL),
+  tag(false),
+  value(NULL),
+  count(ModelComp::tt_count++)  {
 
-  value = NULL;
-  this->tag = false;
-  this->id = id_;
-  this->type = type_;
   this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing_);
   if (indexing) (this->indexing)->splitExpression();
-  this->attributes = attrib;
-
-  this->count = ModelComp::tt_count++;
   if (GlobalVariables::prtLvl>0) 
     cout << "Defining model component (" << this->count << "): " << id << "\n";
 
@@ -1035,5 +1035,4 @@ ModelComp::reassignDependencies()
   dependencies = newdep;
   
   delete(idrefnodes);
-
 }
