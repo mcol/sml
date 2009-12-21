@@ -46,7 +46,7 @@ class AmplModel;
  * It usually represents one line of AMPL/SML which is a definition of a
  * variable/parameter/set/constraint/objective/block.
  * A model component is broken down into the following parts:
- * - <typo\> <name\> <indexing\>_opt <attributes\>_opt
+ * - <type\> <name\> <indexing\>_opt <attributes\>_opt
  */
 class ModelComp{
  public:

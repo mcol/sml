@@ -37,7 +37,7 @@ public:
 };
 
 /** @class SimpleSet
- * This calls represents a contigous set defined using 1..T or similar
+ *  This class represents a contiguous set defined using 1..T or similar.
  */
 class SimpleSet: public SetNode {
 private:
