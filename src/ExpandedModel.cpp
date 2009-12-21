@@ -674,16 +674,14 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
       localVarInfoSet=true;
    }
 
-   string ind = "";
-   for(int i=0; i<indent; ++i) ind += " ";
-   string ind2 = ind + "  ";
+   string ind(indent, ' ');
+   string ind2(ind);
 
    if(getName()!="root") {
       string name = getName();
       string pname = parent->getName();
       out << "\n" << ind << name.substr(pname.size()+1) << " {" << endl;
-   } else {
-      ind2 = ind;
+      ind2 += "  ";
    }
 
    if(pvar) {
