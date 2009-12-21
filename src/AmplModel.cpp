@@ -132,7 +132,6 @@ AmplModel::setGlobalNameRecursive()
 void
 AmplModel::writeTaggedComponents(ostream &fout)
 {
-  
   SyntaxNode::default_model = this;
   SyntaxNodeIx *ix = node->indexing;
 
@@ -423,53 +422,25 @@ getListOfInstances(istream &file)
   return li;
 }
 
-#ifndef HAVE_STRTOK_R
-char *strtok_r(char *str, const char *delim, char **saveptr) {
-
-  char *token;
-
-  if (str)
-    *saveptr = str;
-  token = *saveptr;
-
-  if (!token)
-    return NULL;
-
-  token += strspn(token, delim);
-  *saveptr = strpbrk(token, delim);
-  if (*saveptr)
-    *(*saveptr)++ = '\0';
-
-  return *token ? token : NULL;
-}
-#endif
-
 /* ---------------------------------------------------------------------------
 crush
 ---------------------------------------------------------------------------- */
-/* helper routine: crushes a set element (N0,N1) into N0N1 */
+/** Crushes a set element "(N0,N1)" into "N0N1". */
 string crush(const string& inst) {
 
   if (inst[0] != '(')
     return inst;
 
-  char *token = strdup(inst.c_str());
-  int len = strlen(token);
-  assert(token[len-1]==')');
-  token[len-1]=0;
-  token++;
-  // now tokenize again by ',' and crush all parts together
-  string crush;
-  for(char*str2=token; ;str2=NULL){
-    char *svptr2;
-    char *tok2 = strtok_r(str2, ",", &svptr2);
-    if (tok2==NULL) break;
-    crush += tok2;
-  }
-  //printf("Crushed mutidim token is: %s\n",crush.c_str());
-  
-  token--;
-  free(token);
+  size_t last = inst.length() - 1, pos;
+  assert(inst[last] == ')');
+
+  // remove opening and closing brackets
+  string crush = inst.substr(1, last - 1);
+
+  // remove commas
+  while ((pos = crush.find(',')) != string::npos)
+    crush = crush.erase(pos, 1);
+
   return crush;
 }
 

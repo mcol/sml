@@ -1,3 +1,7 @@
+2009-12-21  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Rewritten crush() in a way that doesn't use strtok_r(), which doesn't exist
+    on MinGW.
+
 2009-12-17  Marco Colombo  <m.colombo@ed.ac.uk>
   * Cleaned up createTmpDirIfNotPresent() and surrounding code.
   * Made process_model() return an error code instead of calling exit().

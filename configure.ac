@@ -28,7 +28,6 @@ AC_PROG_INSTALL
 # check for headers and functions not available under MinGW
 AC_CHECK_HEADERS(direct.h)
 AC_CHECK_FUNCS(strndup)
-AC_CHECK_FUNCS(strtok_r)
 
 # amplsolver is required
 ACX_AMPL( [], AC_ERROR([Ampl Solver Library Required]) )
