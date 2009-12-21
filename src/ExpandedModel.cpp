@@ -76,8 +76,6 @@ ExpandedModel::setLocalVarInfo()
 
   if (localVarInfoSet) {
     return;
-  }else{
-    localVarInfoSet=true;
   }
 
   // ------- read the names of constraints defined in this NlFile ------------
@@ -208,6 +206,8 @@ ExpandedModel::setLocalVarInfo()
   nLocalCons = nlfile->getNoConstraints();
   //printf("Found %d constraints\n",nLocalCons);
 
+  localVarInfoSet = true;
+
   if (GlobalVariables::prtLvl>=1)
     cout << "setLocalVarInfo(): " << model_file << " (" << nLocalCons <<
       "x" << nLocalVars << ")\n";
@@ -225,7 +225,6 @@ ExpandedModel::getLocalVarNames()
 {
   if (!localVarInfoSet){
     setLocalVarInfo();
-    localVarInfoSet=true;
   }
   return listOfLocalVarNames;
 }
@@ -242,7 +241,6 @@ ExpandedModel::getLocalConNames()
 {
   if (!localVarInfoSet){
     setLocalVarInfo();
-    localVarInfoSet=true;
   }
   return listOfLocalConNames;
 }
@@ -259,7 +257,6 @@ ExpandedModel::getNLocalVars()
 {
   if (!localVarInfoSet){
     setLocalVarInfo();
-    localVarInfoSet=true;
   }
   return nLocalVars;
 }
@@ -276,7 +273,6 @@ ExpandedModel::getNLocalCons()
 {
   if (!localVarInfoSet){
     setLocalVarInfo();
-    localVarInfoSet=true;
   }
   return nLocalCons;
 }
@@ -607,7 +603,6 @@ ExpandedModel::setPrimalSolColumns
 void ExpandedModel::setPrimalSolColumns(double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
-      localVarInfoSet=true;
    }
    if(!pvar) {
      pvar = new double[nLocalVars];
@@ -623,7 +618,6 @@ ExpandedModel::setDualSolColumns
 void ExpandedModel::setDualSolColumns(double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
-      localVarInfoSet=true;
    }
    if(!dvar) {
      dvar = new double[nLocalVars];
@@ -639,7 +633,6 @@ ExpandedModel::setPrimalSolRows
 void ExpandedModel::setPrimalSolRows(double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
-      localVarInfoSet=true;
    }
    if(!prow) {
      prow = new double[nLocalCons];
@@ -655,7 +648,6 @@ ExpandedModel::setDualSolRows
 void ExpandedModel::setDualSolRows(double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
-      localVarInfoSet=true;
    }
    if(!drow) {
      drow = new double[nLocalCons];
@@ -671,7 +663,6 @@ ExpandedModel::outputSolution
 void ExpandedModel::outputSolution(ostream &out, int indent) {
    if (!localVarInfoSet){
       setLocalVarInfo();
-      localVarInfoSet=true;
    }
 
    string ind(indent, ' ');
