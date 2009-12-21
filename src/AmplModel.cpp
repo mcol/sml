@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +25,6 @@
 #include "AmplModel.h"
 #include "backend.h"
 #include "ExpandedModel.h"
-#include "AmplsolverCalls.h"
 #include "nodes.h"
 #include "sml.tab.h"
 #include "GlobalVariables.h"
@@ -239,14 +239,15 @@ AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
     ExpandedModel::pathToNodeStack.clear();
   }
 
-
   ExpandedModel *em = new ExpandedModel(this);
   
   // copy information on the constraints/variables?
   
-  em->model_file = smodelname;
-  if (sinstanceStub!="") em->model_file += "_"+sinstanceStub;
-  em->nlfile = new NlFile(em->model_file);
+  string nlfilename = smodelname;
+  if (sinstanceStub != "")
+    nlfilename += "_" + sinstanceStub;
+  em->setupNlFile(nlfilename);
+
   // Open this with AMPL interface and check which variables are
   // part of this model? I guess we need to do this
   // No, just need to look at the *.col file (produced by the 'write b' 

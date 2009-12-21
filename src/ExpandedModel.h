@@ -104,6 +104,7 @@ class NlFile;
 class ExpandedModel : public ExpandedModelInterface {
 
  private:
+
   int nLocalVars;  //!< number of local variables
   int nLocalCons;  //!< number of local constraints
 
@@ -118,8 +119,6 @@ class ExpandedModel : public ExpandedModelInterface {
   double *prow, *drow;
 
   AmplModel *src;
-
- public:
 
   // local information:
   /** Name of the *.nl file that describes the problem data */
@@ -153,6 +152,8 @@ class ExpandedModel : public ExpandedModelInterface {
 
   //! indices of local variables in the corresponding *.nl file */
   int *listOfVars;        
+
+ public:
 
   //! the locally applicable variable declarations
   std::list<std::string> localVarDef;
@@ -217,6 +218,10 @@ class ExpandedModel : public ExpandedModelInterface {
   //! Upload the local constraints duals (multipliers on constraints)
   void setDualSolRows(double *elts);
 
+  //! Set up the nl file for this block
+  void setupNlFile(const std::string& name);
+
+  //! Find the indices of the local variables of this model in a given nl file
   int findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar);
 
   //! Returns unique name of this block

@@ -504,6 +504,11 @@ ExpandedModel::getColUpBounds(double *elts)
   delete [] lvar;
 }
 
+/** Set up the nl file for this block */
+void ExpandedModel::setupNlFile(const string& name) {
+  nlfile = new NlFile(name);
+  model_file = name;
+}
 
 /* -------------------------------------------------------------------------
 ExpandedModel::findIxOfLocalVarsInNlFile
