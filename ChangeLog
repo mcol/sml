@@ -1,5 +1,7 @@
 2009-12-22  Marco Colombo  <m.colombo@ed.ac.uk>
   * Fixed a possible use of initialised value in createTmpDirIfNotPresent().
+  * Changed l_addIndex to store lists and structures directly rather than
+    pointers, to avoid memory leaks.
 
 2009-12-21  Marco Colombo  <m.colombo@ed.ac.uk>
   * Rewritten crush() in a way that doesn't use strtok_r(), which doesn't exist

@@ -61,7 +61,7 @@ typedef struct {
 } add_index;
 
 /* some global variables that change the behaviour of some printing routines */
-extern std::vector <std::list <add_index*>* > l_addIndex;
+extern std::vector<std::list<add_index> > l_addIndex;
 
 int process_model(AmplModel *model, const std::string& datafilename);
 

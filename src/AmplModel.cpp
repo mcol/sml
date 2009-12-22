@@ -118,7 +118,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
   SyntaxNode::default_model = this;
   SyntaxNodeIx *idx = node->indexing;
 
-  list<add_index*> li;
+  list<add_index> li;
   if (idx) {
 
     if (!idx->done_split) {
@@ -135,12 +135,12 @@ AmplModel::writeTaggedComponents(ostream &fout)
     // onto the stack
     
     //Place the indexing expression of the current model onto the addIndex stack 
-    add_index *ai = new add_index;
-    ai->dummyVar = idx->dummyVarExpr[0];
-    ai->set = idx->sets[0];
+    add_index ai;
+    ai.dummyVar = idx->dummyVarExpr[0];
+    ai.set = idx->sets[0];
     li.push_back(ai);
   }
-  l_addIndex.push_back(&li);
+  l_addIndex.push_back(li);
 
   // loop through all model components
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){

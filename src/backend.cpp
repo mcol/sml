@@ -52,7 +52,7 @@ void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 //         multiple dimensions {i in SET1,j in SET2}
 //         SET valued expressions: {i in SET1 cross SET2} 
 //         or conditions:    {(i,j) in SET1:i<j}
-vector <list <add_index *>* > l_addIndex;  /* to add to all statements */
+vector<list<add_index> > l_addIndex;  /* to add to all statements */
 
 static void
 print_entry(const ModelComp *entry) {
@@ -258,21 +258,21 @@ process_model(AmplModel *model, const string& datafilename) {
         (I guess this should be done by an "indexing" object) */
       
       /* remove outside braces from indexing expression */
-      list <add_index*>* li = new list<add_index*>();
+      list<add_index> li;
       if (ix){
-        add_index *ai = new add_index[1];
-        li->push_back(ai);
+        add_index ai;
         if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin());
         /* assumes that the next level is the 'IN' keyword (if present) */
         dummyVar = NULL;
         set = ix;
         if (set->opCode==IN){
           SyntaxNode::iterator ixi = set->begin();
-          dummyVar = (SyntaxNode*)*ixi;
-          set = (SyntaxNode*)*(++ixi);
+          dummyVar = *ixi;
+          set = *(++ixi);
         }
-        ai->dummyVar = dummyVar;
-        ai->set = set;
+        ai.dummyVar = dummyVar;
+        ai.set = set;
+        li.push_back(ai);
       }
 
       // FIXME: how to deal with multidimensional dummy variables?
@@ -317,7 +317,6 @@ process_model(AmplModel *model, const string& datafilename) {
         fscript << "{\n";
       }
       l_addIndex.push_back(li);
-      //      delete li; // valgrind errors on alm_xi
     }
 
     /* FIXME: still need to take the "print card()" statement from the
@@ -569,7 +568,6 @@ write_ampl_for_submodel
       
     - sister blocks and subblocks of the current block:
       var/set/param declarations are copied, constraints not
-
 */
 void write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel, 
             AmplModel **list, AmplModel *submodel);
@@ -713,15 +711,14 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
       /* check that it needs to be followed */
       if (thism!=submodel && listam[thislevel-1]==comp->other){
         SyntaxNode *ix;
-        list <add_index*>* li = new list<add_index*>();
+        list<add_index> li;
         /* ok, looks like this needs to be followed */
         /* add the indexing expression */
   
         // initialise the new entry in l_addIndex stack if not already done
         ix = comp->indexing;
-        // l.addIndex.push_back(li);
         if (ix){
-          add_index *ai = new add_index[1];
+          add_index ai;
           
           // and place the indexing expression of this BLOCK onto the stack
           // the stack stores the dummy variable and the SET separately, 
@@ -729,16 +726,13 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin()); // rem {..}
           if (ix->opCode==IN){
              SyntaxNode::iterator ixi = ix->begin();
-            ai->dummyVar = (SyntaxNode*)*ixi;
-            ai->set = (SyntaxNode*)*(++ixi);
+            ai.dummyVar = *ixi;
+            ai.set = *(++ixi);
           }else{ // no dummy variable, just a set
-            ai->dummyVar = NULL;
-            ai->set = ix;
+            ai.dummyVar = NULL;
+            ai.set = ix;
           }
 
-          // add new entry on the addIndex stack
-          li->push_back(ai);
-          
           /* okay we have placed the set description on the stack
              but really this should be modified:
              'i in ARCS' should read 'i in ARCS_SUB'
@@ -757,7 +751,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           */
           {
             ModelComp newmc;
-            SyntaxNode *setn = ai->set;
+            SyntaxNode *setn = ai.set;
             
             newmc.type = TSET;
             
@@ -782,7 +776,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             modified_write(fout, &newmc);
           }
           
-          SyntaxNode *setn = ai->set;
+          SyntaxNode *setn = ai.set;
           //fprintf(fout, "set %s_SUB within %s;\n", 
           //      print_SyntaxNode(setn), print_SyntaxNode(setn));
           /* and now modify the set declaration */
@@ -799,18 +793,17 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           //newn->ref->model = thism;
 
           /* and finally set the new name (add _SUB) to the name */
-          ModelComp *tmp = newn->ref;
-          tmp->id = ((SyntaxNodeIDREF*)setn)->ref->id + "_SUB";
+          newn->ref->id = ((SyntaxNodeIDREF*)setn)->ref->id + "_SUB";
 
           /* and put this on the stack */
-          ai->set = newn;
+          ai.set = newn;
+          li.push_back(ai);
         }       
         l_addIndex.push_back(li);
         write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, 
                submodel);
         SyntaxNode::default_model = thism;
         l_addIndex.pop_back();
-        //        delete li; // valgrind errors on alm_xi
       } /* end of (model on the current list branch) */
       else if (thislevel==0) {
         // we are in the current model and are 
@@ -843,9 +836,7 @@ write_columnfile_for_submodel
    probably just leave the stub of the variable name here and add the 
    index later (indices would have to be given as numbers, here we
    do not know the size of the set indexed over
-
 */
-
 void
 write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
 {
@@ -924,22 +915,21 @@ modified_write(ostream &fout, ModelComp *comp)
     // find number of indexing expressions on stack
     c_addIndex = 0;
     for(i=0;i<level;i++){
-      c_addIndex += l_addIndex[i]->size();
+      c_addIndex += l_addIndex[i].size();
     }
     /* write name and indexing expression */
     fout << getGlobalName(comp, NULL, NULL, NOARG) << " ";
     if (c_addIndex>0 || comp->indexing)
       fout << "{";
-    /* write out the additional indexes */
+    /* write out the additional indices */
     for(i=0;i<level;i++){
-      list <add_index*>* li = l_addIndex.at(i);
-      for(list<add_index*>::iterator p=li->begin();p!=li->end();p++){
-        add_index *ix = *p;
+      list<add_index>& li = l_addIndex.at(i);
+      for (list<add_index>::iterator p = li.begin(); p != li.end(); p++) {
+        add_index ix = *p;
         if (first) {first = 0;} else {fout << ",";}
-        if (ix->dummyVar){
-          fout << ix->dummyVar << " in ";
-        }
-        ixsn = ix->set;
+        if (ix.dummyVar)
+          fout << ix.dummyVar << " in ";
+        ixsn = ix.set;
         if (ixsn->opCode==LBRACE) ixsn=(SyntaxNode*)*ixsn->begin(); 
         fout << ixsn;
       }

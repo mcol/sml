@@ -599,10 +599,10 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
     for (int i = 0; i < clvl; i++) {
       /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */
-      list <add_index *> *li = l_addIndex.at(i);
-      for(list<add_index*>::iterator p = li->begin();p!=li->end();p++){
+      list<add_index>& li = l_addIndex.at(i);
+      for (list<add_index>::iterator p = li.begin(); p != li.end(); p++) {
         //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-        SyntaxNode *dv = (*p)->dummyVar;
+        SyntaxNode *dv = (*p).dummyVar;
         if (dv) {
           if (n_index > 0)
             arglist += ",";
