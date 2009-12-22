@@ -30,6 +30,7 @@ using namespace std;
 list<string> ExpandedModel::pathToNodeStack;
 const bool log_EM = false;
 
+/** Constructor */
 ExpandedModel::ExpandedModel(AmplModel *src_model) :
    nLocalVars(-1), nLocalCons(-1), localVarInfoSet(false), pvar(NULL), 
    dvar(NULL), prow(NULL), drow(NULL), src(src_model),
@@ -37,9 +38,6 @@ ExpandedModel::ExpandedModel(AmplModel *src_model) :
    listOfVars(NULL)
 {
   // Note: Setup of model is largely done in AmplModel::createExpandedModel()
-
-  //printf("ExpandedModel: Called default constructor\n");
-  //exit(1);
 }
 
 
@@ -284,8 +282,8 @@ ExpandedModel::print()
  *  Used only for debugging.
  */
 void
-ExpandedModel::print()
-{
+ExpandedModel::print() const {
+
   cout << "EM: ------------------------------------------------------------\n";
   if (nlfile==NULL){
     cerr << "EM: No NlFile attached\n";
@@ -294,7 +292,8 @@ ExpandedModel::print()
   cout << "EM: This is ExpandedModel: " <<  nlfile->nlfilename << "\n";
   cout << "EM: Nb children: " << children.size() << "\n";
   cout << "EM: Nb local variable definitions: " << localVarDef.size() << "\n";
-  for(list<string>::iterator p=localVarDef.begin();p!=localVarDef.end();p++){
+  for (list<string>::const_iterator p = localVarDef.begin();
+       p != localVarDef.end(); p++) {
     cout << "EM:   " << *p << "\n";
   }
   if (!localVarInfoSet){
@@ -542,7 +541,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
   // look up if this index set has already been calculated
   if (nlf->indexList.count(em)>0){
     // we have already calculated this list
-    IndexListValue *ilv = nlf->indexList[em];
+    const IndexListValue *ilv = nlf->indexList[em];
     if(log_EM) cout << "<<<<<<<<<<<<<<< found IndexValue "+nlfilename+":"+em->model_file+"\n";
     assert(nvar==ilv->nvar);
     for (int i=0;i<nvar;i++){
@@ -571,8 +570,8 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
     }
   
     if (GlobalVariables::prtLvl>=2){
-      printf("Read %d lines from file %s.col\n",colfilelist.size(),
-	     nlfilename.c_str());
+      cout << "Read " <<  colfilelist.size() << " lines from "
+           << nlfilename << ".col\n";
     }
     
     // -------------- compare this listOfVarNames against this list
@@ -594,7 +593,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
     }
     //and place a copy on the map
     int *lvarc = new int[nvar];
-    for (int i=0;i<nvar;i++) lvarc[i] = lvar[i];
+    for (int j = 0; j < nvar; j++) lvarc[j] = lvar[j];
     nlf->indexList[em] = new IndexListValue(nvar,lvarc,count);
   }
 
@@ -605,60 +604,60 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
 ExpandedModel::setPrimalSolColumns
 -------------------------------------------------------------------------- */
 /** Upload the local variable solutions */
-void ExpandedModel::setPrimalSolColumns(double *elts) {
+void ExpandedModel::setPrimalSolColumns(const double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
    }
    if(!pvar) {
      pvar = new double[nLocalVars];
    }
-   for(double *src=elts,*dest=pvar; src<elts+nLocalVars; ++src,++dest)
-      *dest = *src;
+   for (int i = 0; i < nLocalVars; ++i)
+     pvar[i] = elts[i];
 }
 
 /* -------------------------------------------------------------------------
 ExpandedModel::setDualSolColumns
 -------------------------------------------------------------------------- */
 /** Upload the local variable duals (multipliers on bounds) */
-void ExpandedModel::setDualSolColumns(double *elts) {
+void ExpandedModel::setDualSolColumns(const double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
    }
    if(!dvar) {
      dvar = new double[nLocalVars];
    }
-   for(double *src=elts,*dest=dvar; src<elts+nLocalVars; ++src,++dest)
-      *dest = *src;
+   for (int i = 0; i < nLocalVars; ++i)
+     dvar[i] = elts[i];
 }
 
 /* -------------------------------------------------------------------------
 ExpandedModel::setPrimalSolRows
 -------------------------------------------------------------------------- */
 /** Upload the local constraints slacks */
-void ExpandedModel::setPrimalSolRows(double *elts) {
+void ExpandedModel::setPrimalSolRows(const double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
    }
    if(!prow) {
      prow = new double[nLocalCons];
    }
-   for(double *src=elts,*dest=prow; src<elts+nLocalCons; ++src,++dest)
-      *dest = *src;
+   for (int i = 0; i < nLocalCons; ++i)
+     prow[i] = elts[i];
 }
 
 /* -------------------------------------------------------------------------
 ExpandedModel::setDualSolRows
 -------------------------------------------------------------------------- */
 /** Upload the local constraints duals (multipliers on constraints) */
-void ExpandedModel::setDualSolRows(double *elts) {
+void ExpandedModel::setDualSolRows(const double *elts) {
    if (!localVarInfoSet){
       setLocalVarInfo();
    }
    if(!drow) {
      drow = new double[nLocalCons];
    }
-   for(double *src=elts,*dest=drow; src<elts+nLocalCons; ++src,++dest)
-      *dest = *src;
+   for (int i = 0; i < nLocalCons; ++i)
+     drow[i] = elts[i];
 }
 
 /* -------------------------------------------------------------------------

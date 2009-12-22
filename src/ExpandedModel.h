@@ -171,7 +171,7 @@ class ExpandedModel : public ExpandedModelInterface {
   ~ExpandedModel();
 
   //! Recursively print contents of this instance
-  void print();
+  void print() const;
   
   //! Returns the number of local variables
   int getNLocalVars();    
@@ -207,16 +207,16 @@ class ExpandedModel : public ExpandedModelInterface {
   void getObjGradient(double *elts);
 
   //! Upload the local variable solutions
-  void setPrimalSolColumns(double *elts);
+  void setPrimalSolColumns(const double *elts);
 
   //! Upload the local variable duals (multipliers on bounds)
-  void setDualSolColumns(double *elts);
+  void setDualSolColumns(const double *elts);
 
   //! Upload the local constraints slacks
-  void setPrimalSolRows(double *elts);
+  void setPrimalSolRows(const double *elts);
 
   //! Upload the local constraints duals (multipliers on constraints)
-  void setDualSolRows(double *elts);
+  void setDualSolRows(const double *elts);
 
   //! Set up the nl file for this block
   void setupNlFile(const std::string& name);

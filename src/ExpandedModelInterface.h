@@ -170,16 +170,16 @@ class ExpandedModelInterface {
   virtual void getObjGradient(double *elts) = 0;
 
   //! Upload the local variable solutions
-  virtual void setPrimalSolColumns(double *elts) = 0; 
+  virtual void setPrimalSolColumns(const double *elts) = 0;
   
   //! Upload the local variable duals (multipliers on bounds)
-  virtual void setDualSolColumns(double *elts) = 0; 
+  virtual void setDualSolColumns(const double *elts) = 0;
 
   //! Upload the local constraints slacks
-  virtual void setPrimalSolRows(double *elts) = 0; 
+  virtual void setPrimalSolRows(const double *elts) = 0;
   
   //! Upload the local constraints duals (multipliers on constraints)
-  virtual void setDualSolRows(double *elts) = 0; 
+  virtual void setDualSolRows(const double *elts) = 0;
 
   //! Returns the unique name of this block.
   virtual std::string getName() const = 0;
