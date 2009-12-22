@@ -112,8 +112,11 @@ class SyntaxNode {
 
   /** Constructor */
   SyntaxNode(int opCode, SyntaxNode *val1=NULL, SyntaxNode *val2=NULL, SyntaxNode *val3=NULL);
-  SyntaxNode(SyntaxNode &src);
-  // Destructor
+
+  /** Copy constructor */
+  SyntaxNode(const SyntaxNode &src);
+
+  /** Destructor */
   virtual ~SyntaxNode();
 
   /** Recursive printing of expression */

@@ -408,7 +408,7 @@ SyntaxNode Methods to follow
 ============================================================================*/
 // constructors:
 
-SyntaxNode::SyntaxNode(SyntaxNode &src) :
+SyntaxNode::SyntaxNode(const SyntaxNode &src) :
    opCode(src.opCode), nval(src.nval), values(src.values) {}
 
 SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode* val3) :
