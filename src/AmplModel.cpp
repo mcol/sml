@@ -43,22 +43,6 @@ bool is_int(const char *tok); // 'const' here means that tok is not modified
 AmplModel::AmplModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
-AmplModel::AmplModel() :
-  n_vars(0),
-  n_cons(0),
-  n_params(0),
-  n_sets(0),
-  n_objs(0),
-  n_submodels(0),
-  n_total(0),
-  level(0),
-  //first(NULL),
-  //last(NULL),
-  parent(NULL),
-  ix(NULL) {}
-
-// Note: just calling the other constructor is apparently insufficient
-// as this causes a bug for Marco's older version of g++
 AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
   name(orig_name),
   n_vars(0),
@@ -72,11 +56,10 @@ AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
   //first(NULL),
   //last(NULL),
   node(NULL),
-  parent(NULL),
+  parent(par),
   ix(NULL)
 {
-   parent = par;
-
+  if (name != "")
    setGlobalName();
 }
 

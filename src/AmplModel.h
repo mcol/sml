@@ -116,8 +116,7 @@ class AmplModel{
 
   // -------------------------- methods ----------------------------------
   /** Constructor */
-  AmplModel();
-  AmplModel(const char *orig_name, AmplModel *par=NULL);
+  AmplModel(const char *orig_name = "", AmplModel *par = NULL);
   
   /** Destructor */
   virtual ~AmplModel();
@@ -163,6 +162,7 @@ class AmplModel{
   std::list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
+
 };
 
 #endif
