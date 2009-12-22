@@ -970,14 +970,14 @@ ModelComp::reassignDependencies()
 void
 ModelComp::reassignDependencies()
 {
-  list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
+  list<SyntaxNode*> idrefnodes;
   list<ModelComp*> newdep;
 
-  if (indexing) indexing->findIDREF(idrefnodes);
-  if (attributes) attributes->findIDREF(idrefnodes);
+  if (indexing) indexing->findIDREF(&idrefnodes);
+  if (attributes) attributes->findIDREF(&idrefnodes);
 
-  for(list<SyntaxNode*>::iterator p = idrefnodes->begin();
-      p!=idrefnodes->end();p++){
+  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
+       p != idrefnodes.end(); p++){
     SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
     AmplModel *am = mc->model;
@@ -1005,6 +1005,4 @@ ModelComp::reassignDependencies()
     }
   }
   dependencies = newdep;
-  
-  delete(idrefnodes);
 }
