@@ -512,12 +512,10 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
 {
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
-  string globalName;
   string arglist;
   int n_index = 0;
-  int i;
 
-  globalName = "";
+  string globalName = "";
   /* need to get list of model names and argument list to prefix */
   if (witharg==NOARG||witharg==WITHARG){
     globalName = node->id;
@@ -562,7 +560,6 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
   {
     AmplModel *path1[5], *path2[5];
     int n_path1, n_path2;
-    int clvl;
 
     n_path1=1;n_path2=1;
     tmp = current_model;
@@ -587,7 +584,7 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
     
     /* now go and find the last common node: 
        path[n_path-1] should be root in both cases */
-    clvl = 0;
+    int clvl = 0;
     while (clvl<n_path1-1 && clvl<n_path2-1 && path1[n_path1-2-clvl]==path2[n_path2-2-clvl]) clvl++;
     /* okay common ancestor should be path[n_path-1-i] */
     tmp = path1[n_path1-1-clvl];
@@ -597,33 +594,22 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
     // => tmp is now set to the common ancestor of current_model and model of 
     //        comp
 
-    
     /* for every level above 0 there should be a dummy variable on the stack 
        => go up the path and add dummy variables to arglist */
-    for(i=0;i<clvl;i++){
+    for (int i = 0; i < clvl; i++) {
       /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */
       list <add_index *> *li = l_addIndex.at(i);
       for(list<add_index*>::iterator p = li->begin();p!=li->end();p++){
-        if (n_index==0){
-          //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-          SyntaxNode *dv = (*p)->dummyVar;
-          if (dv) {
-            arglist = dv->printDummyVar();
-            //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
-            n_index++;
-          }
-        }else{
-          /* need to put subscript before the current list */
-          //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-          SyntaxNode *dv = (*p)->dummyVar;
-          if (dv){
+        //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+        SyntaxNode *dv = (*p)->dummyVar;
+        if (dv) {
+          if (n_index > 0)
             arglist += ",";
-            arglist += dv->printDummyVar();
-            //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
-            n_index++;
-          }
+          arglist += dv->printDummyVar();
+          //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
         }
+        n_index++;
       }
     }
   }
@@ -727,11 +713,9 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
   AmplModel *tmp;
   string arglist;
-  string globalName;
   int n_index = 0;
-  int i;
 
-  globalName = "";
+  string globalName = "";
   /* need to get list of model names and argument list to prefix */
   if (witharg==NOARG||witharg==WITHARG){
     globalName = node->id;
@@ -776,7 +760,6 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
   {
     AmplModel *path1[5], *path2[5];
     int n_path1, n_path2;
-    int clvl;
 
     n_path1=1;n_path2=1;
     tmp = current_model;
@@ -801,7 +784,7 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
     
     /* now go and find the last common node: 
        path[n_path-1] should be root in both cases */
-    clvl = 0;
+    int clvl = 0;
     while (clvl<n_path1-1 && clvl<n_path2-1 && path1[n_path1-2-clvl]==path2[n_path2-2-clvl]) clvl++;
     /* okay common ancestor should be path[n_path-1-i] */
     tmp = path1[n_path1-1-clvl];
@@ -811,10 +794,10 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
     // => tmp is now set to the common ancestor of current_model and model of 
     //        comp
 
-    
     /* for every level above 0 there should be a dummy variable on the stack 
        => go up the path and add dummy variables to arglist */
-    for(i=1;i<=clvl;i++){ //start from 1: 0 is the root which has no indexing
+    // start from 1: 0 is the root which has no indexing
+    for (int i = 1; i <= clvl; i++) {
       /* FIXME: here the dv cannot be printed by SyntaxNode.print() if it is 
          a list like (i,j)! */
       ModelComp *node_model = path1[n_path1-1-i]->node;
@@ -822,30 +805,19 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
       
       if (indexing_model){
         for(int p=0;p<indexing_model->ncomp;p++){
-          if (n_index==0){
-            //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-            SyntaxNode *dv = indexing_model->dummyVarExpr[p];
-            if (dv) {
-              arglist = dv->printDummyVar();
-              //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
-              n_index++;
-            }
-          }else{
-            /* need to put subscript before the current list */
-            //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-            SyntaxNode *dv = indexing_model->dummyVarExpr[p];
-            if (dv){
+          //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
+          SyntaxNode *dv = indexing_model->dummyVarExpr[p];
+          if (dv) {
+            if (n_index > 0)
               arglist += ",";
-              arglist += dv->printDummyVar();
-              //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
-              n_index++;
-            }
+            arglist += dv->printDummyVar();
+            //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
           }
+          n_index++;
         }
       }
     }
   }
-  
 
   /* work on the argument list */
   /* opn->nval is the number of arguments (at this level),
