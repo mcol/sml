@@ -116,19 +116,19 @@ void
 AmplModel::writeTaggedComponents(ostream &fout)
 {
   SyntaxNode::default_model = this;
-  SyntaxNodeIx *ix = node->indexing;
+  SyntaxNodeIx *idx = node->indexing;
 
   list<add_index*> li;
-  if (ix){
+  if (idx) {
 
-    if (!ix->done_split) {
+    if (!idx->done_split) {
       cerr << "All SyntaxNodeIx should have the expression split done!\n";
       exit(1);
     }
     
-    if (ix->ncomp>1){
+    if (idx->ncomp > 1) {
       cerr << "More than 1 indexing expression is not supported yet\n";
-      cerr << "Expression: " << ix->print() << "\n";
+      cerr << "Expression: " << idx->print() << "\n";
       exit(1);
     }
     // FIXME: need to check for number of expressions and place them all
@@ -136,8 +136,8 @@ AmplModel::writeTaggedComponents(ostream &fout)
     
     //Place the indexing expression of the current model onto the addIndex stack 
     add_index *ai = new add_index;
-    ai->dummyVar = ix->dummyVarExpr[0];
-    ai->set = ix->sets[0];
+    ai->dummyVar = idx->dummyVarExpr[0];
+    ai->set = idx->sets[0];
     li.push_back(ai);
   }
   l_addIndex.push_back(&li);
@@ -609,34 +609,34 @@ AmplModel::addDummyObjective()
     if (comp->type==TVAR){
       // if there is no indexing expression, simply add this
       if (comp->indexing){
-        SyntaxNodeIx *ix = comp->indexing;
+        SyntaxNodeIx *idx = comp->indexing;
         // Need to create "sum{dummy in set} var[dummy]":
         // 1) create "dummy in set"
         vector<SyntaxNode*> commaseplist;
         SyntaxNode *commasepon;
-        for(i=0;i<ix->ncomp;i++){
-          if (ix->dummyVarExpr[i]){
-            SyntaxNode *newon = new OpNode(IN, ix->dummyVarExpr[i], ix->sets[i]);
+        for (i = 0; i < idx->ncomp; i++) {
+          if (idx->dummyVarExpr[i]) {
+            SyntaxNode *newon = new OpNode(IN, idx->dummyVarExpr[i], idx->sets[i]);
             commaseplist.push_back(newon);
           }else{
             // need to make up a dummy variable
             ostringstream ost;
             ost << "dum" << i;
-            SyntaxNode *newon = new OpNode(IN, new IDNode(ost.str()), ix->sets[i]);
+            SyntaxNode *newon = new OpNode(IN, new IDNode(ost.str()), idx->sets[i]);
             commaseplist.push_back(newon);
           }
         } // end for
         // make the commaseplist
-        if (ix->ncomp==1){
+        if (idx->ncomp == 1) {
           commasepon = commaseplist[0];
         }else{
           commasepon = new ListNode(COMMA);
-          for(i=0;i<ix->ncomp;i++){
+          for (i = 0; i < idx->ncomp; i++) {
             commasepon->push_back(commaseplist[i]);
           }
         }
         SyntaxNodeIDREF *onref = new SyntaxNodeIDREF(comp);
-        for(i=0;i<ix->ncomp;i++){
+        for (i = 0; i < idx->ncomp; i++) {
           // this is the dummy variable of the i-th indexing expression
           SyntaxNode *ondum = (SyntaxNode*)*(commaseplist[i]->begin());
           if (ondum->opCode==LBRACKET) ondum=(SyntaxNode*)*(ondum->begin());
