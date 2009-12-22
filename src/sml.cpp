@@ -57,10 +57,6 @@ int createTmpDirIfNotPresent() {
   
    fl_exists = !(stat("tmp", &sbuf) == -1);
 
-   // check that it's a directory with RWX permissions
-   bool isusable = S_ISDIR(sbuf.st_mode) &&
-                   ((sbuf.st_mode & S_IRWXU) == S_IRWXU);
-
    // tmp doesn't exist
    if (!fl_exists){
 #ifdef HAVE_DIRECT_H
@@ -72,10 +68,17 @@ int createTmpDirIfNotPresent() {
         cerr << "ERROR: Failed to create temporary directory 'tmp/'.\n";
    }
 
-   // tmp is present but it's not a directory or it's not usable
-   else if (!isusable) {
-     err = 1;
-     cerr << "ERROR: Cannot use 'tmp/' as temporary directory.\n";
+   // tmp is present
+   else {
+
+     // check that it's a directory with RWX permissions
+     bool isusable = S_ISDIR(sbuf.st_mode) &&
+                     ((sbuf.st_mode & S_IRWXU) == S_IRWXU);
+
+     if (!isusable) {
+       err = 1;
+       cerr << "ERROR: Cannot use 'tmp/' as temporary directory.\n";
+     }
    }
 
    return err;
