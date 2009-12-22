@@ -260,7 +260,7 @@ StochModel::expandStagesOfComp()
     }
     int errc = system(command.c_str());
     if (errc!=0){
-      printf("ERROR: Call to AMPL returns errc=%d\n",errc);
+      cerr << "ERROR: Call to AMPL returns error code " << errc << ".\n";
       exit(1);
     }
   }
@@ -701,7 +701,8 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
       }else{
         // This is not a StochModelComp: this should be an indexing set 
         // definition for a submodel. 
-        printf("StochModel::_transcribeComponents: unwritten branch executed\n");
+        cerr << "ERROR: StochModel::_transcribeComponents: unwritten branch "
+                "executed.\n";
         exit(1);
       }
     }

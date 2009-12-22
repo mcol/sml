@@ -15,7 +15,6 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include "StochModelComp.h"
@@ -89,7 +88,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
   StochModel *thissm = this->stochmodel;
   if (thissm==NULL){
-    printf("SMC.transcribeToModelComp: this->stochmodel not set\n");
+    cerr << "ERROR: SMC.transcribeToModelComp: this->stochmodel not set.\n";
     exit(1);
   }
   if (prtSM)
@@ -125,7 +124,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
       // set the correct model w.r.t which this should be resolved
       // (deal with xh(-1;i)/xh[i].parent(i) notation)
-      AmplModel *model = current_model;
+      model = current_model;
       for (int lvl=onr->stochparent;lvl>0;lvl--){
         model = model->parent;
         if (model==NULL){
@@ -256,7 +255,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // create the *CP[ix0] term
           SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
           if (opn_prob==NULL){
-            printf("Probabilities parameter in stochastic block must be given as IDREF\n");
+            cerr << "ERROR: Probabilities parameter in stochastic block must "
+                    "be given as IDREF.\n";
             exit(1);
           }
           SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref, 
@@ -298,7 +298,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // create the *CP[ix0] term
           SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
           if (opn_prob==NULL){
-            printf("Probabilities parameter in stochastic block must be given as IDREF\n");
+            cerr << "ERROR: Probabilities parameter in stochastic block must "
+                    "be given as IDREF.\n";
             exit(1);
           }
           SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref,
@@ -321,7 +322,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
         // create the sum expression: first build comma separated list
         if (listofsum.size()==0){
-          printf("Expectation indexing expression *must* be present\n");
+          cerr << "ERROR: Expectation indexing expression *must* be present.\n";
           exit(1);
         }
         SyntaxNode *cslon = new ListNode(COMMA);
@@ -358,7 +359,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       // NEED TO KNOW:
       // - current stage
       // - stage of where averaging should take place
-      printf("Two argument version of Exp(...,...) not supported yet\n");
+      cerr << "ERROR: Two argument version of Exp() not supported yet.\n";
       exit(1);
     }
   }
