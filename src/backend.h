@@ -30,7 +30,7 @@
      if dummyVar is NULL
 */
 
-/** \brief An entry on the indexing expressions stack.
+/** An entry on the indexing expressions stack.
 
     add_index implements a stack of applicable indexing expressions:
     for processing the model. Indexing expressions on the stack come from
@@ -50,14 +50,17 @@
          SyntaxNodeIx does provide all these. Should replace the stack of
 	 add_index objects by a stack of SyntaxNodeIx objects
 */
-typedef struct add_index_st { 
-  SyntaxNode *dummyVar;     //!< an SyntaxNode representing the dummy variable expr */
-  SyntaxNode *set;          //!< an SyntaxNode representing the set */
+typedef struct {
+
+  //! SyntaxNode representing the dummy variable expr
+  SyntaxNode *dummyVar;
+
+  //! SyntaxNode representing the set
+  SyntaxNode *set;
+
 } add_index;
 
 /* some global variables that change the behaviour of some printing routines */
-//extern int n_addIndex;           /* number and list of indexing expressions */
-//extern add_index *l_addIndex[5];  /* to add to all statements */
 extern std::vector <std::list <add_index*>* > l_addIndex;
 
 int process_model(AmplModel *model, const std::string& datafilename);

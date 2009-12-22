@@ -260,7 +260,7 @@ process_model(AmplModel *model, const string& datafilename) {
       /* remove outside braces from indexing expression */
       list <add_index*>* li = new list<add_index*>();
       if (ix){
-        add_index *ai = (add_index*)calloc(1, sizeof(add_index));
+        add_index *ai = new add_index[1];
         li->push_back(ai);
         if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin());
         /* assumes that the next level is the 'IN' keyword (if present) */
@@ -324,7 +324,7 @@ process_model(AmplModel *model, const string& datafilename) {
        bit below and add it here. 
        Unclear what that really needs to do:
         - Write out all indexing sets? Just their cardinality? 
-          Or the whoroole set? Whole set might be nice so that we can refer
+          Or the whole set? Whole set might be nice so that we can refer
           to submodels to their "proper" AMPL-name. 
         - These indexing sets might need to be subscripted as well:
           COMM might be different for each incarnation of root_MCNF
@@ -353,11 +353,10 @@ process_model(AmplModel *model, const string& datafilename) {
         
         // so buffer here should be name of current model
         string rootfilename = filename;
-        filename += "_";
-        filename += submodel->name;
+        filename += "_" + submodel->name;
+
         // for all levels from root up to here add the value of 
         // indexing variables
-        
 
         filename+= "\"";
         for(int k=1;k<=this_model->level;k++){
@@ -396,7 +395,6 @@ process_model(AmplModel *model, const string& datafilename) {
         filename = rootfilename; //delete the extension again
       }
     }
-    
 
     /* write the main part of the submodel generation part in the scripts */
     for(j=0;j<this_model->level;j++) fscript << "  "; fscript << "fix all;\n";
@@ -497,7 +495,6 @@ process_model(AmplModel *model, const string& datafilename) {
     }
     pclose(ain);
 
-    cout << endl;
     if (n_nocsobj + n_novar) {
       cout << "AMPL: Model without constraints and objectives: " <<
         n_nocsobj << "\n";
@@ -586,7 +583,6 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
   int i, level;
   
   SyntaxNode::use_global_names = 1;
-  //n_addIndex = 0; // clear addIndex stack
   l_addIndex.clear();
 
   if (GlobalVariables::prtLvl>1){
@@ -637,7 +633,6 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
   
   write_ampl_for_submodel_(fout, level, 0, listam, submodel);
 
-  
   /* - indexing 'i in ARCS' changed to 'i in ARCS_SUB'
     
   This needs further clarification: The indexing expression can have several
@@ -655,7 +650,6 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
 
    it is possibly sufficient to start implementing only the first two,
    keeping in mind that the extension might be wanted later
- 
   */
 } 
 
@@ -688,10 +682,8 @@ write_ampl_for_submodel_
      AmplModel *submodel   the current model again
    OUT: none (output on data file)
 
-
    It keeps track of the stack of block indexing expressions, by putting them
    onto the l_addIndex stack
-
 */
 void
 write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel, 
@@ -729,21 +721,17 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         ix = comp->indexing;
         // l.addIndex.push_back(li);
         if (ix){
-          add_index *ai = (add_index*)calloc(1, sizeof(add_index));
+          add_index *ai = new add_index[1];
           
           // and place the indexing expression of this BLOCK onto the stack
           // the stack stores the dummy variable and the SET separately, 
           // so take them to bits here
           if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin()); // rem {..}
           if (ix->opCode==IN){
-            //l_addIndex[n_addIndex]->dummyVar = (SyntaxNode*)ix->values[0];
-            //l_addIndex[n_addIndex]->set = (SyntaxNode*)ix->values[1];
              SyntaxNode::iterator ixi = ix->begin();
             ai->dummyVar = (SyntaxNode*)*ixi;
             ai->set = (SyntaxNode*)*(++ixi);
           }else{ // no dummy variable, just a set
-            //l_addIndex[n_addIndex]->dummyVar = NULL;
-            //l_addIndex[n_addIndex]->set = ix;
             ai->dummyVar = NULL;
             ai->set = ix;
           }
@@ -758,7 +746,6 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
              ought to 'write set ARCS_SUB within ARCS'; as well
           */
           
-          
           /* 14/03/08: what we are trying to do is to create a ModelComp
              that represents the expression
              set indset_SUB within indset;   
@@ -766,14 +753,13 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
              automatically indexed over all subproblem indexing sets:
              set indset_SUB{ix0 in indset0_SUB} within indset[ix0];
              
-             
              The ModelComp is of type SET, with no indexing expression
           */
           {
-            ModelComp *newmc = new ModelComp();
+            ModelComp newmc;
             SyntaxNode *setn = ai->set;
             
-            newmc->type = TSET;
+            newmc.type = TSET;
             
             // set name of the ModelComp
             if (setn->opCode!=IDREF){
@@ -787,15 +773,13 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               exit(1);
             }
             ModelComp *setmc = setnref->ref;
-            newmc->id = setmc->id + "_SUB";
+            newmc.id = setmc->id + "_SUB";
             
             // and build "within indset" as attribute tree
-            newmc->attributes = new SyntaxNode(WITHIN, setn);
-            //newmc->model = comp->model;
-            newmc->model = setmc->model;
-            modified_write(fout, newmc);
-
-            delete newmc;
+            newmc.attributes = new SyntaxNode(WITHIN, setn);
+            //newmc.model = comp->model;
+            newmc.model = setmc->model;
+            modified_write(fout, &newmc);
           }
           
           SyntaxNode *setn = ai->set;
@@ -845,10 +829,8 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         // on these components
         // => what does modified_write depend on?
       }
-      
     } /* end else (end of the TMODEL branch) */
   }
-  
 }
 
 /* --------------------------------------------------------------------------
