@@ -604,9 +604,10 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
         //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
         SyntaxNode *dv = (*p).dummyVar;
         if (dv) {
-          if (n_index > 0)
-            arglist += ",";
-          arglist += dv->printDummyVar();
+          if (n_index == 0)
+            arglist = dv->printDummyVar();
+          else
+            arglist += "," + dv->printDummyVar();
           //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
         }
         n_index++;
@@ -808,9 +809,10 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
           //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
           SyntaxNode *dv = indexing_model->dummyVarExpr[p];
           if (dv) {
-            if (n_index > 0)
-              arglist += ",";
-            arglist += dv->printDummyVar();
+            if (n_index == 0)
+              arglist = dv->printDummyVar();
+            else
+              arglist += "," + dv->printDummyVar();
             //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
           }
           n_index++;
