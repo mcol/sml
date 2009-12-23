@@ -23,18 +23,17 @@
 #include "sml-oops.h"
 
 using namespace std;
-string progname = "smloops";
 
-void writeHelp(ostream &out, string progname) {
+const string progname = "smloops";
+
+void writeHelp(ostream& out, const string& programname) {
    out << "Syntax:" << endl;
-   out << "   " << progname << 
-      " [OPTIONS] modelfile datafile" << endl;
-   out << endl;
+   out << "   " << programname
+       << " [OPTIONS] modelfile datafile\n\n";
    out << "Option summary:" << endl;
    out << " -d                  Enables debug information when reading model "
       "file." << endl;
-   out << " --help              Displays this help information and exit." <<
-      endl;
+   out << " --help              Displays this help information." << endl;
    out << " --output=outfile," << endl;
    out << "   -o outfile        Write solution to file outfile." << endl;
    out << " modelfile           File containing SML model." << endl;

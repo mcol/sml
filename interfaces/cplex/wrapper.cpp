@@ -25,9 +25,10 @@ using namespace std;
 
 const string progname = "smlcplex";
 
-void writeHelp(ostream &out, string progname) {
+void writeHelp(ostream& out, const string& programname) {
   out << "Syntax:\n";
-  out << "   " << progname << " [-d] [--help] modelfile datafile\n\n";
+  out << "   " << programname
+      << " [OPTIONS] modelfile datafile\n\n";
   out << "Option summary:\n";
   out << " -d            Enables debug information when reading model file.\n";
   out << " --help        Displays this help information.\n";

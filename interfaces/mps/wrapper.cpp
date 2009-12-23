@@ -22,13 +22,13 @@
 #include "sml-mps.h"
 
 using namespace std;
-string progname = "smlmps";
 
-void writeHelp(ostream &out, string progname) {
+const string progname = "smlmps";
+
+void writeHelp(ostream& out, const string& programname) {
    out << "Syntax:" << endl;
-   out << "   " << progname << 
-      " [-d] [--help] modelfile datafile mpsfile" << endl;
-   out << endl;
+   out << "   " << programname
+       << " [OPTIONS] modelfile datafile mpsfile\n\n";
    out << "Option summary:" << endl;
    out << " -d            Enables debug information when reading model "
       "file." << endl;
