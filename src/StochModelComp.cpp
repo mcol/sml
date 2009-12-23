@@ -38,7 +38,7 @@ StochModelComp::StochModelComp(const string& id_, compType type_,
 
 /** Transcribe a StochModelComp in a StochModel into a ModelComp.
  *
- *  This function takes a StochModelComp as read in by the parses and
+ *  This function takes a StochModelComp as read in by the parser and
  *  transcribes it into a corresponding ModelComp of the current
  *  FlatModel. It does this by:
  *   - Scanning for all IDREF references to entities defined in the StochModel
@@ -48,7 +48,7 @@ StochModelComp::StochModelComp(const string& id_, compType type_,
  *     This also deals with references to StochModel entities in a different
  *     stage (i.e. through xh(-1;...))
  *   - Objective components have a term for the node probability added
- *   - replacing special StochModel constructs (i.e. Exp(...) by their
+ *   - replacing special StochModel constructs (i.e. Exp(...)) by their
  *     corresponding constructs in the FlatModel
  *  @param[in] current_model
  *             The current AmplModel that all references should be resolved to.
@@ -85,7 +85,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
      //(4)  if this is an OBJ component, then add probabilities to it
   */
   ModelComp *newmc;
-  list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
+  list<SyntaxNode*> idrefnodes;
   StochModel *thissm = this->stochmodel;
   if (thissm==NULL){
     cerr << "ERROR: SMC.transcribeToModelComp: this->stochmodel not set.\n";
@@ -101,14 +101,14 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   // ---------- (2) find list of all IDREF nodes in indexing/attributes ------
 
   // find all IDREF nodes that are referenced in the attributes section
-  if (newmc->indexing) (newmc->indexing)->findIDREF(idrefnodes);
-  if (newmc->attributes) (newmc->attributes)->findIDREF(idrefnodes);
+  if (newmc->indexing) (newmc->indexing)->findIDREF(&idrefnodes);
+  if (newmc->attributes) (newmc->attributes)->findIDREF(&idrefnodes);
 
   // ---------- (2a) resolve IDREF nodes w.r.t AmplModel tree ----------------
 
   // loop through all IDREFs that are in dependency list
-  for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
-  {
+  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
+       p != idrefnodes.end(); p++) {
     // check if this is a reference within the current StochModel
     // (*p) is an SyntaxNodeIDREF
     SyntaxNodeIDREF *onr = dynamic_cast<SyntaxNodeIDREF*>(*p);
@@ -123,14 +123,12 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       //    a model comp in the ModelComp model
 
       // set the correct model w.r.t which this should be resolved
-      // (deal with xh(-1;i)/xh[i].parent(i) notation)
+      // (deal with ancestor(1).x notation)
       model = current_model;
       for (int lvl=onr->stochparent;lvl>0;lvl--){
         model = model->parent;
         if (model==NULL){
-          cerr << "Trying to take the " << onr->stochparent << 
-             " ancestor in a model that does not have " << onr->stochparent <<
-             " ancestors" << endl;
+          cerr << "ERROR: Ancestor " << onr->stochparent << " doesn't exist.\n";
           exit(1);
         }
       }
@@ -159,15 +157,15 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   // ---------- (3) find STAGE/NODE nodes in attributes ----------------------
   
   // find all STAGE & NODE nodes
-  idrefnodes->clear();
+  idrefnodes.clear();
   if (newmc->attributes){
-    (newmc->attributes)->findOpCode(ID,idrefnodes);
+    newmc->attributes->findOpCode(ID, &idrefnodes);
   }
 
   // ---------- (3a) and replace them by text -------------------------------
 
-  for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
-  {
+  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
+       p != idrefnodes.end(); p++) {
     IDNode *node = static_cast<IDNode *>(*p);
     if (node->name == stagedummy){
        node->name = StageNodeNode::stage;
@@ -206,9 +204,9 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
    */
 
   // find all STAGE & NODE nodes
-  idrefnodes->clear();
+  idrefnodes.clear();
   if (newmc->attributes){
-    (newmc->attributes)->findOpCode(EXPECTATION,idrefnodes);
+    newmc->attributes->findOpCode(EXPECTATION, &idrefnodes);
   }
 
   // -------- (4a) and replace them by path probabilities --------------------
@@ -216,11 +214,10 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   // first create the tree of path probabilities for this node in the
   // scenario tree
 
-  
   AmplModel *thisam = current_model;
 
-  for(list<SyntaxNode*>::iterator p=idrefnodes->begin(); p!=idrefnodes->end();p++)
-  {
+  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
+       p != idrefnodes.end(); p++) {
     // use "(*p)->..." to access the EXP-SyntaxNode
     /* need to build a tree of OpNodes that represent
          CP[ix0]*CP[ix1]*
@@ -280,7 +277,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         // set "up" to the argument of Exp(...)
         // FIXME: need to put brackets around this?
         list<SyntaxNode*> listofsum; // expressions in the sum{..}
-
 
         SyntaxNode *up = (SyntaxNode*)*((*p)->begin());
         // put brackets around this
@@ -364,7 +360,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     }
   }
 
-  delete(idrefnodes);
   return newmc;
 }
 
