@@ -102,7 +102,7 @@ class ModelComp{
   virtual ~ModelComp();
 
   /** Set up an existing model comp to specified values */
-  void setTo(char *id, compType type,
+  void setTo(const std::string& id, compType type,
              SyntaxNodeIx *indexing, SyntaxNode *attrib);
 
   /** Set up list of dependencies for this component */

@@ -193,7 +193,7 @@ ModelComp::setTo()
  *                     IDs should have been replaced by IDREFs 
  */
 void
-ModelComp::setTo(char *id_, compType type_,
+ModelComp::setTo(const string& id_, compType type_,
                  SyntaxNodeIx *indexing_, SyntaxNode *attrib) {
 
   static int tt_count=0;

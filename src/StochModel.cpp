@@ -559,12 +559,9 @@ StochModel::expandToFlatModel()
       // so we've got an SyntaxNode to '{i in NODES:A[i] in indS0}'
       
       /* Add this as a model component defining a set? */
-      char buf[20];
-      sprintf(buf, "ind%s",(*st).c_str());
-      (indset[stgcnt])->setTo(/*name*/ buf, /*type*/TSET, /*ix*/NULL, on1);
+      indset[stgcnt]->setTo("ind" + *st, TSET, NULL, on1);
       indset[stgcnt]->stochmodel = this;
       am->addComp(indset[stgcnt]);
-
 
       if (model_above){
         // create a dummy variable
