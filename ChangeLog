@@ -1,3 +1,6 @@
+2009-12-23  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Changed the IDNode class not to inherit from ValueNodeBase.
+
 2009-12-22  Marco Colombo  <m.colombo@ed.ac.uk>
   * Fixed a possible use of initialised value in createTmpDirIfNotPresent().
   * Changed l_addIndex to store lists and structures directly rather than

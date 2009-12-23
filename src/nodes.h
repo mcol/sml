@@ -260,7 +260,7 @@ IDNode
 /** @class IDNode
  *  A node on the tree representing a user identifier (ie variable name).
  */
-class IDNode : public SyntaxNode, virtual ValueNodeBase {
+class IDNode : public SyntaxNode {
   public:
    std::string name;
    long stochparent;
@@ -279,7 +279,7 @@ class IDNode : public SyntaxNode, virtual ValueNodeBase {
       return new IDNode(name, stochparent);
    }
    SyntaxNode *clone() { return deep_copy(); }
-   double getFloatVal() const { return 0.0; }
+
 };
 
 
