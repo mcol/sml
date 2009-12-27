@@ -50,6 +50,7 @@ class AmplModel;
  *       the SyntaxNode::values array with a C++ list.
  */
 class SyntaxNode {
+
  public:
   virtual int nchild() const { return nval; }
   class iterator {
@@ -147,7 +148,7 @@ class SyntaxNode {
   /** Find all nodes of opCode oc below current node */
   virtual void findOpCode(int oc, std::list<SyntaxNode*> *lnd);
 
-  /** Find ModelComp (if it exitst) refered to by this SyntaxNode.
+  /** Find the ModelComp (if it exists) refered to by this SyntaxNode.
    *
    *  If the expression given by this SyntaxNode is an immediate reference to
    *  a ModelComp then return that, otherwise return NULL.
@@ -177,6 +178,7 @@ class SyntaxNode {
 /** @class StageNodeNode
  */
 class StageNodeNode : public SyntaxNode {
+
  private:
   std::string value_;
 
@@ -188,13 +190,18 @@ class StageNodeNode : public SyntaxNode {
   /** Current replacement string for the 'stage' keyword */
   static std::string stage;
 
-  StageNodeNode(int opCode_, std::string value="") :
+  /** Constructor */
+  StageNodeNode(int opCode_, const std::string& value = "") :
      SyntaxNode(opCode_), value_(value) {}
 
   std::ostream& put(std::ostream& s) const;
   SyntaxNode *clone() { return new StageNodeNode(opCode, value_); }
   SyntaxNode *deep_copy() { return clone(); }
-  void setValue(std::string& value) { value_ = value; }
+
+  void setValue(const std::string& value) {
+    value_ = value;
+  }
+
 };
 
 /** @class SyntaxNodeIx
