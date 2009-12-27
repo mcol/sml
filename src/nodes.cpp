@@ -519,92 +519,91 @@ SyntaxNode::findIDREF()
 ---------------------------------------------------------------------------- */
 /** Find the list of all the IDREF nodes at or below the current node */
 void
-SyntaxNode::findIDREF()
-{
-  int i;
+SyntaxNode::findIDREF() const {
+
+ if (opCode == ID)
+    return;
 
   if (opCode==IDREF){
     cout << getGlobalName((ModelComp*)this->values[0], NULL, NULL, NOARG) <<
       endl;
-  }else if (opCode==ID) {
-    return;
   }else{
-    for(i=0;i<nval;i++){
+    for (int i = 0; i < nval; i++) {
       if (values[i]){
 	     values[i]->findIDREF();
       }
     }
   }
 }
+
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<ModelComp> *lmc)
 ---------------------------------------------------------------------------- */
 /** Find the list of all the IDREF nodes at or below the current node */
 void
-SyntaxNode::findIDREF(list<ModelComp*> &lmc)
-{
-  int i;
+SyntaxNode::findIDREF(list<ModelComp*>& lmc) const {
+
+  if (opCode == ID)
+    return;
 
   if (opCode==IDREF){
     //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lmc.push_back(((SyntaxNodeIDREF*)this)->ref);
-  }else if (opCode==ID) {
-    return;
   }else{
-    for(i=0;i<nval;i++){
+    for (int i = 0; i < nval; i++) {
       if (values[i]){
 	     ((SyntaxNode*)values[i])->findIDREF(lmc);
       }
     }
   }
 }
+
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
 /** Find the list of all the IDREF nodes at or below the current node */
 void
-SyntaxNode::findIDREF(list<SyntaxNode*> *lnd)
-{
-  int i;
+SyntaxNode::findIDREF(list<SyntaxNode*> *lnd) {
+
+  // if terminal then return
+  if (opCode == ID)
+    return;
 
   if (opCode==IDREF){
     //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
-  }else if (opCode==ID) {
-    // if terminal then return
-    return;
   }else if (opCode==-99) {
      throw exception();
     cerr << "BAD findIDREF(-99)\n";
     return;
   }else{
-    for(i=0;i<nval;i++){
+    for (int i = 0; i < nval; i++) {
       if (values[i]){
 	     values[i]->findIDREF(lnd);
       }
     }
   }
 }
+
 /* --------------------------------------------------------------------------
 SyntaxNode::findOpCode(int oc, list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
 /** Find the list of all nodes with opCode==oc at or below the current node */
 void
-SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd)
-{
-  int i;
+SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd) {
+
+  // if terminal then return
+  if (opCode == ID)
+    return;
 
   if (opCode==oc){
     //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
-  }else if (opCode==ID) {
-    // if terminal then return
-    return;
   }else{
-    for(i=0;i<nval;i++){
+    for (int i = 0; i < nval; i++) {
       if (values[i]){
 	     values[i]->findOpCode(oc, lnd);
       }
@@ -718,7 +717,6 @@ SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
 
    return (*this);
 }
-
 
 /* ==========================================================================
 SyntaxNodeix Methods to follow

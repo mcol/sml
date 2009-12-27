@@ -137,10 +137,10 @@ class SyntaxNode {
   std::string getArgumentList() const;
 
   /** Find all IDREF's below current node and print to screen */
-  void findIDREF();           
+  void findIDREF() const;
 
   /** Find all IDREFs below current node */
-  virtual void findIDREF(std::list<ModelComp*> &lmc);
+  virtual void findIDREF(std::list<ModelComp*>& lmc) const;
 
   /** Find all IDREF nodes below current node */
   virtual void findIDREF(std::list<SyntaxNode*> *lnd);
