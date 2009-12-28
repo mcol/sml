@@ -25,7 +25,6 @@
 /* the asl_pfgh.h file in amplsolver globally redefines list
    => this is a separate file that provides all the calls to the
       amplsolver library (and that cannot use c++ lists
-
 */
 
 class IndexListValue {
@@ -33,24 +32,17 @@ class IndexListValue {
   int nvar;
   int *lvar;
   int count;
-  // provide a constructor that just sets everything to nonsensical values.
-  IndexListValue();
-  IndexListValue(int nvar, int *lvar, int count);
+
+  /** Constructor */
+  IndexListValue(int new_nvar = -1, int *new_lvar = NULL, int new_count =  -1) :
+    nvar(new_nvar), lvar(new_lvar), count(new_count) {}
 
   // destructor
   ~IndexListValue() {
    delete[] lvar;
   }
-};
 
-inline IndexListValue::IndexListValue():nvar(-1),lvar(NULL),count(-1){}
-inline IndexListValue::IndexListValue(int new_nvar, int *new_lvar, 
-				      int new_count)
-{
-  nvar = new_nvar; 
-  lvar = new_lvar;
-  count = new_count;
-}
+};
 
 
 /** @class NlFile 
