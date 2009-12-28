@@ -129,9 +129,9 @@ class NlFile {
    *         is redundant.
    */
   void readCommonScalarValues();
-  int getNoNonzerosAMPL(int nvar, int *lvar);
+  int getNoNonzerosAMPL(int nvar, const int *lvar);
 
-  void fillSparseAMPL(int nvar, int *lvar, 
+  void fillSparseAMPL(int nvar, const int *lvar,
 		      int *colbeg, int *collen, int *rownbs, double *el);
   void getRowLowBoundsAMPL(double *elts);
   void getRowUpBoundsAMPL(double *elts);

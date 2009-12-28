@@ -127,6 +127,7 @@ NlFile::getNoHessianEntries()
   if(log_NL) printf("%d\n",nzH);
   return nzH;
 }
+
 /* ----------------------------------------------------------------------------
 NlFile::getHessianStructure
 ---------------------------------------------------------------------------- */
@@ -160,6 +161,7 @@ NlFile::getHessianStructure(int *colbegH, int *rownbsH)
 
   ASL_free((ASL**)&asl);
 }
+
 /* ----------------------------------------------------------------------------
 NlFile::getHessianEntries
 ---------------------------------------------------------------------------- */
@@ -197,7 +199,6 @@ NlFile::getHessianEntries(int *colbegH, int *rownbsH, double *eltsH)
 }
 
 
-
 /* ----------------------------------------------------------------------------
 getNoNonzerosAMPL
 ---------------------------------------------------------------------------- */
@@ -215,8 +216,8 @@ getNoNonzerosAMPL
  *  this routine will return the nonzeros in the Jacobian.
  */
 int 
-NlFile::getNoNonzerosAMPL(int nvar, int *lvar)
-{
+NlFile::getNoNonzerosAMPL(int nvar, const int *lvar) {
+
   /* FIXME: the convenient column wise data access is only available for
             the LP reader ASL_read_f. For ASL_read_pfgh this results in 
 	    a segmentation fault due to Cgrad not being allocated.
@@ -261,7 +262,6 @@ NlFile::getNoNonzerosAMPL(int nvar, int *lvar)
   if(log_NL) printf("%d\n",tt_nz);
   
   return tt_nz;
-
 }
 
 /* ----------------------------------------------------------------------------
@@ -289,9 +289,9 @@ fillSparseAMPL
  *  this routine will return the Jacobian in (columnwise) sparse matrix format.
  */
 void
-NlFile::fillSparseAMPL(int nvar, int *lvar, 
-		  int *colbeg, int *collen, int *rownbs, double *el)
-{
+NlFile::fillSparseAMPL(int nvar, const int *lvar,
+		       int *colbeg, int *collen, int *rownbs, double *el) {
+
   /* FIXME: the convenient column wise data access is only available for
             the LP reader ASL_read_f. For ASL_read_pfgh this results in 
 	    a segmentation fault due to Cgrad not being allocated.
@@ -377,7 +377,6 @@ NlFile::getRowLowBoundsAMPL(double *elts)
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
-
 }
 
 /* ----------------------------------------------------------------------------
@@ -415,7 +414,6 @@ NlFile::getRowUpBoundsAMPL(double *elts)
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
-
 }
 
 /* ----------------------------------------------------------------------------
@@ -481,8 +479,8 @@ NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
   }
 
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
-
 }
+
 /* ----------------------------------------------------------------------------
 getColUpBoundsAMPL
 ---------------------------------------------------------------------------- */
@@ -523,7 +521,6 @@ NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
-
 }
 
 
@@ -567,7 +564,6 @@ NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
   }
   
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
-
 }
 
 /* -------------------------------------------------------------------------
@@ -596,7 +592,6 @@ NlFile::findIxOfLocalVarsInNlFile
 int
 NlFile::findIxOfLocalVarsInNlFile(ExpandedModel *em, int *lvar)
 {
-  
   // call the corresponding routine in the ExpandedModel class
   return em->findIxOfLocalVarsInNlFile(this, lvar);
 }
