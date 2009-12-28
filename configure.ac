@@ -25,6 +25,10 @@ AC_PROG_YACC
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
+# generate nicer looking output from the makefiles with automake 1.11
+# (run make V=1 to see all the details)
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 # check for headers and functions not available under MinGW
 AC_CHECK_HEADERS(direct.h)
 AC_CHECK_FUNCS(strndup)

@@ -1,6 +1,8 @@
 2009-12-28  Marco Colombo  <m.colombo@ed.ac.uk>
   * Made the member variables of the IDNode class private, and added the
     corresponding getters and setters.
+  * Added AM_SILENT_RULES to produce a less verbose output from the makefiles,
+    which works from automake 1.11; for older versions the output is unchanged.
 
 2009-12-23  Marco Colombo  <m.colombo@ed.ac.uk>
   * Changed the IDNode class not to inherit from ValueNodeBase.
