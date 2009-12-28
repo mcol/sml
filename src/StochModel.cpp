@@ -691,8 +691,8 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
       ModelComp* mcnew;
       smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
-        string ndname = nodedummy ? nodedummy->name : "__INVALID__";
-        string stname = stagedummy ? stagedummy->name : "__INVALID__";
+        string ndname = nodedummy ? nodedummy->id() : "__INVALID__";
+        string stname = stagedummy ? stagedummy->id() : "__INVALID__";
         mcnew = smc->transcribeToModelComp(current, ndname, stname, lev);
         newcomps.push_back(mcnew);
       }else{
@@ -705,7 +705,6 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
     }
   }
   current->comps = newcomps;
-
 }
 
 void StochModel::addComp(ModelComp *comp) {
@@ -714,8 +713,8 @@ void StochModel::addComp(ModelComp *comp) {
 }
 
 SyntaxNodeIDREF* StochModel::find_var_ref_in_context(IDNode *ref) {
-   if((stagedummy && ref->name == stagedummy->name) || 
-      (nodedummy && ref->name == nodedummy->name)) 
+  if ((stagedummy && ref->id() == stagedummy->id()) ||
+      (nodedummy && ref->id() == nodedummy->id()))
          return NULL; // but don't generate an error
    return AmplModel::find_var_ref_in_context(ref);
 }

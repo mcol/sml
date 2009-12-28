@@ -218,6 +218,7 @@ class StageNodeNode : public SyntaxNode {
 class SyntaxNodeIx : public SyntaxNode {
 
  private:
+
   SyntaxNodeIx(const int opCode_) :
     SyntaxNode(opCode_), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
     dummyVarExpr(NULL), done_split(0) {};
@@ -232,7 +233,9 @@ class SyntaxNodeIx : public SyntaxNode {
   // private:            
   int done_split; //!< indicates that extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
   // --------------------------- methods ----------------------------------
-  SyntaxNodeIx(SyntaxNode *on); //!< initialise values from an SyntaxNode
+
+  //! Constructor
+  SyntaxNodeIx(SyntaxNode *on);
 
   //! Finds if the indexing expression defines a given dummy variable 
   SyntaxNode *hasDummyVar(const std::string& name);
@@ -268,7 +271,8 @@ IDNode
  *  A node on the tree representing a user identifier (ie variable name).
  */
 class IDNode : public SyntaxNode {
-  public:
+
+ private:
    std::string name;
    long stochparent;
   
@@ -285,7 +289,22 @@ class IDNode : public SyntaxNode {
    SyntaxNode *deep_copy() { 
       return new IDNode(name, stochparent);
    }
-   SyntaxNode *clone() { return deep_copy(); }
+
+   void setName(const std::string& id) {
+     name = id;
+   }
+
+   std::string id() const {
+     return name;
+   }
+
+   void setStochParent(long parent) {
+     stochparent = parent;
+   }
+
+   long getStochParent() const {
+     return stochparent;
+   }
 
 };
 

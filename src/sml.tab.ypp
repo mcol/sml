@@ -752,8 +752,8 @@ iditem:  ID {                               /* simple identifier */
                idnode = (IDNode *) node;
             }
             assert(idnode->opCode==ID);
-            assert(idnode->stochparent==0);
-            idnode->stochparent = *$3;
+            assert(idnode->getStochParent() == 0);
+            idnode->setStochParent(*$3);
             $$ = $6;
          }
       ;

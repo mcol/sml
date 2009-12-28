@@ -1,3 +1,7 @@
+2009-12-28  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Made the member variables of the IDNode class private, and added the
+    corresponding getters and setters.
+
 2009-12-23  Marco Colombo  <m.colombo@ed.ac.uk>
   * Changed the IDNode class not to inherit from ValueNodeBase.
   * Fixed warnings in the interface wrappers and made the help output more

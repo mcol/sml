@@ -861,10 +861,10 @@ is_int(const char *tok){
 SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
    for(list<ModelComp*>::iterator p=comps.begin(); p!=comps.end(); ++p){
       ModelComp *thismc = *p;
-      if (ref->name == thismc->id) {
+      if (ref->id() == thismc->id) {
          /* this is a match */
          if (GlobalVariables::logParseModel){
-            cout << "Found Match: " << ref->name << " refers to ";
+            cout << "Found Match: " << ref->id() << " refers to ";
             cout << ModelComp::nameTypes[thismc->type] << "\n";
             cout << "    " << thismc->id << "\n";
             cout << "       " << *(thismc->indexing) << "\n";
@@ -887,6 +887,6 @@ SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
 
    /* need also to look through list of local variables */
 
-   cerr << "ERROR: Could not find ref '" << ref->name << "' in context\n";
+   cerr << "ERROR: Could not find ref '" << ref->id() << "' in context\n";
    exit(1);
 }

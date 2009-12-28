@@ -39,7 +39,7 @@ SetElement::SetElement(int n_, IDNode **new_val) :
 
   val = new string[n];
   for(int i=0; i<n; i++)
-     val[i] = new_val[i]->name;
+    val[i] = new_val[i]->id();
 }
 
 SetElement::~SetElement() {

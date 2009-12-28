@@ -879,18 +879,18 @@ SyntaxNodeIx::hasDummyVar
  */
 SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
 
-  int i;
   SyntaxNode *ret = NULL;
 
-  for(i=0;i<ncomp;i++){
+  for (int i = 0; i < ncomp; i++) {
+
     SyntaxNode *tmp = dummyVarExpr[i];
     if (!tmp) continue; // no dummy var, just a set.
 
     // this is either ID or (ID,   ,ID)
     if (tmp->opCode==ID){
       IDNode *tmpid = (IDNode *) tmp;
-      if (logCreate) cout << "Found dummy variable: " << tmpid->name << "\n";
-      if (name == tmpid->name)
+      if (logCreate) cout << "Found dummy variable: " << tmpid->id() << "\n";
+      if (name == tmpid->id())
         ret = tmp;
     }else{
       /* This is a multidimensional dummy variable: */
@@ -905,8 +905,8 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
         assert((*j)->opCode==ID);
         IDNode *tmp2 = (IDNode *) *j;
         if (logCreate)
-           cout << "Found dummy variable: " << tmp2->name << "\n";
-        if (name == tmp2->name)
+	  cout << "Found dummy variable: " << tmp2->id() << "\n";
+        if (name == tmp2->id())
           ret = tmp2;
       }
     }
@@ -1185,20 +1185,19 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    // Test if this ID node is actually of type SyntaxNodeID and if so remember
    // the value of stochparent
    {
-      if (idNode->stochparent!=0){
+     if (idNode->getStochParent() != 0)
          // there is an extra argument, which is the stochparent
-         stochparent = idNode->stochparent;
-      }
+       stochparent = idNode->getStochParent();
    }
 
    if (GlobalVariables::logParseModel) 
-      cout << "--> search for matches of " << idNode->name << "\n";
+     cout << "--> search for matches of " << idNode->id() << "\n";
  
    // see if this matches a dummy variable
-   tmp = find_var_ref_in_indexing(idNode->name);
+   tmp = find_var_ref_in_indexing(idNode->id());
    if (tmp) {
       if (GlobalVariables::logParseModel) 
-         cout << idNode->name << " is matched by dummy var in " << *tmp << "\n";
+	cout << idNode->id() << " is matched by dummy var in " << *tmp << "\n";
       return ref;
    }
 

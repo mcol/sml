@@ -167,11 +167,10 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
        p != idrefnodes.end(); p++) {
     IDNode *node = static_cast<IDNode *>(*p);
-    if (node->name == stagedummy){
-       node->name = StageNodeNode::stage;
-    } else if(node->name == nodedummy) {
-       node->name = StageNodeNode::node;
-    }
+    if (node->id() == stagedummy)
+      node->setName(StageNodeNode::stage);
+    else if (node->id() == nodedummy)
+      node->setName(StageNodeNode::node);
   }
 
   // ---------- (4) add probablities to Exp components ---------------
