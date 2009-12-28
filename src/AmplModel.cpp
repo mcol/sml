@@ -37,7 +37,7 @@ AmplModel *AmplModel::root = NULL; //initialize root to NULL
 extern void modified_write(ostream &fout, ModelComp *comp);
 
 // Utility function
-bool is_int(const char *tok); // 'const' here means that tok is not modified
+static bool is_int(const char *tok);
 
 /* ---------------------------------------------------------------------------
 AmplModel::AmplModel()

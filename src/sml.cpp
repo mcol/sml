@@ -42,14 +42,14 @@ string sml_version() {
    return PACKAGE_VERSION;
 }
 
-void writeCopyright(ostream &out) {
+static void writeCopyright(ostream &out) {
    out << PACKAGE_NAME" "PACKAGE_VERSION", Structure-conveying Modelling Language" << endl;
    out << "(c) 2008,2009 Jonathan Hogg and Andreas Grothey, "
       "University of Edinburgh." << endl;
    out << "Released under LGPL v3" << endl;
 }
 
-int createTmpDirIfNotPresent() {
+static int createTmpDirIfNotPresent() {
 
    int err = 0;
    bool fl_exists;

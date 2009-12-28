@@ -32,7 +32,7 @@ static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
 
 void write_ampl_for_submodel(ostream &fout, AmplModel *submodel);
-void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
+static void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 
 /* Stack of indexing expressions that are applicable to all variables that
    are printed:
