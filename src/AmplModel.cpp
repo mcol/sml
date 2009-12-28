@@ -184,8 +184,9 @@ list<string> *getListOfInstances(istream &file);
  *  instance.
  */
 ExpandedModel*
-AmplModel::createExpandedModel(string smodelname, string sinstanceStub)
-{
+AmplModel::createExpandedModel(const string& smodelname,
+                               const string& sinstanceStub) {
+
   /* the route down the AmplModel tree is encoded in modelname:
          root_MOD1_MOD2 
      the instance is encoded in instancestub 

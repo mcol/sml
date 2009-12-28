@@ -131,9 +131,9 @@ class AmplModel{
       submodels to file */
   void writeTaggedComponents(std::ostream &fout = std::cout);
                                 
-  /** Recursively creates an ExpandedModel tree from the flat AmplModel */
-  ExpandedModel* createExpandedModel(std::string smodelname,
-                                     std::string sinstanceStub);
+  /** Recursively create an ExpandedModel tree from the flat AmplModel */
+  ExpandedModel* createExpandedModel(const std::string& smodelname,
+                                     const std::string& sinstanceStub);
 
   /** Add a dummy objective that uses (sums up) all variables in the model */
   void addDummyObjective();
