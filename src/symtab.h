@@ -52,11 +52,11 @@ public:
       }
    }
    bool defineSymbol(symb_type, char *id, ModelComp *mc);
-   Entry* findSymbol(std::string id);
+   Entry* findSymbol(const std::string& id);
    std::list<Entry> getListByType(const symb_type type) const;
 
 private:
-   unsigned long hash_function(const char *str);
+   unsigned long hash_function(const char *str) const;
 };
 
 #endif

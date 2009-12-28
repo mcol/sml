@@ -158,7 +158,8 @@ class AmplModel{
 
   static void applyChanges(); //< apply the model changes stored in Q
 
-  SymbolTable::Entry *findComponent(std::string id);
+  /** Find a component with name id in correct scoping order */
+  SymbolTable::Entry *findComponent(const std::string& id);
   std::list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);

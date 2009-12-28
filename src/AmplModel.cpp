@@ -822,7 +822,7 @@ AmplModel::findComponent(string id)
  *  It will first search this model's SymbolTable, and if it cannot find
  *  the component it will recurse to its parent node and so on up to the root.
  */
-SymbolTable::Entry *AmplModel::findComponent(string id) {
+SymbolTable::Entry *AmplModel::findComponent(const string& id) {
    SymbolTable::Entry *ent = symbol_table.findSymbol(id);
    if (!ent && parent)
      ent = parent->findComponent(id);
