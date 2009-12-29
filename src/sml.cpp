@@ -87,8 +87,8 @@ static int createTmpDirIfNotPresent() {
 /* ----------------------------------------------------------------------------
 main
 ---------------------------------------------------------------------------- */
-ExpandedModelInterface* sml_generate(const string modelfilename, 
-      const string datafilename, const bool debug) {
+ExpandedModelInterface* sml_generate(const string& modelfilename,
+                                     const string& datafilename, bool debug) {
 
    int errcode;
 
