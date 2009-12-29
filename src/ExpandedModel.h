@@ -153,11 +153,11 @@ class ExpandedModel : public ExpandedModelInterface {
   //! indices of local variables in the corresponding *.nl file */
   int *listOfVars;        
 
- public:
-
   //! the locally applicable variable declarations
   std::list<std::string> localVarDef;
   
+ public:
+
   /** A stack of block instances that encode the current path through the
    * ExpandedModel tree during the construction phase                     */
   static std::list<std::string> pathToNodeStack;   //!< stack of instance names
@@ -229,6 +229,11 @@ class ExpandedModel : public ExpandedModelInterface {
 
   //! Outputs the solution to the supplied stream, at given indent
   void outputSolution(std::ostream &out, int indent=0);
+
+  //! Append the variable to the list of local variable declarations
+  void appendLocalVarDef(const std::string& name) {
+    localVarDef.push_back(name);
+  }
 
  private: 
   //! Sets nLocalVar, listOfVars, nLocalCons, listOfVarNames

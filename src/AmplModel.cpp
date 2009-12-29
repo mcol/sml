@@ -309,8 +309,7 @@ AmplModel::createExpandedModel(const string& smodelname,
       }
       //printf("\n");
       //cout << globname+'\n';
-      em->localVarDef.push_back(globname);
-
+      em->appendLocalVarDef(globname);
     }
     if (mc->type == TMODEL){
       int card;
