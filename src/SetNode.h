@@ -25,7 +25,7 @@
 #include "sml.tab.h"
 
 /** @class SetNode
- * This class represents a set in the the syntax tree.
+ *  This class represents a set in the the syntax tree.
  */
 class SetNode: public SyntaxNode, public CompDescr {
 protected:
@@ -54,7 +54,7 @@ public:
 };
 
 /** @class ListSet
- * This class represents a set with explicitly enumerated members
+ *  This class represents a set with explicitly enumerated members.
  */
 class ListSet: public SetNode {
 private:

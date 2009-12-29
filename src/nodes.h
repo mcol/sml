@@ -41,7 +41,7 @@ class AmplModel;
  *  @bug This should probably be implemented by deriving subclasses, however
  *       an attempt for ID nodes resulted in problems with dynamic_casts
  *
- *  @bug A comma separated list is currently represented by an SyntaxNode with
+ *  @bug A comma separated list is currently represented by a SyntaxNode with
  *       opCode==COMMA and values[0/1] pointing to the first and last member
  *       in a linked list of SyntaxNodes. This linked list is implemented using
  *       _indexNode objects (which is a SyntaxNode plus a pointer to next). 
@@ -161,7 +161,7 @@ class SyntaxNode {
    *  as well. 
    *
    *  Non-SyntaxNode objects pointed to are not recreated, here just pointers
-   *  are copied (->ref in the case of an SyntaxNodeIDREF object)
+   *  are copied (->ref in the case of a SyntaxNodeIDREF object).
    *  The int/double entries pointed to by INT_VAL/FLOAT_VAL SyntaxNodes *are*
    *  recreated.
    */
@@ -325,8 +325,8 @@ class SyntaxNodeIDREF : public SyntaxNode {
   ModelComp *ref;
 
   /* stochrecourse was for the same purpose as stochparent, just that the
-     recourse level was given as an SyntaxNode (i.e. expression to be 
-     eveluated by AMPL rather than an explicit  INT_VAL */
+     recourse level was given as a SyntaxNode (i.e. expression to be
+     eveluated by AMPL rather than an explicit  INT_VAL) */
   //?SyntaxNode *stochrecourse; //!< resourse level in stoch programming
 
   /** Levels above this one for which the reference is.

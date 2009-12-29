@@ -37,7 +37,7 @@ class IndexListValue {
   IndexListValue(int new_nvar = -1, int *new_lvar = NULL, int new_count =  -1) :
     nvar(new_nvar), lvar(new_lvar), count(new_count) {}
 
-  // destructor
+  /** Destructor */
   ~IndexListValue() {
    delete[] lvar;
   }
@@ -112,7 +112,7 @@ class NlFile {
 
  private:
 
-  //! return number of constraints defined in this *.nl file 
+  /** Return the number of constraints defined in this *.nl file */
   int getNoConstraints();
 
   /** common method that opens the *.nl file and reads the scalar values
@@ -136,10 +136,10 @@ class NlFile {
   // exist yet.
  public:
   // this is here since createQ accesses it directly
-  //! return number of variables defined in this *.nl file 
+  /** Return the number of variables defined in this *.nl file */
   int getNoVariables();
 
-  //! return number of Hessian entries defined in this *.nl file 
+  /** Return the number of Hessian entries defined in this *.nl file */
   int getNoHessianEntries();
 
   /** return objective Hessian structure in this *.nl file.

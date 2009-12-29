@@ -26,27 +26,20 @@ typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 #include "nodes.h"
 #include "CompDescr.h"
 
-/* ------------------------------------------------------------------------ */
-/* ModelComp describes a model component such as 
-   var/subject to/param/set/minimize 
-   
-   every such component is stored as
-   - id : the name of the component 
-   - indexing: the indexing expression stored as a tree 
-   - attributes: a list of attributes 
-                 (this includes the actual constraint definition for 
-		  "subject to" components)
-*/
 class AmplModel;
 
 /** @class ModelComp
  *  Object to represent a component of an AMPL/SML model/block.
  *
- * The ModelComp object represents a component of an SML model/block.
- * It usually represents one line of AMPL/SML which is a definition of a
- * variable/parameter/set/constraint/objective/block.
- * A model component is broken down into the following parts:
- * - <type\> <name\> <indexing\>_opt <attributes\>_opt
+ *  It usually represents one line of AMPL/SML which is a definition of a
+ *  variable/parameter/set/constraint/objective/block.
+ *
+ *  A model component is broken down into the following parts:
+ *  - type: the type of the component
+ *  - id: the name of the component
+ *  - indexing: the indexing expression stored as a tree
+ *  - attributes: a list of attributes (this includes the actual constraint
+ *                definition for "subject to" components)
  */
 class ModelComp{
  public:
@@ -59,8 +52,7 @@ class ModelComp{
   /** Name of the component */
   std::string id;
 
-  /** this is a tree of specifications, this includes
-   * :=, within, default, >=                                               */
+  /** A tree of specifications (which includes :=, within, default, >=) */
   SyntaxNode *attributes;   
 			 
   /**  Indexing expression */
@@ -110,8 +102,12 @@ class ModelComp{
 
   /** Detailed debugging output */
   void dump(std::ostream& fout);
-  void print();   //!< prints elements of the class
-  void printBrief();   //!< prints one liner
+
+  /** Print elements of the class */
+  void print();
+
+  /** Print one liner */
+  void printBrief();
 
   /** Tag this components and all its dependencies recursively */
   void tagDependencies();

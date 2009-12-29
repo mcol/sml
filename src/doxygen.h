@@ -185,7 +185,7 @@ PASS2:
     within the chain.
     StochModelComp::transcribeToModelComp will
     - create a deep copy of the StochModelComp
-    - find all IDREF nodes in dependecy and resolve them w.r.t  AmplModel chain
+    - find all IDREF nodes in dependency and resolve them w.r.t  AmplModel chain
       (also resolving 'ancestor' references)
     - find all STAGE/NODE nodes and translate them
     - find all EXP expressions and translate them
@@ -398,7 +398,7 @@ All entities within the block are local variables to this block. They
 are all repeated over the indexing set indicated in the block
 command. The above piece of code actually defines a variable Net_Flow:
 \code
- var Net_Flow{k in COMMIDITIES, ARCS} >=0;
+ var Net_Flow{k in COMMODITIES, ARCS} >=0;
 \endcode
 
 Blocks can also be defined with the alternative syntax
@@ -470,7 +470,7 @@ components declared within a stochastic block:
         ...
     }
   \endcode
-<li> All model components declared in an sblbock are by default
+<li> All model components declared in a stochastic block are by default
      indexed over the NODES set. Some parameters or variables only have one
      value for every stage not for every node within the stage. These can
      be defined by the 'deterministic' keyword:
@@ -480,7 +480,8 @@ components declared within a stochastic block:
 
   @bug This is understood by the parser, but not implemented yet in the backend
 
-<li> It is possible to explicitely refer to the node or stage of a component (for example to refer to parameters declared outside the stochastic block):
+<li> It is possible to explicitly refer to the node or stage of a component
+(for example to refer to parameters declared outside the stochastic block):
 \code
  param Liability{STAGES}; //an alternative deterministic parameter
  block alm stochastic using (NODES, PARENT, PROBS, STAGES): {

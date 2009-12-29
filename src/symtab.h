@@ -37,7 +37,9 @@ public:
    };
 
 private:
-   static const int n_hash = 100; // Number of available has codes
+
+   /** Number of available hash codes */
+   static const int n_hash = 100;
    static const bool logSymtab = false; // Enable debug logging?
    std::list<Entry> table_[n_hash];
 

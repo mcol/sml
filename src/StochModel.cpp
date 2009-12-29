@@ -462,7 +462,7 @@ StochModel::expandToFlatModel()
 
     */
     
-      /* so this is a set definition ModelComp with an SyntaxNode tree 
+      /* so this is a set definition ModelComp with a SyntaxNode tree
          describing the indexing set
        */
       
@@ -556,7 +556,7 @@ StochModel::expandToFlatModel()
       on1 = new OpNode(DEFINED, on3);
       //printf("Test all of expression: %s\n",on1->print());
       
-      // so we've got an SyntaxNode to '{i in NODES:A[i] in indS0}'
+      // so we've got a SyntaxNode to '{i in NODES:A[i] in indS0}'
       
       /* Add this as a model component defining a set? */
       indset[stgcnt]->setTo("ind" + *st, TSET, NULL, on1);

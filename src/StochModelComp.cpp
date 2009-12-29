@@ -110,7 +110,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
        p != idrefnodes.end(); p++) {
     // check if this is a reference within the current StochModel
-    // (*p) is an SyntaxNodeIDREF
+    // (*p) is a SyntaxNodeIDREF
     SyntaxNodeIDREF *onr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     if (onr==NULL){
       cerr << "SyntaxNode should be SyntaxNodeIDREF but dynamic cast fails" << endl;

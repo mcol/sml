@@ -660,7 +660,7 @@ SyntaxNode *SyntaxNodeIx::getIndexingSet()
 /* --------------------------------------------------------------------------
 SyntaxNode::getArgumentList()
 ---------------------------------------------------------------------------- */
-/** This is for an SyntaxNode of type IDREF (and should eventually be moved
+/** This is for a SyntaxNode of type IDREF (and should eventually be moved
  *  to SyntaxNodeIDREF:getArgumentList()).
  *
  *  @return A comma separated list of the arguments (the bit in [..] brackets).
@@ -1125,7 +1125,7 @@ find_var_ref_in_context
  *         It can also carry an indexing expressinon ID[.,.,.] in which case
  *         the indexing is attached to the returned IDREF node.
  *
- *  @return An SyntaxNode of type IDREF that points to the correct ModelComp.
+ *  @return A SyntaxNode of type IDREF that points to the correct ModelComp.
  *
  *  @bug Should return a SyntaxNodeIDREF*.
  *
@@ -1138,7 +1138,7 @@ find_var_ref_in_context
 SyntaxNode*
 find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
 {
-   /* 'ref' is an SyntaxNode representing an iditem. 
+   /* 'ref' is a SyntaxNode representing an iditem.
       This can be either
       - a ID node where values[0] simply points to a name
       - an ID node which is actually SyntaxNodeID and has stochparent set

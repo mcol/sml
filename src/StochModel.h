@@ -47,6 +47,8 @@ class StochModel: public AmplModel{
 
   //! The set of STAGES
   SyntaxNode *stageset;
+
+  //! The dummy variable for the STAGES set
   IDNode *stagedummy;
 
   //! Explicit set of STAGES
@@ -57,9 +59,15 @@ class StochModel: public AmplModel{
 
   //! The set of NODES
   SyntaxNode *nodeset;
+
+  //! The dummy variable for the NODES set
   IDNode *nodedummy;
-  SyntaxNode *anc;       //!< The parameter array of ancestors
-  SyntaxNode *prob;      //!< The parameter array of probabilities
+
+  //! The parameter array of ancestors
+  SyntaxNode *anc;
+
+  //! The parameter array of probabilities
+  SyntaxNode *prob;
 
   // -------------------------- methods ----------------------------------
   //! Constructor 
@@ -75,7 +83,7 @@ class StochModel: public AmplModel{
   //! Expand STAGES set of all StochModelComps in this model
   void expandStagesOfComp(); 
 
-  /** Expand on AmplModel::addComp to setup stochmodel of component too */
+  //! Expand on AmplModel::addComp to setup stochmodel of component too
   void addComp(ModelComp *comp);
 
   SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);

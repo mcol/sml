@@ -53,10 +53,9 @@ class changeitem{
  *  Each component is stored in *symbolic* form: i.e. a tree of AMPL
  *  expressions for the body of the component definition and a tree of AMPL
  *  expressions for the indexing expression. It does not know about the
- *  cardinality of each component (it does not expand indexing expressions)
- *  It keeps track of both the number of every type
- *  registered and a linked list of entries describing each of the 
- *  entities in more detail. 
+ *  cardinality of each component (it does not expand indexing expressions).
+ *  It keeps track of both the number of every type registered and a linked
+ *  list of entries describing each of the entities in more detail.
  */
 class AmplModel{
  public:
@@ -147,8 +146,11 @@ class AmplModel{
   /** Recursively recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();
 
-  void print();    //< prints debugging output recursively
-  void check();    //< checks instance for consistency
+  /** Print debugging output recursively */
+  void print();
+
+  /** Check instance for consistency */
+  void check();
 
   /** Recursive detailed debugging output */
   void dump(const char *filename);

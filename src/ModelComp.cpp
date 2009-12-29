@@ -576,7 +576,7 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
       path2[n_path2] = tmp;
       n_path2++;
     }
-    /* okay the two paths are build, let's print them */
+    /* okay the two paths are built, let's print them */
     //printf("Path to current_model: %s:\n",current_model->name);
     //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
     //printf("Path to model_of_comp: %s:\n",model_of_comp->name);
@@ -777,7 +777,7 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
       path2[n_path2] = tmp;
       n_path2++;
     }
-    /* okay the two paths are build, let's print them */
+    /* okay the two paths are built, let's print them */
     //printf("Path to current_model: %s:\n",current_model->name);
     //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
     //printf("Path to model_of_comp: %s:\n",model_of_comp->name);

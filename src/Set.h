@@ -24,12 +24,11 @@
 #include "SetElement.h"
 
 /** @class Set
- *  This class describes a set: it mainly consists of a list of set elements
+ *  This class describes a set: it mainly consists of a list of set elements.
  *
  *  The element of the sets are described by the vector<string*> elements
  *  Each entry of elements is an array of strings (dimension of the array
- *  is the dimension of the set)
- *
+ *  is the dimension of the set).
  */
 class Set: public CompDescr{
  private:
@@ -44,15 +43,21 @@ class Set: public CompDescr{
   int dim_;
 
   // ---------------- methods -----------------
-  void add(SetElement);     //!< add element to set
+
+  //! Add element to the set
+  void add(SetElement el);
 
   // virtual method inherited from CompDescr
   //! Return the set as a string
   std::string toString() const;
 
  public:
-  Set(const ListNode &list_of_els); //!< construct a set from a list of elements in an SyntaxNode
-  int size(); //!< return size of Set
+
+  //! Construct a set from a list of elements in a SyntaxNode
+  Set(const ListNode& list_of_els);
+
+  //! Return the size of the set
+  int size();
 
   //! Return the dimension of the set
   int dim();

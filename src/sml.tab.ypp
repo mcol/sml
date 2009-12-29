@@ -661,7 +661,7 @@ ubsetop: UNION    { $$ = UNION; }
 /* Identifier is any quotation of a predefined object:
     RoutComm[j].Flow[k-3*j, k]#
    An iditem is simply a tree of SyntaxNodes that serve as an identifier.
-   An 'identifer' is an SyntaxNode of type IDREF or IDREFM
+   An 'identifer' is a SyntaxNode of type IDREF or IDREFM.
 */
 identifier: iditem {
                /* this is a simple identifier in global context */

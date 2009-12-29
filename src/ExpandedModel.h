@@ -158,9 +158,12 @@ class ExpandedModel : public ExpandedModelInterface {
   
  public:
 
-  /** A stack of block instances that encode the current path through the
-   * ExpandedModel tree during the construction phase                     */
-  static std::list<std::string> pathToNodeStack;   //!< stack of instance names
+  /** Stack of instance names.
+   *
+   *  A stack of block instances that encode the current path through the
+   *  ExpandedModel tree during the construction phase.
+   */
+  static std::list<std::string> pathToNodeStack;
 
   // -------------------------- methods ------------------------------------
 

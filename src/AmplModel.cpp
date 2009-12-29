@@ -161,7 +161,9 @@ AmplModel::createExpandedModel
 static string crush(const string& inst);
 list<string> *getListOfInstances(istream &file);
 
-/** This method is given a location in the Expanded tree and the correspoding
+/** Recursively create an ExpandedModel tree from the flat AmplModel.
+ *
+ *  This method is given a location in the Expanded tree and the correspoding
  *  node of the AmplModel tree and creates recursively the ExpandedModel 
  *  instances corresponding to it.
  *  The location in the ExpandedTree to be created is encoded in two 
@@ -250,16 +252,16 @@ AmplModel::createExpandedModel(const string& smodelname,
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     ModelComp *mc = *p;
     if (mc->type == TVAR){
-      // need to translate this into the global name of the variable, tgether
+      // need to translate this into the global name of the variable, together
       // with any applicable indexing expression
       string globname(getGlobalName(mc, NULL, NULL, NOARG));
       // and add all applicable indexing to it
       // if this is on the branch (N1,N0)->C0 then the variable indexing will
       // start with
       // ['N1','NO','CO']
-      // In order to recreate this we will need to somewhere store the actual
+      // In order to recreate this we will need to store somewhere the actual
       // path of set elements that was taken to get here
-      // => Can be done by a gobal stack associated with ExpandedModel
+      // => Can be done by a global stack associated with ExpandedModel
       //    (similar to addIndex, but this time a C++ implementation
       //printf("Stack of path instances is: \n");
       for(list<string>::iterator q = ExpandedModel::pathToNodeStack.begin();
@@ -278,7 +280,7 @@ AmplModel::createExpandedModel(const string& smodelname,
         // indexing nodes for the blocks. However this time it is actual
         // instances of the dummyVariables rather than the dummy variables 
         // themselves. The expressions come from AMPL output so they have not
-        // been parsed by the lexer/yacc. Need to do te parsing by hand
+        // been parsed by the lexer/yacc. Need to do the parsing by hand
         if ((*q).at(0)=='('){
           char *token = strdup((*q).c_str());
           // remove first and last character
@@ -599,7 +601,7 @@ AmplModel::addDummyObjective()
      model:
       - for variables without indexing expression a SyntaxNodeIDREF pointing
         to this ModelComp is added
-      - for variables with indexing expression an SyntaxNode tree that encodes
+      - for variables with indexing expression a SyntaxNode tree that encodes
           sum {dumN in SET} var[dumN]
         is added
   */
