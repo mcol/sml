@@ -17,7 +17,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <typeinfo>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -75,11 +74,10 @@ StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *on
 }
 
 
-
 /* ---------------------------------------------------------------------------
 expandSet()
 ---------------------------------------------------------------------------- */
-vector<string> expandSet(SyntaxNode *set) {
+static vector<string> expandSet(SyntaxNode *set) {
 
   /* analyze all dependencies of this expression */
   ModelComp::untagAll();
