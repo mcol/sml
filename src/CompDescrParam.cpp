@@ -181,9 +181,9 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
       assert(paramspec->opCode==' ');
       int nval = paramspec->nchild()/(nobj+1);
       if (paramspec->nchild()%(nobj+1)!=0){
-        cerr << "Paramdef requires " << nobj << " position specifiers." << endl;
-        cerr << "Length of value list is " << paramspec->nchild() << 
-          " which is not divisible by " << nobj+1 << "." << endl;
+        cerr << "ERROR: Paramdef requires " << nobj << " position specifiers.\n"
+             << "Length of value list is " << paramspec->nchild()
+             << " which is not divisible by " << nobj+1 << ".\n";
         exit(1);
       }
       // loop through all parameter values that are given
@@ -255,7 +255,7 @@ void
 CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
   // this is a value_table_list
   
-  /* An SyntaxNode of type TOKVALUETABLELIST can have the following structure:
+  /* A SyntaxNode of type TOKVALUETABLELIST can have the following structure:
      - TOKVALUETABLELIST has ->nval children of type TOKVALUETABLE
      - TOKVALUETABLE has 2 children:
        + col_label_list
@@ -336,10 +336,10 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
           exit(1);
         }
         if (cl->nchild()!=indices[ixcolset]->dim()){
-          cerr << "Number of entries in bracketed expression used as "
-             "col_label (" << cl->nchild() << ")" << endl;
+          cerr << "ERROR: Number of entries in bracketed expression used as "
+            "col_label (" << cl->nchild() << ")\n";
           cerr << "does not match dimension (" << indices[ixcolset]->dim() <<
-             ") of indexing set '" << ix->sets_mc[ixcolset]->id << "'" << endl;
+            ") of indexing set '" << ix->sets_mc[ixcolset]->id << "'.\n";
           exit(1);
         }
         cl = *(cl->begin());
@@ -370,10 +370,10 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
           exit(1);
         }
         if (rl->nchild()!=indices[ixrowset]->dim()){
-          cerr << "Number of entries in bracketed expression used as "
-            "row_label (" << rl->nchild() << ")" << endl;
+          cerr << "ERROR: Number of entries in bracketed expression used as "
+            "row_label (" << rl->nchild() << ")\n";
           cerr << "does not match dimension (" << indices[ixrowset]->dim() <<
-            ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'" << endl;
+            ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'.\n";
           exit(1);
         }
         rl = *(rl->begin());
