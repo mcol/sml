@@ -38,7 +38,7 @@ ID       [a-zA-Z][a-zA-Z0-9_]*
 %%
 
 -?{DIGIT}+".." {
-                long *dummy = (long *)malloc(sizeof(long));
+                long *dummy = new long;
                 *dummy = strtol(yytext, NULL, 10);
                 yylval.ival = dummy;
                 
@@ -51,7 +51,7 @@ ID       [a-zA-Z][a-zA-Z0-9_]*
 ".."  myreturn(DOTDOT);
    /* Tokens with values */
 -?{DIGIT}+ {
-            long *dummy = (long *)malloc(sizeof(long));
+            long *dummy = new long;
             *dummy = strtol(yytext, NULL, 10);
             yylval.ival = dummy;
             if(errno == ERANGE)
@@ -60,7 +60,7 @@ ID       [a-zA-Z][a-zA-Z0-9_]*
             myreturn(INT_VAL);
          }
 -?{DIGIT}+("."{DIGIT}*)?([eE]{DIGIT}+)?  {
-            double *dummy = (double *)malloc(sizeof(double));
+            double *dummy = new double;
             *dummy = strtod(yytext, NULL);
             yylval.fval = dummy;
             if(errno == ERANGE)

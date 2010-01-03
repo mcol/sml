@@ -80,7 +80,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     /* work out the dimension and cardinality of the parameter */
     n = 1;
     nsets = ix->ncomp; // the number of indexing sets given 
-    indices = (Set **)malloc(ix->ncomp*sizeof(Set *));
+    indices = new Set*[ix->ncomp];
     nix =0;
     for(int i=0;i<ix->ncomp;i++){
       indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->value);
