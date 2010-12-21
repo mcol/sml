@@ -71,7 +71,6 @@ int analyseOptions(int argc, char **argv, string &modelfilename,
    if(modelfilename=="" || datafilename=="" || mpsfilename=="") {
       cerr << "ERROR: all of modelfile, datafile and mpsfile " 
          "must be supplied." << endl << endl;
-      writeHelp(cerr, progname);
       return 1;
    }
 

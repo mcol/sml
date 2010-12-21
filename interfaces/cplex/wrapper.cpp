@@ -69,7 +69,6 @@ int analyseOptions(int argc, char **argv, string &modelfilename,
   if (modelfilename == "" || datafilename == "") {
     cerr << "ERROR: all of modelfile and datafile must be supplied."
          << endl << endl;
-    writeHelp(cerr, progname);
     return 1;
   }
 

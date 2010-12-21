@@ -79,8 +79,7 @@ int analyseOptions(int argc, char **argv, string &modelfilename,
             datafilename = argv[i];
             found++;
          }else{
-            cerr << "Error, too many filenames." << endl;
-            writeHelp(cerr, progname);
+            cerr << "ERROR: too many filenames." << endl;
             return 1;
          }
       }
@@ -89,7 +88,6 @@ int analyseOptions(int argc, char **argv, string &modelfilename,
    if(modelfilename=="" || datafilename=="") {
       cerr << "ERROR: both modelfile and datafile " 
          "must be supplied." << endl << endl;
-      writeHelp(cerr, progname);
       return 1;
    }
 
