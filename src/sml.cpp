@@ -39,11 +39,11 @@ void parse_data(AmplModel*, const string& datafilename);
 int parse_model(const string& modelfilename);
 
 string sml_version() {
-   return PACKAGE_VERSION;
+  return PACKAGE_NAME " " PACKAGE_VERSION;
 }
 
 static void writeCopyright(ostream &out) {
-   out << PACKAGE_NAME" "PACKAGE_VERSION", Structure-conveying Modelling Language" << endl;
+   out << "Structure-conveying Modelling Language, " << sml_version() << endl;
    out << "(c) 2008,2009 Jonathan Hogg and Andreas Grothey, "
       "University of Edinburgh." << endl;
    out << "Released under LGPL v3" << endl;
@@ -96,8 +96,6 @@ ExpandedModelInterface* sml_generate(const string& modelfilename,
    int errcode;
 
    if(debug) GlobalVariables::prtLvl++;
-
-   writeCopyright(cout);
 
    // ensure that the directory for temporary files exists and can be used
    errcode = createTmpDirIfNotPresent();

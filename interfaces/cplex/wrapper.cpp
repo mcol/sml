@@ -82,8 +82,8 @@ int main(int argc, char **argv) {
    string datafilename = "";
    bool debug = false;
 
-   cout << "SML CPLEX, SML version " << sml_version() << endl;
-   cout << "(c) 2009 Marco Colombo, University of Edinburgh" << endl;
+   cout << "SML CPLEX, " << sml_version() << endl;
+   cout << "(c) 2009 Marco Colombo, University of Edinburgh" << endl << endl;
 
    int rv = analyseOptions(argc, argv, modelfilename, datafilename, debug);
    if (rv)

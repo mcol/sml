@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
    string mpsfilename = "";
    bool debug = false;
 
-   cout << "SML MPS generator, SML version " << sml_version() << endl;
+   cout << "SML MPS generator, " << sml_version() << endl;
    cout << "(c) Andreas Grothey and Jonathan Hogg, "
       "University of Edinburgh 2009" << endl << endl;
 

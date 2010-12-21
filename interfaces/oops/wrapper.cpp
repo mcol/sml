@@ -105,6 +105,10 @@ int main(int argc, char **argv) {
    string outfilename = "";
    bool debug = false;
 
+   cout << "SML OOPS, " << sml_version() << endl;
+   cout << "(c) 2009 Andreas Grothey and Jonathan Hogg, University of Edinburgh"
+        << endl << endl;
+
    int rv = analyseOptions(argc, argv,
                            modelfilename, datafilename, outfilename, debug);
    if (rv)

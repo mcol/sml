@@ -20,6 +20,7 @@
 #include "ExpandedModelInterface.h"
 #include <string>
 
+/// Report the current version
 std::string sml_version();
 
 ExpandedModelInterface* sml_generate(const std::string& modelfilename,
