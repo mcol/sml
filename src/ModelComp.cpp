@@ -15,13 +15,14 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
 #include "ModelComp.h"
+#include "AmplModel.h"
 #include "backend.h"
 #include "GlobalVariables.h" //for GlobalVariables class
-#include "AmplModel.h"
+#include "nodes.h"
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
 
 using namespace std;
 

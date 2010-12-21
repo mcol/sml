@@ -15,12 +15,12 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+#include "StochModelComp.h"
+#include "misc.h"
+#include "nodes.h"
+#include "sml.tab.h"
 #include <cstdlib>
 #include <iostream>
-#include "StochModelComp.h"
-#include "StochModel.h"
-#include "sml.tab.h"
-#include "misc.h"
 
 using namespace std;
 

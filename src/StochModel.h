@@ -17,10 +17,9 @@
 #ifndef STOCHMODEL_H
 #define STOCHMODEL_H
 
-#include <vector>
-#include <string>
 #include "AmplModel.h"
-#include "SetNode.h"
+#include <string>
+#include <vector>
 
 /* ------------------------------------------------------------------------ */
 /** @class StochModel

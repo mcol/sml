@@ -20,13 +20,14 @@
 enum {NOARG=0,WITHARG=1,ONLYARG=2};
 typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 
+#include "CompDescr.h"
 #include <list>
 #include <string>
-#include <iostream>
-#include "nodes.h"
-#include "CompDescr.h"
 
 class AmplModel;
+class SyntaxNode;
+class SyntaxNodeIx;
+class SyntaxNodeIDREF;
 
 /** @class ModelComp
  *  Object to represent a component of an AMPL/SML model/block.

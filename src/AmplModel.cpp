@@ -15,19 +15,19 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <cassert>
 #include "AmplModel.h"
 #include "backend.h"
 #include "ExpandedModel.h"
+#include "GlobalVariables.h"
 #include "nodes.h"
 #include "sml.tab.h"
-#include "GlobalVariables.h"
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 using namespace std;
 

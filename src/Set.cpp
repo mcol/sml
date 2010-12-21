@@ -15,15 +15,15 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <cstdlib>
-#include <iostream>
 #include "Set.h"
-#include <map>
-#include <cstdio>
-#include <string>
-#include <assert.h>
+#include "nodes.h"
 #include "data.tab.h"
 #include "misc.h"
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
+#include <map>
+#include <string>
 
 using namespace std;
 

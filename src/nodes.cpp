@@ -15,16 +15,16 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <iostream>
-#include <sstream>
 #include "nodes.h"
-#include "sml.tab.h"
 #include "AmplModel.h"
 #include "ModelComp.h"    // for WITHARG
 #include "GlobalVariables.h"
+#include "sml.tab.h"
+#include <cassert>
+#include <cstdlib>
+#include <cstring>        // for memset()
+#include <iostream>
+#include <sstream>
 
 using namespace std;
 

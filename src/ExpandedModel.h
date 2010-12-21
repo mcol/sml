@@ -34,7 +34,6 @@ This would still be in the Benders view.
 
 #include <string>
 #include <list>
-#include <iostream>
 #include "ExpandedModelInterface.h"
 #include "symtab.h"
 

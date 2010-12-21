@@ -15,10 +15,10 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+#include "SetNode.h"
+#include "misc.h"
 #include <cstdlib>
 #include <iostream>
-#include <sstream>
-#include "SetNode.h"
 
 using namespace std;
 
@@ -47,13 +47,6 @@ SimpleSet::SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2) :
       cout << "Parsed Set " << lower_bound_ << ".." << upper_bound_ << endl;
 }
 
-// Safely convert an integer to a string
-string itos(int val) {
-   ostringstream ost;
-   ost << val;
-   return ost.str();
-}
-
 vector<string> SimpleSet::members(AmplModel &context) {
    if(!parsed_) {
       cerr << "Trying to obtain members of set which has not been parsed!\n";
@@ -62,7 +55,7 @@ vector<string> SimpleSet::members(AmplModel &context) {
 
    vector<string> result;
    for(int i=lower_bound_; i<=upper_bound_; i+=interval_)
-      result.push_back(itos(i));
+      result.push_back(to_string(i));
 
    return result;
 }

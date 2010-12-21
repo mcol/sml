@@ -15,16 +15,16 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+#include "StochModel.h"
+#include "GlobalVariables.h"
+#include "nodes.h"
+#include "sml.tab.h"
+#include "StochModelComp.h"
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
-#include "GlobalVariables.h"
-#include "StochModel.h"
-#include "StochModelComp.h"
-#include "sml.tab.h"
-#include "SetNode.h"
 
 using namespace std;
 

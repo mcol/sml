@@ -15,16 +15,16 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+#include "CompDescrParam.h"
+#include "data.tab.h"
+#include "GlobalVariables.h"
+#include "ModelComp.h"
+#include "misc.h"
+#include "nodes.h"
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include "CompDescrParam.h"
-#include "GlobalVariables.h"
-#include "ModelComp.h"
-#include "nodes.h"
-#include <assert.h>
-#include "data.tab.h"
-#include "misc.h"
 
 using namespace std;
 

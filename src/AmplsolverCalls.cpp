@@ -19,10 +19,11 @@
       amplsolver library (and that cannot use c++ lists
 */
 
-#include <string>
-#include <limits>
 #include "AmplsolverCalls.h"
 #include "asl_pfgh.h"
+#include <string>
+#include <limits>
+
 #define asl cur_ASL
 
 using namespace std;

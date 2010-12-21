@@ -17,9 +17,13 @@
 #ifndef COMPDESCRPARAM_H
 #define COMPDESCRPARAM_H
 
-#include <string>
-#include "Set.h"
 #include "CompDescr.h"
+#include "Set.h"
+#include <string>
+
+class ModelComp;
+class SyntaxNode;
+class SyntaxNodeIx;
 
 /** @class CompDescrParam
  *  This class describes a parameter: it consists of

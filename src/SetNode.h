@@ -17,12 +17,12 @@
 #ifndef SETNODE_H
 #define SETNODE_H
 
-#include <cassert>
-#include <vector>
-#include <string>
 #include "nodes.h"
 #include "CompDescr.h"
 #include "sml.tab.h"
+#include <cassert>
+#include <string>
+#include <vector>
 
 /** @class SetNode
  *  This class represents a set in the the syntax tree.

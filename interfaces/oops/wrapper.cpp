@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #include <iostream>
 #include <fstream>
 #include <cstring> // for strcmp() and strncmp()
 #include <cstdlib> // for exit()
-#include <sys/stat.h>
 #include "sml.h"
 #include "sml-oops.h"
 

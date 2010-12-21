@@ -17,10 +17,12 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-#include "nodes.h"
 #include <list>
 #include <vector>
 #include <string>
+
+class AmplModel;
+class SyntaxNode;
 
 /* this struct stores an indexing expression in an easy to modify form:
    the add_index below will be rendered as

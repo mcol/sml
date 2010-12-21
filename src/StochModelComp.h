@@ -15,10 +15,15 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <vector>
-#include <string>
+#ifndef STOCHMODELCOMP_H
+#define STOCHMODELCOMP_H
+
 #include "ModelComp.h"
 #include "StochModel.h"
+#include <string>
+#include <vector>
+
+class SyntaxNode;
 
 /** @class StochModelComp
  *  The class describes an entity in a stochastic model.
@@ -69,3 +74,5 @@ class StochModelComp: public ModelComp {
   //! Shallow copy, only copies pointers
   StochModelComp *clone();
 };
+
+#endif /* STOCHMODELCOMP_H */

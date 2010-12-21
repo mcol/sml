@@ -15,15 +15,16 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#include <list>
-#include <cstdlib>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
 #include "ExpandedModel.h"
-#include "GlobalVariables.h"
-#include "AmplsolverCalls.h"
 #include "AmplModel.h"
+#include "AmplsolverCalls.h"
+#include "GlobalVariables.h"
+#include <cassert>
+#include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <list>
 
 using namespace std;
 

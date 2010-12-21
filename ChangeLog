@@ -1,3 +1,7 @@
+2010-12-21  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Cleaned up the included headers, reducing the header dependencies by
+    forward-declaring the classes when possible.
+
 2009-12-28  Marco Colombo  <m.colombo@ed.ac.uk>
   * Made the member variables of the IDNode class private, and added the
     corresponding getters and setters.

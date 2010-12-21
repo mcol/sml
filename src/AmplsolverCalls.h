@@ -17,10 +17,9 @@
 #ifndef AMPLSOLVERCALLS_H
 #define AMPLSOLVERCALLS_H
 
-#include <string>
-#include <map>
-#include <assert.h>
 #include "ExpandedModel.h"
+#include <map>
+#include <string>
 
 /* the asl_pfgh.h file in amplsolver globally redefines list
    => this is a separate file that provides all the calls to the

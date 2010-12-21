@@ -18,7 +18,8 @@
 #define SETELH
 
 #include <string>
-#include "nodes.h"
+
+class IDNode;
 
 /** @class SetElement
  *  This class describes an element of a set. It is basically an array of

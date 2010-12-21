@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-#include <iostream>
-#include <sys/stat.h>
+
 #include "sml.h"
-#include "GlobalVariables.h"
 #include "AmplModel.h"
 #include "backend.h"
+#include "ExpandedModel.h"
+#include "GlobalVariables.h"
+#include <iostream>
+#include <sys/stat.h>
 
 #ifdef HAVE_DIRECT_H
 #include <direct.h> // for mkdir() under MinGW

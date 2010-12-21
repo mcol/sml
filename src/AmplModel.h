@@ -18,12 +18,15 @@
 #define AMPLMODEL_H
 
 #include <list>
-#include <string>
 #include <iostream>
-#include "ModelComp.h"
-#include "nodes.h"
+#include <string>
 #include "symtab.h"
-#include "ExpandedModel.h"
+
+class ExpandedModel;
+class IDNode;
+class ModelComp;
+class SyntaxNodeIx;
+class SyntaxNodeIDREF;
 
 enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
 

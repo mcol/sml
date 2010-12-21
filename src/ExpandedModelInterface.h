@@ -17,8 +17,9 @@
 #ifndef MODEL_INTERFACE_H
 #define MODEL_INTERFACE_H
 
-#include <vector>
 #include <list>
+#include <string>
+#include <vector>
 
 /** 
  *  The representation of a a submodel (block) in the expanded model

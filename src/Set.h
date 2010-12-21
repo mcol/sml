@@ -17,11 +17,12 @@
 #ifndef SET_H
 #define SET_H
 
-#include <map>
-#include <string>
-#include "nodes.h"
 #include "CompDescr.h"
 #include "SetElement.h"
+#include <map>
+#include <string>
+
+class ListNode;
 
 /** @class Set
  *  This class describes a set: it mainly consists of a list of set elements.

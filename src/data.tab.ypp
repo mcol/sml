@@ -17,15 +17,16 @@
 %debug
 %expect 20
 %{
-   #include <stdio.h>
-   #include <stdlib.h>
-   #include <assert.h>
-   #include <iostream>
-   #include "nodes.h"
-   #include "CompDescrParam.h"
    #include "AmplModel.h"
+   #include "CompDescrParam.h"
    #include "DataNodes.h"
    #include "GlobalVariables.h"
+   #include "nodes.h"
+   #include <cassert>
+   #include <cstdio>
+   #include <cstdlib>
+   #include <iostream>
+
    #define YYERROR_VERBOSE
 
    using namespace std;
