@@ -54,18 +54,20 @@ static int createTmpDirIfNotPresent() {
    int err = 0;
    bool fl_exists;
    struct stat sbuf;
-  
-   fl_exists = !(stat("tmp", &sbuf) == -1);
+   const char *tmpdirname = "tmp";
+
+   fl_exists = !(stat(tmpdirname, &sbuf) == -1);
 
    // tmp doesn't exist
    if (!fl_exists){
 #ifdef HAVE_DIRECT_H
-      err = mkdir("tmp");
+      err = mkdir(tmpdirname);
 #else
-      err = mkdir("tmp", S_IRWXU);
+      err = mkdir(tmpdirname, S_IRWXU);
 #endif
       if (err)
-        cerr << "ERROR: Failed to create temporary directory 'tmp/'.\n";
+        cerr << "ERROR: Failed to create temporary directory '"
+             << tmpdirname << "'.\n";
    }
 
    // tmp is present
@@ -77,7 +79,8 @@ static int createTmpDirIfNotPresent() {
 
      if (!isusable) {
        err = 1;
-       cerr << "ERROR: Cannot use 'tmp/' as temporary directory.\n";
+       cerr << "ERROR: Cannot use '" << tmpdirname
+            << "' as temporary directory.\n";
      }
    }
 
@@ -96,7 +99,7 @@ ExpandedModelInterface* sml_generate(const string& modelfilename,
 
    writeCopyright(cout);
 
-   // ensure that the 'tmp/' dir for temporary files exists and can be used
+   // ensure that the directory for temporary files exists and can be used
    errcode = createTmpDirIfNotPresent();
    if (errcode)
      return NULL;
