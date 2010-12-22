@@ -564,9 +564,9 @@ StochModel::expandToFlatModel()
         on2 = new SyntaxNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 
-        ModelComp *newmc = new ModelComp(model_above->name.c_str(), TMODEL,
+        ModelComp *newmc = new ModelComp(model_above->name, TMODEL,
                                            new SyntaxNodeIx(on2), NULL);
-        //ModelComp *newmc = new ModelComp(strdup(((*st)++).c_str()), TMODEL, 
+        //ModelComp *newmc = new ModelComp(((*st)++), TMODEL,
         //                                   new SyntaxNodeIx(on2), NULL);
         newmc->other = model_above;
         am->addComp(newmc);
