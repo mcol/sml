@@ -129,11 +129,15 @@ process_model
 */
 static void fill_model_list_(AmplModel *model, list<AmplModel*>& listam);
 
+/** Prettyprinting */
+static void print_indent(ofstream& out, int k) {
+  for (int j = 1; j < k; ++j)
+    out << "  ";
+}
+
 int
 process_model(AmplModel *model, const string& datafilename) {
 
-  int j;
-  
   if(GlobalVariables::prtLvl>=1)
     cout << "-------------- start of process_model ----------------------\n";
 
@@ -277,9 +281,9 @@ process_model(AmplModel *model, const string& datafilename) {
            (void*) node->indexing << ")" << endl;
         return 1;
       }
-      //for(j=1;j<k;j++) fprintf(fscript,"  "); /* prettyprinting */
+      //print_indent(fscript, k);
       //fprintf(fscript, "for {i%d in %s }{\n", k, print_SyntaxNode(set));
-      //for(j=1;j<=k;j++) fprintf(fscript,"  ");
+      //print_indent(fscript, k + 1);
       //fprintf(fscript, "let %s_SUB := {i%d};\n", print_SyntaxNode(set), k);
       if (set){
         SyntaxNodeIDREF *set_ref = dynamic_cast<SyntaxNodeIDREF*>(set);
@@ -287,23 +291,23 @@ process_model(AmplModel *model, const string& datafilename) {
           cerr << "ERROR: set reference must be SyntaxNodeIDREF\n";
           return 1;
         }
-        for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+        print_indent(fscript, k);
         fscript << "for {" << dummyVar << " in " << set << " }\n";
-        for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+        print_indent(fscript, k);
         fscript << "{\n";
+        print_indent(fscript, k + 1);
         // the "reset data" command is needed to avoid the invalid subscript
         // error
-        for(j=1;j<=k;j++) fscript << "  ";
         fscript << "reset data " << getGlobalName(set_ref->ref, set,
             SyntaxNode::default_model, NOARG) << "_SUB;\n";
-        for(j=1;j<=k;j++) fscript << "  ";
+        print_indent(fscript, k + 1);
         fscript << "let " << 
           getGlobalName(set_ref->ref, set, SyntaxNode::default_model, NOARG) <<
           "_SUB" <<
           getGlobalName(set_ref->ref, set, SyntaxNode::default_model, ONLYARG) <<
           " := {" << dummyVar << "};\n";
       }else{
-        for(j=1;j<k;j++) fscript << "  "; /* prettyprinting */
+        print_indent(fscript, k);
         fscript << "{\n";
       }
       l_addIndex.push_back(li);
@@ -372,10 +376,10 @@ process_model(AmplModel *model, const string& datafilename) {
         // where 1, 2 are  the values of the iteration indices in the 
         // scriptfile
         if (set){
-          for(j=1;j<=this_model->level;j++) fscript << "  "; 
+          print_indent(fscript, this_model->level + 1);
           fscript << "print card(" << set << ") > (\"" << filename << ");\n";
           filename.replace(filename.find("&\".crd\""), 7, "&\".set\"");
-          for(j=1;j<=this_model->level;j++) fscript << "  "; 
+          print_indent(fscript, this_model->level + 1);
           fscript << "display " << set << " > (\"" << filename << ");\n";
         }else{
           fscript << "print \"0\" > (\"" << filename << ");\n";
@@ -386,12 +390,14 @@ process_model(AmplModel *model, const string& datafilename) {
     }
 
     /* write the main part of the submodel generation part in the scripts */
-    for(j=0;j<this_model->level;j++) fscript << "  "; fscript << "fix all;\n";
-    for(j=0;j<this_model->level;j++) fscript << "  "; fscript << "unfix all;\n";
+    print_indent(fscript, this_model->level + 1);
+    fscript << "fix all;\n";
+    print_indent(fscript, this_model->level + 1);
+    fscript << "unfix all;\n";
     
     /* take the .mod suffix away from buffer */
     //n = strlen(buffer);buffer[n-4] = 0;
-    for(j=0;j<this_model->level;j++) fscript << "  "; /* prettyprinting */
+    print_indent(fscript, this_model->level + 1);
     fscript << "write (\"b" << filename << "\"";
     for(int k=1;k<=this_model->level;k++) {
       // get all the indexing variables and add them together (joined by &)
@@ -411,7 +417,7 @@ process_model(AmplModel *model, const string& datafilename) {
     
     /* and close all the brackets (prettyprinting) */
     for(int k=this_model->level;k>0;k--){
-      for(j=1;j<k;j++) fscript << "  ";
+      print_indent(fscript, k);
       fscript << "}\n";
       //rem_from_index_stack();
       l_addIndex.pop_back();
