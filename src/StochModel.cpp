@@ -271,7 +271,7 @@ StochModel::expandStagesOfComp()
       sprintf(buf, "tmp%d.out",cnt);
       ifstream in(buf);
       if (!in){
-             cerr << "ERROR: File '" << buf << "' produces by AMPL does not exist. "
+        cerr << "ERROR: File '" << buf << "' produced by AMPL does not exist. "
            "AMPL processing failed?\n";
         exit(1);
       }
@@ -359,10 +359,9 @@ StochModel::expandToFlatModel()
   // up from the beginning, so that they can be referred to
   indset = new StochModelComp*[stagenames.size()];
   for(unsigned int i=0;i<stagenames.size();i++) {
-    // @bug this introduces a memory leak
-    indset[i] = new StochModelComp();
     // give it a dummy name just so that debugging routines work
-    indset[i]->id = "indset";
+    // @bug this introduces a memory leak
+    indset[i] = new StochModelComp("indset");
   }
 
   // loop over all stages and create an AmplModel for every stage 

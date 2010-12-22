@@ -261,7 +261,7 @@ AmplModel::createExpandedModel(const string& smodelname,
       // In order to recreate this we will need to store somewhere the actual
       // path of set elements that was taken to get here
       // => Can be done by a global stack associated with ExpandedModel
-      //    (similar to addIndex, but this time a C++ implementation
+      //    (similar to addIndex, but this time a C++ implementation)
       //printf("Stack of path instances is: \n");
       for(list<string>::iterator q = ExpandedModel::pathToNodeStack.begin();
           q!=ExpandedModel::pathToNodeStack.end();q++){

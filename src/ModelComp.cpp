@@ -407,7 +407,7 @@ ModelComp::tagDependencies()
 /** Tag this components and all its dependencies recursively.
  *
  *  Recursively set tag=true for this model component and all components that
- *  it depends on (i.e. everything listed in its dependency list.
+ *  it depends on (i.e. everything listed in its dependency list).
  */
 void
 ModelComp::tagDependencies()
