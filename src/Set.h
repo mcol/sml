@@ -58,10 +58,14 @@ class Set: public CompDescr{
   Set(const ListNode& list_of_els);
 
   //! Return the size of the set
-  int size();
+  int size() const {
+    return elements.size();
+  }
 
   //! Return the dimension of the set
-  int dim();
+  int dim() const {
+    return dim_;
+  }
 
   //! Find position of element in set
   int findPos(SetElement el) const;
