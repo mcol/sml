@@ -160,8 +160,8 @@ tree is complete.
 In detail the steps in the expansion procedure are as follows
 
 PASS 1:
- - Expand the STAGES set for the StochModel (StochModel::expandStages)
-   and for all its components (StochModel::expandStagesOfComp) 
+ - Expand the STAGES set for the StochModel (StochModel::expandStages())
+   and for all its components (StochModel::expandStagesOfComp())
    This is done by setting up an ampl script that is processed by ampl and
    whose output is read in again
  - Create an AmplModel for each element in STAGES. Add a clone of all
@@ -180,10 +180,10 @@ PASS 1:
    ModelComp representing the subblock of the next stage.
 
 PASS2:
-  - StochModel::_transcribeComponents: recursively call 
-    StochModelComp::transcribeToModelComp for all components of all AmplModels
+  - StochModel::_transcribeComponents(): recursively call
+    StochModelComp::transcribeToModelComp() for all components of all AmplModels
     within the chain.
-    StochModelComp::transcribeToModelComp will
+    StochModelComp::transcribeToModelComp() will
     - create a deep copy of the StochModelComp
     - find all IDREF nodes in dependency and resolve them w.r.t  AmplModel chain
       (also resolving 'ancestor' references)
@@ -255,7 +255,6 @@ for an OOPS Matrix tree node, some matching of variable names has to be done.
 
 Is done in process_model() in backend.cpp. It uses much the same logic
 as the printing out of the *.mod files.
-
 
 */
 
