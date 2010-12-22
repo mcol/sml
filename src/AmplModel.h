@@ -149,21 +149,21 @@ class AmplModel{
   void reassignDependencies();
 
   /** Print debugging output recursively */
-  void print();
+  void print() const;
 
   /** Check instance for consistency */
   void check();
 
   /** Recursive detailed debugging output */
-  void dump(const char *filename);
+  void dump(const char *filename) const;
 
   /** Recursive detailed debugging output */
-  void dump(std::ostream &fout);
+  void dump(std::ostream& fout) const;
 
   static void applyChanges(); //< apply the model changes stored in Q
 
   /** Find a component with name id in correct scoping order */
-  SymbolTable::Entry *findComponent(const std::string& id);
+  const SymbolTable::Entry *findComponent(const std::string& id) const;
   std::list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);

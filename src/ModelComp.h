@@ -108,7 +108,7 @@ class ModelComp{
   void print();
 
   /** Print one liner */
-  void printBrief();
+  void printBrief() const;
 
   /** Tag this components and all its dependencies recursively */
   void tagDependencies();

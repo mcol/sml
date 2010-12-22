@@ -53,7 +53,7 @@ private:
 
 public:
    SymbolTable() {};
-   void copy(SymbolTable &src) {
+   void copy(const SymbolTable& src) {
       for(int i=0; i<n_hash; ++i) {
         for(std::list<Entry>::const_iterator j = src.table_[i].begin();
             j != src.table_[i].end(); ++j) {
@@ -62,7 +62,7 @@ public:
       }
    }
    bool defineSymbol(symb_type, char *id, ModelComp *mc);
-   Entry* findSymbol(const std::string& id);
+   const Entry* findSymbol(const std::string& id) const;
    std::list<Entry> getListByType(const symb_type type) const;
 
 private:

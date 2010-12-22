@@ -44,11 +44,9 @@ SyntaxNode *SyntaxNode::push_back(SyntaxNode *newitem)
 {
   /* extend the size of the node by one */
   SyntaxNode **newvalues = new SyntaxNode*[nval + 1];
-  int i;
 
-  for (i=0;i<nval;i++){
+  for (int i = 0; i < nval; ++i)
     newvalues[i] = values[i];
-  }
   newvalues[nval] = newitem;
   nval++;
   delete[] values;
@@ -62,12 +60,10 @@ SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
 {
   /* extend the size of the node by one */
   SyntaxNode **newvalues = new SyntaxNode*[nval + 1];
-  int i;
 
-  for (i=0;i<nval;i++){
-    newvalues[i+1] = values[i];
-  }
   newvalues[0] = newitem;
+  for (int i = 0; i < nval; ++i)
+    newvalues[i+1] = values[i];
   nval++;
   delete[] values;
   values = newvalues;
@@ -331,8 +327,7 @@ ostream& SyntaxNodeIDREF::put(ostream& s) const {
 }
 
 string
-SyntaxNode::print()
-{
+SyntaxNode::print() const {
    ostringstream ost;
    ost << (*this);
    return ost.str();
@@ -737,9 +732,8 @@ SyntaxNodeIx::SyntaxNodeIx(SyntaxNode *on) :
 SyntaxNodeIx::printDiagnostic
 -----------------------------------------------------------------------------*/
 void
-SyntaxNodeIx::printDiagnostic(ostream &fout)
-{
-  if (!done_split) splitExpression();
+SyntaxNodeIx::printDiagnostic(ostream &fout) const {
+  assert(done_split);
   fout << "qualifier: " << qualifier << "\n";
   fout << "number of indexing expressions: " << ncomp << "\n";
   for(int i=0;i<ncomp;i++){

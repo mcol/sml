@@ -345,7 +345,10 @@ ModelComp::print()
   cout << "  type: " << ModelComp::nameTypes[type] << "\n";
   cout << "  attributes: " << *attributes << "\n";
   cout << "  indexing: " << *indexing << "\n";
-  if (indexing) indexing->printDiagnostic(cout);
+  if (indexing) {
+    indexing->splitExpression();
+    indexing->printDiagnostic(cout);
+  }
   cout << "  dependencies: " << dependencies.size() << ":\n";
   cout << "      ";
   for(list<ModelComp*>::iterator p = dependencies.begin();
@@ -371,8 +374,11 @@ ModelComp::dump(ostream &fout)
   fout << "MCDP  attributes: " << attributes << "\n";
   if (attributes) attributes->dump(fout);
   fout << "MCDP  indexing: " << indexing << "\n";
-  if (indexing) indexing->printDiagnostic(fout);
-  if (indexing) indexing->dump(fout);
+  if (indexing) {
+    indexing->splitExpression();
+    indexing->printDiagnostic(fout);
+    indexing->dump(fout);
+  }
   fout << "MCDP  dependencies: " << dependencies.size() << ":\n";
   fout << "      ";
   for(list<ModelComp*>::iterator p = dependencies.begin();
@@ -391,10 +397,10 @@ ModelComp::printBrief()
 ---------------------------------------------------------------------------- */
 /** Print a one line description of the object: type and name */
 void
-ModelComp::printBrief()
-{
+ModelComp::printBrief() const {
   cout << ModelComp::nameTypes[type] << " " << id << endl;
 }
+
 /* ---------------------------------------------------------------------------
 ModelComp::tagDependencies()
 ---------------------------------------------------------------------------- */

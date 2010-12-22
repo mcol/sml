@@ -42,11 +42,11 @@ bool SymbolTable::defineSymbol(symb_type type, char *id, ModelComp *mc)
    return true;
 }
 
-SymbolTable::Entry* SymbolTable::findSymbol(const string& id) {
+const SymbolTable::Entry* SymbolTable::findSymbol(const string& id) const {
    /* Calculate hashcode */
    int hash = hash_function(id.c_str()) % n_hash;
 
-   list<Entry>::iterator i;
+   list<Entry>::const_iterator i;
    for(i=table_[hash].begin(); i!=table_[hash].end(); ++i)
      if ((*i).id() == id)
        break;

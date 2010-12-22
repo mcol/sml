@@ -121,7 +121,7 @@ class SyntaxNode {
   virtual ~SyntaxNode();
 
   /** Recursive printing of expression */
-  std::string print();
+  std::string print() const;
 
   /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
       the value of this node as a c_string */
@@ -249,8 +249,8 @@ class SyntaxNodeIx : public SyntaxNode {
   //! copies node and all its subnodes into new datastructures 
   SyntaxNodeIx *deep_copy();    
 
-  //!< diagnostic print of class variables
-  void printDiagnostic(std::ostream &fout);
+  //! Diagnostic printing of member variables
+  void printDiagnostic(std::ostream& fout) const;
 
   /** for nodes that are indexing expressions, get the set that is indexed over
    */

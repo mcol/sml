@@ -432,8 +432,7 @@ string crush(const string& inst) {
 AmplModel::print
 ---------------------------------------------------------------------------- */
 void 
-AmplModel::print()
-{
+AmplModel::print() const {
   printf("AM: ------------------------------------------------------------\n");
   printf("AM: This is AmplModel: %s\n", name.c_str());
   printf("AM: global name: %s\n",global_name.c_str());
@@ -452,7 +451,8 @@ AmplModel::print()
   printf("AM: Nb constraints: %d\n", n_cons);
   printf("AM: Nb objectives: %d\n", n_submodels);
   printf("AM: Entities declared:\n");
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (list<ModelComp*>::const_iterator p = comps.begin();
+       p != comps.end(); ++p) {
     printf("AM:   ");
     (*p)->printBrief();
   }
@@ -460,7 +460,8 @@ AmplModel::print()
   if (n_submodels>0)
     printf("AM: now list the submodels:\n");
   
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (list<ModelComp*>::const_iterator p = comps.begin();
+       p != comps.end(); ++p) {
     ModelComp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
@@ -473,8 +474,7 @@ AmplModel::print()
 AmplModel::dump(const char *filename)
 ---------------------------------------------------------------------------- */
 void 
-AmplModel::dump(const char *filename)
-{
+AmplModel::dump(const char *filename) const {
   ofstream fout(filename);
   dump(fout);
 }
@@ -483,8 +483,7 @@ AmplModel::dump(const char *filename)
 AmplModel::dump(ostream &fout)
 ---------------------------------------------------------------------------- */
 void 
-AmplModel::dump(ostream &fout)
-{
+AmplModel::dump(ostream& fout) const {
   fout << "DUMP: ----------------------------------------------------------\n";
   fout << "DP: This is AmplModel (" << (void *) this << "): " << name << "\n";
   fout << "DP: global name: " << global_name << "\n";
@@ -500,14 +499,16 @@ AmplModel::dump(ostream &fout)
   fout << "DP: Nb constraints: " <<  n_cons << "\n";
   fout << "DP: Nb objectives: " <<  n_submodels << "\n";
   fout << "DP: List components:";
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (list<ModelComp*>::const_iterator p = comps.begin();
+       p != comps.end(); ++p) {
     (*p)->dump(fout);
   }
 
   if (n_submodels>0)
     fout << "DP: now list the submodels:\n";
   
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (list<ModelComp*>::const_iterator p = comps.begin();
+       p != comps.end(); ++p) {
     ModelComp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = (AmplModel*)mc->other;
@@ -823,8 +824,8 @@ AmplModel::findComponent(string id)
  *  It will first search this model's SymbolTable, and if it cannot find
  *  the component it will recurse to its parent node and so on up to the root.
  */
-SymbolTable::Entry *AmplModel::findComponent(const string& id) {
-   SymbolTable::Entry *ent = symbol_table.findSymbol(id);
+const SymbolTable::Entry *AmplModel::findComponent(const string& id) const {
+   const SymbolTable::Entry *ent = symbol_table.findSymbol(id);
    if (!ent && parent)
      ent = parent->findComponent(id);
    return ent;

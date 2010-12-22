@@ -93,7 +93,7 @@ statement:  paramdef
 
 setdef:  SET ID defined_opt setspec_list SEMICOLON {
             // Find symbol
-            SymbolTable::Entry *entry = root->symbol_table.findSymbol($2);
+            const SymbolTable::Entry *entry = root->symbol_table.findSymbol($2);
             if (!entry) {
                cerr << "Data given for set " << $2 << " which has not been"
                   "declared at top level!" << endl;
@@ -188,7 +188,7 @@ object: ID { $$ = new IDNode($1); }
       ;
 
 paramdef:   PARAM ID paramdefault_opt defined_opt paramspec_list SEMICOLON {
-               SymbolTable::Entry *entry =
+               const SymbolTable::Entry *entry =
                   root->symbol_table.findSymbol($2);
                 if (entry==NULL){
                   cerr << "Data given for parameter " << $2 << " which has "

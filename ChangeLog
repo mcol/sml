@@ -1,3 +1,6 @@
+2010-12-22  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Declare more methods as const.
+
 2010-12-21  Marco Colombo  <m.colombo@ed.ac.uk>
   * Cleaned up the included headers, reducing the header dependencies by
     forward-declaring the classes when possible.
