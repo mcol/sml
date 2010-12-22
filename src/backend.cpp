@@ -29,6 +29,8 @@
 
 using namespace std;
 
+static const int MAX_NESTED_LEVELS = 5;
+
 static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
 
@@ -572,8 +574,7 @@ void modified_write(ostream &fout, ModelComp *comp);
 void
 write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
 {
-  AmplModel *listam[5];  /* assume models are not nested further than
-         5 levels */
+  AmplModel *listam[MAX_NESTED_LEVELS];
   int i, level;
   
   SyntaxNode::use_global_names = 1;
@@ -596,6 +597,7 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
       tmp = tmp->parent;
       level++;
       listam[level] = tmp;
+      assert(level < MAX_NESTED_LEVELS);
     }
   }
   if (GlobalVariables::prtLvl>1){
