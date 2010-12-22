@@ -17,23 +17,31 @@
 #ifndef SYMTAB_H
 #define SYMTAB_H
 
-#include <string>
-#include <list>
 #include "ModelComp.h"
+#include <list>
+#include <string>
 
 class SymbolTable {
 public:
    enum symb_type {ST_NONE, ST_PARAM, ST_VAR, ST_CONS, ST_OBJ, ST_SET};
+
    class Entry {
-     public:
-      const std::string id;
+    private:
+      const std::string name;
       const symb_type type;
+     public: // should be private
       ModelComp *mc;
 
      public:
       Entry(const std::string new_id, const symb_type new_type,
             ModelComp *new_mc) :
-         id(new_id), type(new_type), mc(new_mc) {}
+         name(new_id), type(new_type), mc(new_mc) {}
+
+      /** Retrieve the identifier for this entry */
+      const std::string& id() const { return name; }
+ 
+      /** Whether this entry is of type @a t */
+      bool isType(symb_type t) const { return type == t; }
    };
 
 private:

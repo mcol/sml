@@ -30,7 +30,8 @@ bool SymbolTable::defineSymbol(symb_type type, char *id, ModelComp *mc)
 
    /* First check id not already defined, return false if it is */
    for(list<Entry>::iterator i=table_[hash].begin(); i!=table_[hash].end(); ++i)
-      if((*i).id == id) return false;
+     if ((*i).id() == id)
+       return false;
 
    /* Otherwise insert at the start of the list */
    table_[hash].push_back(Entry(id,type,mc));
@@ -47,7 +48,8 @@ SymbolTable::Entry* SymbolTable::findSymbol(const string& id) {
 
    list<Entry>::iterator i;
    for(i=table_[hash].begin(); i!=table_[hash].end(); ++i)
-      if((*i).id == id) break;
+     if ((*i).id() == id)
+       break;
 
    if(i==table_[hash].end()) return NULL;
 
@@ -77,9 +79,8 @@ list<SymbolTable::Entry> SymbolTable::getListByType(const symb_type type) const 
 
    for(int j=0; j<n_hash; j++) {
       for(list<Entry>::const_iterator i=table_[j].begin(); i!=table_[j].end(); ++i) {
-         if(i->type == type) {
+        if (i->isType(type))
             result.push_back(*i);
-         }
       }
    }
 

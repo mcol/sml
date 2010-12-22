@@ -99,9 +99,9 @@ setdef:  SET ID defined_opt setspec_list SEMICOLON {
                   "declared at top level!" << endl;
                exit(1);
             }
-            if(entry->type != SymbolTable::ST_SET) {
+            if (!entry->isType(SymbolTable::ST_SET)) {
                cerr << "Set data given for variable " << $2 << " which was "
-                  "not delcared a set!" << endl;
+                  "not declared a set!" << endl;
                exit(1);
             }
             assert($4->nchild() == 1);
@@ -195,7 +195,7 @@ paramdef:   PARAM ID paramdefault_opt defined_opt paramspec_list SEMICOLON {
                     "not beendeclared at top level!" << endl;
                   exit(1);
                 }
-                if(entry->type != SymbolTable::ST_PARAM) {
+                if (!entry->isType(SymbolTable::ST_PARAM)) {
                   cerr << "Param data given for variable " << $2 << " which "
                     "was not delcared a param!" << endl;
                     exit(1);

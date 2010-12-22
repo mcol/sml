@@ -111,12 +111,13 @@ ExpandedModel::setLocalVarInfo()
     // skip any objectives
     bool isObj = false;
     for(list<SymbolTable::Entry>::const_iterator i=objList.begin(); i!=objList.end(); ++i) {
-       if(line.substr(j,i->id.size()) == i->id) {
-          if(line.size()==j+i->id.size()) {
+      const string id = i->id();
+      if (line.substr(j, id.size()) == id) {
+        if (line.size() == j + id.size()) {
              isObj=true;
              break;
           }
-          if(line.at(j+i->id.size()=='[')) {
+        if (line.at(j + id.size() == '[')) {
              isObj=true;
              break;
           }
