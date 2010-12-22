@@ -109,8 +109,7 @@ AmplModel::setGlobalNameRecursive()
 /** Write all tagged model components in this model and submodels to a file.
  *
  *  @param fout
- *         Name of the file to which to write. If not indicated, the writing
- *         will be directed to the standard output.
+ *         Name of the stream to which to write.
  */
 void
 AmplModel::writeTaggedComponents(ostream &fout)

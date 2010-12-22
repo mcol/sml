@@ -18,7 +18,6 @@
 #define AMPLMODEL_H
 
 #include <list>
-#include <iostream>
 #include <string>
 #include "symtab.h"
 
@@ -131,7 +130,7 @@ class AmplModel{
 
   /** Recursively write out all tagged model components in this model and 
       submodels to file */
-  void writeTaggedComponents(std::ostream &fout = std::cout);
+  void writeTaggedComponents(std::ostream& fout);
                                 
   /** Recursively create an ExpandedModel tree from the flat AmplModel */
   ExpandedModel* createExpandedModel(const std::string& smodelname,
