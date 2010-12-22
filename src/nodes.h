@@ -128,10 +128,10 @@ class SyntaxNode {
   virtual std::string getValue() const { throw std::exception(); return "(fail)"; }
 
   /** Diagnostic printing */
-  void dump(std::ostream &fout);
+  void dump(std::ostream& fout) const;
 
   // node is a dummy var -> remove (..)
-  std::string printDummyVar();
+  std::string printDummyVar() const;
 
   /** Return comma separated list of arguments for IDREF nodes */
   std::string getArgumentList() const;
@@ -153,7 +153,7 @@ class SyntaxNode {
    *  If the expression given by this SyntaxNode is an immediate reference to
    *  a ModelComp then return that, otherwise return NULL.
    */
-  ModelComp *findModelComp();
+  ModelComp *findModelComp() const;
 
   SyntaxNode &merge(const SyntaxNode &src);
 
@@ -442,7 +442,7 @@ class OpNode : public SyntaxNode {
 };
 
 ListNode *addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem);
-std::string print_SyntaxNodesymb(SyntaxNode *node);
+std::string print_SyntaxNodesymb(const SyntaxNode *node);
 
 std::ostream& operator<<(std::ostream& s, const SyntaxNode &node);
 std::ostream& operator<<(std::ostream& s, const SyntaxNode *node);

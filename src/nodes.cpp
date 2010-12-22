@@ -334,16 +334,14 @@ SyntaxNode::print() const {
 }
 
 void 
-SyntaxNode::dump(ostream &fout)
-{
+SyntaxNode::dump(ostream& fout) const {
   fout << print_SyntaxNodesymb(this) << "\n";
 }
 
 string
-print_SyntaxNodesymb(SyntaxNode *node)
-{
-  ValueNode<long> *inode;
-  ValueNode<double> *dnode;
+print_SyntaxNodesymb(const SyntaxNode *node) {
+  const ValueNode<long> *inode;
+  const ValueNode<double> *dnode;
   ostringstream  ost;
 
   if (node==NULL){
@@ -352,12 +350,12 @@ print_SyntaxNodesymb(SyntaxNode *node)
   if (node->opCode==ID){
     return "(ID T)";
   }
-  if ((inode = dynamic_cast<ValueNode<long> *>(node))){
+  if ((inode = dynamic_cast<const ValueNode<long> *>(node))) {
     string temp = "T:";
     temp += inode->getValue();
     return temp;
   }
-  if ((dnode = dynamic_cast<ValueNode<double> *>(node))){
+  if ((dnode = dynamic_cast<const ValueNode<double> *>(node))) {
     string temp = "T:";
     temp += dnode->getValue();
     return temp;
@@ -368,7 +366,7 @@ print_SyntaxNodesymb(SyntaxNode *node)
   switch (node->opCode)
   {
   case IDREF: {
-    SyntaxNodeIDREF *onir= dynamic_cast<SyntaxNodeIDREF*>(node);
+    const SyntaxNodeIDREF *onir= dynamic_cast<const SyntaxNodeIDREF*>(node);
     if (onir==NULL) {
       cerr << "Some IDREF node still not SyntaxNodeIDREF\n";
       exit(1);
@@ -486,8 +484,7 @@ char *SyntaxNode::printDummyVar()
    expression: that is it, is either ID or LBRACKET (COMMA (ID1 .. IDn)) */
 
 string
-SyntaxNode::printDummyVar()
-{
+SyntaxNode::printDummyVar() const {
   if (opCode==ID){
     return this->print();
   }else{
@@ -614,15 +611,14 @@ SyntaxNode::findModelComp()
  *  @return The ModelComp only if the expression given by this SyntaxNode is
  *          an immediate reference to a ModelComp, otherwise NULL.
  */
-ModelComp *SyntaxNode::findModelComp()
-{
-  SyntaxNode *on = this;
+ModelComp *SyntaxNode::findModelComp() const {
+  const SyntaxNode *on = this;
   while ((on->opCode==LBRACKET || on->opCode==LBRACE) && on->nval==1){
     on = on->values[0];
   }
 
   if (opCode==IDREF){
-    SyntaxNodeIDREF *onref = dynamic_cast<SyntaxNodeIDREF*>(this);
+    const SyntaxNodeIDREF *onref = dynamic_cast<const SyntaxNodeIDREF*>(this);
     return onref->ref;
   }
   return NULL;
