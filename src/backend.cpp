@@ -32,7 +32,7 @@ using namespace std;
 static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
 
-void write_ampl_for_submodel(ostream &fout, AmplModel *submodel);
+static void write_ampl_for_submodel(ostream& fout, AmplModel *submodel);
 static void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 
 /* Stack of indexing expressions that are applicable to all variables that
@@ -127,7 +127,7 @@ process_model
     5) generate the corresponding structure files that partition the 
        *.nl files by columns
 */
-void fill_model_list_(AmplModel *model, list<AmplModel*> &listam);
+static void fill_model_list_(AmplModel *model, list<AmplModel*>& listam);
 
 int
 process_model(AmplModel *model, const string& datafilename) {
