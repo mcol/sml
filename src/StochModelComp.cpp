@@ -261,7 +261,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         }
         // up is now a pointer into the expression, this should
         // replace the EXP node?
-        (*p)->opCode = 0;
         (*p)->clear();
         (*p)->push_back(up);
       }else{
@@ -334,7 +333,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         cslon = new SyntaxNode(SUM, cslon, up);
         //cout << "This is the sum: " << cslon->print() << "\n";
 
-        (*p)->opCode = 0;
         (*p)->clear();
         (*p)->push_back(cslon);
         
