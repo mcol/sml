@@ -41,7 +41,9 @@
  *  nested set of AmplModels. 
  */
 class StochModel: public AmplModel{
- public:
+
+ private:
+
   // FIXME: stage should be replaced by a Set (decribing the elements)
 
   //! The set of STAGES
@@ -65,9 +67,11 @@ class StochModel: public AmplModel{
   //! The parameter array of ancestors
   SyntaxNode *anc;
 
+ public:
   //! The parameter array of probabilities
   SyntaxNode *prob;
 
+ public:
   // -------------------------- methods ----------------------------------
   //! Constructor 
   StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
