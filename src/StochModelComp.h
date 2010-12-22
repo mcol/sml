@@ -59,7 +59,9 @@ class StochModelComp: public ModelComp {
   StochModel *stochmodel;
 
   /* ======================== methods =================================== */
-  StochModelComp();  //!< constructor that sets everything to default values
+
+  //! Constructor that sets everything to default values
+  StochModelComp(const std::string& id);
 
   //! Constructor
   StochModelComp(const std::string& id_, compType type,

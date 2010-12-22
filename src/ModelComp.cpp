@@ -164,9 +164,9 @@ ModelComp::setUpDependencies()
 ModelComp::ModelComp()
 ---------------------------------------------------------------------------- */
 /** Default constructor: just sets all fields to -1/NULL/false               */
-ModelComp::ModelComp() :
+ModelComp::ModelComp(const string& id_) :
   type(TNOTYPE),
-  id(""),
+  id(id_),
   attributes(NULL),
   indexing(NULL),
   model(NULL),
@@ -430,10 +430,9 @@ ModelComp::deep_copy()
 ModelComp *
 ModelComp::deep_copy()
 {
-  ModelComp *newm = new ModelComp();
+  ModelComp *newm = new ModelComp(id);
 
   newm->type = type;
-  newm->id = id;
   if (attributes) newm->attributes = attributes->deep_copy();
   if (indexing) newm->indexing = indexing->deep_copy();
   newm->dependencies = dependencies;
@@ -453,10 +452,9 @@ ModelComp::clone()
 ModelComp *
 ModelComp::clone()
 {
-  ModelComp *newm = new ModelComp();
+  ModelComp *newm = new ModelComp(id);
 
   newm->type = type;
-  newm->id = id;
   newm->attributes = attributes;
   newm->indexing = indexing;
   newm->dependencies = dependencies;

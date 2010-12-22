@@ -26,9 +26,8 @@ using namespace std;
 
 static bool prtSM = false;
 
-StochModelComp::StochModelComp():
-  ModelComp()
-{}
+StochModelComp::StochModelComp(const string& id_):
+  ModelComp(id_) {}
 
 StochModelComp::StochModelComp(const string& id_, compType type_,
                                SyntaxNode *indexing_, SyntaxNode *attrib):
@@ -370,10 +369,9 @@ StochModelComp::clone()
   //  => I guess no, since this would create a ModelComp object and not a
   //     StochModelComp
 
-  StochModelComp *newsmc = new StochModelComp();
+  StochModelComp *newsmc = new StochModelComp(id);
 
   newsmc->type = type;
-  newsmc->id = id;
   newsmc->attributes = attributes;
   newsmc->indexing = indexing;
   newsmc->dependencies = dependencies;

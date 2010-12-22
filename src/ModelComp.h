@@ -89,7 +89,7 @@ class ModelComp{
             SyntaxNode *indexing, SyntaxNode *attrib);
 
   /** Default constructor */
-  ModelComp();
+  ModelComp(const std::string& id);
 
   /** Destructor */
   virtual ~ModelComp();

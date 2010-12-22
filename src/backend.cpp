@@ -748,10 +748,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
              The ModelComp is of type SET, with no indexing expression
           */
           {
-            ModelComp newmc;
             SyntaxNode *setn = ai.set;
-            
-            newmc.type = TSET;
             
             // set name of the ModelComp
             if (setn->opCode!=IDREF){
@@ -765,7 +762,8 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               exit(1);
             }
             ModelComp *setmc = setnref->ref;
-            newmc.id = setmc->id + "_SUB";
+            ModelComp newmc(setmc->id + "_SUB");
+            newmc.type = TSET;
             
             // and build "within indset" as attribute tree
             newmc.attributes = new SyntaxNode(WITHIN, setn);
