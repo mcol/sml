@@ -73,6 +73,21 @@ StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *on
   expandStages();
 }
 
+/** Build the command to call Ampl and run it */
+static void callAmpl() {
+  string command = GlobalVariables::amplcommand;
+  command += " tmp.scr";
+  if (GlobalVariables::prtLvl >= 1)
+    cout << "Executing '" << command << "'\n";
+  else
+    command += " 2> /dev/null";
+
+  int errc = system(command.c_str());
+  if (errc) {
+    cerr << "ERROR: Call to AMPL returns error code " << errc << endl;
+    exit(1);
+  }
+}
 
 /* ---------------------------------------------------------------------------
 expandSet()
@@ -112,18 +127,7 @@ static vector<string> expandSet(SyntaxNode *set) {
   out << "display settemp > (\"tmp.out\");\n";
   out.close();
   
-  {
-    string command = GlobalVariables::amplcommand;
-    command += " tmp.scr";
-    if(GlobalVariables::prtLvl>=1) {
-      cout << "Executing `" << command << "`\n";
-    }
-    int errc = system(command.c_str());
-    if (errc!=0){
-      cerr << "ERROR: Call to AMPL returns errc=" << errc << endl;
-      exit(1);
-    }
-  }
+  callAmpl();
 
   ifstream in("tmp.out");
   if (!in){
@@ -248,20 +252,7 @@ StochModel::expandStagesOfComp()
   }
   out.close();
 
-  {
-    string command = GlobalVariables::amplcommand;
-    command += " tmp.scr";
-    if(GlobalVariables::prtLvl>=1) {
-      cout << "Executing `" << command << "`\n";
-    } else {
-      command += " 2> /dev/null";
-    }
-    int errc = system(command.c_str());
-    if (errc!=0){
-      cerr << "ERROR: Call to AMPL returns error code " << errc << ".\n";
-      exit(1);
-    }
-  }
+  callAmpl();
 
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
