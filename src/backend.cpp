@@ -62,6 +62,16 @@ print_entry(const ModelComp *entry) {
   cout << "       " << *(entry->attributes) << "\n";
 }
 
+static void
+print_entries(AmplModel *model, compType type) {
+  list<ModelComp*>::iterator p;
+  for (p = model->comps.begin(); p != model->comps.end(); ++p) {
+    ModelComp *entry = *p;
+    if (entry->type == type)
+      print_entry(entry);
+  }
+}
+
 void
 print_model(AmplModel *model)
 {
@@ -73,43 +83,22 @@ print_model(AmplModel *model)
   cout << "-------------------------- backend::print_model ----------------"
      "----------\n";
   cout << "Model: " << model->name << "\n";
+
   cout << "n_sets: " << model->n_sets << "\n";
-  for (p = model->comps.begin(); p != model->comps.end(); p++) {
-    entry = *p;
-    if (entry->type==TSET){
-      print_entry(entry);
-    }
-  }
+  print_entries(model, TSET);
+
   cout << "n_cons: " << model->n_cons << "\n";
-  for (p = model->comps.begin(); p != model->comps.end(); p++) {
-    entry = *p;
-    if (entry->type==TCON){
-      print_entry(entry);
-    }
-  }
+  print_entries(model, TCON);
+
   cout << "n_vars: " << model->n_vars << "\n";
-  for (p = model->comps.begin(); p != model->comps.end(); p++) {
-    entry = *p;
-    if (entry->type==TVAR){
-      print_entry(entry);
-    }
-  }
+  print_entries(model, TVAR);
+
   cout << "n_params: " << model->n_params << "\n";
-  for (p = model->comps.begin(); p != model->comps.end(); p++) {
-    entry = *p;
-    if (entry->type==TPARAM){
-      print_entry(entry);
-    }
-  }
+  print_entries(model, TPARAM);
 
   cout << "n_obj: "<< model->n_objs;
-  for (p = model->comps.begin(); p != model->comps.end(); p++) {
-    entry = *p;
-    if (entry->type==TMIN||entry->type==TMAX){
-      print_entry(entry);
-    }
-  }
-  
+  print_entries(model, TMAX);
+
   cout << "submodels: " << model->n_submodels << "\n";
   for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
