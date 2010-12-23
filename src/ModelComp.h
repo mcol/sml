@@ -153,10 +153,10 @@ class ModelComp{
 };
 
 std::string
-getGlobalName(ModelComp *node, const SyntaxNode *opn, 
-	      AmplModel *current_model, int witharg);
+getGlobalName(const ModelComp *node, const SyntaxNode *opn,
+	      const AmplModel *current_model, int witharg);
 std::string
-getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, 
-	      AmplModel *current_model, int witharg);
+getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,
+                 const AmplModel *current_model, int witharg);
 
 #endif

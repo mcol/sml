@@ -512,11 +512,11 @@ getGlobalName
  *        node (likely set up to the current_model).
  */
 string
-getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
-              int witharg)
-{
+getGlobalName(const ModelComp *node, const SyntaxNode *opn,
+              const AmplModel *current_model, int witharg) {
+
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
-  AmplModel *tmp;
+  const AmplModel *tmp;
   string arglist;
   int n_index = 0;
 
@@ -563,7 +563,7 @@ getGlobalName(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model,
 
   // ---- find the common ancestor of current_model and model of component ---
   {
-    AmplModel *path1[5], *path2[5];
+    const AmplModel *path1[5], *path2[5];
     int n_path1, n_path2;
 
     n_path1=1;n_path2=1;
@@ -713,11 +713,11 @@ getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model,
  *   be prepended to the argument list
  */
 string
-getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_model, 
-              int witharg)
-{
+getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,
+                 const AmplModel *current_model, int witharg) {
+
   AmplModel *model_of_comp = node->model;/* this is the model it belongs to */
-  AmplModel *tmp;
+  const AmplModel *tmp;
   string arglist;
   int n_index = 0;
 
@@ -764,7 +764,7 @@ getGlobalNameNew(ModelComp *node, const SyntaxNode *opn, AmplModel *current_mode
 
   // ---- find the common ancestor of current_model and model of component ---
   {
-    AmplModel *path1[5], *path2[5];
+    const AmplModel *path1[5], *path2[5];
     int n_path1, n_path2;
 
     n_path1=1;n_path2=1;
