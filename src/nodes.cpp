@@ -957,7 +957,7 @@ SyntaxNodeIDREF *SyntaxNodeIDREF::deep_copy()
 SyntaxNodeIDREF*
 SyntaxNodeIDREF::deep_copy()
 {
-  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode);
+  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode, ref);
 
   newn->nval = nval;
   if (nval>0){
@@ -965,10 +965,6 @@ SyntaxNodeIDREF::deep_copy()
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i]->deep_copy();
   }
-
-  // this is a ModelComp that needs to be cloned as well
-  //newn->ref = ref->clone();
-  newn->ref = ref;
   newn->stochparent = stochparent;
 
   return newn;
@@ -980,7 +976,7 @@ SyntaxNodeIDREF *SyntaxNodeIDREF::clone()
 SyntaxNodeIDREF *
 SyntaxNodeIDREF::clone()
 {
-  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode);
+  SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode, ref);
 
   newn->nval = nval;
   if (nval>0){
@@ -988,8 +984,6 @@ SyntaxNodeIDREF::clone()
     for(int i=0;i<nval;i++)
       newn->values[i] = values[i];
   }
-  newn->ref = ref;
-  //  newn->ref = ref->clone();
   newn->stochparent = stochparent;
 
   return newn;

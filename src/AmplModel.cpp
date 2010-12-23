@@ -876,11 +876,11 @@ SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
 
          SyntaxNodeIDREF *ret;
          if(thismc->type==TMODEL) {
-           ret = new SyntaxNodeIDREF(IDREFM);
+           ret = new SyntaxNodeIDREF(IDREFM, thismc);
          } else {
-           ret = new SyntaxNodeIDREF(IDREF);
+           ret = new SyntaxNodeIDREF(IDREF, thismc);
          }
-         ret->ref = thismc;
+
          return ret;
       }
    }

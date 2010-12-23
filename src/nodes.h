@@ -341,10 +341,15 @@ class SyntaxNodeIDREF : public SyntaxNode {
    */
   int stochparent;
 
+ public:
+
   // ---------------------------- methods -----------------------------
-  // constructor
+
+  /** Default constructor */
   SyntaxNodeIDREF(ModelComp *r=NULL, SyntaxNode *val1=NULL);
-  SyntaxNodeIDREF(int opCode, ModelComp *r=NULL);
+
+  /** Constructor */
+  SyntaxNodeIDREF(int opCode, ModelComp *r);
   
   /** Creates a shallow copy: points to the same components as the original */
   SyntaxNodeIDREF *clone();
