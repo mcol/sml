@@ -320,7 +320,7 @@ AmplModel::createExpandedModel(const string& smodelname,
       // - work out the set and the names of the subproblem instancestub
       // - create the ExpandedModel nodes by calling this routine
       
-      string nameSetFile = smodelname+"_"+string(mc->id);
+      string nameSetFile = smodelname + "_" + mc->id;
       if (sinstanceStub.length() > 0)
         nameSetFile += "_" + sinstanceStub;
       
@@ -344,7 +344,7 @@ AmplModel::createExpandedModel(const string& smodelname,
         list<string>* li = getListOfInstances(fset);
 
         for(list<string>::iterator q=li->begin();q!=li->end();q++){
-          string subModelName = smodelname+"_"+string(mc->id);
+          string subModelName = smodelname + "_" + mc->id;
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
           subModelInst += crush(*q);
@@ -361,7 +361,7 @@ AmplModel::createExpandedModel(const string& smodelname,
 
       }else{
         // if this node is not repeated over an indexing set
-        string subModelName = smodelname+"_"+string(mc->id);
+        string subModelName = smodelname + "_" + mc->id;
         string subModelInst;
         if(GlobalVariables::prtLvl>=1)
           cout << subModelName << ":" << sinstanceStub << endl;
