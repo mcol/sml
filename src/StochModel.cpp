@@ -31,7 +31,7 @@ using namespace std;
 static bool logSM = false;
 
 static void splitIn(SyntaxNode *expr, IDNode **dummy, SyntaxNode **set) {
-   if(expr->opCode == IN) {
+  if (expr->getOpCode() == IN) {
       SyntaxNode::iterator i = expr->begin();
       *dummy = static_cast<IDNode *>(*i);
       *set = *(++i);

@@ -151,7 +151,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   memset(values, 0, n * sizeof(double));
 
   // the paramdefinition is a list of PARAMSPEC's
-  assert(desc->opCode==TOKPARAMSPECLIST);
+  assert(desc->getOpCode() == TOKPARAMSPECLIST);
 
   // the value list at the heart of the parameter specification is a list 
   // of the form
@@ -166,19 +166,19 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     paramspec = *i;
 
     // either of which can have a param_template
-    if (paramspec->opCode==TOKPARAMTEMPLATE){
+    if (paramspec->getOpCode() == TOKPARAMTEMPLATE) {
       SyntaxNode::iterator psi = paramspec->begin();
       templ = (SyntaxNode*)*psi;
       paramspec = (SyntaxNode*)*(++psi);
     }
 
     // now this can be either a "value list" or a "value table list"
-    if (paramspec->opCode==TOKVALUETABLELIST){
+    if (paramspec->getOpCode() == TOKVALUETABLELIST)
       processValueTableList(paramspec, ix);
-    }else{
+    else {
       // this is a value list, i.e. a ' '-separated list of values
       // need to know the dimension of the parameter
-      assert(paramspec->opCode==' ');
+      assert(paramspec->getOpCode() == ' ');
       int nval = paramspec->nchild()/(nobj+1);
       if (paramspec->nchild()%(nobj+1)!=0){
         cerr << "ERROR: Paramdef requires " << nobj << " position specifiers.\n"
@@ -204,7 +204,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
           pos_in_array += indices[k]->findPos(SetElement(1,&obj));
         }          
         SyntaxNode *on = (*((ListNode *)paramspec))[pos_in_paramspec+nobj];
-        assert(on->opCode==ID||on->opCode==-99);
+        assert(on->getOpCode() == ID || on->getOpCode() == -99);
         values[pos_in_array] = ((ValueNodeBase*)on)->getFloatVal();
         nread++;
       }// end loop over j
@@ -298,7 +298,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
   // loop through all value_table's
   for(SyntaxNode::iterator i=node->begin(); i!=node->end(); ++i){
     SyntaxNode *on_valtab = (SyntaxNode*)*i;
-    assert(on_valtab->opCode==TOKVALUETABLE);
+    assert(on_valtab->getOpCode() == TOKVALUETABLE);
     
     // get the dimensions of the value_table_list
     assert(on_valtab->nchild()==2);
@@ -323,13 +323,13 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
     int jj=0;
     for(SyntaxNode::iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
       SyntaxNode *cl = (SyntaxNode*)*j;
-      assert(cl->opCode==ID || cl->opCode==LBRACKET);
+      assert(cl->getOpCode() == ID || cl->getOpCode() == LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label
       
       // make the label into a SetElement
       if (indices[ixcolset]->dim()>1){
-        if (cl->opCode!=LBRACKET){
+        if (cl->getOpCode() != LBRACKET) {
           cerr << "ERROR: col_label for multidimensional set '"
                << ix->sets_mc[ixcolset]->id
                << "' must be a bracketed '(..,..)' expression.\n";
@@ -343,7 +343,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
           exit(1);
         }
         cl = *(cl->begin());
-        assert(cl->opCode==COMMA);
+        assert(cl->getOpCode() == COMMA);
         ListNode *cll = (ListNode*) cl;
         IDNode *cli = (IDNode *) (*cll)[0];
         colpos[jj] = indices[ixcolset]->findPos(SetElement(1,&cli));
@@ -357,13 +357,13 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
     for(int j=0;j<nrow;j++){
       int pos = j*(ncol+1); // get position of next row label
       SyntaxNode *rl = (*on_values)[pos];
-      assert(rl->opCode==ID || rl->opCode==LBRACKET);
+      assert(rl->getOpCode() == ID || rl->getOpCode() == LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label
       
       // make the label into a SetElement
       if (indices[ixrowset]->dim()>1){
-        if (rl->opCode!=LBRACKET){
+        if (rl->getOpCode() != LBRACKET) {
           cerr << "ERROR: row_label for multidimensional set '"
                << ix->sets_mc[ixrowset]->id
                << "' must be a bracketed '(..,..)' expression.\n";
@@ -377,7 +377,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
           exit(1);
         }
         rl = *(rl->begin());
-        assert(rl->opCode==COMMA);
+        assert(rl->getOpCode() == COMMA);
         IDNode *rli = (IDNode *) *(rl->begin());
         rowpos[j] = indices[ixrowset]->findPos(SetElement(1, &rli));
       }else{

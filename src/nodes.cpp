@@ -89,7 +89,7 @@ addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem)
   if(!newitem) return list;
 
   if (list){
-    assert(oc==list->opCode);
+    assert(oc == list->getOpCode());
     return (ListNode*) list->push_back(newitem);
   }else{
     assert(oc==' '||oc==COMMA);
@@ -127,11 +127,10 @@ ostream& SyntaxNode::put(ostream&s) const {
      for(int j=0; j<level; ++j) cout << " ";
      if(level!=0) cout << "-";
      level++;
-     cout << "here " << this->opCode << "(" << node << ")\n";
+     cout << "here " << this->getOpCode() << "(" << node << ")\n";
   }*/
 
-  switch (this->opCode)
-    {
+  switch (this->getOpCode()) {
     case 0:          s << **i;                           break;
       /* these are lots of simple binary operators */
     case ID:
@@ -235,7 +234,7 @@ ostream& SyntaxNode::put(ostream&s) const {
       break;
     default: 
       s << endl;
-      cerr << "Unknown opcode " << this->opCode << "\n";
+      cerr << "Unknown opcode " << this->getOpCode() << "\n";
       cerr << ".nval = " << this->nval << "\n";
       for(; i!=this->end(); ++i) {
          cerr << "val[" << **i << "]\n";
@@ -347,9 +346,8 @@ print_SyntaxNodesymb(const SyntaxNode *node) {
   if (node==NULL){
     return "NULL";
   }
-  if (node->opCode==ID){
+  if (node->getOpCode() == ID)
     return "(ID T)";
-  }
   if ((inode = dynamic_cast<const ValueNode<long> *>(node))) {
     string temp = "T:";
     temp += inode->getValue();
@@ -363,8 +361,7 @@ print_SyntaxNodesymb(const SyntaxNode *node) {
 
   // start new version
   // print node symbol
-  switch (node->opCode)
-  {
+  switch (node->getOpCode()) {
   case IDREF: {
     const SyntaxNodeIDREF *onir= dynamic_cast<const SyntaxNodeIDREF*>(node);
     if (onir==NULL) {
@@ -385,7 +382,7 @@ print_SyntaxNodesymb(const SyntaxNode *node) {
   case '+':    ost << "\"+\""; break;
   case '*':    ost << "\"*\""; break;
   default:
-    ost << "\"" << node->opCode << "\"";
+    ost << "\"" << node->getOpCode() << "\"";
   }
   ost << "(";
   for(SyntaxNode::iterator i=node->begin(); i!=node->end(); ++i){
@@ -635,9 +632,10 @@ SyntaxNode *SyntaxNodeIx::getIndexingSet()
 
   if (ix==NULL) return NULL;
   /* remove outside braces from indexing expression */
-  if (ix->opCode==LBRACE) ix = *(ix->begin());
+  if (ix->getOpCode() == LBRACE)
+    ix = *(ix->begin());
   /* assumes that the next level is the 'IN' keyword (if present) */
-  if (ix->opCode==IN){
+  if (ix->getOpCode() == IN) {
     SyntaxNode::iterator i = ix->begin();
     dummyVar = *i;
     set = *(++i);
@@ -661,7 +659,7 @@ SyntaxNode::getArgumentList() const
 {
    const SyntaxNodeIDREF *on;
    string arglist = "";
-   if (opCode!=IDREF){
+   if (getOpCode() != IDREF) {
       cerr << "Can only call getArgumentList for SyntaxNodes of type IDREF\n";
       exit(1);
    }
@@ -749,11 +747,11 @@ SyntaxNodeIx::getListDummyVars()
   for(int i=0;i<ncomp;i++){
     SyntaxNode *dv = dummyVarExpr[i];
     // a dummy var expression is either ID/IDREF or (ID1,...IDn)
-    if (dv->opCode==ID||dv->opCode==IDREF){
+    if (dv->getOpCode() == ID || dv->getOpCode() ==IDREF ) {
       l.push_back(dv);
-    }else if(dv->opCode==LBRACKET){
+    }else if(dv->getOpCode() == LBRACKET) {
       dv = *(dv->begin());
-      if (dv->opCode!=COMMA){
+      if (dv->getOpCode() != COMMA) {
 	     cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
 	     cerr << "Given expression: " << dv << "\n";
 	     exit(1);
@@ -796,7 +794,7 @@ void SyntaxNodeIx::splitExpression()
 
   tmp = *(this->begin());
   // discard the colon (if there is one present: only interested in lhs) 
-  if (tmp->opCode==COLON) {
+  if (tmp->getOpCode() == COLON) {
     SyntaxNode::iterator tj = tmp->begin();
     tmp = *tj; // step down tree
     qualifier = *(++tj); // qualifier from previous node
@@ -804,7 +802,7 @@ void SyntaxNodeIx::splitExpression()
     qualifier = NULL;
   }
   /* this should now be a comma separated list */
-  if (tmp->opCode==COMMA){
+  if (tmp->getOpCode() == COMMA) {
     ListNode *tmpl = static_cast<ListNode*>(tmp);
     ncomp = tmp->nchild();
     this->sets = new SyntaxNode*[ncomp];
@@ -877,22 +875,22 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
     if (!tmp) continue; // no dummy var, just a set.
 
     // this is either ID or (ID,   ,ID)
-    if (tmp->opCode==ID){
+    if (tmp->getOpCode() == ID) {
       IDNode *tmpid = (IDNode *) tmp;
       if (logCreate) cout << "Found dummy variable: " << tmpid->id() << "\n";
       if (name == tmpid->id())
         ret = tmp;
     }else{
       /* This is a multidimensional dummy variable: */
-      assert(tmp->opCode==LBRACKET);
+      assert(tmp->getOpCode() == LBRACKET);
       tmp = *(tmp->begin());
       ListNode *tmpl = static_cast<ListNode*>(tmp);
       // and this should be a comma separated list
       assert(tmpl);
-      assert(tmpl->opCode==COMMA);
+      assert(tmpl->getOpCode() == COMMA);
       for(ListNode::literator j=tmpl->lbegin(); j!=tmpl->lend(); ++j){
         // items on the list should be ID
-        assert((*j)->opCode==ID);
+        assert((*j)->getOpCode() == ID);
         IDNode *tmp2 = (IDNode *) *j;
         if (logCreate)
 	  cout << "Found dummy variable: " << tmp2->id() << "\n";
@@ -1082,7 +1080,8 @@ findKeywordinTree
 SyntaxNode *
 findKeywordinTree(SyntaxNode *root, int oc)
 {
-   if (root->opCode==oc) return root;
+  if (root->getOpCode() == oc)
+    return root;
 
    SyntaxNode *found, *res;
    found = NULL;
@@ -1160,16 +1159,16 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
    if (GlobalVariables::logParseModel)
       cout << "find_var_ref_in_context: " << ref << "\n";
 
-   if (ref->opCode==ID){
+   if (ref->getOpCode() == ID) {
       idNode = (IDNode *)ref;
       argNode = NULL;
    }else{
-      assert(ref->opCode==LSBRACKET||ref->opCode==LBRACKET);
+      assert(ref->getOpCode() == LSBRACKET || ref->getOpCode() == LBRACKET);
       SyntaxNode::iterator i = ref->begin();
       idNode = (IDNode*)*i;
       argNode = (ListNode*) *(++i);
-      assert(idNode->opCode==ID);
-      assert(argNode->opCode==COMMA);
+      assert(idNode->getOpCode() == ID);
+      assert(argNode->getOpCode() == COMMA);
    }
 
    // Test if this ID node is actually of type SyntaxNodeID and if so remember
@@ -1210,7 +1209,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       //free(idNode->values); // jdh - what does this do?
       for(ListNode::literator i=argNode->lbegin(); i!=argNode->lend(); ++i)
          ret->push_back(*i);
-      if (ref->opCode==LBRACKET){
+      if (ref->getOpCode() == LBRACKET) {
          // this is old code to deal with ancestor(1).ID declarations. To go
          cerr << "Executing old code to deal with ancestor(1).ID "
             "declarations\n";

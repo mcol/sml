@@ -257,11 +257,13 @@ process_model(AmplModel *model, const string& datafilename) {
       list<add_index> li;
       if (ix){
         add_index ai;
-        if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin());
+        if (ix->getOpCode() == LBRACE)
+          ix = (SyntaxNode*)*(ix->begin());
+
         /* assumes that the next level is the 'IN' keyword (if present) */
         dummyVar = NULL;
         set = ix;
-        if (set->opCode==IN){
+        if (set->getOpCode() == IN) {
           SyntaxNode::iterator ixi = set->begin();
           dummyVar = *ixi;
           set = *(++ixi);
@@ -721,8 +723,9 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           // and place the indexing expression of this BLOCK onto the stack
           // the stack stores the dummy variable and the SET separately, 
           // so take them to bits here
-          if (ix->opCode==LBRACE) ix = (SyntaxNode*)*(ix->begin()); // rem {..}
-          if (ix->opCode==IN){
+          if (ix->getOpCode() == LBRACE)
+            ix = (SyntaxNode*)*(ix->begin()); // rem {..}
+          if (ix->getOpCode() == IN) {
              SyntaxNode::iterator ixi = ix->begin();
             ai.dummyVar = *ixi;
             ai.set = *(++ixi);
@@ -751,7 +754,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             SyntaxNode *setn = ai.set;
             
             // set name of the ModelComp
-            if (setn->opCode!=IDREF){
+            if (setn->getOpCode() != IDREF) {
               cerr << "At the moment can index blocks only with simple sets\n";
               cerr << "Indexing expression is " << setn->print() << "\n";
               exit(1);
@@ -776,7 +779,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           //fprintf(fout, "set %s_SUB within %s;\n", 
           //      print_SyntaxNode(setn), print_SyntaxNode(setn));
           /* and now modify the set declaration */
-          if (setn->opCode!=IDREF){
+          if (setn->getOpCode() != IDREF) {
             cerr << "At the moment can index blocks only with simple sets\n";
             cerr << "Indexing expression is " << setn->print() << "\n";
             exit(1);
@@ -926,7 +929,8 @@ modified_write(ostream &fout, ModelComp *comp)
         if (ix.dummyVar)
           fout << ix.dummyVar << " in ";
         ixsn = ix.set;
-        if (ixsn->opCode==LBRACE) ixsn=(SyntaxNode*)*ixsn->begin(); 
+        if (ixsn->getOpCode() == LBRACE)
+          ixsn = (SyntaxNode*)*ixsn->begin();
         fout << ixsn;
       }
     }
@@ -934,7 +938,8 @@ modified_write(ostream &fout, ModelComp *comp)
     if (comp->indexing) {
       if (first) {first = 0;} else {fout << ",";}
       ixsn = comp->indexing;
-      if (ixsn->opCode==LBRACE) ixsn=(SyntaxNode*)*(ixsn->begin()); 
+      if (ixsn->getOpCode() == LBRACE)
+        ixsn = (SyntaxNode*)*(ixsn->begin());
       fout << ixsn;
     }
     if (c_addIndex>0 || comp->indexing)

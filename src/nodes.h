@@ -17,8 +17,8 @@
 #ifndef NODES_H
 #define NODES_H
 
-#include <sstream>
 #include <list>
+#include <sstream>
 #include <vector>
 
 class ModelComp;
@@ -83,10 +83,10 @@ class SyntaxNode {
   /** Clear the child list */
   virtual void clear() { opCode = 0; nval = 0; delete[] values; values = NULL; }
 
+ protected:
+
   /** ID CODE of this node (a list can be found in ampl.tab.h) */
   int opCode;
-
- protected:
 
   /** Number of arguments */
   int nval;
@@ -119,6 +119,9 @@ class SyntaxNode {
 
   /** Destructor */
   virtual ~SyntaxNode();
+
+  /** Retrieve the opCode */
+  int getOpCode() const { return opCode; }
 
   /** Recursive printing of expression */
   std::string print() const;

@@ -231,7 +231,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
     SyntaxNode *child = *((*p)->begin());
 
-    if (child->opCode!=COMMA||child->nchild()==1){
+    if (child->getOpCode() != COMMA || child->nchild() == 1) {
       // this is the "one argument" use if Exp within an objective function
       if (type==TMIN || type==TMAX){
         // set "up" to the argument of Exp(...)
@@ -305,7 +305,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
           // cnix might contain a '{' => strip it if present
           SyntaxNode *cnixon = cnix;
-          if (cnixon->opCode==LBRACE) cnixon = (SyntaxNode*)*(cnixon->begin());
+          if (cnixon->getOpCode() == LBRACE)
+            cnixon = (SyntaxNode*)*(cnixon->begin());
           listofsum.push_front(cnixon->deep_copy());
           
           thisam = thisam->parent;
@@ -344,7 +345,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         newmc->moveUp(level);
       }
     }
-    if (child->opCode==COMMA&&child->nchild()>1){
+    if (child->getOpCode() == COMMA && child->nchild() > 1) {
       // this is the two argument version of Exp(..., ...)
       // the second argument is the stage in which the expression should
       // be averaged

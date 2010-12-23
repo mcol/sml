@@ -52,17 +52,17 @@ Set::Set(const ListNode &list):
 {
   SyntaxNode *item;
 
-  assert(list.opCode==' ');
+  assert(list.getOpCode() == ' ');
   
   // have a look at the first item to get the dimension of the set
   item = list[0];
-  if (item->opCode==ID||item->opCode==-99){
+  if (item->getOpCode() == ID || item->getOpCode() ==- 99)
     this->dim_ = 1;
-  }else{
+  else {
     // otherwise this needs to be an element of form (.., .., ..)
-    assert(item->opCode==LBRACKET);
+    assert(item->getOpCode() == LBRACKET);
     item = *(item->begin());
-    assert(item->opCode==COMMA);
+    assert(item->getOpCode() == COMMA);
     this->dim_ = item->nchild();
   }
   
@@ -77,14 +77,14 @@ Set::Set(const ListNode &list):
       array[0] = (char *) item->getValue().c_str();
       add(SetElement(1,array));
     }else{
-      assert(item->opCode==LBRACKET);
+      assert(item->getOpCode() == LBRACKET);
       item = (SyntaxNode*)*(item->begin());
-      assert(item->opCode==COMMA);
+      assert(item->getOpCode() == COMMA);
       if (dim_==item->nchild()){
         int j = 0;
         for(SyntaxNode::iterator k=item->begin(); k!=item->end(); ++k){
           SyntaxNode *idnd = (SyntaxNode*)*k;
-          assert(idnd->opCode==ID);
+          assert(idnd->getOpCode() == ID);
           array[j++] = (char*)*(idnd->begin());
         }
         add(SetElement(dim_, array));
