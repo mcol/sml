@@ -226,15 +226,26 @@ class SyntaxNodeIx : public SyntaxNode {
     SyntaxNode(opCode_), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
     dummyVarExpr(NULL), done_split(0) {};
 
+  //! Whether the extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
+  bool done_split;
+
+  //! Number of 'dummy IN set'-type expressions
+  int ncomp;
+
+  //! List of the dummyVarExpressions
+  SyntaxNode **dummyVarExpr;
+
+  //! List of the set expressions
+  SyntaxNode **sets;
+
+  //! The expresson to the right of the ':' (if present)
+  SyntaxNode *qualifier;
+
  public:
 
-  SyntaxNode *qualifier;    //!< the stuff to the right of ':' (if present)
-  int ncomp;            //!< number of 'dummy IN set'-type expressions
-  SyntaxNode **sets;        //!< list of the set expressions
   ModelComp **sets_mc;  //!< list of ModelComp for the indexing sets
-  SyntaxNode **dummyVarExpr;//!< list of the dummyVarExpressions
-  // private:            
-  int done_split; //!< indicates that extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
+
+ public:
   // --------------------------- methods ----------------------------------
 
   //! Constructor
@@ -245,6 +256,15 @@ class SyntaxNodeIx : public SyntaxNode {
 
   //! returns list of all dummy variables defined by this index'g expression 
   std::list<SyntaxNode *> getListDummyVars();
+
+  //! Retrieve the number of indexing expressions
+  int getNComp() { return ncomp; }
+
+  //! Retrieve the dummy variable for the specified indexing expression
+  SyntaxNode* getDummyVarExpr(int i) { return dummyVarExpr[i]; }
+
+  //! Retrieve the set for the specified indexing expression
+  SyntaxNode* getSet(int i) { return sets[i]; }
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
@@ -332,6 +352,8 @@ class SyntaxNodeIDREF : public SyntaxNode {
      eveluated by AMPL rather than an explicit  INT_VAL) */
   //?SyntaxNode *stochrecourse; //!< resourse level in stoch programming
 
+   private:
+
   /** Levels above this one for which the reference is.
    *
    *  This field is only meaningful if the node represents a component
@@ -342,8 +364,6 @@ class SyntaxNodeIDREF : public SyntaxNode {
   int stochparent;
 
  public:
-
-  // ---------------------------- methods -----------------------------
 
   /** Default constructor */
   SyntaxNodeIDREF(ModelComp *r=NULL, SyntaxNode *val1=NULL);
@@ -358,6 +378,14 @@ class SyntaxNodeIDREF : public SyntaxNode {
   SyntaxNodeIDREF *deep_copy();
 
   std::ostream& put(std::ostream& s) const;
+
+  /** Retrieve the level of the parent stage */
+  int getStochParent() { return stochparent; }
+
+  /** Set the level of the parent stage */
+  void setStochParent(int parent) { stochparent = parent; }
+
+  ModelComp* getModelComp() { return ref; }
 };
 
 /** @class ValueNode

@@ -79,10 +79,10 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     /* if an indexing set is given, then the parameter is a vector (matrix) */
     /* work out the dimension and cardinality of the parameter */
     n = 1;
-    nsets = ix->ncomp; // the number of indexing sets given 
-    indices = new Set*[ix->ncomp];
+    nsets = ix->getNComp(); // the number of indexing sets given
+    indices = new Set*[nsets];
     nix =0;
-    for(int i=0;i<ix->ncomp;i++){
+    for (int i = 0; i < nsets; ++i) {
       indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->value);
       if (indices[i]==NULL){
         cerr << "ERROR: Value of parameter " << mc->id

@@ -810,9 +810,9 @@ getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,
       SyntaxNodeIx *indexing_model = node_model->indexing;
       
       if (indexing_model){
-        for(int p=0;p<indexing_model->ncomp;p++){
+        for (int p = 0; p < indexing_model->getNComp(); ++p) {
           //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
-          SyntaxNode *dv = indexing_model->dummyVarExpr[p];
+          SyntaxNode *dv = indexing_model->getDummyVarExpr(p);
           if (dv) {
             if (n_index == 0)
               arglist = dv->printDummyVar();
@@ -935,12 +935,12 @@ ModelComp::moveUp(int level){
       // starting with level-1
       for(i=posm; i<level; ++i){
         SyntaxNodeIx *mix = mlist[i]->ix;
-        if (mix->ncomp!=1){
+        if (mix->getNComp() != 1)  {
           cerr << "ModelComp::moveUp() does not support intermediate models "
             "with !=1 dummy Var" << endl;
           exit(1);
         }
-        onidr->push_front(mix->dummyVarExpr[0]);
+        onidr->push_front(mix->getDummyVarExpr(0));
         /* indexing dummy var of mlist[level-1-i]*/
       }
     }

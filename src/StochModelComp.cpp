@@ -124,10 +124,11 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       // set the correct model w.r.t which this should be resolved
       // (deal with ancestor(1).x notation)
       model = current_model;
-      for (int lvl=onr->stochparent;lvl>0;lvl--){
+      for (int lvl = onr->getStochParent(); lvl > 0; lvl--) {
         model = model->parent;
         if (model==NULL){
-          cerr << "ERROR: Ancestor " << onr->stochparent << " doesn't exist.\n";
+          cerr << "ERROR: Ancestor " << onr->getStochParent()
+               << " doesn't exist.\n";
           exit(1);
         }
       }

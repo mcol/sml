@@ -718,7 +718,7 @@ SyntaxNodeIx::SyntaxNodeIx(SyntaxNode *on) :
   sets = NULL;
   sets_mc = NULL;
   dummyVarExpr = NULL;
-  done_split = 0;
+  done_split = false;
   splitExpression();
 }
 
@@ -784,7 +784,7 @@ void SyntaxNodeIx::splitExpression()
   int i;
 
   if (done_split) return;
-  done_split=1;
+  done_split = true;
 
   if (opCode!=LBRACE){
     cerr << "Error in splitExpression: Indexing Expression must start with {\n";
@@ -1220,7 +1220,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       argNode->clear();
    }
   
-   ret->stochparent = stochparent;
+   ret->setStochParent(stochparent);
    return ret;
 }
 

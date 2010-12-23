@@ -302,14 +302,14 @@ process_model(AmplModel *model, const string& datafilename) {
         print_indent(fscript, k + 1);
         // the "reset data" command is needed to avoid the invalid subscript
         // error
-        fscript << "reset data " << getGlobalName(set_ref->ref, set,
+        fscript << "reset data " << getGlobalName(set_ref->getModelComp(), set,
             SyntaxNode::default_model, NOARG) << "_SUB;\n";
         print_indent(fscript, k + 1);
-        fscript << "let " << 
-          getGlobalName(set_ref->ref, set, SyntaxNode::default_model, NOARG) <<
-          "_SUB" <<
-          getGlobalName(set_ref->ref, set, SyntaxNode::default_model, ONLYARG) <<
-          " := {" << dummyVar << "};\n";
+        fscript << "let " << getGlobalName(set_ref->getModelComp(), set,
+                                           SyntaxNode::default_model, NOARG)
+                << "_SUB" << getGlobalName(set_ref->getModelComp(), set,
+                                           SyntaxNode::default_model, ONLYARG)
+                << " := {" << dummyVar << "};\n";
       }else{
         print_indent(fscript, k);
         fscript << "{\n";
@@ -764,7 +764,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               cerr << "IDREF node should be of type SyntaxNodeIDREF\n";
               exit(1);
             }
-            ModelComp *setmc = setnref->ref;
+            ModelComp *setmc = setnref->getModelComp();
             ModelComp newmc(setmc->id + "_SUB");
             newmc.type = TSET;
             
@@ -787,12 +787,12 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           /* newn is the new node, first copy the old one */
           SyntaxNodeIDREF *newn = ((SyntaxNodeIDREF *)setn)->clone();
           // clone the ModelComp that is referred to
-          newn->ref = ((SyntaxNodeIDREF*)setn)->ref->clone();
+          newn->ref = ((SyntaxNodeIDREF*)setn)->getModelComp()->clone();
           // ???but associate this with the current model
           //newn->ref->model = thism;
 
           /* and finally set the new name (add _SUB) to the name */
-          newn->ref->id = ((SyntaxNodeIDREF*)setn)->ref->id + "_SUB";
+          newn->getModelComp()->id = ((SyntaxNodeIDREF*)setn)->getModelComp()->id + "_SUB";
 
           /* and put this on the stack */
           ai.set = newn;
