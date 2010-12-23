@@ -1110,7 +1110,7 @@ find_var_ref_in_context
  *         the ID expressions should be resolved.
  *  @param ref
  *         A pointer to an expression that evaluates to a ModelComp: this can
- *         be given by an ID a dotted expression ID.ID or a reference to a
+ *         be given by an ID, a dotted expression ID.ID or a reference to a
  *         parent stage (in StochProg) such as ID(-1;...).
  *         It can also carry an indexing expressinon ID[.,.,.] in which case
  *         the indexing is attached to the returned IDREF node.

@@ -880,16 +880,16 @@ ModelComp::moveUp(int level){
   int i, posm;
   
   // -------------------- Expand local indexing expression -----------------
-  /* This ModelComp is written for the 'current' model and is now re-asigned
+  /* This ModelComp is written for the 'current' model and is now re-assigned
      to a different model. In order for that to work the indexing expressions
      in all IDREFs in its attribute/indexing section have got to be
-     rewritten
+     rewritten.
 
      Indexing expressions applicable to a IDREF are divided into local and 
      block indexing. 'local' is directly associated with the IDREF (as
      arguments in ->values[]. 'block' originate from the indexing expressions
      of the blocks up to the current model in the model tree. Both indexing 
-     expression together need to combine to get the correct global indexing
+     expression together need to combine to get the correct global indexing.
 
      When moving a ModelComp up in the tree, we therefore need to do the
      following to have correct global indexing:

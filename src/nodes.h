@@ -145,7 +145,7 @@ class SyntaxNode {
   /** Find all IDREF nodes below current node */
   virtual void findIDREF(std::list<SyntaxNode*> *lnd);
 
-  /** Find all nodes of opCode oc below current node */
+  /** Find all nodes of opCode @a oc below current node */
   virtual void findOpCode(int oc, std::list<SyntaxNode*> *lnd);
 
   /** Find the ModelComp (if it exists) refered to by this SyntaxNode.
@@ -207,7 +207,7 @@ class StageNodeNode : public SyntaxNode {
 /** @class SyntaxNodeIx
  *  A node on the operator tree representing an indexing expression.
  *
- *  This is node on the operator tree that represents an indexing expression.
+ *  This is a node on the operator tree that represents an indexing expression.
  *  A general indexing expression can be of the form:
  *
  *  {(i,j) in ARCS, k in SET: i>k} 
