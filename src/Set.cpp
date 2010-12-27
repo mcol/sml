@@ -122,8 +122,7 @@ Set::toString() const {
 Set::add(SetElement newel)
 ---------------------------------------------------------------------------- */
 void
-Set::add(SetElement newel)
-{
+Set::add(const SetElement& newel) {
   int n = elements.size();
   elements.insert(pair<SetElement, int>(newel, n));
 }
@@ -132,7 +131,7 @@ Set::add(SetElement newel)
 Set::findPos(string *el)
 ---------------------------------------------------------------------------- */
 int
-Set::findPos(SetElement el) const {
+Set::findPos(const SetElement& el) const {
 
   map<SetElement, int, SetElement>::const_iterator iter = elements.find(el);
   if( iter != elements.end() ) {

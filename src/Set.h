@@ -46,7 +46,7 @@ class Set: public CompDescr{
   // ---------------- methods -----------------
 
   //! Add element to the set
-  void add(SetElement el);
+  void add(const SetElement& el);
 
   // virtual method inherited from CompDescr
   //! Return the set as a string
@@ -68,7 +68,7 @@ class Set: public CompDescr{
   }
 
   //! Find position of element in set
-  int findPos(SetElement el) const;
+  int findPos(const SetElement& el) const;
 
 };
 
