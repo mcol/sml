@@ -425,8 +425,7 @@ ExpandedModel::getRowLowBounds
  *  The method is simply a wrapper around NlFile::getRowLowBoundsAMPL.
  */
 void
-ExpandedModel::getRowLowBounds(double *elts)
-{
+ExpandedModel::getRowLowBounds(double *elts) const {
   nlfile->getRowLowBoundsAMPL(elts);
 }
 
@@ -441,8 +440,7 @@ ExpandedModel::getRowUpBounds
  *  The method is simply a wrapper around NlFile::getRowUpBoundsAMPL.
  */
 void
-ExpandedModel::getRowUpBounds(double *elts)
-{
+ExpandedModel::getRowUpBounds(double *elts) const {
   nlfile->getRowUpBoundsAMPL(elts);
 }
 

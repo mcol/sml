@@ -47,7 +47,7 @@ SimpleSet::SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2) :
       cout << "Parsed Set " << lower_bound_ << ".." << upper_bound_ << endl;
 }
 
-vector<string> SimpleSet::members(AmplModel &context) {
+vector<string> SimpleSet::members(AmplModel& context) const {
    if(!parsed_) {
       cerr << "Trying to obtain members of set which has not been parsed!\n";
       exit(1);

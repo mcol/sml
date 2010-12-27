@@ -233,16 +233,16 @@ class SyntaxNodeIx : public SyntaxNode {
   SyntaxNode *hasDummyVar(const std::string& name);
 
   //! returns list of all dummy variables defined by this index'g expression 
-  std::list<SyntaxNode *> getListDummyVars();
+  std::list<SyntaxNode *> getListDummyVars() const;
 
   //! Retrieve the number of indexing expressions
-  int getNComp() { return ncomp; }
+  int getNComp() const { return ncomp; }
 
   //! Retrieve the dummy variable for the specified indexing expression
-  SyntaxNode* getDummyVarExpr(int i) { return dummyVarExpr[i]; }
+  SyntaxNode* getDummyVarExpr(int i) const { return dummyVarExpr[i]; }
 
   //! Retrieve the set for the specified indexing expression
-  SyntaxNode* getSet(int i) { return sets[i]; }
+  SyntaxNode* getSet(int i) const { return sets[i]; }
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
@@ -253,9 +253,8 @@ class SyntaxNodeIx : public SyntaxNode {
   //! Diagnostic printing of member variables
   void printDiagnostic(std::ostream& fout) const;
 
-  /** for nodes that are indexing expressions, get the set that is indexed over
-   */
-  SyntaxNode *getIndexingSet();
+  //! for nodes that are indexing expressions, get the set that is indexed over
+  const SyntaxNode* getIndexingSet() const;
 };
 
 class ValueNodeBase {
@@ -358,12 +357,12 @@ class SyntaxNodeIDREF : public SyntaxNode {
   std::ostream& put(std::ostream& s) const;
 
   /** Retrieve the level of the parent stage */
-  int getStochParent() { return stochparent; }
+  int getStochParent() const { return stochparent; }
 
   /** Set the level of the parent stage */
   void setStochParent(int parent) { stochparent = parent; }
 
-  ModelComp* getModelComp() { return ref; }
+  ModelComp* getModelComp() const { return ref; }
 };
 
 /** @class ValueNode

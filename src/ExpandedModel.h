@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef EXPANDED_MODEL_H
 #define EXPANDED_MODEL_H
 
@@ -32,10 +33,10 @@ variables/constraints belong to off-diagonal subblocks)
 This would still be in the Benders view.
 */
 
-#include <string>
-#include <list>
 #include "ExpandedModelInterface.h"
 #include "symtab.h"
+#include <list>
+#include <string>
 
 class AmplModel;
 class NlFile;
@@ -176,7 +177,7 @@ class ExpandedModel : public ExpandedModelInterface {
   void print() const;
   
   //! Returns the number of local variables
-  int getNLocalVars();    
+  int getNLocalVars();
 
   //! Returns the names of local variables
   const std::list<std::string>& getLocalVarNames();
@@ -194,10 +195,10 @@ class ExpandedModel : public ExpandedModelInterface {
 				 int *collen, int *rownbs, double *el);
 
   //! Returns the vector of lower bounds for the constraints in this model
-  void getRowLowBounds(double *elts);
+  void getRowLowBounds(double *elts) const;
 
   //! Returns the vector of upper bounds for the constraints in this model
-  void getRowUpBounds(double *elts);
+  void getRowUpBounds(double *elts) const;
 
   //! Returns the vector of lower bounds for the local variables in this model
   void getColLowBounds(double *elts);

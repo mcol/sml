@@ -341,8 +341,9 @@ process_model(AmplModel *model, const string& datafilename) {
         /* found a submodel */
         AmplModel *submodel = (AmplModel*)mc->other;
         SyntaxNodeIx *ix = mc->indexing;
-    
-        SyntaxNode *set = ix->getIndexingSet(); // set is NULL if ix is NULL
+
+        // set is NULL if ix is NULL
+        const SyntaxNode *set = ix->getIndexingSet();
   
         // the name of the *.crd file is the global name of the submodel
         // with all the current values of loop variables up to

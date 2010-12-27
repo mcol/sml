@@ -584,10 +584,9 @@ ModelComp *SyntaxNode::findModelComp() const {
 /* --------------------------------------------------------------------------
 SyntaxNodeIx::getIndexingSet()
 ---------------------------------------------------------------------------- */
-SyntaxNode *SyntaxNodeIx::getIndexingSet()
-{
-  SyntaxNode *ix = this;
-  SyntaxNode *set;
+const SyntaxNode* SyntaxNodeIx::getIndexingSet() const {
+  const SyntaxNode *ix = this;
+  const SyntaxNode *set;
   SyntaxNode *dummyVar;
 
   if (ix==NULL) return NULL;
@@ -697,8 +696,7 @@ SyntaxNodeIx::printDiagnostic(ostream &fout) const {
 SyntaxNodeIx::getListDummyVars
 -----------------------------------------------------------------------------*/
 list<SyntaxNode *>
-SyntaxNodeIx::getListDummyVars()
-{
+SyntaxNodeIx::getListDummyVars() const {
   list<SyntaxNode *> l;
   
   for(int i=0;i<ncomp;i++){

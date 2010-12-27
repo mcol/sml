@@ -46,11 +46,13 @@ private:
    int upper_bound_;
    SyntaxNode *ubc_;
    int interval_;
-   bool parsed_; // did we suceed at parsing, or do we need to use ampl on it?
+   bool parsed_; // did we succeed at parsing, or do we need to use ampl on it?
 
 public:
    SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2);
-   std::vector<std::string> members(AmplModel &context);
+
+   /// Retrieve the members of the set
+   std::vector<std::string> members(AmplModel& context) const;
 };
 
 /** @class ListSet

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef MODEL_INTERFACE_H
 #define MODEL_INTERFACE_H
 
@@ -156,10 +157,10 @@ class ExpandedModelInterface {
 				 int *collen, int *rownbs, double *el) = 0;
 
   //! Returns the vector of lower bounds for the constraints in this model
-  virtual void getRowLowBounds(double *elts) = 0;
+  virtual void getRowLowBounds(double *elts) const = 0;
 
   //! Returns the vector of upper bounds for the constraints in this model
-  virtual void getRowUpBounds(double *elts) = 0;
+  virtual void getRowUpBounds(double *elts) const = 0;
 
   //! Returns the vector of lower bounds for the local variables in this model
   virtual void getColLowBounds(double *elts) = 0;
