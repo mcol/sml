@@ -14,12 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef STOCHMODEL_H
 #define STOCHMODEL_H
 
 #include "AmplModel.h"
 #include <string>
 #include <vector>
+
+class ModelComp;
+class SyntaxNode;
+class SyntaxNodeIDREF;
 
 /* ------------------------------------------------------------------------ */
 /** @class StochModel

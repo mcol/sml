@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef SYMTAB_H
 #define SYMTAB_H
 
-#include "ModelComp.h"
 #include <list>
 #include <string>
+
+class ModelComp;
 
 class SymbolTable {
 public:

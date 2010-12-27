@@ -14,37 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef AMPLMODEL_H
 #define AMPLMODEL_H
 
+#include "symtab.h"
 #include <list>
 #include <string>
-#include "symtab.h"
 
+class changeitem;
 class ExpandedModel;
 class IDNode;
 class ModelComp;
 class SyntaxNodeIx;
 class SyntaxNodeIDREF;
-
-enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
-
-/** @class changeitem
- *  Simple struct that stores a queued change to the model tree.
- *
- *  This is needed to treat expectation constraints that in the postprocessing
- *  need to be removed from the model in which they are defined and added
- *  to a different model. This action cannot be done by recursively working
- *  through all models and ModelComps (since removing/adding comps 
- *  invalidates the iterators used in the recursion)
- */
-class changeitem{
- public:
-  ModelComp *comp;   //< The component to be added or removed
-  AmplModel *model;   //< The model to which it should be added/removed
-  int action;         //< the action (CHANGE_REM/CHANGE_ADD)
-};
-
 
 /** @class AmplModel
  *  This class describes a model (block) in the flat model tree.
@@ -168,6 +151,30 @@ class AmplModel{
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
 
+};
+
+enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
+
+/** @class changeitem
+ *  Simple struct that stores a queued change to the model tree.
+ *
+ *  This is needed to treat expectation constraints that in the postprocessing
+ *  need to be removed from the model in which they are defined and added
+ *  to a different model. This action cannot be done by recursively working
+ *  through all models and ModelComps (since removing/adding comps
+ *  invalidates the iterators used in the recursion)
+ */
+class changeitem {
+ public:
+
+  /** The component to be added or removed */
+  ModelComp *comp;
+
+  /** The model to which it should be added/removed */
+  AmplModel *model;
+
+  /** The action: CHANGE_REM/CHANGE_ADD */
+  int action;
 };
 
 #endif

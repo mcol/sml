@@ -19,6 +19,7 @@
 #include "backend.h"
 #include "ExpandedModel.h"
 #include "GlobalVariables.h"
+#include "ModelComp.h"
 #include "nodes.h"
 #include "sml.tab.h"
 #include <cassert>
