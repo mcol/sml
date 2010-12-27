@@ -699,7 +699,6 @@ SyntaxNodeIx::SyntaxNodeIx(SyntaxNode *on) :
   sets = NULL;
   sets_mc = NULL;
   dummyVarExpr = NULL;
-  done_split = false;
   splitExpression();
 }
 
@@ -708,7 +707,7 @@ SyntaxNodeIx::printDiagnostic
 -----------------------------------------------------------------------------*/
 void
 SyntaxNodeIx::printDiagnostic(ostream &fout) const {
-  assert(done_split);
+  assert(ncomp > 0);
   fout << "qualifier: " << qualifier << "\n";
   fout << "number of indexing expressions: " << ncomp << "\n";
   for(int i=0;i<ncomp;i++){
@@ -762,10 +761,9 @@ SyntaxNodeIx::splitExpression
 void SyntaxNodeIx::splitExpression()
 {
   SyntaxNode *tmp, *tmp2;
-  int i;
 
-  if (done_split) return;
-  done_split = true;
+  if (ncomp > 0)
+    return;
 
   if (opCode!=LBRACE){
     cerr << "Error in splitExpression: Indexing Expression must start with {\n";
@@ -789,7 +787,7 @@ void SyntaxNodeIx::splitExpression()
     this->sets = new SyntaxNode*[ncomp];
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
     this->dummyVarExpr = new SyntaxNode*[ncomp];
-    i=0;
+    int i = 0;
     for(ListNode::literator ti=tmpl->lbegin(); ti!=tmpl->lend(); ++ti, ++i){
       tmp2 = findKeywordinTree(*ti, IN);
       /* everything to the left of IN is a dummy variables */
@@ -833,6 +831,7 @@ void SyntaxNodeIx::splitExpression()
       sets_mc[0] = new ModelComp("dummy", TSET, NULL, sets[0]);
     }
   }
+  assert(ncomp > 0);
 }
 
 /*----------------------------------------------------------------------------

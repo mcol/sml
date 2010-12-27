@@ -224,10 +224,7 @@ class SyntaxNodeIx : public SyntaxNode {
 
   SyntaxNodeIx(const int opCode_) :
     SyntaxNode(opCode_), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
-    dummyVarExpr(NULL), done_split(0) {};
-
-  //! Whether the extra fields have been set: qualifier/ncomp/sets/dummyVarExpr
-  bool done_split;
+    dummyVarExpr(NULL) {};
 
   //! Number of 'dummy IN set'-type expressions
   int ncomp;
