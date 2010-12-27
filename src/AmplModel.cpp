@@ -641,9 +641,9 @@ AmplModel::addDummyObjective()
         SyntaxNodeIDREF *onref = new SyntaxNodeIDREF(comp);
         for (i = 0; i < idx->getNComp(); ++i) {
           // this is the dummy variable of the i-th indexing expression
-          SyntaxNode *ondum = (SyntaxNode*)*(commaseplist[i]->begin());
+          SyntaxNode *ondum = commaseplist[i]->front();
           if (ondum->getOpCode() == LBRACKET)
-            ondum = (SyntaxNode*)*(ondum->begin());
+            ondum = ondum->front();
           onref->push_back(ondum);
         }
         // make the sum part

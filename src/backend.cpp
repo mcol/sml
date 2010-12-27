@@ -258,7 +258,7 @@ process_model(AmplModel *model, const string& datafilename) {
       if (ix){
         add_index ai;
         if (ix->getOpCode() == LBRACE)
-          ix = (SyntaxNode*)*(ix->begin());
+          ix = ix->front();
 
         /* assumes that the next level is the 'IN' keyword (if present) */
         dummyVar = NULL;
@@ -724,7 +724,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           // the stack stores the dummy variable and the SET separately, 
           // so take them to bits here
           if (ix->getOpCode() == LBRACE)
-            ix = (SyntaxNode*)*(ix->begin()); // rem {..}
+            ix = ix->front(); // rem {..}
           if (ix->getOpCode() == IN) {
              SyntaxNode::iterator ixi = ix->begin();
             ai.dummyVar = *ixi;
@@ -930,7 +930,7 @@ modified_write(ostream &fout, ModelComp *comp)
           fout << ix.dummyVar << " in ";
         ixsn = ix.set;
         if (ixsn->getOpCode() == LBRACE)
-          ixsn = (SyntaxNode*)*ixsn->begin();
+          ixsn = ixsn->front();
         fout << ixsn;
       }
     }
@@ -939,7 +939,7 @@ modified_write(ostream &fout, ModelComp *comp)
       if (first) {first = 0;} else {fout << ",";}
       ixsn = comp->indexing;
       if (ixsn->getOpCode() == LBRACE)
-        ixsn = (SyntaxNode*)*(ixsn->begin());
+        ixsn = ixsn->front();
       fout << ixsn;
     }
     if (c_addIndex>0 || comp->indexing)

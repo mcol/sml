@@ -745,7 +745,7 @@ iditem:  ID {                               /* simple identifier */
             SyntaxNode *node = $6;
             IDNode *idnode;
             if (node->getOpCode() == LSBRACKET)
-               idnode = (IDNode*) *(node->begin());
+               idnode = (IDNode*) node->front();
             else
                idnode = (IDNode *) node;
             assert(idnode->getOpCode() == ID);

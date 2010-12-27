@@ -1,6 +1,8 @@
 2010-12-27  Marco Colombo  <m.colombo@ed.ac.uk>
   * Reimplement SyntaxNode::findIDREF(list<SyntaxNode*> *lnd) by calling
     findOpCode().
+  * Add SyntaxNode::front()/back() to provide direct access to the first/last
+    child.
 
 2010-12-22  Marco Colombo  <m.colombo@ed.ac.uk>
   * Declare more methods as const.

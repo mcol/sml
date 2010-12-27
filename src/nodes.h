@@ -80,6 +80,9 @@ class SyntaxNode {
   iterator begin() const { return iterator(values); }
   iterator end() const { return iterator(values+nval); }
 
+  SyntaxNode* front() const { return values[0]; }
+  SyntaxNode* back()  const { return values[nval - 1]; }
+
   /** Clear the child list */
   virtual void clear() { opCode = 0; nval = 0; delete[] values; values = NULL; }
 

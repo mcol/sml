@@ -105,7 +105,7 @@ setdef:  SET ID defined_opt setspec_list SEMICOLON {
                exit(1);
             }
             assert($4->nchild() == 1);
-            SetSpec *tmp = (SetSpec*) *($4->begin());
+            SetSpec *tmp = (SetSpec*) $4->front();
             entry->mc->value = new Set(*(tmp->list));
          }
       ;

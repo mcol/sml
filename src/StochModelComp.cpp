@@ -230,14 +230,14 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
     // (*p) is the EXPECTATION node, it should have one child
 
-    SyntaxNode *child = *((*p)->begin());
+    SyntaxNode *child = (*p)->front();
 
     if (child->getOpCode() != COMMA || child->nchild() == 1) {
       // this is the "one argument" use if Exp within an objective function
       if (type==TMIN || type==TMAX){
         // set "up" to the argument of Exp(...)
         // FIXME: need to put brackets around this?
-        SyntaxNode *up = *((*p)->begin());
+        SyntaxNode *up = (*p)->front();
         for (int i=level;i>0;i--){
           
           // find the dummy variable expression
@@ -276,7 +276,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         // FIXME: need to put brackets around this?
         list<SyntaxNode*> listofsum; // expressions in the sum{..}
 
-        SyntaxNode *up = (SyntaxNode*)*((*p)->begin());
+        SyntaxNode *up = (*p)->front();
         // put brackets around this
         up = new SyntaxNode(LBRACKET, up);
 
@@ -307,7 +307,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // cnix might contain a '{' => strip it if present
           SyntaxNode *cnixon = cnix;
           if (cnixon->getOpCode() == LBRACE)
-            cnixon = (SyntaxNode*)*(cnixon->begin());
+            cnixon = cnixon->front();
           listofsum.push_front(cnixon->deep_copy());
           
           thisam = thisam->parent;

@@ -61,7 +61,7 @@ Set::Set(const ListNode &list):
   else {
     // otherwise this needs to be an element of form (.., .., ..)
     assert(item->getOpCode() == LBRACKET);
-    item = *(item->begin());
+    item = item->front();
     assert(item->getOpCode() == COMMA);
     this->dim_ = item->nchild();
   }
@@ -78,14 +78,14 @@ Set::Set(const ListNode &list):
       add(SetElement(1,array));
     }else{
       assert(item->getOpCode() == LBRACKET);
-      item = (SyntaxNode*)*(item->begin());
+      item = item->front();
       assert(item->getOpCode() == COMMA);
       if (dim_==item->nchild()){
         int j = 0;
         for(SyntaxNode::iterator k=item->begin(); k!=item->end(); ++k){
           SyntaxNode *idnd = (SyntaxNode*)*k;
           assert(idnd->getOpCode() == ID);
-          array[j++] = (char*)*(idnd->begin());
+          array[j++] = (char*) idnd->front();
         }
         add(SetElement(dim_, array));
         //this->elements.push_back(array);

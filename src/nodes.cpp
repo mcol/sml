@@ -491,7 +491,7 @@ SyntaxNode::printDummyVar() const {
       cerr << "current opCode is "+opCode;
       exit(1);
     }
-    list = (SyntaxNode*)values[0];
+    list = front();
     if (list->opCode==ID) return list->print();
     if (list->opCode!=COMMA){
       cerr << "printDummyVar: dummy var must be ID or (ID1,..,IDn)\n";
@@ -614,7 +614,7 @@ SyntaxNode *SyntaxNodeIx::getIndexingSet()
   if (ix==NULL) return NULL;
   /* remove outside braces from indexing expression */
   if (ix->getOpCode() == LBRACE)
-    ix = *(ix->begin());
+    ix = ix->front();
   /* assumes that the next level is the 'IN' keyword (if present) */
   if (ix->getOpCode() == IN) {
     SyntaxNode::iterator i = ix->begin();
@@ -730,7 +730,7 @@ SyntaxNodeIx::getListDummyVars()
     if (dv->getOpCode() == ID || dv->getOpCode() ==IDREF ) {
       l.push_back(dv);
     }else if(dv->getOpCode() == LBRACKET) {
-      dv = *(dv->begin());
+      dv = dv->front();
       if (dv->getOpCode() != COMMA) {
 	     cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
 	     cerr << "Given expression: " << dv << "\n";
@@ -771,7 +771,7 @@ void SyntaxNodeIx::splitExpression()
     exit(1);
   }
 
-  tmp = *(this->begin());
+  tmp = this->front();
   // discard the colon (if there is one present: only interested in lhs) 
   if (tmp->getOpCode() == COLON) {
     SyntaxNode::iterator tj = tmp->begin();
@@ -863,7 +863,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
     }else{
       /* This is a multidimensional dummy variable: */
       assert(tmp->getOpCode() == LBRACKET);
-      tmp = *(tmp->begin());
+      tmp = tmp->front();
       ListNode *tmpl = static_cast<ListNode*>(tmp);
       // and this should be a comma separated list
       assert(tmpl);

@@ -342,7 +342,7 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
             ") of indexing set '" << ix->sets_mc[ixcolset]->id << "'.\n";
           exit(1);
         }
-        cl = *(cl->begin());
+        cl = cl->front();
         assert(cl->getOpCode() == COMMA);
         ListNode *cll = (ListNode*) cl;
         IDNode *cli = (IDNode *) (*cll)[0];
@@ -376,9 +376,9 @@ CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
             ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'.\n";
           exit(1);
         }
-        rl = *(rl->begin());
+        rl = rl->front();
         assert(rl->getOpCode() == COMMA);
-        IDNode *rli = (IDNode *) *(rl->begin());
+        IDNode *rli = (IDNode *) rl->front();
         rowpos[j] = indices[ixrowset]->findPos(SetElement(1, &rli));
       }else{
         // this is a set of dim 1
