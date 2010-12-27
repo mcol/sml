@@ -1,3 +1,7 @@
+2010-12-27  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Reimplement SyntaxNode::findIDREF(list<SyntaxNode*> *lnd) by calling
+    findOpCode().
+
 2010-12-22  Marco Colombo  <m.colombo@ed.ac.uk>
   * Declare more methods as const.
 

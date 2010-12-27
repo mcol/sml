@@ -82,7 +82,6 @@ addItemToListOrCreate
  *  - if the list is NULL then a list with opCode 'oc' is created from the
  *    single item that is passed.
  */
-
 ListNode *
 addItemToListOrCreate(int oc, ListNode *list, SyntaxNode *newitem)
 {
@@ -555,25 +554,7 @@ SyntaxNode::findIDREF(list<SyntaxNode *> *lnd)
 void
 SyntaxNode::findIDREF(list<SyntaxNode*> *lnd) {
 
-  // if terminal then return
-  if (opCode == ID)
-    return;
-
-  if (opCode==IDREF){
-    //printf("%s\n",getGlobalName((ModelComp*)this->values[0], 
-    //				NULL, NULL, NOARG));
-    lnd->push_back(this);
-  }else if (opCode==-99) {
-     throw exception();
-    cerr << "BAD findIDREF(-99)\n";
-    return;
-  }else{
-    for (int i = 0; i < nval; i++) {
-      if (values[i]){
-	     values[i]->findIDREF(lnd);
-      }
-    }
-  }
+  findOpCode(IDREF, lnd);
 }
 
 /* --------------------------------------------------------------------------
