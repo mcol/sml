@@ -22,7 +22,6 @@
 #include "sml.tab.h"
 #include <cassert>
 #include <cstdlib>
-#include <cstring>        // for memset()
 #include <iostream>
 #include <sstream>
 
@@ -138,7 +137,8 @@ ostream& SyntaxNode::put(ostream&s) const {
       throw exception();
       break;
     case ' ':        
-      if(this->nval>1) s << **(i++);
+      if (this->nchild() > 1)
+        s << **(i++);
       s << ' ' << **i;
       break;
     case DOT:
@@ -147,20 +147,22 @@ ostream& SyntaxNode::put(ostream&s) const {
       break;
     case COMMA:
       s << **i;
-      for(++i;i!=this->end();++i) {
+      while (++i != end())
          s << "," << (**i);
-      }
       break;
     case DIFF:
-      if(this->nval>1) s << **(i++);
+      if (this->nchild() > 1)
+        s << **(i++);
       s << " diff " <<  **i;
       break;
     case CROSS:
-      if(this->nval>1) s << **(i++);
+      if (this->nchild() > 1)
+        s << **(i++);
       s << " cross " <<  **i;
       break;
     case DOTDOT:
-      if(this->nval>1) s << **(i++);
+      if (this->nchild() > 1)
+        s << **(i++);
       s << " .. " <<  **i;
       break;
     case SUM:
@@ -197,9 +199,9 @@ ostream& SyntaxNode::put(ostream&s) const {
       s << "within " << **i;
       break;
     case LSBRACKET:
-      if (this->nval==1){
+      if (this->nchild() == 1)
          s << "[" << **i << "]";
-      } else {
+      else {
          s << **i << "[";
          s << **(++i) << "]";
       }
@@ -211,13 +213,15 @@ ostream& SyntaxNode::put(ostream&s) const {
       s << "(" << **i << ")";
       break;
     case COLON:
-      if(this->nval>1) s << **(i++);
+      if (this->nchild() > 1)
+        s << **(i++);
       s << ":" <<  **i;
       break;
     case IF:
       s << "if " << **i;
       s << " then " << **(++i);
-      if(this->nval==3) s << " else " << **(++i);
+      if (this->nchild() == 3)
+        s << " else " << **(++i);
       break;
     case IDREF:
     case IDREFM:
@@ -234,7 +238,7 @@ ostream& SyntaxNode::put(ostream&s) const {
     default: 
       s << endl;
       cerr << "Unknown opcode " << this->getOpCode() << "\n";
-      cerr << ".nval = " << this->nval << "\n";
+      cerr << ".nval = " << this->nchild() << "\n";
       for(; i!=this->end(); ++i) {
          cerr << "val[" << **i << "]\n";
       }
@@ -292,21 +296,20 @@ ostream& SyntaxNodeIDREF::put(ostream& s) const {
 
    switch(opCode) {
    case IDREF:
-      if (nval<0) {
+     if (nchild() < 0)
 	      // as yet unset IDREF
          s << "IDREF";
-      } else if (SyntaxNode::use_global_names) {
+     else if (SyntaxNode::use_global_names) {
 	      s << getGlobalNameNew(ref, this, default_model, WITHARG);
       } else {
          /* this is the new ID processor */
-         if(nval==0) {
+         if (nchild() == 0)
             s << ref->id;
-         } else {
+         else {
             SyntaxNode::iterator i=begin();
             s << ref->id << "[" << **i;
-            for(++i; i!=end(); ++i){
+            while (++i != end())
                s << "," << **i;
-            }
             s << "]";
          }
       }
@@ -419,7 +422,7 @@ SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode
 
 SyntaxNode::~SyntaxNode() {
 
-  for (int i = 0; i < nval; ++i)
+  for (int i = 0; i < nchild(); ++i)
     delete values[i];
   delete[] values;
 }
@@ -450,7 +453,7 @@ SyntaxNode::deep_copy()
     return newn;*/
   }
   
-  for(int i=0;i<nval;i++)
+  for (int i = 0; i < nchild(); ++i)
     newn->values[i] = values[i]->deep_copy();
   return newn;
 }
@@ -467,8 +470,8 @@ SyntaxNode::clone()
     exit(1);
   }
   newn->nval = nval;
-  newn->values = new SyntaxNode*[nval];
-  for(int i=0;i<nval;i++)
+  newn->values = new SyntaxNode*[nchild()];
+  for (int i = 0; i < nchild(); ++i)
     newn->values[i] = values[i];
   return newn;
 }
@@ -516,7 +519,7 @@ SyntaxNode::findIDREF() const {
     cout << getGlobalName((ModelComp*)this->values[0], NULL, NULL, NOARG) <<
       endl;
   }else{
-    for (int i = 0; i < nval; i++) {
+    for (int i = 0; i < nchild(); i++) {
       if (values[i]){
 	     values[i]->findIDREF();
       }
@@ -539,11 +542,9 @@ SyntaxNode::findIDREF(list<ModelComp*>& lmc) const {
     //				NULL, NULL, NOARG));
     lmc.push_back(((SyntaxNodeIDREF*)this)->ref);
   }else{
-    for (int i = 0; i < nval; i++) {
-      if (values[i]){
-	     ((SyntaxNode*)values[i])->findIDREF(lmc);
-      }
-    }
+    for (SyntaxNode::iterator i = begin(); i != end(); ++i)
+      if (*i)
+        (*i)->findIDREF(lmc);
   }
 }
 
@@ -573,11 +574,9 @@ SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd) {
     //				NULL, NULL, NOARG));
     lnd->push_back(this);
   }else{
-    for (int i = 0; i < nval; i++) {
-      if (values[i]){
-	     values[i]->findOpCode(oc, lnd);
-      }
-    }
+    for (SyntaxNode::iterator i = begin(); i != end(); ++i)
+      if (*i)
+        (*i)->findOpCode(oc, lnd);
   }
 }
 
@@ -591,7 +590,7 @@ SyntaxNode::findModelComp()
  */
 ModelComp *SyntaxNode::findModelComp() const {
   const SyntaxNode *on = this;
-  while ((on->opCode==LBRACKET || on->opCode==LBRACE) && on->nval==1){
+  while ((on->opCode==LBRACKET || on->opCode==LBRACE) && on->nchild() == 1) {
     on = on->values[0];
   }
 
@@ -649,21 +648,17 @@ SyntaxNode::getArgumentList() const
    on = dynamic_cast<const SyntaxNodeIDREF*>(this);
    if (on==NULL){
       cout << "WARNING: This is an IDREF SyntaxNode not of type SyntaxNodeIDREF\n";
-      if (nval>0){
+      if (nchild() > 0) {
          arglist += values[1]->print();
-         for(int i=1;i<nval;i++){
-	         arglist += ",";
-	         arglist += values[1+i]->print();
-         }
+         for (int i = 1; i < nchild(); ++i)
+           arglist += "," + values[1+i]->print();
       }
    }else{
-      if (nval>0){
+     if (nchild() > 0) {
          SyntaxNode::iterator i = begin();
          arglist += (*i)->print();
-         for(++i;i!=end();++i){
-            arglist += ",";
-	         arglist += (*i)->print();
-         }
+         while (++i != end())
+           arglist += "," + (*i)->print();
       }
   }
   return arglist;
@@ -897,7 +892,7 @@ SyntaxNodeIx::deep_copy()
   
   onix->nval = nval;
   onix->values = new SyntaxNode*[nval];
-  for(int i=0;i<nval;i++)
+  for (int i = 0; i < nchild(); ++i)
     onix->values[i] = values[i]->deep_copy();
   
   // deep_copy is a virtual function, so qualifier->deep_copy is not defined
@@ -907,11 +902,11 @@ SyntaxNodeIx::deep_copy()
   onix->ncomp = ncomp;
   onix->sets = new SyntaxNode*[ncomp];
   onix->dummyVarExpr = new SyntaxNode*[ncomp];
-  memset(onix->dummyVarExpr, 0, ncomp*sizeof(SyntaxNode*));
   
   for(int i=0;i<ncomp;i++){
     onix->sets[i] = sets[i]->deep_copy();
-    if (dummyVarExpr[i]) onix->dummyVarExpr[i] = dummyVarExpr[i]->deep_copy();
+    onix->dummyVarExpr[i] = dummyVarExpr[i] ? dummyVarExpr[i]->deep_copy()
+                                            : NULL;
   }
   return onix;
 }
@@ -976,11 +971,10 @@ ostream& ListNode::put(ostream& s) const {
    literator i = lbegin();
    if(i==lend()) return s;
 
-   char sep = ',';
-   if(opCode==' ') sep = ' ';
+   char sep = (opCode == ' ') ? ' ' : ',';
 
    s << *i;
-   for(++i; i!=lend(); ++i)
+   while (++i != lend())
       s << sep << *i;
 
    return s;
@@ -1192,7 +1186,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
          // This is a reference indexed by '(..)'. In this case we are in
          // a stoch block and the first argument refers to the stage
          //      ret->stochrecourse = (SyntaxNode*)ret->values[0];
-         //for(int i=1;i<ret->nval;i++){
+         //for (int i = 1; i < ret->nchild(); ++i) {
          //ret->values[i-1] = ret->values[i];
          //}
          //ret->nval--;
@@ -1221,11 +1215,10 @@ find_var_ref_in_indexing
 SyntaxNode *
 find_var_ref_in_indexing(const string& name) {
 
-   int i;
    SyntaxNodeIx *tmp;
    SyntaxNode *ret = NULL;
 
-   for(i=0;i<n_indexing;i++){
+   for (int i = 0; i < n_indexing; ++i) {
       /* have a look at all the indexing expressions */
       /* an indexing expression is a '{' node followed by a 'Comma' node */
       tmp = list_of_indexing[i];
