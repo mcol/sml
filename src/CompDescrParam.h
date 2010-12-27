@@ -66,7 +66,7 @@ class CompDescrParam: public CompDescr{
  private:
 
   /** Service routine that processes a tree below a TOKVALUETABLELIST node */
-  void processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix);
+  void processValueTableList(const SyntaxNode *node, const SyntaxNodeIx *ix);
 
 };
 

@@ -252,7 +252,8 @@ CompDescrParam::processValueTableList
  *         parameter (to get ix->sets_mc).
  */
 void
-CompDescrParam::processValueTableList(SyntaxNode *node, SyntaxNodeIx *ix){
+CompDescrParam::processValueTableList(const SyntaxNode *node,
+                                      const SyntaxNodeIx *ix) {
   // this is a value_table_list
   
   /* A SyntaxNode of type TOKVALUETABLELIST can have the following structure:
