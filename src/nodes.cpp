@@ -40,13 +40,13 @@ string StageNodeNode::stage = "";
 SyntaxNode *SyntaxNode::push_back(SyntaxNode *newitem)
 {
   values.push_back(newitem);
-  nval++;
   return this;
 }
 
 /** Add an item to the front */
 SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
 {
+  int nval = values.size();
   values.resize(++nval);
   for (int i = nval; --i > 0; )
     values[i] = values[i - 1];
@@ -386,11 +386,11 @@ SyntaxNode Methods to follow
 // constructors:
 
 SyntaxNode::SyntaxNode(const SyntaxNode &src) :
-   opCode(src.opCode), nval(src.nval), values(src.values) {}
+   opCode(src.opCode), values(src.values) {}
 
 SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode* val3) :
-   opCode(code), nval(0), values(NULL)
-{
+   opCode(code) {
+   int nval = 0;
    if(val1) nval++;
    if(val2) nval++;
    if(val3) nval++;
@@ -423,8 +423,6 @@ SyntaxNode::deep_copy()
     cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
-  newn->nval = nchild();
-  newn->values.resize(nchild());
 
   /* Values are copied depending on the type of the SyntaxNode */
   /* ID/IDREF/INT_VAL/FLOAT_VAL/IDREFM are treated differently */
@@ -435,7 +433,8 @@ SyntaxNode::deep_copy()
     newn->values[0] = strdup((char *)values[0]);
     return newn;*/
   }
-  
+
+  newn->values.resize(nchild());
   for (int i = 0; i < nchild(); ++i)
     newn->values[i] = values[i]->deep_copy();
   return newn;
@@ -452,7 +451,6 @@ SyntaxNode::clone()
     cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
-  newn->nval = nval;
   newn->values = values;
 
   return newn;
@@ -652,18 +650,17 @@ SyntaxNode::getArgumentList() const
  */
 SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
 
-   values.resize(src.nval + nval);
+   int nval = values.size();
+   int srcnval = src.nchild();
+   values.resize(srcnval + nval);
 
    // copy this object's values to the end
-   for (int i = src.nval + nval; --i > 0; )
-     values[i] = values[i - src.nval];
+   for (int i = srcnval + nval; --i > 0; )
+     values[i] = values[i - srcnval];
 
    // copy src's values to the beginning
-   for (int i = 0; i < src.nval; ++i)
+   for (int i = 0; i < srcnval; ++i)
      values[i] = src.values[i];
-
-   // update the number of values
-   nval += src.nval;
 
    return (*this);
 }
@@ -874,8 +871,7 @@ SyntaxNodeIx *
 SyntaxNodeIx::deep_copy()
 {
   SyntaxNodeIx *onix = new SyntaxNodeIx(opCode);
-  
-  onix->nval = nval;
+
   onix->values.resize(nchild());
   for (int i = 0; i < nchild(); ++i)
     onix->values[i] = values[i]->deep_copy();
@@ -919,7 +915,6 @@ SyntaxNodeIDREF::deep_copy()
 {
   SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode, ref);
 
-  newn->nval = nval;
   newn->values.resize(nchild());
   for (int i = 0; i < nchild(); ++i)
     newn->values[i] = values[i]->deep_copy();
@@ -936,7 +931,6 @@ SyntaxNodeIDREF::clone()
 {
   SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode, ref);
 
-  newn->nval = nval;
   newn->values = values;
   newn->stochparent = stochparent;
 

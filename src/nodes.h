@@ -52,7 +52,6 @@ class AmplModel;
 class SyntaxNode {
 
  public:
-  virtual int nchild() const { return nval; }
 
   typedef std::vector<SyntaxNode*>::const_iterator iterator;
 
@@ -63,15 +62,12 @@ class SyntaxNode {
   SyntaxNode* back () const { return values.back();  }
 
   /** Clear the child list */
-  virtual void clear() { opCode = 0; nval = 0; values.clear(); }
+  virtual void clear() { opCode = 0; values.clear(); }
 
  protected:
 
   /** ID CODE of this node (a list can be found in ampl.tab.h) */
   int opCode;
-
-  /** Number of arguments */
-  int nval;
 
   /** List of arguments.
    *
@@ -101,6 +97,9 @@ class SyntaxNode {
 
   /** Destructor */
   virtual ~SyntaxNode();
+
+  /** Retrieve the number of children */
+  virtual int nchild() const { return values.size(); }
 
   /** Retrieve the opCode */
   int getOpCode() const { return opCode; }
