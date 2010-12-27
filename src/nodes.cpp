@@ -36,36 +36,21 @@ AmplModel *SyntaxNode::default_model =NULL;
 string StageNodeNode::node = "";
 string StageNodeNode::stage = "";
 
-/* --------------------------------------------------------------------------
-addItemToListNew
--------------------------------------------------------------------------- */
+/** Add an item to the back */
 SyntaxNode *SyntaxNode::push_back(SyntaxNode *newitem)
 {
-  /* extend the size of the node by one */
-  SyntaxNode **newvalues = new SyntaxNode*[nval + 1];
-
-  for (int i = 0; i < nval; ++i)
-    newvalues[i] = values[i];
-  newvalues[nval] = newitem;
+  values.push_back(newitem);
   nval++;
-  delete[] values;
-  values = newvalues;
   return this;
 }
-/* --------------------------------------------------------------------------
-addItemToListBeg
--------------------------------------------------------------------------- */
+
+/** Add an item to the front */
 SyntaxNode *SyntaxNode::push_front(SyntaxNode *newitem)
 {
-  /* extend the size of the node by one */
-  SyntaxNode **newvalues = new SyntaxNode*[nval + 1];
-
-  newvalues[0] = newitem;
-  for (int i = 0; i < nval; ++i)
-    newvalues[i+1] = values[i];
-  nval++;
-  delete[] values;
-  values = newvalues;
+  values.resize(++nval);
+  for (int i = nval; --i > 0; )
+    values[i] = values[i - 1];
+  values[0] = newitem;
   return this;
 }
 
@@ -410,7 +395,7 @@ SyntaxNode::SyntaxNode (int code, SyntaxNode *val1, SyntaxNode *val2, SyntaxNode
    if(val2) nval++;
    if(val3) nval++;
 
-   if(nval) values = new SyntaxNode*[nval];
+   values.resize(nval);
 
    int i = 0;
    if(val1) values[i++] = val1;
@@ -424,7 +409,6 @@ SyntaxNode::~SyntaxNode() {
 
   for (int i = 0; i < nchild(); ++i)
     delete values[i];
-  delete[] values;
 }
 
 /* --------------------------------------------------------------------------
@@ -439,9 +423,8 @@ SyntaxNode::deep_copy()
     cerr << "IDREF SyntaxNodes need to be cloned differently\n";
     exit(1);
   }
-  newn->nval = nval;
-  if (nval>0)
-    newn->values = new SyntaxNode*[nval];
+  newn->nval = nchild();
+  newn->values.resize(nchild());
 
   /* Values are copied depending on the type of the SyntaxNode */
   /* ID/IDREF/INT_VAL/FLOAT_VAL/IDREFM are treated differently */
@@ -470,9 +453,8 @@ SyntaxNode::clone()
     exit(1);
   }
   newn->nval = nval;
-  newn->values = new SyntaxNode*[nchild()];
-  for (int i = 0; i < nchild(); ++i)
-    newn->values[i] = values[i];
+  newn->values = values;
+
   return newn;
 }
 
@@ -669,16 +651,19 @@ SyntaxNode::getArgumentList() const
  *  The items from src are prepended to this object's values.
  */
 SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
-   SyntaxNode **newvalues = new SyntaxNode*[src.nval + nval];
 
-   SyntaxNode **ptr = newvalues;
-   for(int i=0;i<src.nval;i++)
-      *(ptr++) = src.values[i];
-   for(int i=0;i<nval;i++)
-      *(ptr++) = values[i];
+   values.resize(src.nval + nval);
+
+   // copy this object's values to the end
+   for (int i = src.nval + nval; --i > 0; )
+     values[i] = values[i - src.nval];
+
+   // copy src's values to the beginning
+   for (int i = 0; i < src.nval; ++i)
+     values[i] = src.values[i];
+
+   // update the number of values
    nval += src.nval;
-   delete[] values;
-   values = newvalues;
 
    return (*this);
 }
@@ -891,7 +876,7 @@ SyntaxNodeIx::deep_copy()
   SyntaxNodeIx *onix = new SyntaxNodeIx(opCode);
   
   onix->nval = nval;
-  onix->values = new SyntaxNode*[nval];
+  onix->values.resize(nchild());
   for (int i = 0; i < nchild(); ++i)
     onix->values[i] = values[i]->deep_copy();
   
@@ -935,11 +920,9 @@ SyntaxNodeIDREF::deep_copy()
   SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode, ref);
 
   newn->nval = nval;
-  if (nval>0){
-    newn->values = new SyntaxNode*[nval];
-    for(int i=0;i<nval;i++)
-      newn->values[i] = values[i]->deep_copy();
-  }
+  newn->values.resize(nchild());
+  for (int i = 0; i < nchild(); ++i)
+    newn->values[i] = values[i]->deep_copy();
   newn->stochparent = stochparent;
 
   return newn;
@@ -954,11 +937,7 @@ SyntaxNodeIDREF::clone()
   SyntaxNodeIDREF *newn = new SyntaxNodeIDREF(opCode, ref);
 
   newn->nval = nval;
-  if (nval>0){
-    newn->values = new SyntaxNode*[nval];
-    for(int i=0;i<nval;i++)
-      newn->values[i] = values[i];
-  }
+  newn->values = values;
   newn->stochparent = stochparent;
 
   return newn;

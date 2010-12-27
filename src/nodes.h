@@ -53,38 +53,17 @@ class SyntaxNode {
 
  public:
   virtual int nchild() const { return nval; }
-  class iterator {
-     private:
-      SyntaxNode **ptr;
-     public:
-      iterator(SyntaxNode **p) { ptr=p; }
-      ~iterator() {}
-      iterator& operator=(const iterator &other) {
-         ptr = other.ptr;
-         return (*this);
-      }
-      bool operator==(const iterator &other) { return (other.ptr == ptr); }
-      bool operator!=(const iterator &other) { return (other.ptr != ptr); }
-      iterator& operator++() {
-         ptr++;
-         return(*this);
-      }
-      iterator operator++(int) {
-         iterator tmp = *this;
-         ++(*this);
-         return tmp;
-      }
-      SyntaxNode* operator*() const { return *ptr; }
-  };
 
-  iterator begin() const { return iterator(values); }
-  iterator end() const { return iterator(values+nval); }
+  typedef std::vector<SyntaxNode*>::const_iterator iterator;
 
-  SyntaxNode* front() const { return values[0]; }
-  SyntaxNode* back()  const { return values[nval - 1]; }
+  iterator begin() const { return values.begin(); }
+  iterator end  () const { return values.end();   }
+
+  SyntaxNode* front() const { return values.front(); }
+  SyntaxNode* back () const { return values.back();  }
 
   /** Clear the child list */
-  virtual void clear() { opCode = 0; nval = 0; delete[] values; values = NULL; }
+  virtual void clear() { opCode = 0; nval = 0; values.clear(); }
 
  protected:
 
@@ -100,7 +79,7 @@ class SyntaxNode {
    *  name of the entity. If there are two arguments the second argument is
    *  an (int*) stating the ancestor information as set by ancestor(1).ID in
    *  stochastic programming */
-  SyntaxNode **values;
+  std::vector<SyntaxNode*> values;
 
  public: 
   

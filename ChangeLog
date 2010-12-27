@@ -3,6 +3,8 @@
     findOpCode().
   * Add SyntaxNode::front()/back() to provide direct access to the first/last
     child.
+  * Use a vector<SyntaxNode*> to store the children of a SyntaxNode. This
+    allows the reuse of the STL vector::iterator.
 
 2010-12-22  Marco Colombo  <m.colombo@ed.ac.uk>
   * Declare more methods as const.
