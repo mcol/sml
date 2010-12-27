@@ -108,7 +108,7 @@ setdef:  SET ID defined_opt setspec_list SEMICOLON {
             }
             assert($4->nchild() == 1);
             SetSpec *tmp = (SetSpec*) $4->front();
-            entry->mc->value = new Set(*(tmp->list));
+            entry->mc->setValue(new Set(*(tmp->list)));
          }
       ;
 
@@ -203,7 +203,7 @@ paramdef:   PARAM ID paramdefault_opt defined_opt paramspec_list SEMICOLON {
                     exit(1);
                 }
                 // reference has been found
-                entry->mc->value = new CompDescrParam(entry->mc, $5);
+                entry->mc->setValue(new CompDescrParam(entry->mc, $5));
             }
         |   PARAM paramdefault_opt COLON object_list DEFINED object_list 
                SEMICOLON

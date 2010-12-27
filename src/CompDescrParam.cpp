@@ -83,7 +83,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     indices = new Set*[nsets];
     nix =0;
     for (int i = 0; i < nsets; ++i) {
-      indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->value);
+      indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->getValue());
       if (indices[i]==NULL){
         cerr << "ERROR: Value of parameter " << mc->id
              << " given before indexing set " << (ix->sets_mc[i])->id

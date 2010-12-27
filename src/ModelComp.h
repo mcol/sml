@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef MODELCOMP_H
 #define MODELCOMP_H
-
-enum {NOARG=0,WITHARG=1,ONLYARG=2};
-typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 
 #include "CompDescr.h"
 #include <list>
@@ -28,6 +26,13 @@ class AmplModel;
 class SyntaxNode;
 class SyntaxNodeIx;
 class SyntaxNodeIDREF;
+
+enum { NOARG = 0,
+       WITHARG = 1,
+       ONLYARG = 2};
+
+/** Possible types of a model component */
+typedef enum {TVAR, TCON, TPARAM, TSET, TMIN, TMAX, TMODEL, TNOTYPE} compType;
 
 /** @class ModelComp
  *  Object to represent a component of an AMPL/SML model/block.
@@ -58,12 +63,6 @@ class ModelComp{
 			 
   /**  Indexing expression */
   SyntaxNodeIx *indexing;
-  
-  /** List of all entities that this model component depends on.
-   *
-   *  This lists all model components used in the definition of this component.
-   */
-  std::list<ModelComp*> dependencies;
 
   /** The model this component belongs to */
   AmplModel *model;
@@ -72,15 +71,23 @@ class ModelComp{
    *  @attention Better implemented as a subclass of ModelComp. */
   void *other;      
 
+ protected:
+
+  /** List of all entities that this model component depends on.
+   *
+   *  This lists all model components used in the definition of this component.
+   */
+  std::list<ModelComp*> dependencies;
+
   /** Components can be tagged by the tagDependencies method which sets
    *  this tag for this components and everything that it depends on 
    *  (i.e. everything listed in the dependencies list).                 */
   bool tag;            //!< true if part of the current 'needed' set
 
-  /** for sets and parameters this points to an object that gives the
+  /** For sets and parameters, this points to an object that gives the
    *  values and further specific information (Set for sets)
    */
-  CompDescr *value;   //!< value (for sets and parameters)
+  CompDescr *value;
 
  public:
 
@@ -116,6 +123,9 @@ class ModelComp{
   /** Recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();
 
+  /** Whether the component has a tag */
+  bool isTagged() const { return tag; }
+
   /** Set the tag to false for all models: using global_list */
   static void untagAll();  
 
@@ -127,6 +137,12 @@ class ModelComp{
 
   /** Write definition of all tagged components to file, using global_list */
   static void modifiedWriteAllTagged(std::ostream &fout);
+
+  /** Retrieve the value of this component (if a set or parameter) */
+  CompDescr* getValue() const { return value; }
+
+  /** Set the value for this component */
+  void setValue(CompDescr *val) { value = val; }
 
   /** Move this model component up in the model tree */
   void moveUp(int level);

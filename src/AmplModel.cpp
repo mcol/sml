@@ -146,7 +146,8 @@ AmplModel::writeTaggedComponents(ostream &fout)
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     ModelComp *c = *p;
     //if (c->tag) printf("%s\n",c->id);
-    if (c->tag) modified_write(fout, c);
+    if (c->isTagged())
+      modified_write(fout, c);
     if (c->type==TMODEL) {
       AmplModel *am = (AmplModel *)c->other;
       am->writeTaggedComponents(fout);
