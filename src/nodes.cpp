@@ -429,14 +429,10 @@ SyntaxNode::deep_copy()
   if (opCode==ID){
     cerr << "Called deep_copy for ID" << endl;
     throw exception();
-    /*assert(nval==1);
-    newn->values[0] = strdup((char *)values[0]);
-    return newn;*/
   }
 
-  newn->values.resize(nchild());
-  for (int i = 0; i < nchild(); ++i)
-    newn->values[i] = values[i]->deep_copy();
+  for (SyntaxNode::iterator i = begin(); i != end(); ++i)
+    newn->push_back((*i)->deep_copy());
   return newn;
 }
 /* --------------------------------------------------------------------------
