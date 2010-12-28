@@ -482,28 +482,6 @@ SyntaxNode::printDummyVar() const {
 }
 
 /* --------------------------------------------------------------------------
-SyntaxNode::findIDREF()
----------------------------------------------------------------------------- */
-/** Find the list of all the IDREF nodes at or below the current node */
-void
-SyntaxNode::findIDREF() const {
-
- if (opCode == ID)
-    return;
-
-  if (opCode==IDREF){
-    cout << getGlobalName((ModelComp*)this->values[0], NULL, NULL, NOARG) <<
-      endl;
-  }else{
-    for (int i = 0; i < nchild(); i++) {
-      if (values[i]){
-	     values[i]->findIDREF();
-      }
-    }
-  }
-}
-
-/* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<ModelComp> *lmc)
 ---------------------------------------------------------------------------- */
 /** Find the list of all the IDREF nodes at or below the current node */

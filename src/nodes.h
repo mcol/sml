@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
+
 #ifndef NODES_H
 #define NODES_H
 
@@ -119,9 +120,6 @@ class SyntaxNode {
 
   /** Return comma separated list of arguments for IDREF nodes */
   std::string getArgumentList() const;
-
-  /** Find all IDREF's below current node and print to screen */
-  void findIDREF() const;
 
   /** Find all IDREFs below current node */
   virtual void findIDREF(std::list<ModelComp*>& lmc) const;
