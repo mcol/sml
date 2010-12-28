@@ -712,9 +712,8 @@ SyntaxNodeIx::getListDummyVars() const {
 	     exit(1);
       }
       ListNode *dvl = static_cast<ListNode *>(dv);
-      for(ListNode::literator j=dvl->lbegin(); j!=dvl->lend(); ++j){
+      for (ListNode::iterator j = dvl->begin(); j != dvl->end(); ++j)
 	     l.push_back(*j);
-      }
     }else{
       cerr << "A dummy variable expression is either ID or (ID1,...ID2)\n";
       cerr << "Given expression: " << dv << "\n";
@@ -763,7 +762,7 @@ void SyntaxNodeIx::splitExpression()
     this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
     this->dummyVarExpr = new SyntaxNode*[ncomp];
     int i = 0;
-    for(ListNode::literator ti=tmpl->lbegin(); ti!=tmpl->lend(); ++ti, ++i){
+    for (ListNode::iterator ti = tmpl->begin(); ti != tmpl->end(); ++ti, ++i) {
       tmp2 = findKeywordinTree(*ti, IN);
       /* everything to the left of IN is a dummy variables */
       if (tmp2){
@@ -843,7 +842,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
       // and this should be a comma separated list
       assert(tmpl);
       assert(tmpl->getOpCode() == COMMA);
-      for(ListNode::literator j=tmpl->lbegin(); j!=tmpl->lend(); ++j){
+      for (ListNode::iterator j = tmpl->begin(); j != tmpl->end(); ++j) {
         // items on the list should be ID
         assert((*j)->getOpCode() == ID);
         IDNode *tmp2 = (IDNode *) *j;
@@ -939,13 +938,14 @@ IDNode::IDNode(const string& new_name, long new_stochparent) :
    SyntaxNode(ID), name(new_name), stochparent(new_stochparent) {}
 
 ostream& ListNode::put(ostream& s) const {
-   literator i = lbegin();
-   if(i==lend()) return s;
+   SyntaxNode::iterator i = begin();
+   if (i == end())
+     return s;
 
    char sep = (opCode == ' ') ? ' ' : ',';
 
    s << *i;
-   while (++i != lend())
+   while (++i != end())
       s << sep << *i;
 
    return s;
@@ -953,31 +953,6 @@ ostream& ListNode::put(ostream& s) const {
 
 void IDNode::findOpCode(int oc, list<SyntaxNode*> *lnd) {
    if(oc==ID) lnd->push_back(this);
-}
-
-ListNode *ListNode::deep_copy() {
-   ListNode *copy = new ListNode(opCode);
-
-   for(literator i=lbegin(); i!=lend(); ++i)
-      copy->push_back((*i)->deep_copy());
-
-   return copy;
-}
-
-ListNode *ListNode::clone() {
-   ListNode *copy = new ListNode(opCode);
-
-   for(literator i=lbegin(); i!=lend(); ++i)
-      copy->push_back(*i);
-
-   return copy;
-}
-
-ListNode::ListNode(int opCode_, SyntaxNode *val1, SyntaxNode *val2) :
-  SyntaxNode(opCode_, val1, val2)
-{
-   if(val1) push_back(val1);
-   if(val2) push_back(val2);
 }
 
 OpNode::OpNode(int opCode_, SyntaxNode *op1, SyntaxNode *op2) :
@@ -1146,7 +1121,7 @@ find_var_ref_in_context(AmplModel *context, SyntaxNode *ref)
       if (GlobalVariables::logParseModel)
          cout << "Adding argument list to node: " << *argNode << "\n";
       //free(idNode->values); // jdh - what does this do?
-      for(ListNode::literator i=argNode->lbegin(); i!=argNode->lend(); ++i)
+      for (ListNode::iterator i = argNode->begin(); i != argNode->end(); ++i)
          ret->push_back(*i);
       if (ref->getOpCode() == LBRACKET) {
          // this is old code to deal with ancestor(1).ID declarations. To go

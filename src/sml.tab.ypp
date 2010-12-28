@@ -924,7 +924,7 @@ begin_smodel(char *name, SyntaxNode *indexing, SyntaxNode *stochsets) {
    if (GlobalVariables::logParseModel)
       cout << "Start Stochastic Model: " << name << "\n";
 
-   ListNode::literator i = stochsetsl->lbegin();
+   ListNode::iterator i = stochsetsl->begin();
    SyntaxNode *nodes = *i;
    SyntaxNode *anc = *(++i);
    SyntaxNode *prob = *(++i);

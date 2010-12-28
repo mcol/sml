@@ -397,34 +397,10 @@ template<class T> std::string ValueNode<T>::getValue() const {
 class ListNode: public SyntaxNode {
 
   public:
-   typedef std::vector<SyntaxNode*>::const_iterator literator;
-
-  private:
-   std::vector<SyntaxNode *> list_;
-
-  public:
-   ListNode(int opCode=',', SyntaxNode *val1=NULL, SyntaxNode *val2=NULL);
-   literator lbegin() const { return list_.begin(); }
-   literator lend() const { return list_.end(); }
+   ListNode(int opCode=',', SyntaxNode *val1 = NULL, SyntaxNode *val2 = NULL) :
+     SyntaxNode(opCode, val1, val2) {}
    std::ostream& put(std::ostream& s) const;
-   ListNode *deep_copy();
-   ListNode *clone();
-   ListNode *push_front(SyntaxNode *node) { 
-      SyntaxNode::push_front(node);
-      list_.insert(list_.begin(), node); 
-      return this; 
-   }
-   ListNode *push_back(SyntaxNode *node) { 
-      SyntaxNode::push_back(node);
-      list_.push_back(node); 
-      return this; 
-   }
-   int nchild() const { return list_.size(); }
-   SyntaxNode *operator[](int i) const { return list_[i]; }
-   void clear() { 
-      SyntaxNode::clear();
-      list_.clear();
-   }
+   SyntaxNode* operator[](int i) const { return values[i]; }
 };
 
 /** @class OpNode
