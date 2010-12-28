@@ -22,12 +22,12 @@
 #include <list>
 #include <string>
 
-class changeitem;
 class ExpandedModel;
 class IDNode;
 class ModelComp;
 class SyntaxNodeIx;
 class SyntaxNodeIDREF;
+struct changeitem;
 
 /** @class AmplModel
  *  This class describes a model (block) in the flat model tree.
@@ -93,7 +93,7 @@ class AmplModel{
   SyntaxNodeIx *ix;
     
   /** List of changes that should be applied to the models */
-  static std::list<changeitem*> changes;
+  static std::list<changeitem> changes;
 
   /** The root model of the AmplModel tree */
   static AmplModel *root;
@@ -155,7 +155,7 @@ class AmplModel{
 
 enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
 
-/** @class changeitem
+/** @struct changeitem
  *  Simple struct that stores a queued change to the model tree.
  *
  *  This is needed to treat expectation constraints that in the postprocessing
@@ -164,8 +164,7 @@ enum {CHANGE_NOACT=0,CHANGE_REM=1,CHANGE_ADD=2};
  *  through all models and ModelComps (since removing/adding comps
  *  invalidates the iterators used in the recursion)
  */
-class changeitem {
- public:
+struct changeitem {
 
   /** The component to be added or removed */
   ModelComp *comp;
@@ -175,6 +174,7 @@ class changeitem {
 
   /** The action: CHANGE_REM/CHANGE_ADD */
   int action;
+
 };
 
 #endif

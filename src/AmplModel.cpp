@@ -32,7 +32,7 @@
 
 using namespace std;
 
-list<changeitem*> AmplModel::changes; //initialize to empty list
+list<changeitem> AmplModel::changes; // initialize to empty list
 AmplModel *AmplModel::root = NULL; //initialize root to NULL
 
 extern void modified_write(ostream &fout, ModelComp *comp);
@@ -781,14 +781,13 @@ AmplModel::applyChanges()
 void
 AmplModel::applyChanges()
 {
-  for(list<changeitem*>::iterator p=changes.begin();p!=changes.end();p++){
-    changeitem *ch = (*p);
-    if (ch->action==CHANGE_REM){
-      (ch->model)->removeComp(ch->comp);
-    }
-    if (ch->action==CHANGE_ADD){
-      (ch->model)->addComp(ch->comp);
-    }
+  for (list<changeitem>::iterator p = changes.begin();
+       p != changes.end(); ++p) {
+    changeitem& ch = *p;
+    if (ch.action == CHANGE_REM)
+      ch.model->removeComp(ch.comp);
+    if (ch.action == CHANGE_ADD)
+      ch.model->addComp(ch.comp);
   }
   changes.clear();
 }

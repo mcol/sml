@@ -946,18 +946,12 @@ ModelComp::moveUp(int level){
   delete idrefnodes;
 
   // and queue this item to be moved up by AmplModel::applyChanges 
-  changeitem *rem = (changeitem*)calloc(1, sizeof(changeitem));
-  changeitem *add = (changeitem*)calloc(1, sizeof(changeitem));
-  rem->comp = this;
-  rem->model = model;
-  rem->action = CHANGE_REM;
+  changeitem rem = {this, model, CHANGE_REM};
   AmplModel::changes.push_back(rem); // Q for removal
   for(i=0;i<level;i++){
     model = model->parent;
   }
-  add->comp = this;
-  add->model = model;
-  add->action = CHANGE_ADD;
+  changeitem add = {this, model, CHANGE_ADD};
   AmplModel::changes.push_back(add);
 }
 
