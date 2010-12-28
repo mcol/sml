@@ -109,10 +109,10 @@ class ModelComp{
   void setUpDependencies();
 
   /** Detailed debugging output */
-  void dump(std::ostream& fout);
+  void dump(std::ostream& fout) const;
 
   /** Print elements of the class */
-  void print();
+  void print() const;
 
   /** Print one liner */
   void printBrief() const;
@@ -148,10 +148,10 @@ class ModelComp{
   void moveUp(int level);
 
   /** Duplicate the object: shallow copy */
-  virtual ModelComp *clone();
+  virtual ModelComp *clone() const;
 
   /** Duplicate the object: deep copy */
-  ModelComp *deep_copy();
+  ModelComp *deep_copy() const;
 
  protected:
 

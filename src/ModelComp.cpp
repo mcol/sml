@@ -338,8 +338,7 @@ ModelComp::print()
 /** Print a detailed diagnostic description of this model component
  *  with the values of all its fields                                        */
 void
-ModelComp::print()
-{
+ModelComp::print() const {
   cout << "------------------------------------------------------------\n";
   cout << "ModelComp: " << id << "\n";
   cout << "  type: " << ModelComp::nameTypes[type] << "\n";
@@ -351,8 +350,8 @@ ModelComp::print()
   }
   cout << "  dependencies: " << dependencies.size() << ":\n";
   cout << "      ";
-  for(list<ModelComp*>::iterator p = dependencies.begin();
-      p!=dependencies.end();p++)
+  for (list<ModelComp*>::const_iterator p = dependencies.begin();
+       p != dependencies.end(); ++p)
     cout << (*p)->model->name << "::" << (*p)->id << " ";
   cout << "  model: " << model->name<< "\n";
   cout << "  count: " << count << "\n";
@@ -365,8 +364,7 @@ ModelComp::dump(ostream &fout)
 /** Print a detailed diagnostic description of this model component
  *  with the values of all its fields                                        */
 void
-ModelComp::dump(ostream &fout)
-{
+ModelComp::dump(ostream& fout) const {
   fout << "MCDP  --------------------------------------------------------"
      "----\n";
   fout << "MCDP ModelComp: " << id << " ("<< (void *) this << ")\n";
@@ -381,8 +379,8 @@ ModelComp::dump(ostream &fout)
   }
   fout << "MCDP  dependencies: " << dependencies.size() << ":\n";
   fout << "      ";
-  for(list<ModelComp*>::iterator p = dependencies.begin();
-      p!=dependencies.end();p++)
+  for (list<ModelComp*>::const_iterator p = dependencies.begin();
+       p != dependencies.end(); ++p)
     fout << (*p)->model->name << "::" << (*p)->id << " ";
   fout << "\nMCDP  model: " << model->name << "\n";
   fout << "MCDP  count: " << count << "\n";
@@ -428,8 +426,8 @@ ModelComp::deep_copy()
  *  entirely new objects.
  */
 ModelComp *
-ModelComp::deep_copy()
-{
+ModelComp::deep_copy() const {
+
   ModelComp *newm = new ModelComp(id);
 
   newm->type = type;
@@ -450,8 +448,8 @@ ModelComp::clone()
  *  copied, pointers below are reused 
  */
 ModelComp *
-ModelComp::clone()
-{
+ModelComp::clone() const {
+
   ModelComp *newm = new ModelComp(id);
 
   newm->type = type;
