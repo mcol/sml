@@ -766,11 +766,9 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
               exit(1);
             }
             ModelComp *setmc = setnref->getModelComp();
-            ModelComp newmc(setmc->id + "_SUB");
-            newmc.type = TSET;
-            
-            // and build "within indset" as attribute tree
-            newmc.attributes = new SyntaxNode(WITHIN, setn);
+            ModelComp newmc(setmc->id + "_SUB", TSET,
+                            NULL, new SyntaxNode(WITHIN, setn));
+
             //newmc.model = comp->model;
             newmc.model = setmc->model;
             modified_write(fout, &newmc);
