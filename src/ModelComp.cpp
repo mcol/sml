@@ -943,6 +943,7 @@ ModelComp::moveUp(int level){
       }
     }
   }
+  delete idrefnodes;
 
   // and queue this item to be moved up by AmplModel::applyChanges 
   changeitem *rem = (changeitem*)calloc(1, sizeof(changeitem));
