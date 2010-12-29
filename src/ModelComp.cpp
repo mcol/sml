@@ -108,56 +108,44 @@ ModelComp::~ModelComp() {
 
 }
 
-/* --------------------------------------------------------------------------
-ModelComp::setUpDependencies()
----------------------------------------------------------------------------- */
+void
+ModelComp::findDependencies(const SyntaxNode* nd) {
+  list<ModelComp*> lmc;
+  nd->findIDREF(lmc);
+  for (list<ModelComp*>::iterator p = lmc.begin(); p != lmc.end(); ++p) {
+    // see if element already in the dependencies list
+    bool found = false;
+    for (list<ModelComp*>::iterator q = dependencies.begin();
+         q != dependencies.end(); ++q)
+      if (*p == *q) found = true;
+    if (!found) {
+      dependencies.push_back(*p);
+      if (prtAnaDep)
+        cout << "  " << (*p)->id << "\n";
+    }
+  }
+}
+
+/** Set up the list of dependencies for this component */
 void
 ModelComp::setUpDependencies()
 {
   dependencies.clear();
-  /* now set up the dependency list for this component */
-  if (prtAnaDep){
-    cout << "Analyse dependencies for " << id << "\n"
-         << " dependencies in indexing: \n";
-  }
+
+  if (prtAnaDep)
+    cout << "Analyse dependencies for " << id << "\n";
   if (indexing) {
-    // get list of IDREF nodes in 'indexing'
-    list<ModelComp*> lmc;
-    indexing->findIDREF(lmc);
-    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
-      // see if element already on dep list
-      bool found=false;
-      for (list<ModelComp*>::iterator q=dependencies.begin();
-           q!=dependencies.end();q++)
-        if (*p==*q) found = true;
-      if (!found)
-        dependencies.push_back(*p);
-    }
+    if (prtAnaDep)
+      cout << " dependencies in indexing:\n";
+    findDependencies(indexing);
   }
   if (attributes){
     if (prtAnaDep)
        cout << " dependencies in attributes: " << *attributes << "\n";
-    //attrib->findIDREF();
-    list<ModelComp*> lmc;
-    attributes->findIDREF(lmc);
-    // lmc should be a list of model components
-    // how do I iterate through it?
-    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
-      // see if element already on dep list
-      bool found=false;
-      for (list<ModelComp*>::iterator q=dependencies.begin();
-           q!=dependencies.end();q++)
-        if (*p==*q) found = true;
-      if (!found)
-        dependencies.push_back(*p);
-    }
+    findDependencies(attributes);
   }
-  if (prtAnaDep){
-    for( list<ModelComp*>::iterator p=dependencies.begin(); 
-         p!=dependencies.end(); ++p)
-      cout << "  " << (*p)->id << "\n";
+  if (prtAnaDep)
     printf("--------------------------------\n");
-  }
 }
 
 /* --------------------------------------------------------------------------
@@ -208,43 +196,18 @@ ModelComp::setTo(const string& id_, compType type_,
   /* now set up the dependency list for the component */
   //printf("Defining model component (%4d): %s\n",tt_count, id);
   this->count = tt_count++;
-  if (prtAnaDep) printf(" dependencies in indexing: \n");
   if (indexing) {
-    list<ModelComp*> lmc;
-    indexing->findIDREF(lmc);
-    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
-      // see if element already on dep list
-      bool found=false;
-      for (list<ModelComp*>::iterator q=dependencies.begin();
-           q!=dependencies.end();q++)
-        if (*p==*q) found = true;
-      if (!found)
-        dependencies.push_back(*p);
-    }
+    if (prtAnaDep)
+      printf(" dependencies in indexing:\n");
+    findDependencies(indexing);
   }
   if (attrib){
     if (prtAnaDep) 
       printf(" dependencies in attributes: %s\n", attrib->print().c_str());
-    //attrib->findIDREF();
-    list<ModelComp*> lmc;
-    attrib->findIDREF(lmc);
-    // lmc should be a list of model components
-    for( list<ModelComp*>::iterator p=lmc.begin(); p!=lmc.end(); ++p){
-      // see if element already on dep list
-      bool found=false;
-      for (list<ModelComp*>::iterator q=dependencies.begin();
-           q!=dependencies.end();q++)
-        if (*p==*q) found = true;
-      if (!found)
-        dependencies.push_back(*p);
-    }
+    findDependencies(attrib);
   }
-  if (prtAnaDep){
-    for( list<ModelComp*>::iterator p=dependencies.begin(); 
-         p!=dependencies.end(); ++p)
-      cout << "  " << (*p)->id << "\n";
+  if (prtAnaDep)
     printf("--------------------------------\n");
-  }
 
   global_list.push_back(this);
 }

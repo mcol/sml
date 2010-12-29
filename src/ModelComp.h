@@ -166,6 +166,9 @@ class ModelComp{
   /** Number of ModelComps defined */
   static int tt_count;
 
+  /** Find dependencies for this component */
+  void findDependencies(const SyntaxNode *nd);
+
 };
 
 std::string
