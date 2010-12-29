@@ -25,7 +25,6 @@
 #include "sml.tab.h"
 #include <cassert>
 #include <cctype>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -55,8 +54,6 @@ AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
   n_submodels(0),
   n_total(0),
   level(0),
-  //first(NULL),
-  //last(NULL),
   node(NULL),
   parent(par),
   ix(NULL)
@@ -145,7 +142,6 @@ AmplModel::writeTaggedComponents(ostream &fout)
   // loop through all model components
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     ModelComp *c = *p;
-    //if (c->tag) printf("%s\n",c->id);
     if (c->isTagged())
       modified_write(fout, c);
     if (c->type==TMODEL) {
@@ -308,15 +304,12 @@ AmplModel::createExpandedModel(const string& smodelname,
             globname += "'"+(*q)+"'";
           }
         }
-        //printf("->%s",(*q).c_str());
       }
-      //printf("\n");
       //cout << globname+'\n';
       em->appendLocalVarDef(globname);
     }
     if (mc->type == TMODEL){
       int card;
-      string setElements;
       // okay this is a submodel declaration:
       // - work out the cardinality
       // - work out the set and the names of the subproblem instancestub
@@ -432,41 +425,7 @@ AmplModel::print
 ---------------------------------------------------------------------------- */
 void 
 AmplModel::print() const {
-  printf("AM: ------------------------------------------------------------\n");
-  printf("AM: This is AmplModel: %s\n", name.c_str());
-  printf("AM: global name: %s\n",global_name.c_str());
-  printf("AM: level: %d\n",level);
-  printf("AM: parent: %s\n", parent ? parent->name.c_str() : "NULL");
-  if (ix){ 
-    printf("AM: indexing: %s\n", ix->print().c_str());
-  }else{
-    printf("AM: indexing: NULL\n");
-  }
-  printf("AM: Nb submodels  : %d\n", n_submodels);
-  printf("AM: Nb sets       : %d\n", n_sets);
-  printf("AM: Nb parameters : %d\n", n_params);
-  printf("AM: Nb objectives : %d\n", n_objs);
-  printf("AM: Nb variables  : %d\n", n_vars);
-  printf("AM: Nb constraints: %d\n", n_cons);
-  printf("AM: Nb objectives: %d\n", n_submodels);
-  printf("AM: Entities declared:\n");
-  for (list<ModelComp*>::const_iterator p = comps.begin();
-       p != comps.end(); ++p) {
-    printf("AM:   ");
-    (*p)->printBrief();
-  }
-
-  if (n_submodels>0)
-    printf("AM: now list the submodels:\n");
-  
-  for (list<ModelComp*>::const_iterator p = comps.begin();
-       p != comps.end(); ++p) {
-    ModelComp *mc = *p;
-    if (mc->type == TMODEL){
-      AmplModel *am = mc->other;
-      am->print();
-    }
-  }
+  dump(cout);
 }
 
 /* ---------------------------------------------------------------------------
@@ -483,28 +442,28 @@ AmplModel::dump(ostream &fout)
 ---------------------------------------------------------------------------- */
 void 
 AmplModel::dump(ostream& fout) const {
-  fout << "DUMP: ----------------------------------------------------------\n";
-  fout << "DP: This is AmplModel (" << (void *) this << "): " << name << "\n";
-  fout << "DP: global name: " << global_name << "\n";
-  fout << "DP: level: " << level << "\n";
-  fout << "DP: parent: " << (parent?parent->name:"NULL") << "\n";
-  fout << "DP: indexing: " << ix << "\n";
-  ix->dump(fout);
-  fout << "DP: Nb submodels  : " <<  n_submodels << "\n";
-  fout << "DP: Nb sets       : " <<  n_sets << "\n";
-  fout << "DP: Nb parameters : " <<  n_params << "\n";
-  fout << "DP: Nb objectives : " <<  n_objs << "\n";
-  fout << "DP: Nb variables  : " <<  n_vars << "\n";
-  fout << "DP: Nb constraints: " <<  n_cons << "\n";
-  fout << "DP: Nb objectives: " <<  n_submodels << "\n";
-  fout << "DP: List components:";
+  fout << "AM: ----------------------------------------------------------\n";
+  fout << "AM: This is AmplModel (" << (void *) this << "): " << name << "\n";
+  fout << "AM: global name: " << global_name << "\n";
+  fout << "AM: level: " << level << "\n";
+  fout << "AM: parent: " << (parent?parent->name:"NULL") << "\n";
+  fout << "AM: indexing: " << ix << "\n";
+  if (ix)
+    ix->dump(fout);
+  fout << "AM: Nb submodels  : " <<  n_submodels << "\n";
+  fout << "AM: Nb sets       : " <<  n_sets << "\n";
+  fout << "AM: Nb parameters : " <<  n_params << "\n";
+  fout << "AM: Nb objectives : " <<  n_objs << "\n";
+  fout << "AM: Nb variables  : " <<  n_vars << "\n";
+  fout << "AM: Nb constraints: " <<  n_cons << "\n";
+  fout << "AM: Nb objectives: " <<  n_submodels << "\n";
+  fout << "AM: List components:";
   list<ModelComp*>::const_iterator p;
   for (p = comps.begin(); p != comps.end(); ++p)
     (*p)->dump(fout);
 
   if (n_submodels>0)
-    fout << "DP: now list the submodels:\n";
-
+    fout << "AM: now list the submodels:\n";
   for (p = comps.begin(); p != comps.end(); ++p) {
     ModelComp *mc = *p;
     if (mc->type == TMODEL){
