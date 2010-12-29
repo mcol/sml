@@ -44,6 +44,18 @@ ExpandedModel::ExpandedModel(AmplModel *src_model) :
   // Note: Setup of model is largely done in AmplModel::createExpandedModel()
 }
 
+static unsigned
+findIdxOfUncommonChar(bool isRoot, const string& line, const string& name) {
+  unsigned int j = 0;
+  if (!isRoot && line != "") {
+    for (j = 0; j < name.size() && j < line.size(); ++j)
+      if (name.at(j) != line.at(j))
+        break;
+    if (j < line.size() && line.at(j) == '_') ++j;
+  }
+  return j;
+}
+
 /* --------------------------------------------------------------------------
 ExpandedModel::setLocalVarInfo
 -------------------------------------------------------------------------- */
@@ -93,13 +105,7 @@ ExpandedModel::setLocalVarInfo()
     getline(fin, line);
     listOfConNames.push_back(line);
     // Trim away common characters between model name and var from varname
-    unsigned int j = 0;
-    if (!isRoot && line != "") {
-      for(j=0; j<model_name.size() && j<line.size(); ++j) {
-        if(model_name.at(j)!=line.at(j)) break;
-      }
-      if(j<line.size() && line.at(j)=='_') j++;
-    }
+    unsigned int j = findIdxOfUncommonChar(isRoot, line, model_name);
     // skip empty line
     if(line.substr(j) == "") continue;
     // skip dummy row
@@ -163,13 +169,7 @@ ExpandedModel::setLocalVarInfo()
         listOfVarNames.push_back(*q);
 
         // Trim away common characters between model name and var from varname
-        unsigned int j = 0;
-        if (!isRoot && *p != "") {
-          for(j=0; j<model_name.size() && j<(*p).size(); ++j) {
-             if(model_name.at(j)!=(*p).at(j)) break;
-          }
-          if(j<(*p).size() && (*p).at(j)=='_') j++;
-        }
+        unsigned int j = findIdxOfUncommonChar(isRoot, *p, model_name);
         listOfLocalVarNames.push_back((*q).substr(j));
       }
     }
