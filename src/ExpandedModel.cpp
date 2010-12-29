@@ -200,11 +200,8 @@ ExpandedModel::getLocalVarNames
  *  @return Names of the local variables.
  */
 const list<string>&
-ExpandedModel::getLocalVarNames() 
-{
-  if (!localVarInfoSet){
-    setLocalVarInfo();
-  }
+ExpandedModel::getLocalVarNames() const {
+  assert(localVarInfoSet);
   return listOfLocalVarNames;
 }
 
@@ -216,11 +213,8 @@ ExpandedModel::getLocalConNames
  *  @return Names of local constraints.
  */
 const list<string>&
-ExpandedModel::getLocalConNames() 
-{
-  if (!localVarInfoSet){
-    setLocalVarInfo();
-  }
+ExpandedModel::getLocalConNames() const {
+  assert(localVarInfoSet);
   return listOfLocalConNames;
 }
 
@@ -232,11 +226,8 @@ ExpandedModel::getNLocalVars
  *  @return Number of local variables.
  */
 int
-ExpandedModel::getNLocalVars()
-{
-  if (!localVarInfoSet){
-    setLocalVarInfo();
-  }
+ExpandedModel::getNLocalVars() const {
+  assert(localVarInfoSet);
   return nLocalVars;
 }
 
@@ -248,11 +239,8 @@ ExpandedModel::getNLocalCons
  *  @return Number of local constraints.
  */
 int
-ExpandedModel::getNLocalCons()
-{
-  if (!localVarInfoSet){
-    setLocalVarInfo();
-  }
+ExpandedModel::getNLocalCons() const {
+  assert(localVarInfoSet);
   return nLocalCons;
 }
 
@@ -579,9 +567,7 @@ ExpandedModel::setPrimalSolColumns
 -------------------------------------------------------------------------- */
 /** Upload the local variable solutions */
 void ExpandedModel::setPrimalSolColumns(const double *elts) {
-   if (!localVarInfoSet){
-      setLocalVarInfo();
-   }
+   assert(localVarInfoSet);
    if(!pvar) {
      pvar = new double[nLocalVars];
    }
@@ -594,9 +580,7 @@ ExpandedModel::setDualSolColumns
 -------------------------------------------------------------------------- */
 /** Upload the local variable duals (multipliers on bounds) */
 void ExpandedModel::setDualSolColumns(const double *elts) {
-   if (!localVarInfoSet){
-      setLocalVarInfo();
-   }
+   assert(localVarInfoSet);
    if(!dvar) {
      dvar = new double[nLocalVars];
    }
@@ -609,9 +593,7 @@ ExpandedModel::setPrimalSolRows
 -------------------------------------------------------------------------- */
 /** Upload the local constraints slacks */
 void ExpandedModel::setPrimalSolRows(const double *elts) {
-   if (!localVarInfoSet){
-      setLocalVarInfo();
-   }
+   assert(localVarInfoSet);
    if(!prow) {
      prow = new double[nLocalCons];
    }
@@ -624,9 +606,7 @@ ExpandedModel::setDualSolRows
 -------------------------------------------------------------------------- */
 /** Upload the local constraints duals (multipliers on constraints) */
 void ExpandedModel::setDualSolRows(const double *elts) {
-   if (!localVarInfoSet){
-      setLocalVarInfo();
-   }
+   assert(localVarInfoSet);
    if(!drow) {
      drow = new double[nLocalCons];
    }
@@ -639,9 +619,7 @@ ExpandedModel::outputSolution
 -------------------------------------------------------------------------- */
 /** Outputs the solution to the supplied stream */
 void ExpandedModel::outputSolution(ostream &out, int indent) {
-   if (!localVarInfoSet){
-      setLocalVarInfo();
-   }
+   assert(localVarInfoSet);
 
    string ind(indent, ' ');
    string ind2(ind);

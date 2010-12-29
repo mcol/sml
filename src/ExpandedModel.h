@@ -177,15 +177,16 @@ class ExpandedModel : public ExpandedModelInterface {
   void print() const;
   
   //! Returns the number of local variables
-  int getNLocalVars();
-
-  //! Returns the names of local variables
-  const std::list<std::string>& getLocalVarNames();
+  int getNLocalVars() const;
 
   //! Returns the number of local constraints
-  int getNLocalCons();
+  int getNLocalCons() const;
 
-  const std::list<std::string>& getLocalConNames();
+  //! Returns the names of local variables
+  const std::list<std::string>& getLocalVarNames() const;
+
+  //! Returns the names of local constraints
+  const std::list<std::string>& getLocalConNames() const;
 
   //! Returns the nonzeros in the Jacobian of a section of the model
   int getNzJacobianOfIntersection(ExpandedModelInterface *emcol);
@@ -238,9 +239,10 @@ class ExpandedModel : public ExpandedModelInterface {
     localVarDef.push_back(name);
   }
 
- private: 
   //! Sets nLocalVar, listOfLocalVars, nLocalCons, listOfVarNames
-  void setLocalVarInfo(); 
+  void setLocalVarInfo();
+
+ private:
   std::list<SymbolTable::Entry> getObjList() const;
 
 };

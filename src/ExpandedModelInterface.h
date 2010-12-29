@@ -138,16 +138,16 @@ class ExpandedModelInterface {
   ancestor_iterator aend() { return ancestor_iterator(NULL); }
   
   //! Returns the number of local variables
-  virtual int getNLocalVars() = 0;
+  virtual int getNLocalVars() const = 0;
 
   //! Returns the names of local variables
-  virtual const std::list<std::string>& getLocalVarNames() = 0;
+  virtual const std::list<std::string>& getLocalVarNames() const = 0;
 
   //! Returns the number of local constraints.
-  virtual int getNLocalCons() = 0;
+  virtual int getNLocalCons() const = 0;
 
   //! Returns the names of local constraints
-  virtual const std::list<std::string>& getLocalConNames() = 0;
+  virtual const std::list<std::string>& getLocalConNames() const = 0;
 
   //! Returns the nonzeros in the Jacobian of a section of the model
   virtual int getNzJacobianOfIntersection(ExpandedModelInterface *emcol) = 0;

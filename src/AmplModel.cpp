@@ -374,6 +374,8 @@ AmplModel::createExpandedModel(const string& smodelname,
       }
     }
   }
+
+  em->setLocalVarInfo();
   
   return em;
 }
