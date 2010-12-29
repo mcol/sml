@@ -25,7 +25,6 @@
 class ModelComp;
 class AmplModel;
 
-
 /** @class SyntaxNode
  *  This is a node in the operator tree.
  *
@@ -61,6 +60,8 @@ class SyntaxNode {
 
   SyntaxNode* front() const { return values.front(); }
   SyntaxNode* back () const { return values.back();  }
+
+  SyntaxNode* operator[](int i) const { return values[i]; }
 
   /** Clear the child list */
   virtual void clear() { opCode = 0; values.clear(); }
@@ -398,7 +399,6 @@ class ListNode: public SyntaxNode {
    ListNode(int opCode=',', SyntaxNode *val1 = NULL, SyntaxNode *val2 = NULL) :
      SyntaxNode(opCode, val1, val2) {}
    std::ostream& put(std::ostream& s) const;
-   SyntaxNode* operator[](int i) const { return values[i]; }
 };
 
 /** @class OpNode

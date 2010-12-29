@@ -195,7 +195,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
         int pos_in_array = 0;
         for(int k=0;k<nobj;k++){
           pos_in_array*= indices[k]->size();
-          SyntaxNode *onid = (*((ListNode *)paramspec))[pos_in_paramspec+k];
+          SyntaxNode *onid = (*paramspec)[pos_in_paramspec + k];
           char *obj = (char *) onid->getValue().c_str();
           // FIXME: if we want to allow multidimensional indexing sets we
           //        need to gather indices[k]->dim entries together and 
@@ -203,7 +203,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
           //        findPos
           pos_in_array += indices[k]->findPos(SetElement(1,&obj));
         }          
-        SyntaxNode *on = (*((ListNode *)paramspec))[pos_in_paramspec+nobj];
+        SyntaxNode *on = (*paramspec)[pos_in_paramspec + nobj];
         assert(on->getOpCode() == ID || on->getOpCode() == -99);
         values[pos_in_array] = ((ValueNodeBase*)on)->getFloatVal();
         nread++;
@@ -345,8 +345,7 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
         }
         cl = cl->front();
         assert(cl->getOpCode() == COMMA);
-        ListNode *cll = (ListNode*) cl;
-        IDNode *cli = (IDNode *) (*cll)[0];
+        IDNode *cli = (IDNode *) (*cl)[0];
         colpos[jj] = indices[ixcolset]->findPos(SetElement(1,&cli));
       }else{
         // this is a set of dim 1
