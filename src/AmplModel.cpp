@@ -160,7 +160,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
 AmplModel::createExpandedModel
 ---------------------------------------------------------------------------- */
 static string crush(const string& inst);
-list<string> *getListOfInstances(istream &file);
+static list<string>* getListOfInstances(istream& file);
 
 /** Recursively create an ExpandedModel tree from the flat AmplModel.
  *

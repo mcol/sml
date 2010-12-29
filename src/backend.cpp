@@ -74,7 +74,7 @@ print_entries(AmplModel *model, compType type) {
   }
 }
 
-void
+static void
 print_model(AmplModel *model)
 {
   ModelComp *entry;

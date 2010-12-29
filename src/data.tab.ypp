@@ -25,7 +25,6 @@
    #include "ModelComp.h"
    #include "nodes.h"
    #include <cassert>
-   #include <cstdio>
    #include <cstdlib>
    #include <iostream>
 
@@ -34,11 +33,10 @@
    using namespace std;
 
    int datalex(void);
-   void dataerror(const char *s);
+   static void dataerror(const char *s);
    extern FILE *datain;
    extern int datalineno;
    static AmplModel *root;
-   static bool logParse = false;
 %}
 
 %union
@@ -262,7 +260,6 @@ valuetable: theader_row DEFINED object_list {
 
 void dataerror(const char *s) {
   cerr << "DATA: " << s << " on line " << datalineno << "\n";
-  //fprintf(stderr, "%s\n", s);
   exit(1);
 }
 
