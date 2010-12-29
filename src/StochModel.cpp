@@ -28,7 +28,12 @@
 
 using namespace std;
 
-static bool logSM = false;
+#if 0
+  #include "misc.h" // for to_string()
+  #define LogSM(X) cout << X
+#else
+  #define LogSM(X)
+#endif
 
 static void splitIn(SyntaxNode *expr, IDNode **dummy, SyntaxNode **set) {
   if (expr->getOpCode() == IN) {
@@ -100,7 +105,7 @@ static vector<string> expandSet(SyntaxNode *set) {
   list <ModelComp*> dep;
   set->findIDREF(dep);
   for(list<ModelComp*>::iterator q=dep.begin(); q!=dep.end(); ++q){
-    if (logSM) cout << "dep: " << (*q)->id << endl;
+    LogSM("dep: " + (*q)->id + "\n");
     (*q)->tagDependencies();
   }
 
@@ -135,8 +140,6 @@ static vector<string> expandSet(SyntaxNode *set) {
        "AMPL processing failed?\n";
     exit(1);
   }
-  //in.getline(buffer, 500);
-  //if (logSM) cout <<"Set " << set << " members: " << buffer << "\n";
 
   // parse the set members
   vector<string> member_list;
@@ -204,8 +207,7 @@ StochModel::expandStagesOfComp()
     if (smc->stageset){
       smc->stageset->findIDREF(dep);
       for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
-        if (logSM)
-          cout << "dep: " << (*q)->id << "\n";
+        LogSM("dep: " + (*q)->id + "\n");
         (*q)->tagDependencies();
       }
     }
@@ -268,8 +270,7 @@ StochModel::expandStagesOfComp()
       }
       in.getline(buffer, 500);
       in.close();
-      if(logSM) 
-         cout << "Set " << smc->stageset << " members: " << buffer << "\n";
+      LogSM("Set " + smc->stageset->print() + " members: " + buffer + "\n");
 
       // parse the set members
       smc->stagenames = new vector<string>;
@@ -280,7 +281,7 @@ StochModel::expandStagesOfComp()
         
         p2 = strtok(p1, " ;");
         while(p2!=NULL){
-          if (logSM) printf("Member: %s\n",p2);
+          LogSM("Member: " + string(p2) + "\n");
           smc->stagenames->push_back(p2);
           p2 = strtok(NULL, " ;\n");
         }
@@ -333,11 +334,9 @@ StochModel::expandToFlatModel()
   StochModelComp **indset;
   int stgcnt;
 
-  if(logSM) {
-    cout << "---------------------------------------------------------------\n";
-    cout << " StochModel::expandToFlatModel: \n";
-    cout << "---------------------------------------------------------------\n";
-  }
+  LogSM("---------------------------------------------------------------\n");
+  LogSM(" StochModel::expandToFlatModel:\n");
+  LogSM("---------------------------------------------------------------\n");
   
   /* expand the stages set for all the StochModelComp entities in this model */
   expandStagesOfComp();
@@ -359,8 +358,8 @@ StochModel::expandToFlatModel()
   stgcnt = stagenames.size()-1;
   for(vector<string>::reverse_iterator st=stagenames.rbegin();
       st!=stagenames.rend();  st++,stgcnt--){// loops backwards through list
-    if(logSM) 
-       cout << "Creating ampl model at stage " << stgcnt << ": " << *st << endl;
+    LogSM("Creating ampl model at stage " + to_string(stgcnt) + ": " +
+          *st + "\n");
     am = new AmplModel();
 
     // set name and global name for this ampl model
@@ -584,15 +583,13 @@ StochModel::expandToFlatModel()
   am->node = node;
   am->ix = node->indexing;
 
-  if(logSM) {
-    cout << " -----------------------------------------------------------\n";
-    cout << " StochModel::expandToFlatModel: Finished Pass 1: ";
-    if (GlobalVariables::prtLvl>1)
-      cout << "printing FlatModel tree:";
-    cout << endl;
-    cout << " -----------------------------------------------------------\n";
-    if (GlobalVariables::prtLvl>1) am->print();
-  }
+  LogSM(" -----------------------------------------------------------\n");
+  LogSM(" StochModel::expandToFlatModel: Finished Pass 1: ");
+  if (GlobalVariables::prtLvl > 1)
+    LogSM("printing FlatModel tree:");
+  LogSM("\n-----------------------------------------------------------\n");
+  if (GlobalVariables::prtLvl > 1)
+    am->print();
 
   /* =========================== PASS 2 ================================== */
      
@@ -605,17 +602,14 @@ StochModel::expandToFlatModel()
   AmplModel::applyChanges();
   am->reassignDependencies();
 
-  if(logSM) {
-    cout << " -----------------------------------------------------------\n";
-    cout << " StochModel::expandToFlatModel: Finished converting:";
-    if (GlobalVariables::prtLvl>1)
-      cout << " printing FlatModel tree:";
-    cout << endl;
-    cout << " -----------------------------------------------------------\n";
-    if (GlobalVariables::prtLvl>1){
-      am->print();
-      cout << " -----------------------------------------------------------\n";
-    }
+  LogSM(" -----------------------------------------------------------\n");
+  LogSM(" StochModel::expandToFlatModel: Finished converting: ");
+  if (GlobalVariables::prtLvl > 1)
+    LogSM("printing FlatModel tree:");
+  LogSM("\n-----------------------------------------------------------\n");
+  if (GlobalVariables::prtLvl > 1) {
+    am->print();
+    LogSM(" -----------------------------------------------------------\n");
   }
 
   return am;

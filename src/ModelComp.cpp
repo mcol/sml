@@ -20,13 +20,16 @@
 #include "backend.h"
 #include "GlobalVariables.h" //for GlobalVariables class
 #include "nodes.h"
-#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
 using namespace std;
 
-static bool prtAnaDep = false;
+#if 0
+  #define LogMC(X) cout << X
+#else
+  #define LogMC(X)
+#endif
 
 int ModelComp::tt_count=0;  // initialise static class member
 
@@ -120,8 +123,7 @@ ModelComp::findDependencies(const SyntaxNode* nd) {
       if (*p == *q) found = true;
     if (!found) {
       dependencies.push_back(*p);
-      if (prtAnaDep)
-        cout << "  " << (*p)->id << "\n";
+      LogMC("  " + (*p)->id + "\n");
     }
   }
 }
@@ -132,20 +134,16 @@ ModelComp::setUpDependencies()
 {
   dependencies.clear();
 
-  if (prtAnaDep)
-    cout << "Analyse dependencies for " << id << "\n";
+  LogMC("Analyse dependencies for " + id + "\n");
   if (indexing) {
-    if (prtAnaDep)
-      cout << " dependencies in indexing:\n";
+    LogMC(" dependencies in indexing:\n");
     findDependencies(indexing);
   }
   if (attributes){
-    if (prtAnaDep)
-       cout << " dependencies in attributes: " << *attributes << "\n";
+    LogMC(" dependencies in attributes: " + attributes->print() + "\n");
     findDependencies(attributes);
   }
-  if (prtAnaDep)
-    printf("--------------------------------\n");
+  LogMC("--------------------------------\n");
 }
 
 /* --------------------------------------------------------------------------
@@ -197,17 +195,14 @@ ModelComp::setTo(const string& id_, compType type_,
   //printf("Defining model component (%4d): %s\n",tt_count, id);
   this->count = tt_count++;
   if (indexing) {
-    if (prtAnaDep)
-      printf(" dependencies in indexing:\n");
+    LogMC(" dependencies in indexing:\n");
     findDependencies(indexing);
   }
   if (attrib){
-    if (prtAnaDep) 
-      printf(" dependencies in attributes: %s\n", attrib->print().c_str());
+    LogMC(" dependencies in attributes: " + attrib->print() + "\n");
     findDependencies(attrib);
   }
-  if (prtAnaDep)
-    printf("--------------------------------\n");
+  LogMC("--------------------------------\n");
 
   global_list.push_back(this);
 }

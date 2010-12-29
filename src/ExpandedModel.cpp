@@ -28,8 +28,13 @@
 
 using namespace std;
 
+#if 0
+  #define LogEM(X) cout << X
+#else
+  #define LogEM(X)
+#endif
+
 list<string> ExpandedModel::pathToNodeStack;
-const bool log_EM = false;
 
 /** Constructor */
 ExpandedModel::ExpandedModel(AmplModel *src_model) :
@@ -542,7 +547,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
   if (nlf->indexList.count(em)>0){
     // we have already calculated this list
     const IndexListValue *ilv = nlf->indexList[em];
-    if(log_EM) cout << "<<<<<<<<<<<<<<< found IndexValue "+nlfilename+":"+em->model_file+"\n";
+    LogEM("<< found IndexValue " + nlfilename + ":" + em->model_file + "\n");
     assert(nvar==ilv->nvar);
     for (int i=0;i<nvar;i++){
       lvar[i] = ilv->lvar[i];
@@ -550,7 +555,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
     }
     assert(count==ilv->count);
   }else{
-    if(log_EM) cout << "<<<<<<<<<<<<<<< place IndexValue "+nlfilename+":"+em->model_file+"\n";
+    LogEM("<< place IndexValue " + nlfilename + ":" + em->model_file + "\n");
     // we need to calculate it
     for(int i=0;i<nvar;i++) lvar[i] = -1;
     
