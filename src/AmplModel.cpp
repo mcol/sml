@@ -23,6 +23,7 @@
 #include "nodes.h"
 #include "sml.tab.h"
 #include <cassert>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -852,14 +853,10 @@ bool is_int(char *tok)
 /** Checks if a cstring represents a natural number (i.e [0-9]*) or not */
 bool 
 is_int(const char *tok){
-  int pos = 0;
-
-  if (tok[0]==0) return false;
-  while(tok[pos]!=0){
-    if (tok[pos]<'0' || tok[pos]>'9') return false;
-    pos++;
-  }
-
+  const char *cp = tok;
+  if (!cp) return false;
+  while (*cp)
+    if (!isdigit(*cp++)) return false;
   return true;
 }
 
