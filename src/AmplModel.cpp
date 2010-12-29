@@ -20,6 +20,7 @@
 #include "ExpandedModel.h"
 #include "GlobalVariables.h"
 #include "ModelComp.h"
+#include "misc.h"
 #include "nodes.h"
 #include "sml.tab.h"
 #include <cassert>
@@ -29,7 +30,6 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 using namespace std;
 
@@ -72,7 +72,6 @@ AmplModel::~AmplModel()
     delete *p;
   }
 }
-
 
 /* ---------------------------------------------------------------------------
 AmplModel::setGlobalName()
@@ -161,7 +160,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
 AmplModel::createExpandedModel
 ---------------------------------------------------------------------------- */
 static string crush(const string& inst);
-static list<string>* getListOfInstances(istream& file);
+static void getListOfInstances(istream& file, list<string>& li);
 
 /** Recursively create an ExpandedModel tree from the flat AmplModel.
  *
@@ -330,7 +329,7 @@ AmplModel::createExpandedModel(const string& smodelname,
       // get cardinality of this node in the ExpandedModel
       ifstream fcrd((nameSetFile+".crd").c_str());
       if (!fcrd) {
-        cout << "Cannot open file: "+ nameSetFile+".crd\n";
+        cerr << "Cannot open file: " << nameSetFile << ".crd\n";
         exit(1);
       }
 
@@ -340,13 +339,14 @@ AmplModel::createExpandedModel(const string& smodelname,
       if (card>0){
         ifstream fset((nameSetFile+".set").c_str());
         if (!fset) {
-          cout << "Cannot open file: "+ nameSetFile+".set\n";
+          cerr << "Cannot open file: " << nameSetFile << ".set\n";
           exit(1);
         }
 
-        list<string>* li = getListOfInstances(fset);
+        list<string> li;
+        getListOfInstances(fset, li);
 
-        for(list<string>::iterator q=li->begin();q!=li->end();q++){
+        for (list<string>::iterator q =li.begin(); q != li.end(); ++q) {
           string subModelName = smodelname + "_" + mc->id;
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
@@ -360,7 +360,6 @@ AmplModel::createExpandedModel(const string& smodelname,
           subem->parent = em;
           (em->children).push_back(subem);
         }
-        delete li;
 
       }else{
         // if this node is not repeated over an indexing set
@@ -379,17 +378,14 @@ AmplModel::createExpandedModel(const string& smodelname,
   return em;
 }
 
-
 /* ---------------------------------------------------------------------------
 getListOfInstances
 --------------------------------------------------------------------------- */
 /* Helper routine: read the set defining statement from the given string
    extract all the set elements, crush them if mutidimensional and
    return them in a list   */
-list<string> *
-getListOfInstances(istream &file)
-{
-  list<string> *li = new list<string>;
+void
+getListOfInstances(istream& file, list<string>& li) {
 
   for(string token=""; token!=":=" && !file.fail(); file >> token);
   if(file.fail()) {
@@ -402,11 +398,9 @@ getListOfInstances(istream &file)
      file >> token;
      final = token.at(token.length()-1);
      if(final==';') token = token.substr(0,token.length()-1);
-     li->push_back(token);
+     li.push_back(token);
      // FIXME: multidimensional?
   }
-  
-  return li;
 }
 
 /* ---------------------------------------------------------------------------
@@ -502,16 +496,14 @@ AmplModel::dump(ostream& fout) const {
   fout << "DP: Nb constraints: " <<  n_cons << "\n";
   fout << "DP: Nb objectives: " <<  n_submodels << "\n";
   fout << "DP: List components:";
-  for (list<ModelComp*>::const_iterator p = comps.begin();
-       p != comps.end(); ++p) {
+  list<ModelComp*>::const_iterator p;
+  for (p = comps.begin(); p != comps.end(); ++p)
     (*p)->dump(fout);
-  }
 
   if (n_submodels>0)
     fout << "DP: now list the submodels:\n";
-  
-  for (list<ModelComp*>::const_iterator p = comps.begin();
-       p != comps.end(); ++p) {
+
+  for (p = comps.begin(); p != comps.end(); ++p) {
     ModelComp *mc = *p;
     if (mc->type == TMODEL){
       AmplModel *am = mc->other;
@@ -525,8 +517,8 @@ AmplModel::check()
 ---------------------------------------------------------------------------- */
 /** Check consistency of the instance */
 void
-AmplModel::check()
-{
+AmplModel::check() const {
+
   if (name == "") {
     cerr << "AmplModel::check: AmplModel has no name given\n";
     exit(1);
@@ -576,7 +568,6 @@ AmplModel::check()
   }
 }
 
-
 /* ---------------------------------------------------------------------------
 AmplModel::addDummyObjective()
 ---------------------------------------------------------------------------- */
@@ -586,9 +577,6 @@ AmplModel::addDummyObjective()
  *  constraint/objective within the model. In order to prevent this,
  *  we need to add a dummy objective that uses every defined variable
  *  (by simply summing them up).
- *
- *  This routine creates a list of all variable declaration in the 
- *  model and creates a dummy objective function that uses them all.
  */
 void
 AmplModel::addDummyObjective()
@@ -597,7 +585,6 @@ AmplModel::addDummyObjective()
   vector<SyntaxNode*> list_on_sum;
   SyntaxNode *attr;
   ModelComp *comp;
-  int i;
 
   // get list of all variable declarations in the model:
   /* build up list_on_sum which is a list of all variable definitions in this
@@ -612,37 +599,30 @@ AmplModel::addDummyObjective()
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     comp = *p;
     if (comp->type==TVAR){
-      // if there is no indexing expression, simply add this
       if (comp->indexing){
         SyntaxNodeIx *idx = comp->indexing;
         // Need to create "sum{dummy in set} var[dummy]":
         // 1) create "dummy in set"
         vector<SyntaxNode*> commaseplist;
         SyntaxNode *commasepon;
-        for (i = 0; i < idx->getNComp(); ++i) {
-          if (idx->getDummyVarExpr(i)) {
-            SyntaxNode *newon = new OpNode(IN, idx->getDummyVarExpr(i),
-                                           idx->getSet(i));
-            commaseplist.push_back(newon);
-          }else{
+        for (int i = 0; i < idx->getNComp(); ++i) {
+          SyntaxNode *dummyVar = idx->getDummyVarExpr(i);
+          if (!dummyVar)
             // need to make up a dummy variable
-            ostringstream ost;
-            ost << "dum" << i;
-            SyntaxNode *newon = new OpNode(IN, new IDNode(ost.str()),
-                                           idx->getSet(i));
-            commaseplist.push_back(newon);
-          }
+            dummyVar = new IDNode("dum" + to_string(i));
+          SyntaxNode *newon = new OpNode(IN, dummyVar, idx->getSet(i));
+          commaseplist.push_back(newon);
         } // end for
         // make the commaseplist
         if (idx->getNComp() == 1)
           commasepon = commaseplist[0];
         else {
           commasepon = new ListNode(COMMA);
-          for (i = 0; i < idx->getNComp(); ++i)
+          for (int i = 0; i < idx->getNComp(); ++i)
             commasepon->push_back(commaseplist[i]);
         }
         SyntaxNodeIDREF *onref = new SyntaxNodeIDREF(comp);
-        for (i = 0; i < idx->getNComp(); ++i) {
+        for (int i = 0; i < idx->getNComp(); ++i) {
           // this is the dummy variable of the i-th indexing expression
           SyntaxNode *ondum = commaseplist[i]->front();
           if (ondum->getOpCode() == LBRACKET)
@@ -652,23 +632,21 @@ AmplModel::addDummyObjective()
         // make the sum part
         commasepon = new SyntaxNode(LBRACE, commasepon);
         list_on_sum.push_back(new SyntaxNode(SUM, commasepon, onref));
-
-      }else{ // no indexing expression, simply add this node
+      }
+      else // no indexing expression, simply add this node
         list_on_sum.push_back(new SyntaxNodeIDREF(comp));
-      } // end if (indexing)
     }
   }
 
-  // we have now build a list of SyntaxNodes representing the components:
+  // we have now built a list of SyntaxNodes representing the components:
   // build the attribute SyntaxNode as a sum of them all
   if (list_on_sum.size()>0){
     if (list_on_sum.size()==1){
       attr = list_on_sum[0];
     }else{
       attr = new OpNode('+', list_on_sum[0], list_on_sum[1]);
-      for(i=2;i<(int) list_on_sum.size();i++){
+      for (int i = 2; i < (int) list_on_sum.size(); ++i)
         attr = new OpNode('+', attr, list_on_sum[i]);
-      }
     }
     
     newobj = new ModelComp("dummy", TMIN, NULL, attr);
@@ -689,8 +667,7 @@ AmplModel::addDummyObjective()
 AmplModel::removeComp()
 ---------------------------------------------------------------------------- */
 void
-AmplModel::removeComp(ModelComp *comp)
-{
+AmplModel::removeComp(const ModelComp *comp) {
   // FIXME: check of comp is indeed on the list
   
   bool found = false;
@@ -755,8 +732,6 @@ AmplModel::addComp(ModelComp *comp)
       n_params++;
       break;
     case TMIN:
-      n_objs++;
-      break;
     case TMAX:
       n_objs++;
       break;

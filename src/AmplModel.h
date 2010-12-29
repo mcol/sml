@@ -126,16 +126,13 @@ class AmplModel{
   virtual void addComp(ModelComp *comp);
 
   /** Remove a model component from the model */
-  void removeComp(ModelComp *comp);
+  void removeComp(const ModelComp *comp);
 
   /** Recursively recalculate dependency list and re-resolve IDREF nodes */
   void reassignDependencies();
 
   /** Print debugging output recursively */
   void print() const;
-
-  /** Check instance for consistency */
-  void check();
 
   /** Recursive detailed debugging output */
   void dump(const char *filename) const;
@@ -150,6 +147,11 @@ class AmplModel{
   std::list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
+
+ private:
+
+  /** Check instance for consistency */
+  void check() const;
 
 };
 

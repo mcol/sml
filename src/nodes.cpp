@@ -100,7 +100,6 @@ operator<<(ostream&s, const SyntaxNode &node) {
 }
 
 ostream& SyntaxNode::put(ostream&s) const {
-  const SyntaxNodeIDREF *onidref;
   static int level=0;
 
   if(this == NULL) return s;
@@ -210,6 +209,7 @@ ostream& SyntaxNode::put(ostream&s) const {
       break;
     case IDREF:
     case IDREFM:
+      const SyntaxNodeIDREF *onidref;
       if(!(onidref = (const SyntaxNodeIDREF*)(this))) {
          cerr << "Cast of node to SyntaxNodeIDREF failed!\n";
          exit(1);
@@ -305,7 +305,7 @@ ostream& SyntaxNodeIDREF::put(ostream& s) const {
       s << ref->id;
       break;
    default:
-      cerr << "In fn SyntaxNodeIDREF::put bu not an IDREF or IDREFM\n";
+      cerr << "In SyntaxNodeIDREF::put but not an IDREF or IDREFM\n";
       exit(1);
    }
 

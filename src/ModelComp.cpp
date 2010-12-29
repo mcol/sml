@@ -618,7 +618,7 @@ getGlobalName(const ModelComp *node, const SyntaxNode *opn,
  indexing is already part of the SyntaxNode structure (and different from just 
  using the submodel indexing)
 
- Could get around this by making indexing dependend on the
+ Could get around this by making indexing dependent on the
   - model to which the comp belongs 
     (to be able to follow down submodels to get indexing expressions)
   - model from which the component was refered to 
@@ -635,7 +635,7 @@ getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model,
 ---------------------------------------------------------------------------- */
 /** New version of getGlobalName that does *not* use the addIndex stack
  *  but creates the modified argument list by looking at the indexing
- *  expressions of the submodel tree leading to this ModelComp
+ *  expressions of the submodel tree leading to this ModelComp.
  *
  *  @param[in] node
  *             The model component in question.
@@ -661,12 +661,12 @@ getGlobalNameNew(ModelComp *node, SyntaxNode *opn, AmplModel *current_model,
  *    + original arguments of the component (as given in the SML file)
  *   The appropriate argument list depends on both the model of the component
  *   and in which model this instance of referal of the ModelComp is 
- *   (the current_model)
+ *   (the current_model).
  *   Basically we need to identify the common ancestor model of the 
  *   current_model and the model_of_comp. The arguments originating from 
  *   block indexing expressions between here and the model_of_comp are already 
  *   included in the argument list of the ModelComp. Anything below needs to
- *   be prepended to the argument list
+ *   be prepended to the argument list.
  */
 string
 getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,

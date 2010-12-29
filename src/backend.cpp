@@ -65,8 +65,8 @@ print_entry(const ModelComp *entry) {
 }
 
 static void
-print_entries(AmplModel *model, compType type) {
-  list<ModelComp*>::iterator p;
+print_entries(const AmplModel *model, compType type) {
+  list<ModelComp*>::const_iterator p;
   for (p = model->comps.begin(); p != model->comps.end(); ++p) {
     ModelComp *entry = *p;
     if (entry->type == type)
@@ -75,15 +75,13 @@ print_entries(AmplModel *model, compType type) {
 }
 
 static void
-print_model(AmplModel *model)
+print_model(const AmplModel *model)
 {
   ModelComp *entry;
-  AmplModel *submod;
+  const AmplModel *submod;
   SyntaxNode::use_global_names=0;
-  list<ModelComp*>::iterator p;
 
-  cout << "-------------------------- backend::print_model ----------------"
-     "----------\n";
+  cout << "-------------------------- backend::print_model ----------------\n";
   cout << "Model: " << model->name << "\n";
 
   cout << "n_sets: " << model->n_sets << "\n";
@@ -98,10 +96,11 @@ print_model(AmplModel *model)
   cout << "n_params: " << model->n_params << "\n";
   print_entries(model, TPARAM);
 
-  cout << "n_obj: "<< model->n_objs;
+  cout << "n_obj: "<< model->n_objs << "\n";
   print_entries(model, TMAX);
 
   cout << "submodels: " << model->n_submodels << "\n";
+  list<ModelComp*>::const_iterator p;
   for (p = model->comps.begin(); p != model->comps.end(); p++) {
     entry = *p;
     if (entry->type==TMODEL){
@@ -110,11 +109,8 @@ print_model(AmplModel *model)
       print_model(submod);
     }
   }
-  
-  cout << "---END-------------------- backend::print_model -------------"
-     "-------------\n";
+  cout << "---END-------------------- backend::print_model ----------------\n";
 }
-
 
 /* ---------------------------------------------------------------------------
 process_model
@@ -334,9 +330,9 @@ process_model(AmplModel *model, const string& datafilename) {
     if (this_model->n_submodels>0){
       for(list<ModelComp*>::iterator p = this_model->comps.begin();
           p!=this_model->comps.end();p++){
-        if ((*p)->type!=TMODEL) continue;
-
         ModelComp *mc = *p;
+        if (mc->type != TMODEL)
+          continue;
 
         /* found a submodel */
         AmplModel *submodel = mc->other;
@@ -466,13 +462,13 @@ process_model(AmplModel *model, const string& datafilename) {
   {
     // call ampl to process script and analyse the output
 
-    FILE *ain = NULL;
     char buffer[256];
     int n_nocsobj=0; // number of model with "No constraints or objectives."
     int n_novar=0; // number of model with "No variables declared."
     int n_other=0; // other ampl error
 
-    ain = popen("ampl script.scr 2>&1", "r"); // "2>&1" sends stderr to stdout
+    // "2>&1" sends stderr to stdout
+    FILE *ain = popen("ampl script.scr 2>&1", "r");
     while(!feof(ain)){
       char *p;
       p = fgets(buffer, 256, ain);
@@ -530,7 +526,7 @@ fill_model_list_(AmplModel *model, list<AmplModel*> &listam)
      OUT: 
        listam
        model->level
-                                                                            */
+  */
 
   /* this works by first adding the current model to the list and then
      all its submodels. 
@@ -578,7 +574,7 @@ void
 write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
 {
   AmplModel *listam[MAX_NESTED_LEVELS];
-  int i, level;
+  int level;
   
   SyntaxNode::use_global_names = 1;
   l_addIndex.clear();
@@ -606,9 +602,8 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
   if (GlobalVariables::prtLvl>1){
     cout << "-> this model is on level " <<  level << "\n";
     cout << "   Levels from top are: \n";
-    for(i=0;i<=level;i++){
+    for (int i = 0; i <= level; ++i)
       cout << i << ": " << listam[i]->name << "\n";
-    }
   }
 
   /* mark all model components that are needed by the current model */
@@ -629,7 +624,6 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
   }
 
   /* now start reporting the modified model recursively */
-  
   write_ampl_for_submodel_(fout, level, 0, listam, submodel);
 
   /* - indexing 'i in ARCS' changed to 'i in ARCS_SUB'
@@ -651,7 +645,6 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
    keeping in mind that the extension might be wanted later
   */
 } 
-
 
 /* ---------------------------------------------------------------------------
 write_ampl_for_submodel_

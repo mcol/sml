@@ -70,17 +70,12 @@ ExpandedModel::setLocalVarInfo
 void 
 ExpandedModel::setLocalVarInfo()
 {
+  if (localVarInfoSet)
+    return;
 
   if (GlobalVariables::prtLvl>=2)
     cout << "setLocalVarInfo(): " << model_file << endl;
   // FIXME: pretty unelegant to have to do n*m comparisons
-
-  list<string> colfilelist;
-  list<int> listColIx;
-
-  if (localVarInfoSet) {
-    return;
-  }
 
   // ------- read the names of constraints defined in this NlFile ------------
   // These have been written in the correct order
@@ -93,14 +88,16 @@ ExpandedModel::setLocalVarInfo()
   
   list<SymbolTable::Entry> objList = getObjList();
   string model_name = getName();
-  if(model_name!="root") model_name = model_name.substr(5); // skip "root_"
+  bool isRoot = (model_name == "root");
+  if (!isRoot)
+    model_name = model_name.substr(5); // skip "root_"
   while(!fin.eof()){
     string line;
     getline(fin, line);
     listOfConNames.push_back(line);
     // Trim away common characters between model name and var from varname
     unsigned int j = 0;
-    if(getName()!="root" && line!="") {
+    if (!isRoot && line != "") {
       for(j=0; j<model_name.size() && j<line.size(); ++j) {
         if(model_name.at(j)!=line.at(j)) break;
       }
@@ -110,19 +107,14 @@ ExpandedModel::setLocalVarInfo()
     if(line.substr(j) == "") continue;
     // skip dummy row
     if(line.substr(j,5) == "dummy") {
-       if(line.size()==j+5) continue;
-       if(line.at(j+5)=='[') continue;
+      if (line.size() == j + 5 || line.at(j + 5) == '[') continue;
     }
     // skip any objectives
     bool isObj = false;
     for(list<SymbolTable::Entry>::const_iterator i=objList.begin(); i!=objList.end(); ++i) {
       const string id = i->id();
       if (line.substr(j, id.size()) == id) {
-        if (line.size() == j + id.size()) {
-             isObj=true;
-             break;
-          }
-        if (line.at(j + id.size() == '[')) {
+        if (line.size() == j + id.size() || line.at(j + id.size() == '[')) {
              isObj=true;
              break;
           }
@@ -140,37 +132,34 @@ ExpandedModel::setLocalVarInfo()
        model_file << ".row" << endl;
 
   // Now read vars - these actually need matching to correct order
-
   fin.open((model_file+".col").c_str());
-
   if (!fin) {
     cerr << "Cannot open column name file: "+model_file+".col" << endl;
     exit(1);
   }
-  
+
+  list<string> colfilelist;
   while(!fin.eof()){
     string line;
     getline(fin, line);
     colfilelist.push_back(line);
   }
-
-  fin.close(); // Added by Marco, probably not strictly required
-               // as it should occour in destructor.
+  fin.close();
   
   if (GlobalVariables::prtLvl>=2)
     cout << "Read " << colfilelist.size() << " lines from file " << 
        model_file << ".col\n";
 
+  list<int> listColIx;
+
   // -------------- compare this list against the given VarDefs
-  
-  for(list<string>::iterator p=localVarDef.begin();p!=localVarDef.end();p++){
+  list<string>::iterator p, q;
+  for (p = localVarDef.begin(); p != localVarDef.end(); ++p) {
     // for all variable declarations in ExpandedModel
 
     int len = (*p).size();
-
     int cnt;
-    list<string>::iterator q;
-    for(q=colfilelist.begin(),cnt=0; q!=colfilelist.end(); ++q,++cnt){
+    for (q = colfilelist.begin(), cnt = 0; q != colfilelist.end(); ++q, ++cnt) {
       string cand(*q, 0, len);
       if (cand==(*p)) {
         if (GlobalVariables::prtLvl>=3)
@@ -180,7 +169,7 @@ ExpandedModel::setLocalVarInfo()
 
         // Trim away common characters between model name and var from varname
         unsigned int j = 0;
-        if(getName()!="root" && *p!="") {
+        if (!isRoot && *p != "") {
           for(j=0; j<model_name.size() && j<(*p).size(); ++j) {
              if(model_name.at(j)!=(*p).at(j)) break;
           }
@@ -291,6 +280,8 @@ ExpandedModel::print()
 void
 ExpandedModel::print() const {
 
+  list<string>::const_iterator p;
+
   cout << "EM: ------------------------------------------------------------\n";
   if (nlfile==NULL){
     cerr << "EM: No NlFile attached\n";
@@ -299,10 +290,8 @@ ExpandedModel::print() const {
   cout << "EM: This is ExpandedModel: " <<  nlfile->nlfilename << "\n";
   cout << "EM: Nb children: " << children.size() << "\n";
   cout << "EM: Nb local variable definitions: " << localVarDef.size() << "\n";
-  for (list<string>::const_iterator p = localVarDef.begin();
-       p != localVarDef.end(); p++) {
+  for (p = localVarDef.begin(); p != localVarDef.end(); ++p)
     cout << "EM:   " << *p << "\n";
-  }
   if (!localVarInfoSet){
     cout << "EM: Further information on local variables not set\n";
   }else{
@@ -320,7 +309,6 @@ ExpandedModel::print() const {
     em->print();
   }
 }
-
 
 /* ----------------------------------------------------------------------------
 ExpandedModel::getNzJacobianOfIntersection
@@ -340,9 +328,6 @@ ExpandedModel::getNzJacobianOfIntersection
 int 
 ExpandedModel::getNzJacobianOfIntersection(ExpandedModelInterface *emcol_)
 {
-  int nvar;
-  int *lvar;
-  int nz;
   ExpandedModel *emcol = static_cast< ExpandedModel* > (emcol_);
 
   if (emcol==NULL) emcol = this;
@@ -350,15 +335,15 @@ ExpandedModel::getNzJacobianOfIntersection(ExpandedModelInterface *emcol_)
   // need to find the indices of the variables local to emcol in the
   // nlfile given by this model.
 
-  nvar = emcol->getNLocalVars();
-  lvar = new int[nvar];
+  int nvar = emcol->getNLocalVars();
+  int *lvar = new int[nvar];
   
   // find the indices of the variable local to emcol in the nlfile belonging
   // to this node.
   nlfile->findIxOfLocalVarsInNlFile(emcol, lvar);
 
   // and ask AMPL to evaluate the Jacobian structure
-  nz = nlfile->getNoNonzerosAMPL(nvar, lvar);
+  int nz = nlfile->getNoNonzerosAMPL(nvar, lvar);
 
   delete [] lvar;
 
@@ -397,8 +382,6 @@ void
 ExpandedModel::getJacobianOfIntersection(ExpandedModelInterface *emcol_, int *colbeg,
 					 int *collen, int *rownbs, double *el)
 {
-  int nvar;
-  int *lvar;
   ExpandedModel *emcol = static_cast< ExpandedModel* > (emcol_);
 
   if (emcol==NULL) emcol = this;
@@ -406,8 +389,8 @@ ExpandedModel::getJacobianOfIntersection(ExpandedModelInterface *emcol_, int *co
   // need to find the indices of the variables local to emcol in the
   // nlfile given by this model.
 
-  nvar = emcol->getNLocalVars();
-  lvar = new int[nvar];
+  int nvar = emcol->getNLocalVars();
+  int *lvar = new int[nvar];
   
   // find the indices of the variable local to emcol in the nlfile belonging
   // to this node.
@@ -535,10 +518,9 @@ ExpandedModel::findIxOfLocalVarsInNlFile
  * we cannot use lists in the NlFile class, the actual code is here.
  */
 int
-ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar)
-{
+ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
   ExpandedModel *em = this;
-  string nlfilename = nlf->nlfilename;
+  const string& nlfilename = nlf->nlfilename;
   int nvar = em->getNLocalVars();
   list<string> colfilelist;
   int count = 0; // count number of matches
@@ -676,9 +658,9 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
 
    string ind(indent, ' ');
    string ind2(ind);
-
-   if(getName()!="root") {
-      string name = getName();
+   string name = getName();
+   bool isRoot = (name == "root");
+   if (!isRoot) {
       string pname = parent->getName();
       out << "\n" << ind << name.substr(pname.size()+1) << " {" << endl;
       ind2 += "  ";
@@ -711,9 +693,10 @@ void ExpandedModel::outputSolution(ostream &out, int indent) {
 
    for(vector<ExpandedModelInterface*>::iterator i=children.begin(); 
          i<children.end(); ++i)
-      (*i)->outputSolution(out, indent+(getName()=="root"?0:2));
+      (*i)->outputSolution(out, indent + (isRoot ? 0 : 2));
 
-   if(getName()!="root") out << ind << "}" << endl;
+   if (!isRoot)
+     out << ind << "}" << endl;
 }
 
 list<SymbolTable::Entry> ExpandedModel::getObjList() const {
