@@ -101,7 +101,7 @@ AmplModel::setGlobalNameRecursive()
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     mc = *p;
     if (mc->type==TMODEL){
-      AmplModel *am = (AmplModel*)mc->other;
+      AmplModel *am = mc->other;
       am->setGlobalNameRecursive();
     }
   }
@@ -149,7 +149,7 @@ AmplModel::writeTaggedComponents(ostream &fout)
     if (c->isTagged())
       modified_write(fout, c);
     if (c->type==TMODEL) {
-      AmplModel *am = (AmplModel *)c->other;
+      AmplModel *am = c->other;
       am->writeTaggedComponents(fout);
     }
   }
@@ -352,7 +352,7 @@ AmplModel::createExpandedModel(const string& smodelname,
           subModelInst += crush(*q);
           if(GlobalVariables::prtLvl>=1)
             cout << subModelName << ":" << subModelInst << endl;
-          AmplModel *subampl = (AmplModel*)mc->other;
+          AmplModel *subampl = mc->other;
           ExpandedModel::pathToNodeStack.push_back(*q);
           ExpandedModel *subem = subampl->createExpandedModel(subModelName, subModelInst);
           ExpandedModel::pathToNodeStack.pop_back();
@@ -367,7 +367,7 @@ AmplModel::createExpandedModel(const string& smodelname,
         string subModelInst;
         if(GlobalVariables::prtLvl>=1)
           cout << subModelName << ":" << sinstanceStub << endl;
-        AmplModel *subampl = (AmplModel*)mc->other;
+        AmplModel *subampl = mc->other;
         ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);
         subem->parent = em;
         (em->children).push_back(subem);
@@ -466,7 +466,7 @@ AmplModel::print() const {
        p != comps.end(); ++p) {
     ModelComp *mc = *p;
     if (mc->type == TMODEL){
-      AmplModel *am = (AmplModel*)mc->other;
+      AmplModel *am = mc->other;
       am->print();
     }
   }
@@ -513,7 +513,7 @@ AmplModel::dump(ostream& fout) const {
        p != comps.end(); ++p) {
     ModelComp *mc = *p;
     if (mc->type == TMODEL){
-      AmplModel *am = (AmplModel*)mc->other;
+      AmplModel *am = mc->other;
       am->dump(fout);
     }
   }
@@ -679,7 +679,7 @@ AmplModel::addDummyObjective()
     comp = *p;
     if (comp->type==TMODEL){
       // might be that we need to add the indexing expression on the stack 
-      ((AmplModel*)(comp->other))->addDummyObjective();
+      comp->other->addDummyObjective();
     }
   }
 }
@@ -761,7 +761,7 @@ AmplModel::addComp(ModelComp *comp)
       break;
     case TMODEL:
       n_submodels++;
-      subm = (AmplModel*)comp->other;
+      subm = comp->other;
       subm->parent = this;
       break;
     default:
@@ -811,7 +811,7 @@ AmplModel::reassignDependencies()
 {
   for(list<ModelComp*>::iterator p=comps.begin();p!=comps.end();p++){
     if ((*p)->type==TMODEL){
-      AmplModel *submodel = (AmplModel*)((*p)->other);
+      AmplModel *submodel = (*p)->other;
       submodel->reassignDependencies();
     }else{
       (*p)->reassignDependencies();

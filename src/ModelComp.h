@@ -69,7 +69,7 @@ class ModelComp{
 
   /** A pointer to an AmplModel structure for components of type MODEL
    *  @attention Better implemented as a subclass of ModelComp. */
-  void *other;      
+  AmplModel *other;
 
  protected:
 

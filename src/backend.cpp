@@ -106,7 +106,7 @@ print_model(AmplModel *model)
     entry = *p;
     if (entry->type==TMODEL){
       print_entry(entry);
-      submod = (AmplModel*)entry->other;
+      submod = entry->other;
       print_model(submod);
     }
   }
@@ -339,7 +339,7 @@ process_model(AmplModel *model, const string& datafilename) {
         ModelComp *mc = *p;
 
         /* found a submodel */
-        AmplModel *submodel = (AmplModel*)mc->other;
+        AmplModel *submodel = mc->other;
         SyntaxNodeIx *ix = mc->indexing;
 
         // set is NULL if ix is NULL
@@ -545,7 +545,7 @@ fill_model_list_(AmplModel *model, list<AmplModel*> &listam)
           p!=model->comps.end(); ++p){
       ModelComp *comp = *p;
       if (comp->type==TMODEL)
-        fill_model_list_((AmplModel*)comp->other, listam);
+        fill_model_list_(comp->other, listam);
     }
   }
 }
@@ -807,7 +807,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         // we are in the current model and are 
         // processing a definition of a child block of the current block
         // => write out everything that is tagged
-        AmplModel *childm = (AmplModel *)comp->other;
+        AmplModel *childm = comp->other;
         
         //printf("\n\n-----------------------------------------------\n");
         //printf("  current model: %s\n",submodel->name);

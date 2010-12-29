@@ -236,7 +236,7 @@ ModelComp::untagAll(AmplModel *start)
        p!=start->comps.end();p++){
     (*p)->tag = false;
     if ((*p)->type==TMODEL){
-      ModelComp::untagAll((AmplModel*)(*p)->other);
+      ModelComp::untagAll((*p)->other);
     }
   }
 }
@@ -259,7 +259,7 @@ ModelComp::writeAllTagged(AmplModel *start)
       cout << start->name << "::" << (*p)->id << "\n";
     }
     if ((*p)->type==TMODEL){
-      ModelComp::writeAllTagged((AmplModel*)(*p)->other);
+      ModelComp::writeAllTagged((*p)->other);
     }
   }
 }
