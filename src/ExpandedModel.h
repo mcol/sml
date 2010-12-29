@@ -93,7 +93,7 @@ class NlFile;
  * of variable name stubs with the variables defined in the *.nl file
  * (from the corresponding *.col file) to generate the list of local
  * variables (ExpandedModel::listOfVarNames), and their indices within
- * the *.nl file (ExpandedModel::listOfVars). This information is then
+ * the *.nl file (ExpandedModel::listOfLocalVars). This information is then
  * used by the routines in ExpandedModel and NlFile to provide an
  * interface into the problem to the solver.
  *
@@ -150,8 +150,8 @@ class ExpandedModel : public ExpandedModelInterface {
   //! list of local names of local constraints
   std::list<std::string> listOfLocalConNames;
 
-  //! indices of local variables in the corresponding *.nl file */
-  int *listOfVars;        
+  //! indices of local variables in the corresponding *.nl file
+  std::list<int> listOfLocalVars;
 
   //! the locally applicable variable declarations
   std::list<std::string> localVarDef;
@@ -239,7 +239,7 @@ class ExpandedModel : public ExpandedModelInterface {
   }
 
  private: 
-  //! Sets nLocalVar, listOfVars, nLocalCons, listOfVarNames
+  //! Sets nLocalVar, listOfLocalVars, nLocalCons, listOfVarNames
   void setLocalVarInfo(); 
   std::list<SymbolTable::Entry> getObjList() const;
 

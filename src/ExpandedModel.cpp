@@ -40,12 +40,9 @@ list<string> ExpandedModel::pathToNodeStack;
 ExpandedModel::ExpandedModel(AmplModel *src_model) :
    nLocalVars(-1), nLocalCons(-1), localVarInfoSet(false), pvar(NULL), 
    dvar(NULL), prow(NULL), drow(NULL), src(src_model),
-   nlfile(NULL),
-   listOfVars(NULL)
-{
+   nlfile(NULL) {
   // Note: Setup of model is largely done in AmplModel::createExpandedModel()
 }
-
 
 /* --------------------------------------------------------------------------
 ExpandedModel::setLocalVarInfo
@@ -150,8 +147,6 @@ ExpandedModel::setLocalVarInfo()
     cout << "Read " << colfilelist.size() << " lines from file " << 
        model_file << ".col\n";
 
-  list<int> listColIx;
-
   // -------------- compare this list against the given VarDefs
   list<string>::iterator p, q;
   for (p = localVarDef.begin(); p != localVarDef.end(); ++p) {
@@ -164,7 +159,7 @@ ExpandedModel::setLocalVarInfo()
       if (cand==(*p)) {
         if (GlobalVariables::prtLvl>=3)
           cout << "Match of " << cand << " and " << *p << "\n";
-        listColIx.push_back(cnt);
+        listOfLocalVars.push_back(cnt);
         listOfVarNames.push_back(*q);
 
         // Trim away common characters between model name and var from varname
@@ -182,21 +177,11 @@ ExpandedModel::setLocalVarInfo()
   
   // FIXME: cannot sort and uniquify just the numerical list, since these
   //        actions would need to be mirrored on the name list
-  //  listColIx.sort();
-  //  listColIx.unique();
-  
-  //printf("Found %d variables\n",listColIx.size());
-  
-  nLocalVars = listColIx.size();
-  listOfVars = new int[nLocalVars];
-  int cnt;
-  list<int>::iterator p;
-  for(p=listColIx.begin(),cnt=0; p!=listColIx.end(); ++p,++cnt){
-    listOfVars[cnt] = (*p);
-  }
-  
+
+  nLocalVars = listOfLocalVars.size();
+  //printf("Found %d variables\n", nLocalVars);
+
   // open *.nl file to get number of constraints
-  
   nLocalCons = nlfile->getNoConstraints();
   //printf("Found %d constraints\n",nLocalCons);
 
@@ -281,6 +266,7 @@ void
 ExpandedModel::print() const {
 
   list<string>::const_iterator p;
+  list<int>::const_iterator i;
 
   cout << "EM: ------------------------------------------------------------\n";
   if (nlfile==NULL){
@@ -296,7 +282,8 @@ ExpandedModel::print() const {
     cout << "EM: Further information on local variables not set\n";
   }else{
     cout << "EM: Nb local Variables: " << nLocalVars << "\n";
-    for(int i=0;i<nLocalVars;i++) cout << listOfVars[i] << " ";
+    for (i = listOfLocalVars.begin(); i != listOfLocalVars.end(); ++i)
+      cout << *i << " ";
     cout << "\n";
     cout << "EM: Nb local Constraints: " <<  nLocalCons << "\n";
   }
@@ -710,7 +697,6 @@ ExpandedModel::~ExpandedModel() {
   delete[] dvar;
   delete[] prow;
   delete[] drow;
-  delete[] listOfVars;
 
   delete nlfile;
 
