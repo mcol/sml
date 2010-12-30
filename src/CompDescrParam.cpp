@@ -83,10 +83,10 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     indices = new Set*[nsets];
     nix =0;
     for (int i = 0; i < nsets; ++i) {
-      indices[i] = dynamic_cast<Set*>((ix->sets_mc[i])->getValue());
+      indices[i] = dynamic_cast<Set*>(ix->getModelComp(i)->getValue());
       if (indices[i]==NULL){
         cerr << "ERROR: Value of parameter " << mc->id
-             << " given before indexing set " << (ix->sets_mc[i])->id
+             << " given before indexing set " << ix->getModelComp(i)->id
              << " is defined\n";
         /* Of course it is possible to define the membership of the sets at 
            the same time as the parameters 
@@ -332,7 +332,7 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
       if (indices[ixcolset]->dim()>1){
         if (cl->getOpCode() != LBRACKET) {
           cerr << "ERROR: col_label for multidimensional set '"
-               << ix->sets_mc[ixcolset]->id
+               << ix->getModelComp(ixcolset)->id
                << "' must be a bracketed '(..,..)' expression.\n";
           exit(1);
         }
@@ -340,7 +340,7 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
           cerr << "ERROR: Number of entries in bracketed expression used as "
             "col_label (" << cl->nchild() << ")\n";
           cerr << "does not match dimension (" << indices[ixcolset]->dim() <<
-            ") of indexing set '" << ix->sets_mc[ixcolset]->id << "'.\n";
+            ") of indexing set '" << ix->getModelComp(ixcolset)->id << "'.\n";
           exit(1);
         }
         cl = cl->front();
@@ -365,7 +365,7 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
       if (indices[ixrowset]->dim()>1){
         if (rl->getOpCode() != LBRACKET) {
           cerr << "ERROR: row_label for multidimensional set '"
-               << ix->sets_mc[ixrowset]->id
+               << ix->getModelComp(ixrowset)->id
                << "' must be a bracketed '(..,..)' expression.\n";
           exit(1);
         }
@@ -373,7 +373,7 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
           cerr << "ERROR: Number of entries in bracketed expression used as "
             "row_label (" << rl->nchild() << ")\n";
           cerr << "does not match dimension (" << indices[ixrowset]->dim() <<
-            ") of indexing set '" << ix->sets_mc[ixrowset]->id << "'.\n";
+            ") of indexing set '" << ix->getModelComp(ixrowset)->id << "'.\n";
           exit(1);
         }
         rl = rl->front();

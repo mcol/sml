@@ -217,8 +217,6 @@ class SyntaxNodeIx : public SyntaxNode {
   //! The expresson to the right of the ':' (if present)
   SyntaxNode *qualifier;
 
- public:
-
   //! List of ModelComp for the indexing sets
   std::vector<ModelComp*> sets_mc;
 
@@ -242,6 +240,9 @@ class SyntaxNodeIx : public SyntaxNode {
 
   //! Retrieve the set for the specified indexing expression
   SyntaxNode* getSet(int i) const { return sets[i]; }
+
+  //! Retrieve the ModelComp for the specified indexing expression
+  ModelComp* getModelComp(int i) const { return sets_mc[i]; }
 
   //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
   void splitExpression();   
