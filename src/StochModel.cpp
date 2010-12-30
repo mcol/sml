@@ -17,6 +17,7 @@
 
 #include "StochModel.h"
 #include "GlobalVariables.h"
+#include "misc.h"
 #include "nodes.h"
 #include "sml.tab.h"
 #include "StochModelComp.h"
@@ -24,12 +25,10 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 using namespace std;
 
 #if 0
-  #include "misc.h" // for to_string()
   #define LogSM(X) cout << X
 #else
   #define LogSM(X)
@@ -291,7 +290,6 @@ StochModel::expandStagesOfComp()
   //exit(1);
 }
 
-
 /* ---------------------------------------------------------------------------
 StochModel::expandToFlatModel()
 ---------------------------------------------------------------------------- */
@@ -329,7 +327,6 @@ StochModel::expandToFlatModel()
 {
   AmplModel *model_above = NULL;
   AmplModel *am;
-  StochModelComp **indset;
   int stgcnt;
 
   LogSM("---------------------------------------------------------------\n");
@@ -345,7 +342,7 @@ StochModel::expandToFlatModel()
 
   // we need to have the pointers to the submodel indexing sets all set
   // up from the beginning, so that they can be referred to
-  indset = new StochModelComp*[stagenames.size()];
+  vector<StochModelComp*> indset(stagenames.size());
   for(unsigned int i=0;i<stagenames.size();i++) {
     // give it a dummy name just so that debugging routines work
     // @bug this introduces a memory leak
@@ -509,9 +506,7 @@ StochModel::expandToFlatModel()
          Trouble is that the model below has not been set up yet... */
       if (stgcnt>0){
         //on3 = new SyntaxNodeIDREF(indset[stgcnt-1]);
-        ostringstream dummy_var;
-        dummy_var << "ix" << stgcnt-1;
-        on3 = new IDNode(dummy_var.str());
+        on3 = new IDNode("ix" + to_string(stgcnt - 1));
         on2 = new OpNode(EQ, onai, on3);
       }else{
         /* No, the first indexing set is not over the nodes that have "root"
@@ -550,14 +545,13 @@ StochModel::expandToFlatModel()
 
       if (model_above){
         // create a dummy variable
-        ostringstream dummy_var;
-        dummy_var << "ix" << stgcnt;
+        string dummy_var = "ix" + to_string(stgcnt);
 
         // add a submodel component that points to the model above 
         // need to create an indexing expression for the model above
         //on1 = new SyntaxNode(ID, strdup(buf)); //indset
         on1 = new SyntaxNodeIDREF(indset[stgcnt]); //indset
-        on_iinN = new OpNode(IN, new IDNode(dummy_var.str()), on1); // i in N
+        on_iinN = new OpNode(IN, new IDNode(dummy_var), on1); // i in N
         on2 = new SyntaxNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
 
@@ -575,7 +569,6 @@ StochModel::expandToFlatModel()
     }
   } // end loop over stages
 
-  delete[] indset;
   am->parent = parent;
   am->setGlobalNameRecursive();
   am->node = node;
