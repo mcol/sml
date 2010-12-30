@@ -97,7 +97,8 @@ static void callAmpl() {
 /* ---------------------------------------------------------------------------
 expandSet()
 ---------------------------------------------------------------------------- */
-static vector<string> expandSet(SyntaxNode *set) {
+static void
+expandSet(SyntaxNode *set, vector<string>& member_list) {
 
   /* analyze all dependencies of this expression */
   ModelComp::untagAll();
@@ -142,7 +143,6 @@ static vector<string> expandSet(SyntaxNode *set) {
   }
 
   // parse the set members
-  vector<string> member_list;
   {
     string read;
     getline(in, read, ';');
@@ -157,8 +157,6 @@ static vector<string> expandSet(SyntaxNode *set) {
     }
   }
   in.close();
-
-  return member_list;
 }
 
 /* ---------------------------------------------------------------------------
@@ -175,7 +173,7 @@ StochModel::expandStages()
 void
 StochModel::expandStages()
 {
-   stagenames = expandSet(stageset);
+  expandSet(stageset, stagenames);
 }
 
 /* ---------------------------------------------------------------------------
