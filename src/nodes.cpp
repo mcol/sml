@@ -646,9 +646,6 @@ SyntaxNodeIx::SyntaxNodeIx(SyntaxNode *on) :
 {
   qualifier = NULL;
   ncomp = 0;
-  sets = NULL;
-  sets_mc = NULL;
-  dummyVarExpr = NULL;
   splitExpression();
 }
 
@@ -732,9 +729,9 @@ void SyntaxNodeIx::splitExpression()
   if (tmp->getOpCode() == COMMA) {
     ListNode *tmpl = static_cast<ListNode*>(tmp);
     ncomp = tmp->nchild();
-    this->sets = new SyntaxNode*[ncomp];
-    this->sets_mc = (ModelComp**)calloc(ncomp, sizeof(ModelComp*));
-    this->dummyVarExpr = new SyntaxNode*[ncomp];
+    this->sets.resize(ncomp);
+    this->sets_mc.resize(ncomp);
+    this->dummyVarExpr.resize(ncomp);
     int i = 0;
     for (ListNode::iterator ti = tmpl->begin(); ti != tmpl->end(); ++ti, ++i) {
       tmp2 = findKeywordinTree(*ti, IN);
@@ -758,9 +755,9 @@ void SyntaxNodeIx::splitExpression()
     }
   }else{
     ncomp = 1;
-    this->sets = new SyntaxNode*[1];
-    this->sets_mc = (ModelComp**)calloc(1, sizeof(ModelComp*));
-    this->dummyVarExpr = new SyntaxNode*[1];
+    this->sets.resize(1);
+    this->sets_mc.resize(1);
+    this->dummyVarExpr.resize(1);
     tmp2 = findKeywordinTree(tmp, IN);
     if (tmp2){
       SyntaxNode::iterator tj = tmp2->begin();
@@ -852,8 +849,8 @@ SyntaxNodeIx::deep_copy()
   if (qualifier) onix->qualifier = qualifier->deep_copy();
     
   onix->ncomp = ncomp;
-  onix->sets = new SyntaxNode*[ncomp];
-  onix->dummyVarExpr = new SyntaxNode*[ncomp];
+  onix->sets.resize(ncomp);
+  onix->dummyVarExpr.resize(ncomp);
   
   for(int i=0;i<ncomp;i++){
     onix->sets[i] = sets[i]->deep_copy();

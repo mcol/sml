@@ -203,24 +203,24 @@ class SyntaxNodeIx : public SyntaxNode {
  private:
 
   SyntaxNodeIx(const int opCode_) :
-    SyntaxNode(opCode_), qualifier(NULL), ncomp(0), sets(NULL), sets_mc(NULL),
-    dummyVarExpr(NULL) {};
+    SyntaxNode(opCode_), qualifier(NULL), ncomp(0) {}
 
   //! Number of 'dummy IN set'-type expressions
   int ncomp;
 
   //! List of the dummyVarExpressions
-  SyntaxNode **dummyVarExpr;
+  std::vector<SyntaxNode*> dummyVarExpr;
 
   //! List of the set expressions
-  SyntaxNode **sets;
+  std::vector<SyntaxNode*> sets;
 
   //! The expresson to the right of the ':' (if present)
   SyntaxNode *qualifier;
 
  public:
 
-  ModelComp **sets_mc;  //!< list of ModelComp for the indexing sets
+  //! List of ModelComp for the indexing sets
+  std::vector<ModelComp*> sets_mc;
 
  public:
   // --------------------------- methods ----------------------------------
