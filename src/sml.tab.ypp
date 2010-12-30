@@ -887,11 +887,10 @@ begin_model
 ---------------------------------------------------------------------------- */
 void
 begin_model(char *name, SyntaxNode *indexing) {
-  AmplModel *new_mod = new AmplModel;
+  AmplModel *new_mod = new AmplModel(name);
   ModelComp *newmc;
   
   cout << "Start Model: " << name << "\n";
-  new_mod->name = name;
 
   /* FIXME: include attrib in definition */
   newmc = new ModelComp(name, TMODEL, indexing, NULL);

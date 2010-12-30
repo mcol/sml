@@ -100,7 +100,7 @@ class AmplModel{
 
   // -------------------------- methods ----------------------------------
   /** Constructor */
-  AmplModel(const char *orig_name = "", AmplModel *par = NULL);
+  AmplModel(const std::string& orig_name, AmplModel *par = NULL);
   
   /** Destructor */
   virtual ~AmplModel();

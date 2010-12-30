@@ -44,7 +44,7 @@ static bool is_int(const char *tok);
 AmplModel::AmplModel()
 ---------------------------------------------------------------------------- */
 /** Constructor */
-AmplModel::AmplModel(const char *orig_name, AmplModel *par) :
+AmplModel::AmplModel(const string& orig_name, AmplModel *par) :
   name(orig_name),
   n_vars(0),
   n_cons(0),

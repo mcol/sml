@@ -51,7 +51,7 @@ StochModel::StochModel()
 /** Constructor */
 StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *onAncs, 
                        SyntaxNode *onProb, AmplModel *prnt) :
-  AmplModel(),
+  AmplModel(""),
   is_symbolic_stages(false)
 {
   /* Split up possible indexing expressions for params */
@@ -320,7 +320,7 @@ StochModel::expandToFlatModel()
  *     The chain of AmplModels is built from the leaves up
  *  -# In the second pass the StochModelComp components are transcribed into
  *     ModelComp's and their dependencies are resolved with respect to the
- *     new model chain. This passed is executed from root down to the leaves.
+ *     new model chain. This pass is executed from root down to the leaves.
  */
 AmplModel *
 StochModel::expandToFlatModel()
@@ -355,14 +355,10 @@ StochModel::expandToFlatModel()
       st!=stagenames.rend();  st++,stgcnt--){// loops backwards through list
     LogSM("Creating ampl model at stage " + to_string(stgcnt) + ": " +
           *st + "\n");
-    am = new AmplModel();
 
     // set name and global name for this ampl model
-    if (stgcnt==0){
-      am->name = name + *st;
-    }else{
-      am->name = *st;
-    }
+    string amname = (stgcnt == 0) ? name + *st : *st;
+    am = new AmplModel(amname);
 
     // FIXME: We just duplicate the symbol table. We should separate
     // out what belong to which model to do this properly
