@@ -142,6 +142,6 @@ ExpandedModelInterface* sml_generate(const string& modelfilename,
    if(GlobalVariables::prtLvl>=1)
       em->print();
 
-   return (ExpandedModelInterface*) em;
+   return em;
 }
 

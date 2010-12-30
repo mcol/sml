@@ -416,7 +416,7 @@ StochModel::expandToFlatModel()
 
         // need to clone so that pointers to ->model, ->next are setup 
         // correctly
-        comp = (ModelComp*)smc->clone();
+        comp = smc->clone();
         //comp = smc->transcribeToModelComp(am);
         
         am->addComp(comp);
