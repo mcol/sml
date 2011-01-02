@@ -340,15 +340,6 @@ StochModel::expandToFlatModel()
      stages set and put in it all entities that either have no stageset
      defined, or whose stageset includes the current stage */
 
-  // we need to have the pointers to the submodel indexing sets all set
-  // up from the beginning, so that they can be referred to
-  vector<StochModelComp*> indset(stagenames.size());
-  for(unsigned int i=0;i<stagenames.size();i++) {
-    // give it a dummy name just so that debugging routines work
-    // @bug this introduces a memory leak
-    indset[i] = new StochModelComp("indset");
-  }
-
   // loop over all stages and create an AmplModel for every stage 
   stgcnt = stagenames.size()-1;
   for(vector<string>::reverse_iterator st=stagenames.rbegin();
@@ -501,7 +492,6 @@ StochModel::expandToFlatModel()
          model below (or root if there is none below)
          Trouble is that the model below has not been set up yet... */
       if (stgcnt>0){
-        //on3 = new SyntaxNodeIDREF(indset[stgcnt-1]);
         on3 = new IDNode("ix" + to_string(stgcnt - 1));
         on2 = new OpNode(EQ, onai, on3);
       }else{
@@ -520,9 +510,6 @@ StochModel::expandToFlatModel()
         on3 = new SyntaxNodeIDREF(smctmp);
         on2 = new OpNode(IN, onai, on3);
       }
-      // problem: Since indset[stgct-1] is not set up it, the expression 
-      // cannot be printed here
-      //printf("Test third part of expression: %s\n",on2->print());
 
       // and build everything
       on1 = new SyntaxNode(COLON, on_iinN, on2);
@@ -535,9 +522,9 @@ StochModel::expandToFlatModel()
       // so we've got a SyntaxNode to '{i in NODES:A[i] in indS0}'
       
       /* Add this as a model component defining a set? */
-      indset[stgcnt]->setTo("ind" + *st, TSET, NULL, on1);
-      indset[stgcnt]->stochmodel = this;
-      am->addComp(indset[stgcnt]);
+      StochModelComp *smc = new StochModelComp("ind" + *st, TSET, NULL, on1);
+      smc->stochmodel = this;
+      am->addComp(smc);
 
       if (model_above){
         // create a dummy variable
@@ -546,7 +533,7 @@ StochModel::expandToFlatModel()
         // add a submodel component that points to the model above 
         // need to create an indexing expression for the model above
         //on1 = new SyntaxNode(ID, strdup(buf)); //indset
-        on1 = new SyntaxNodeIDREF(indset[stgcnt]); //indset
+        on1 = new SyntaxNodeIDREF(smc); //indset
         on_iinN = new OpNode(IN, new IDNode(dummy_var), on1); // i in N
         on2 = new SyntaxNode(LBRACE, on_iinN);    // {i in N}
         //printf("Indexing Expression: %s\n",on2->print());
