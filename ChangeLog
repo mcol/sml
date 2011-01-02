@@ -1,3 +1,7 @@
+2011-01-02  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Moved some members of the StochModelComp class in the private section
+    and added accessors.
+
 2010-12-28  Marco Colombo  <m.colombo@ed.ac.uk>
   * Simplified the implementation of ListNode, now it reuses most methods
     directly from SyntaxNode.

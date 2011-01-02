@@ -391,3 +391,8 @@ StochModelComp::clone()
 
   return newsmc;
 }
+
+void
+StochModelComp::addStageName(const string& name) {
+  stagenames.push_back(name);
+}

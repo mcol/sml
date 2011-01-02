@@ -1026,13 +1026,12 @@ void
 addStochInfo(StochModelComp *newmcs, SyntaxNode *stochopt)
 {
    if(stochopt) {
-      newmcs->is_deterministic = (stochopt->getOpCode() == DETERMINISTIC) |
-         is_deterministic_glo;
-      newmcs->stageset = (stochopt->getOpCode() != DETERMINISTIC) ? stochopt :
-         stages_glo;
+     bool isDet = stochopt->getOpCode() == DETERMINISTIC;
+     newmcs->setDeterministic(isDet || is_deterministic_glo);
+     newmcs->setStageSet(isDet ? stages_glo : stochopt);
    } else {
-      newmcs->is_deterministic = is_deterministic_glo;
-      newmcs->stageset = stages_glo;
+      newmcs->setDeterministic(is_deterministic_glo);
+      newmcs->setStageSet(stages_glo);
    }
 }
 

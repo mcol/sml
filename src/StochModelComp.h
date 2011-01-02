@@ -37,7 +37,8 @@ class SyntaxNode;
  *  listed in the stageset.
  */
 class StochModelComp: public ModelComp {
- public:
+
+ private:
   /* FIXME: No good idea, hides the AmplModel *model in ModelComp */
   //StochModel *model; 
 
@@ -53,7 +54,9 @@ class StochModelComp: public ModelComp {
 
   /** List of stages in which this component is present.
    *  stagenames is the expanded list of stage set members. */
-  std::vector<std::string> *stagenames;
+  std::vector<std::string> stagenames;
+
+ public:
 
   /** StochModel that this belongs to */
   StochModel *stochmodel;
@@ -75,6 +78,22 @@ class StochModelComp: public ModelComp {
 
   //! Shallow copy, only copies pointers
   StochModelComp *clone();
+
+  //! Set the stage set
+  void setStageSet(SyntaxNode *stageSet) { stageset = stageSet; }
+
+  //! Retrieve the stage set
+  const SyntaxNode* getStageSet() const { return stageset; }
+
+  //! Set whether this component varies only over the stages
+  void setDeterministic(bool det) { is_deterministic = det; }
+
+  //! Append a stage name
+  void addStageName(const std::string& name);
+
+  //! Get a reference to the vector of stage names
+  const std::vector<std::string>& getStageNames() const { return stagenames; }
+
 };
 
 #endif /* STOCHMODELCOMP_H */

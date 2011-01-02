@@ -201,8 +201,9 @@ StochModel::expandStagesOfComp()
   //ModelComp::untagAll();
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc = dynamic_cast<StochModelComp*>(*p);
-    if (smc->stageset){
-      smc->stageset->findIDREF(dep);
+    const SyntaxNode *stageSet = smc->getStageSet();
+    if (stageSet) {
+      stageSet->findIDREF(dep);
       for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
         LogSM("dep: " + (*q)->id + "\n");
         (*q)->tagDependencies();
@@ -229,9 +230,9 @@ StochModel::expandStagesOfComp()
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
-    if (smc->stageset){
-      out << "set settemp" << cnt << " = " << smc->stageset <<
-         ";\n";
+    const SyntaxNode *stageSet = smc->getStageSet();
+    if (stageSet) {
+      out << "set settemp" << cnt << " = " << stageSet << ";\n";
       cnt++;
     }
   }
@@ -244,7 +245,8 @@ StochModel::expandStagesOfComp()
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
-    if (smc->stageset){
+    const SyntaxNode *stageSet = smc->getStageSet();
+    if (stageSet) {
       out << "display settemp" << cnt << " > (\"tmp" << cnt << ".out\");\n";
       cnt++;
     }
@@ -256,7 +258,8 @@ StochModel::expandStagesOfComp()
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
     StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
-    if (smc->stageset){
+    const SyntaxNode *stageSet = smc->getStageSet();
+    if (stageSet) {
       char buf[20];
       sprintf(buf, "tmp%d.out",cnt);
       ifstream in(buf);
@@ -267,10 +270,9 @@ StochModel::expandStagesOfComp()
       }
       in.getline(buffer, 500);
       in.close();
-      LogSM("Set " + smc->stageset->print() + " members: " + buffer + "\n");
+      LogSM("Set " + stageSet->print() + " members: " + buffer + "\n");
 
       // parse the set members
-      smc->stagenames = new vector<string>;
       {
         char *p1, *p2;
         p1 = strstr(buffer, ":=");
@@ -279,7 +281,7 @@ StochModel::expandStagesOfComp()
         p2 = strtok(p1, " ;");
         while(p2!=NULL){
           LogSM("Member: " + string(p2) + "\n");
-          smc->stagenames->push_back(p2);
+          smc->addStageName(p2);
           p2 = strtok(NULL, " ;\n");
         }
       }
@@ -374,10 +376,11 @@ StochModel::expandToFlatModel()
       bool inc;
       // check if this component should be included in the current stage
       
-      if (smc->stageset){
+      if (smc->getStageSet()) {
         inc = false;
-        for(vector<string>::iterator q = (smc->stagenames)->begin();
-            q != smc->stagenames->end(); q++) {
+        const vector<string>& smcstagenames = smc->getStageNames();
+        for (vector<string>::const_iterator q = smcstagenames.begin();
+             q != smcstagenames.end(); ++q) {
           if (*st==*q) {
             inc = true;
             break;
