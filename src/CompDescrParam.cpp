@@ -168,8 +168,8 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     // either of which can have a param_template
     if (paramspec->getOpCode() == TOKPARAMTEMPLATE) {
       SyntaxNode::iterator psi = paramspec->begin();
-      templ = (SyntaxNode*)*psi;
-      paramspec = (SyntaxNode*)*(++psi);
+      templ = *psi;
+      paramspec = *(++psi);
     }
 
     // now this can be either a "value list" or a "value table list"
@@ -298,13 +298,13 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
 
   // loop through all value_table's
   for(SyntaxNode::iterator i=node->begin(); i!=node->end(); ++i){
-    SyntaxNode *on_valtab = (SyntaxNode*)*i;
+    SyntaxNode *on_valtab = *i;
     assert(on_valtab->getOpCode() == TOKVALUETABLE);
     
     // get the dimensions of the value_table_list
     assert(on_valtab->nchild()==2);
     SyntaxNode::iterator ovti = on_valtab->begin();
-    SyntaxNode *on_collabel = (SyntaxNode*)*ovti;
+    SyntaxNode *on_collabel = *ovti;
     ListNode *on_values = (ListNode*)*(++ovti);
     
     int ncol = on_collabel->nchild();
@@ -323,7 +323,7 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
     
     int jj=0;
     for(SyntaxNode::iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
-      SyntaxNode *cl = (SyntaxNode*)*j;
+      SyntaxNode *cl = *j;
       assert(cl->getOpCode() == ID || cl->getOpCode() == LBRACKET);
       // need to get reference to the first indexing set and 
       // ask it for the position of this label

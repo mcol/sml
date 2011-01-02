@@ -702,7 +702,7 @@ identifier: iditem {
                      "not an object:\n " << *($1) << "\n";
                   exit(1);
                }
-               local_context = (AmplModel*)(((SyntaxNodeIDREF*)$1)->ref)->other;
+               local_context = (((SyntaxNodeIDREF*)$1)->ref)->other;
 
                if (GlobalVariables::logParseModel) {
                   cout << "Trying to merge \n identifier "<< *($1);
@@ -986,7 +986,7 @@ end_smodel(char *name){
   // new (AmplModel) model. 
   // (this is a concatenation of the StochModel name and the name of the 
   // first stage)
-  mc->id = ((StochModel*)mc->other)->name;
+  mc->id = mc->other->name;
 
   // and go back to the parent 
   current_model = current_model->parent;

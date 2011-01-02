@@ -971,7 +971,7 @@ findKeywordinTree(SyntaxNode *root, int oc)
    SyntaxNode *found, *res;
    found = NULL;
    for(SyntaxNode::iterator i=root->begin(); i!=root->end(); ++i) {
-      res = findKeywordinTree((SyntaxNode*)*i, oc);
+      res = findKeywordinTree(*i, oc);
       if(res && found) {
          cerr << "Found keyword " << oc << "at least twice in " << root << "\n";
          exit(1);

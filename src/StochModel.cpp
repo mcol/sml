@@ -637,7 +637,7 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
       p!=current->comps.end();p++){
     mc = *p;
     if (mc->type==TMODEL){
-      _transcribeComponents((AmplModel*) mc->other, lev + 1);
+      _transcribeComponents(mc->other, lev + 1);
       newcomps.push_back(mc);
     }else{
       /* The component in question is just a pointer to the original
@@ -693,7 +693,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
   // loop through all the entities in this model
   for(mc=current->first;mc!=NULL;mc = mc->next){
     if (mc->type==TMODEL){
-      _transcribeComponents((AmplModel*)mc->other, level+1);
+      _transcribeComponents(mc->other, level + 1);
       if (mc!=current->first){
         prev->next = mc;
       }

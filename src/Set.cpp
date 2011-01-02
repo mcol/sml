@@ -83,7 +83,7 @@ Set::Set(const ListNode &list):
       if (dim_==item->nchild()){
         int j = 0;
         for(SyntaxNode::iterator k=item->begin(); k!=item->end(); ++k){
-          SyntaxNode *idnd = (SyntaxNode*)*k;
+          SyntaxNode *idnd = *k;
           assert(idnd->getOpCode() == ID);
           array[j++] = (char*) idnd->front();
         }
@@ -91,7 +91,7 @@ Set::Set(const ListNode &list):
         //this->elements.push_back(array);
       }else{
         cerr << "First element in set has dim=" << dim_ << " later element '"
-           << (SyntaxNode*)*i << "' has dim=" << item->nchild() << "\n";
+             << *i << "' has dim=" << item->nchild() << "\n";
         exit(1);
       }
     }
