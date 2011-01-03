@@ -77,7 +77,7 @@ class StochModelComp: public ModelComp {
                                    const int level);
 
   //! Shallow copy, only copies pointers
-  StochModelComp *clone();
+  StochModelComp *clone() const;
 
   //! Set the stage set
   void setStageSet(SyntaxNode *stageSet) { stageset = stageSet; }

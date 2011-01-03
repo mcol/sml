@@ -365,8 +365,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 StochModelComp::clone()
 ---------------------------------------------------------------------------- */
 StochModelComp*
-StochModelComp::clone()
-{
+StochModelComp::clone() const {
+
   // can we call clone for the ModelComp? 
   //  => I guess no, since this would create a ModelComp object and not a
   //     StochModelComp
