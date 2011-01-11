@@ -194,12 +194,13 @@ StochModel::expandStagesOfComp()
 {
   char buffer[500];
   list <ModelComp*> dep;
+  list<ModelComp*>::iterator p;
   int cnt;
 
   /* analyze all dependencies of this expression */
   ModelComp::untagAll(AmplModel::root);
   //ModelComp::untagAll();
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (p = comps.begin(); p != comps.end(); ++p) {
     const SyntaxNode *stageSet = (*p)->getStageSet();
     if (stageSet) {
       stageSet->findIDREF(dep);
@@ -217,8 +218,7 @@ StochModel::expandStagesOfComp()
     while (amroot->parent)
       amroot = amroot->parent;
     
-    for (list<ModelComp*>::iterator p = amroot->comps.begin();
-         p != amroot->comps.end(); p++) {
+    for (p = amroot->comps.begin(); p != amroot->comps.end(); ++p) {
       ModelComp *q = *p;
       if (q->type==TSET || q->type==TPARAM) q->tagDependencies();
     }
@@ -227,7 +227,7 @@ StochModel::expandStagesOfComp()
   ofstream out("tmp.mod");
   ModelComp::modifiedWriteAllTagged(out);
   cnt=0;
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (p = comps.begin(); p != comps.end(); ++p) {
     const SyntaxNode *stageSet = (*p)->getStageSet();
     if (stageSet) {
       out << "set settemp" << cnt << " = " << stageSet << ";\n";
@@ -241,7 +241,7 @@ StochModel::expandStagesOfComp()
   out << "model tmp.mod;\n";
   out << "data ../" << GlobalVariables::datafilename << ";\n";
   cnt=0;
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (p = comps.begin(); p != comps.end(); ++p) {
     const SyntaxNode *stageSet = (*p)->getStageSet();
     if (stageSet) {
       out << "display settemp" << cnt << " > (\"tmp" << cnt << ".out\");\n";
@@ -253,7 +253,7 @@ StochModel::expandStagesOfComp()
   callAmpl();
 
   cnt=0;
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
+  for (p = comps.begin(); p != comps.end(); ++p) {
     ModelComp *smc = *p;
     const SyntaxNode *stageSet = smc->getStageSet();
     if (stageSet) {
