@@ -805,8 +805,10 @@ SyntaxNodeIDREF* AmplModel::find_var_ref_in_context(IDNode *ref) {
             cout << "Found Match: " << ref->id() << " refers to ";
             cout << ModelComp::nameTypes[thismc->type] << "\n";
             cout << "    " << thismc->id << "\n";
-            cout << "       " << *(thismc->indexing) << "\n";
-            cout << "       " << *(thismc->attributes) << "\n";
+            if (thismc->indexing)
+              cout << "       " << *(thismc->indexing) << "\n";
+            if (thismc->attributes)
+              cout << "       " << *(thismc->attributes) << "\n";
          }
 
          SyntaxNodeIDREF *ret;
