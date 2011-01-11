@@ -72,7 +72,6 @@ class StochModel: public AmplModel{
   //! The parameter array of ancestors
   SyntaxNode *anc;
 
- public:
   //! The parameter array of probabilities
   SyntaxNode *prob;
 
@@ -93,6 +92,8 @@ class StochModel: public AmplModel{
 
   //! Expand on AmplModel::addComp to setup stochmodel of component too
   void addComp(ModelComp *comp);
+
+  SyntaxNode* getProbs() const { return prob; }
 
   SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
 

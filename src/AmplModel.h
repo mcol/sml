@@ -25,6 +25,7 @@
 class ExpandedModel;
 class IDNode;
 class ModelComp;
+class SyntaxNode;
 class SyntaxNodeIx;
 class SyntaxNodeIDREF;
 struct changeitem;
@@ -147,6 +148,10 @@ class AmplModel{
   std::list<SymbolTable::Entry> getObjList() const;
 
   virtual SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);
+
+  // Virtual methods implemented only for stochastic models
+  virtual AmplModel* expandToFlatModel() { throw; }
+  virtual SyntaxNode* getProbs() const { throw; }
 
  private:
 

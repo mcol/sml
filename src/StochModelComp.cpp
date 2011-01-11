@@ -30,10 +30,10 @@ StochModelComp::StochModelComp(const string& id_):
   ModelComp(id_) {}
 
 StochModelComp::StochModelComp(const string& id_, compType type_,
-                               SyntaxNode *indexing_, SyntaxNode *attrib):
-  ModelComp(id_, type_, indexing_, attrib)
-{}
-
+                               SyntaxNode *indexing_, SyntaxNode *attrib,
+                               StochModel *stoch):
+  ModelComp(id_, type_, indexing_, attrib),
+  stochmodel(stoch) {}
 
 /** Transcribe a StochModelComp in a StochModel into a ModelComp.
  *
@@ -249,7 +249,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // thissm->prob is an ID SyntaxNode giving path probabilities
           
           // create the *CP[ix0] term
-          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
+          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->getProbs());
           if (opn_prob==NULL){
             cerr << "ERROR: Probabilities parameter in stochastic block must "
                     "be given as IDREF.\n";
@@ -290,7 +290,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           // thissm->prob is an ID SyntaxNode giving path probabilities
           
           // create the *CP[ix0] term
-          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->prob);
+          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->getProbs());
           if (opn_prob==NULL){
             cerr << "ERROR: Probabilities parameter in stochastic block must "
                     "be given as IDREF.\n";

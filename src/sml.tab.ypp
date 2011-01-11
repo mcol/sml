@@ -60,7 +60,7 @@
    static SyntaxNode *stages_glo;
    extern FILE *yyin;
 
-   void addStochInfo(StochModelComp *newmc, SyntaxNode*);
+   void addStochInfo(ModelComp *newmc, SyntaxNode*);
 %}
 
 %union
@@ -322,7 +322,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
             ModelComp *newmc;
             if (is_stoch_model){
                newmc = new StochModelComp($2, TMAX, $3, $7);
-               addStochInfo((StochModelComp*)newmc, $5);
+               addStochInfo(newmc, $5);
             }else{
                newmc = new ModelComp($2, TMAX, $3, $7);
             }
@@ -339,7 +339,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
             ModelComp *newmc;
             if (is_stoch_model){
                newmc = new StochModelComp($2, TMIN, $3, $7);
-               addStochInfo((StochModelComp*)newmc, $5);
+               addStochInfo(newmc, $5);
             }else{
                newmc = new ModelComp($2, TMIN, $3, $7);
             }
@@ -356,7 +356,7 @@ cnstr:   MAXIMIZE ID indexing_opt {
             ModelComp *newmc;
             if (is_stoch_model){
                newmc = new StochModelComp($2, TCON, $3, $7);
-               addStochInfo((StochModelComp*)newmc, $5);
+               addStochInfo(newmc, $5);
             }else{
                newmc = new ModelComp($2, TCON, $3, $7);
             }
@@ -437,7 +437,7 @@ setdef:  SET ID indexing_opt {
             ModelComp *newmc;
             if (is_stoch_model){
                newmc = new StochModelComp($2, TSET, $3, $6);
-               addStochInfo((StochModelComp*)newmc, $5);
+               addStochInfo(newmc, $5);
             }else{
                newmc = new ModelComp($2, TSET, $3, $6);
             }
@@ -479,7 +479,7 @@ vardef:  VAR ID indexing_opt {
             ModelComp *newmc;
             if (is_stoch_model){
                newmc = new StochModelComp($2, TVAR, $3, $6);
-               addStochInfo((StochModelComp*)newmc, $5);
+               addStochInfo(newmc, $5);
             }else{
                newmc = new ModelComp($2, TVAR, $3, $6);
             }
@@ -980,7 +980,7 @@ end_smodel(char *name){
   ModelComp *mc = current_model->node; 
   
   // point that to the expanded flat model tree
-  mc->other = ((StochModel*)current_model)->expandToFlatModel();
+  mc->other = current_model->expandToFlatModel();
 
   // and change the name of the ModelComp of this model to the name of the 
   // new (AmplModel) model. 
@@ -1023,8 +1023,7 @@ rem_indexing(SyntaxNodeIx *indexing){
 Stochastic model helper functions
 ---------------------------------------------------------------------------- */
 void 
-addStochInfo(StochModelComp *newmcs, SyntaxNode *stochopt)
-{
+addStochInfo(ModelComp *newmcs, SyntaxNode *stochopt) {
    if(stochopt) {
      bool isDet = stochopt->getOpCode() == DETERMINISTIC;
      newmcs->setDeterministic(isDet || is_deterministic_glo);

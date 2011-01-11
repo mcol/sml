@@ -21,8 +21,10 @@
 #include "CompDescr.h"
 #include <list>
 #include <string>
+#include <vector>
 
 class AmplModel;
+class StochModel;
 class SyntaxNode;
 class SyntaxNodeIx;
 class SyntaxNodeIDREF;
@@ -152,6 +154,19 @@ class ModelComp{
 
   /** Duplicate the object: deep copy */
   ModelComp *deep_copy() const;
+
+  // Virtual methods implemented only for stochastic models
+
+  virtual void setStochModel(StochModel *stoch) { throw; }
+  virtual void setStageSet(SyntaxNode *stageSet) { throw; }
+  virtual void setDeterministic(bool det) { throw; }
+  virtual const SyntaxNode* getStageSet() const { throw; }
+  virtual void addStageName(const std::string& name) { throw; }
+  virtual const std::vector<std::string>& getStageNames() const { throw; }
+  virtual ModelComp* transcribeToModelComp(AmplModel *current_model,
+                                           const std::string& nodedummy,
+                                           const std::string& stagedummy,
+                                           const int level) { throw; }
 
  protected:
 

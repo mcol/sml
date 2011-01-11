@@ -1,3 +1,8 @@
+2011-01-11  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Introduced a virtual interface to be implemented by the StochModel and
+    StochModelComp classes. This allows to remove a number of dynamic_casts
+    to the derived classes.
+
 2011-01-02  Marco Colombo  <m.colombo@ed.ac.uk>
   * Moved some members of the StochModelComp class in the private section
     and added accessors.

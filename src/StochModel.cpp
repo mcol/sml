@@ -200,8 +200,7 @@ StochModel::expandStagesOfComp()
   ModelComp::untagAll(AmplModel::root);
   //ModelComp::untagAll();
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    StochModelComp *smc = dynamic_cast<StochModelComp*>(*p);
-    const SyntaxNode *stageSet = smc->getStageSet();
+    const SyntaxNode *stageSet = (*p)->getStageSet();
     if (stageSet) {
       stageSet->findIDREF(dep);
       for(list<ModelComp*>::iterator q=dep.begin();q!=dep.end();q++){
@@ -229,8 +228,7 @@ StochModel::expandStagesOfComp()
   ModelComp::modifiedWriteAllTagged(out);
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
-    const SyntaxNode *stageSet = smc->getStageSet();
+    const SyntaxNode *stageSet = (*p)->getStageSet();
     if (stageSet) {
       out << "set settemp" << cnt << " = " << stageSet << ";\n";
       cnt++;
@@ -244,8 +242,7 @@ StochModel::expandStagesOfComp()
   out << "data ../" << GlobalVariables::datafilename << ";\n";
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
-    const SyntaxNode *stageSet = smc->getStageSet();
+    const SyntaxNode *stageSet = (*p)->getStageSet();
     if (stageSet) {
       out << "display settemp" << cnt << " > (\"tmp" << cnt << ".out\");\n";
       cnt++;
@@ -257,7 +254,7 @@ StochModel::expandStagesOfComp()
 
   cnt=0;
   for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
+    ModelComp *smc = *p;
     const SyntaxNode *stageSet = smc->getStageSet();
     if (stageSet) {
       char buf[20];
@@ -361,7 +358,7 @@ StochModel::expandToFlatModel()
 
     // loop over all components of the StochModel 
     for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-      StochModelComp *smc=dynamic_cast<StochModelComp*>(*p);
+      ModelComp *smc = *p;
 
       /** @bug Submodel components within sblock's is not supported yet
           This is not implemented when creating a nested AmplModel tree
@@ -459,8 +456,7 @@ StochModel::expandToFlatModel()
         on1 = new OpNode(DEFINED, 
           new SyntaxNode(LBRACE, new SyntaxNode(COLON, on_iinN, on2)));
         // and add this to the model
-        smctmp = new StochModelComp("rootset", TSET, NULL, on1);
-        smctmp->stochmodel = this;
+        smctmp = new StochModelComp("rootset", TSET, NULL, on1, this);
         am->addComp(smctmp);
       }
       /* EITHER we can set this up as an ID node with name NODES and do a
@@ -525,8 +521,7 @@ StochModel::expandToFlatModel()
       // so we've got a SyntaxNode to '{i in NODES:A[i] in indS0}'
       
       /* Add this as a model component defining a set? */
-      StochModelComp *smc = new StochModelComp("ind" + *st, TSET, NULL, on1);
-      smc->stochmodel = this;
+      StochModelComp *smc = new StochModelComp("ind" + *st, TSET, NULL, on1, this);
       am->addComp(smc);
 
       if (model_above){
@@ -646,9 +641,8 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
       /* The component in question is just a pointer to the original
          StochModelComp: need to resolve this with respect to the current 
          setting */
-      StochModelComp *smc;
+      StochModelComp *smc = dynamic_cast<StochModelComp*>(mc);
       ModelComp* mcnew;
-      smc = dynamic_cast<StochModelComp*>(mc);
       if (smc){
         string ndname = nodedummy ? nodedummy->id() : "__INVALID__";
         string stname = stagedummy ? stagedummy->id() : "__INVALID__";
@@ -668,7 +662,7 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
 
 void StochModel::addComp(ModelComp *comp) {
    AmplModel::addComp(comp);
-   ((StochModelComp*) comp)->stochmodel = this;
+   comp->setStochModel(this);
 }
 
 SyntaxNodeIDREF* StochModel::find_var_ref_in_context(IDNode *ref) {

@@ -56,10 +56,10 @@ class StochModelComp: public ModelComp {
    *  stagenames is the expanded list of stage set members. */
   std::vector<std::string> stagenames;
 
- public:
-
   /** StochModel that this belongs to */
   StochModel *stochmodel;
+
+ public:
 
   /* ======================== methods =================================== */
 
@@ -68,7 +68,8 @@ class StochModelComp: public ModelComp {
 
   //! Constructor
   StochModelComp(const std::string& id_, compType type,
-                 SyntaxNode *indexing, SyntaxNode *attrib);
+                 SyntaxNode *indexing, SyntaxNode *attrib,
+                 StochModel *stoch = NULL);
 
   //! Transcribe a StochModelComp in a StochModel into a ModelComp 
   ModelComp *transcribeToModelComp(AmplModel *current_model,
@@ -78,6 +79,9 @@ class StochModelComp: public ModelComp {
 
   //! Shallow copy, only copies pointers
   StochModelComp *clone() const;
+
+  //! Set the stochastic model
+  void setStochModel(StochModel *stoch) { stochmodel = stoch; }
 
   //! Set the stage set
   void setStageSet(SyntaxNode *stageSet) { stageset = stageSet; }
