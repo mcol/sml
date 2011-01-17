@@ -145,7 +145,8 @@ ExpandedModel::setLocalVarInfo()
   while(!fin.eof()){
     string line;
     getline(fin, line);
-    colfilelist.push_back(line);
+    if (line.size() > 0)
+      colfilelist.push_back(line);
   }
   fin.close();
   
