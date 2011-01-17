@@ -43,8 +43,10 @@ SimpleSet::SimpleSet(SyntaxNode *bnd1, SyntaxNode *bnd2) :
 
    parsed_ = !(lbc_ || ubc_);
 
+#if 0
    if(parsed_) 
       cout << "Parsed Set " << lower_bound_ << ".." << upper_bound_ << endl;
+#endif
 }
 
 vector<string> SimpleSet::members(AmplModel& context) const {
