@@ -161,16 +161,19 @@ ExpandedModel::setLocalVarInfo()
 
     int len = (*p).size();
     int cnt;
+    if (GlobalVariables::prtLvl >= 3)
+      cout << "Trying to match variable definition " << (*p) << ":\n";
+
     for (q = colfilelist.begin(), cnt = 0; q != colfilelist.end(); ++q, ++cnt) {
 
       // avoid trying to find impossible matches
       if ((*q).size() < len)
         continue;
 
-      string cand(*q, 0, len);
-      if (cand==(*p)) {
+      // compare the first 'len' characters from q with p
+      if ((*q).compare(0, len, *p) == 0) {
         if (GlobalVariables::prtLvl>=3)
-          cout << "Match of " << cand << " and " << *p << "\n";
+          cout << "  " << *q << " matches " << *p << "\n";
         listOfLocalVars.push_back(cnt);
         listOfVarNames.push_back(*q);
 
