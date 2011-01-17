@@ -590,8 +590,8 @@ StochModel::expandToFlatModel()
 /*-----------------------------------------------------------------------------
 StochModel::_transcribeComponents(AmplModel *current, int level)
 -----------------------------------------------------------------------------*/
-/** This routine recursively calls StochModelComp::transcribeToModelComp
- *  for all components of this StochModel.
+/** Call recursively StochModelComp::transcribeToModelComp() for all components
+ *  of this StochModel.
  *
  *  It sets SyntaxNode::stage and SyntaxNode::node to the correct values
  *  for each new AmplModel encountered in the recursion.
@@ -599,7 +599,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
  *  @param current
  *         The AmplModel that is currently worked on. I.e. in the current
  *         level of the recursion the routine is working on AmplModel current
- *          within this StochModel.
+ *         within this StochModel.
  *  @param lev
  *         The recursion level (to work out the correct way to resolve the
  *         'stage' and 'node' keywords and 'ancestor' references).
@@ -607,10 +607,7 @@ StochModel::_transcribeComponents(AmplModel *current, int level)
 void
 StochModel::_transcribeComponents(AmplModel *current, int lev) {
 
-  ModelComp *mc;
-  list<SyntaxNode*> dv;
   // need to set stage and node for the current model
-  
   /* What should we do here: I think use quotation marks if the set of stages
      is symbolic. otherwise don't use quotation marks */
 
@@ -624,16 +621,15 @@ StochModel::_transcribeComponents(AmplModel *current, int lev) {
     StageNodeNode::node = "\"root\"";
   }else{
     SyntaxNodeIx *cnix = current->node->indexing;
-    dv = cnix->getListDummyVars();
+    list<SyntaxNode*> dv = cnix->getListDummyVars();
     StageNodeNode::node = (dv.front())->print();
   }
 
-  //list<ModelComp*> newcomps(current->comps.size());
   list<ModelComp*> newcomps;
   // loop through all the entities in this model
   for(list<ModelComp*>::iterator p = current->comps.begin();
       p!=current->comps.end();p++){
-    mc = *p;
+    ModelComp *mc = *p;
     if (mc->type==TMODEL){
       _transcribeComponents(mc->other, lev + 1);
       newcomps.push_back(mc);
