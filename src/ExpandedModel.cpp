@@ -162,6 +162,11 @@ ExpandedModel::setLocalVarInfo()
     int len = (*p).size();
     int cnt;
     for (q = colfilelist.begin(), cnt = 0; q != colfilelist.end(); ++q, ++cnt) {
+
+      // avoid trying to find impossible matches
+      if ((*q).size() < len)
+        continue;
+
       string cand(*q, 0, len);
       if (cand==(*p)) {
         if (GlobalVariables::prtLvl>=3)
