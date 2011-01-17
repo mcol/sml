@@ -1,0 +1,11 @@
+# This file is (c) 2011 Marco Colombo, University of Edinburgh.
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty.
+
+set PRODUCTS := 1 2;
+
+param maxProduction := 1  150
+                       2  120;
+param maxTotalProduction := 200;
+param profit := 1  2
+                2  5;

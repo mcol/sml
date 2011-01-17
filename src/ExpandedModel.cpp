@@ -170,6 +170,14 @@ ExpandedModel::setLocalVarInfo()
       if ((*q).size() < len)
         continue;
 
+      // If *q is longer than *p, it can represent the same variable as *p
+      // only if it contains a '[' in its first len characters. Without this
+      // check we would match 'slackTotal' with 'slack' (see test-01.mod),
+      // which would produce an incorrect variable count and a repeated
+      // 'slackTotal' entry in the solution file.
+      if ((*q).size() > len && (*q).find('[') > len)
+        continue;
+
       // compare the first 'len' characters from q with p
       if ((*q).compare(0, len, *p) == 0) {
         if (GlobalVariables::prtLvl>=3)
