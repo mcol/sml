@@ -516,7 +516,6 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
   ExpandedModel *em = this;
   const string& nlfilename = nlf->nlfilename;
   int nvar = em->getNLocalVars();
-  list<string> colfilelist;
   int count = 0; // count number of matches
 
   // look up if this index set has already been calculated
@@ -544,6 +543,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
       exit(1);
     }
     
+    list<string> colfilelist;
     string line;
     getline(fin, line);
     while(!fin.eof()){

@@ -37,11 +37,6 @@ OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *col
       - need a list of indices into the NlFile for these columns
    */
   
-
-
-  list<string> colfilelist;
-  //list<int> listColIx;
-
   if (GlobalVariables::prtLvl>=2){
     cout << "-------------------------OOPS Block---------------------------\n";
     cout << "Generate OOPSBlock: col: " << colmod->getName() << 
@@ -70,6 +65,7 @@ OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *col
     exit(1);
   }
   
+  list<string> colfilelist;
   string line;
   getline(fin, line);
   while(!fin.eof()){
