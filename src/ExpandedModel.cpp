@@ -88,10 +88,11 @@ ExpandedModel::setLocalVarInfo()
 
   // ------- read the names of constraints defined in this NlFile ------------
   // These have been written in the correct order
-  ifstream fin((model_file+".row").c_str());
+  const string nlrowfile = model_file + ".row";
+  ifstream fin(nlrowfile.c_str());
 
   if (!fin) {
-    cerr << "Cannot open row name file: "+model_file+".row" << endl;
+    cerr << "Cannot open row name file " << nlrowfile << ".\n";
     exit(1);
   }
   
@@ -131,13 +132,14 @@ ExpandedModel::setLocalVarInfo()
   fin.clear(); // Recommended by Marco
   
   if (GlobalVariables::prtLvl>=2)
-    cout << "Read " << listOfConNames.size() << " lines from file " << 
-       model_file << ".row" << endl;
+    cout << "Read " << listOfConNames.size() << " lines from "
+         << nlrowfile << ".\n";
 
   // Now read vars - these actually need matching to correct order
-  fin.open((model_file+".col").c_str());
+  const string nlcolfile = model_file + ".col";
+  fin.open(nlcolfile.c_str());
   if (!fin) {
-    cerr << "Cannot open column name file: "+model_file+".col" << endl;
+    cerr << "Cannot open column name file " << nlcolfile << ".\n";
     exit(1);
   }
 
@@ -151,8 +153,8 @@ ExpandedModel::setLocalVarInfo()
   fin.close();
   
   if (GlobalVariables::prtLvl>=2)
-    cout << "Read " << colfilelist.size() << " lines from file " << 
-       model_file << ".col\n";
+    cout << "Read " << colfilelist.size() << " lines from "
+         << nlcolfile << ".\n";
 
   // -------------- compare this list against the given VarDefs
   list<string>::iterator p, q;
@@ -532,12 +534,13 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
     LogEM("<< place IndexValue " + nlfilename + ":" + em->model_file + "\n");
     // we need to calculate it
     for(int i=0;i<nvar;i++) lvar[i] = -1;
-    
+
     // ------- read the names of columns defined in this NlFile ------------
-    ifstream fin((nlfilename+".col").c_str());
+    const string nlcolfile = nlfilename + ".col";
+    ifstream fin(nlcolfile.c_str());
     
     if (!fin) {
-      cout << "Cannot open column name file: "+nlfilename+".col";
+      cerr << "Cannot open column name file " << nlcolfile << ".\n";
       exit(1);
     }
     
@@ -550,7 +553,7 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
   
     if (GlobalVariables::prtLvl>=2){
       cout << "Read " <<  colfilelist.size() << " lines from "
-           << nlfilename << ".col\n";
+           << nlcolfile << ".\n";
     }
     
     // -------------- compare this listOfVarNames against this list
