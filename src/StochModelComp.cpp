@@ -35,6 +35,34 @@ StochModelComp::StochModelComp(const string& id_, compType type_,
   ModelComp(id_, type_, indexing_, attrib),
   stochmodel(stoch) {}
 
+/** Multiply the current expression by the conditional probability terms */
+static SyntaxNode*
+buildPathProbTerm(int level, const AmplModel *thisam,
+                  const StochModel *thissm, SyntaxNode *up) {
+
+  SyntaxNodeIDREF *prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->getProbs());
+  if (prob == NULL) {
+    cerr << "ERROR: Probs parameter in stochastic block must be an IDREF.\n";
+    exit(1);
+  }
+
+  for (int i = level; i > 0; --i) {
+
+    // find the dummy variable expression
+    SyntaxNodeIx *cnix = thisam->node->indexing;
+    list<SyntaxNode*> dv = cnix->getListDummyVars();
+    const string varName = (dv.front())->print();
+
+    // build the conditional probability term for this stage and multiply by it
+    SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(prob->ref, new IDNode(varName));
+    up = new OpNode('*', oncp, up);
+
+    thisam = thisam->parent;
+  }
+
+  return up;
+}
+
 /** Transcribe a StochModelComp in a StochModel into a ModelComp.
  *
  *  This function takes a StochModelComp as read in by the parser and
@@ -79,7 +107,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
             nodes higher up in the tree
      (3)  find all STAGE and NODE nodes in the attribute section
      (3a) replace them with the values in SyntaxNode::stage and SyntaxNode::node
-     (4)  find all EXP nodes in tbe attribute section
+     (4)  find all EXP nodes in the attribute section
      (4a) replace them by path probabilities
      //(4)  if this is an OBJ component, then add probabilities to it
   */
@@ -229,102 +257,50 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     */
 
     // (*p) is the EXPECTATION node, it should have one child
-
     SyntaxNode *child = (*p)->front();
 
     if (child->getOpCode() != COMMA || child->nchild() == 1) {
 
       // surround the argument of Exp(...) with brackets for the multiplication
       // by the probability to apply correctly to all terms
-      SyntaxNode *up = new SyntaxNode(LBRACKET, child);
+      SyntaxNode *up = buildPathProbTerm(level, thisam, thissm,
+                                         new SyntaxNode(LBRACKET, child));
 
       // one argument version of Exp within an objective function
       if (type==TMIN || type==TMAX){
-
-        // multiply by the conditional probability terms (one per stage)
-        for (int i=level;i>0;i--){
-          
-          // find the dummy variable expression
-          SyntaxNodeIx *cnix = thisam->node->indexing;
-          list<SyntaxNode *> dv = cnix->getListDummyVars();
-          //dv->front() is a string giving name of dummy var
-          thisam = thisam->parent;
-        
-          // thissm->prob is an ID SyntaxNode giving path probabilities
-          
-          // create the *CP[ix0] term
-          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->getProbs());
-          if (opn_prob==NULL){
-            cerr << "ERROR: Probabilities parameter in stochastic block must "
-                    "be given as IDREF.\n";
-            exit(1);
-          }
-          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref, 
-             new IDNode((dv.front())->print()));
-          up = new OpNode('*', oncp, up);
-        }
-        // up is now a pointer into the expression, this should
-        // replace the EXP node?
         (*p)->clear();
         (*p)->push_back(up);
       }
 
       // one argument version of Exp used in constraint
       else {
-        // => this constraint should be moved to the top level; 
-        //    there it will encompass all nodes that are in the current stage
-        //    this should become
+        // this constraint should be moved to the top level, where it will
+        // encompass all nodes that are in the current stage, like this:
         //     subject to ExpCons: 
         //       mu = sum{ix0 in almS0_indS0, ix1 in almS0_S1_indS1[ix0]}
         //            CP[ix0]*CP[ix1]*(sum{i in ASSETS}xh[ix0, ix1, i])
+
+        // create the list of indexing expression used in this model
         list<SyntaxNode*> listofsum; // expressions in the sum{..}
-
         for (int i=level;i>0;i--){
-          
-          // find the dummy variable expression
-          SyntaxNodeIx *cnix = thisam->node->indexing;
-          list<SyntaxNode *> dv = cnix->getListDummyVars();
-          //dv->front() is a string giving name of dummy var
-        
-          // thissm->prob is an ID SyntaxNode giving path probabilities
-          
-          // create the *CP[ix0] term
-          SyntaxNodeIDREF *opn_prob = dynamic_cast<SyntaxNodeIDREF*>(thissm->getProbs());
-          if (opn_prob==NULL){
-            cerr << "ERROR: Probabilities parameter in stochastic block must "
-                    "be given as IDREF.\n";
-            exit(1);
-          }
-          SyntaxNodeIDREF *oncp = new SyntaxNodeIDREF(opn_prob->ref,
-            new IDNode(dv.front()->print()));
-          up = new OpNode('*', oncp, up);
-
-          // put together the sum expression 
-          // => build the ix0 in almS0_indS0 (which is the indexing expression
-          //    used for this model)
-
-          // cnix might contain a '{' => strip it if present
-          SyntaxNode *cnixon = cnix;
+          SyntaxNode *cnixon = thisam->node->indexing;
+          // cnixon might contain a '{' => strip it if present
           if (cnixon->getOpCode() == LBRACE)
             cnixon = cnixon->front();
           listofsum.push_front(cnixon->deep_copy());
-          
           thisam = thisam->parent;
         }
-        // up is now a pointer into the expression, this should
-        // replace the EXP node?
-
-        // create the sum expression: first build comma separated list
         if (listofsum.size()==0){
           cerr << "ERROR: Expectation indexing expression *must* be present.\n";
           exit(1);
         }
+
+        // build the comma separated list and put braces around it
         SyntaxNode *cslon = new ListNode(COMMA);
         for(list<SyntaxNode*>::iterator q = listofsum.begin();q!=listofsum.end();
             q++){
           cslon->push_back(*q);
         }
-        // and put braces around it
         cslon = new SyntaxNode(LBRACE, cslon);
         
         // now build the sum
