@@ -1,5 +1,8 @@
 2011-01-20  Marco Colombo  <m.colombo@ed.ac.uk>
   * Improved the readability of the generated ampl models.
+  * Fixed a bug for which the expressions in the Exp() where not properly
+    parenthesised, which caused the probability to multiply only the first
+    term instead of the whole expression.
 
 2011-01-17  Marco Colombo  <m.colombo@ed.ac.uk>
   * Fixed a bug in ExpandedModel::setLocalVarInfo() that caused a repeated

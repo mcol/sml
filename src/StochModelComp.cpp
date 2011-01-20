@@ -233,11 +233,15 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     SyntaxNode *child = (*p)->front();
 
     if (child->getOpCode() != COMMA || child->nchild() == 1) {
-      // this is the "one argument" use if Exp within an objective function
+
+      // surround the argument of Exp(...) with brackets for the multiplication
+      // by the probability to apply correctly to all terms
+      SyntaxNode *up = new SyntaxNode(LBRACKET, child);
+
+      // one argument version of Exp within an objective function
       if (type==TMIN || type==TMAX){
-        // set "up" to the argument of Exp(...)
-        // FIXME: need to put brackets around this?
-        SyntaxNode *up = (*p)->front();
+
+        // multiply by the conditional probability terms (one per stage)
         for (int i=level;i>0;i--){
           
           // find the dummy variable expression
@@ -263,22 +267,17 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
         // replace the EXP node?
         (*p)->clear();
         (*p)->push_back(up);
-      }else{
+      }
 
-        // one argument version of Exp used in constraint
+      // one argument version of Exp used in constraint
+      else {
         // => this constraint should be moved to the top level; 
         //    there it will encompass all nodes that are in the current stage
         //    this should become
         //     subject to ExpCons: 
         //       mu = sum{ix0 in almS0_indS0, ix1 in almS0_S1_indS1[ix0]}
         //            CP[ix0]*CP[ix1]*(sum{i in ASSETS}xh[ix0, ix1, i])
-        // set "up" to the argument of Exp(...)
-        // FIXME: need to put brackets around this?
         list<SyntaxNode*> listofsum; // expressions in the sum{..}
-
-        SyntaxNode *up = (*p)->front();
-        // put brackets around this
-        up = new SyntaxNode(LBRACKET, up);
 
         for (int i=level;i>0;i--){
           
