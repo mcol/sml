@@ -323,28 +323,29 @@ ModelComp::dump(ostream &fout)
  *  with the values of all its fields                                        */
 void
 ModelComp::dump(ostream& fout) const {
-  fout << "MCDP  --------------------------------------------------------"
-     "----\n";
-  fout << "MCDP ModelComp: " << id << " ("<< (void *) this << ")\n";
-  fout << "MCDP  type: " << ModelComp::nameTypes[type] << "\n";
-  fout << "MCDP  attributes: " << attributes << "\n";
-  if (attributes) attributes->dump(fout);
-  fout << "MCDP  indexing: " << indexing << "\n";
+  fout << "MC: ----------------------------------------------------------\n";
+  fout << "MC: ModelComp: " << id << " ("<< (void *) this << ")\n";
+  fout << "    type: " << ModelComp::nameTypes[type] << "\n";
+  if (attributes) {
+    fout << "    attr: " << attributes << '\n';
+    // fout << "       ";
+    // attributes->dump(fout);
+  }
   if (indexing) {
+    fout << "    indexing: " << indexing << "\n";
     indexing->splitExpression();
     indexing->printDiagnostic(fout);
     indexing->dump(fout);
   }
-  fout << "MCDP  dependencies: " << dependencies.size() << ":\n";
-  fout << "      ";
+  fout << "    dependencies (" << dependencies.size() << "):\n";
   for (list<ModelComp*>::const_iterator p = dependencies.begin();
        p != dependencies.end(); ++p)
-    fout << (*p)->model->name << "::" << (*p)->id << " ";
-  fout << "\nMCDP  model: " << model->name << "\n";
-  fout << "MCDP  count: " << count << "\n";
-  fout << "MCDP  tag: " << tag << "\n";
+    fout << "       " << (*p)->model->name << "::" << (*p)->id << endl;
+  fout << "    model: " << model->name << "\n";
+  fout << "    count: " << count << "\n";
+  fout << "    tag: " << tag << "\n";
   if (value) {
-    fout << "MCDP  value: " << value->toString() << "\n";
+    fout << "    value: " << value->toString() << "\n";
   }
 }
 

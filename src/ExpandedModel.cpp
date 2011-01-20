@@ -281,7 +281,6 @@ ExpandedModel::print() const {
     exit(1);
   }
   cout << "EM: This is ExpandedModel: " <<  nlfile->nlfilename << "\n";
-  cout << "EM: Nb children: " << children.size() << "\n";
   cout << "EM: Nb local variable definitions: " << localVarDef.size() << "\n";
   for (p = localVarDef.begin(); p != localVarDef.end(); ++p)
     cout << "EM:   " << *p << "\n";
@@ -295,6 +294,7 @@ ExpandedModel::print() const {
     cout << "EM: Nb local Constraints: " <<  nLocalCons << "\n";
   }
 
+  cout << "EM: Nb children: " << children.size() << "\n";
   if (children.size()>0)
     cout << "EM: now list the children:\n";
   

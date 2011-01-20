@@ -447,17 +447,18 @@ AmplModel::dump(ostream& fout) const {
   fout << "AM: global name: " << global_name << "\n";
   fout << "AM: level: " << level << "\n";
   fout << "AM: parent: " << (parent?parent->name:"NULL") << "\n";
-  fout << "AM: indexing: " << ix << "\n";
-  if (ix)
+  if (ix) {
+    fout << "AM: indexing: " << ix << "\n";
     ix->dump(fout);
+  }
   fout << "AM: Nb submodels  : " <<  n_submodels << "\n";
   fout << "AM: Nb sets       : " <<  n_sets << "\n";
   fout << "AM: Nb parameters : " <<  n_params << "\n";
   fout << "AM: Nb objectives : " <<  n_objs << "\n";
   fout << "AM: Nb variables  : " <<  n_vars << "\n";
   fout << "AM: Nb constraints: " <<  n_cons << "\n";
-  fout << "AM: Nb objectives: " <<  n_submodels << "\n";
-  fout << "AM: List components:";
+  fout << "AM: Nb objectives : " <<  n_submodels << "\n";
+  fout << "AM: List components:\n";
   list<ModelComp*>::const_iterator p;
   for (p = comps.begin(); p != comps.end(); ++p)
     (*p)->dump(fout);

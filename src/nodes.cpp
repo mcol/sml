@@ -175,9 +175,9 @@ ostream& SyntaxNode::put(ostream&s) const {
       s << "ord" << **i;
       break;
       // -------------------------terminals --------------------------
-    case ORDERED:    s << " ordered";                    break;
-    case SYMBOLIC:   s << " symbolic";                   break;
-    case DETERMINISTIC: s << " deterministic";           break;
+    case ORDERED:       s << "ordered";        break;
+    case SYMBOLIC:      s << "symbolic";       break;
+    case DETERMINISTIC: s << "deterministic";  break;
       /* these are lots of simple unary operators */
     case WITHIN:
       s << "within " << **i;
@@ -199,7 +199,7 @@ ostream& SyntaxNode::put(ostream&s) const {
     case COLON:
       if (this->nchild() > 1)
         s << **(i++);
-      s << ":" <<  **i;
+      s << ": " <<  **i;
       break;
     case IF:
       s << "if " << **i;
@@ -248,7 +248,7 @@ ostream& StageNodeNode::put(ostream &s) const {
 }
 
 ostream& OpNode::put(ostream &s) const {
-  if(left) s << left;
+  if(left) s << left << " ";
   
   switch(opCode) {
     case '+':
@@ -264,15 +264,15 @@ ostream& OpNode::put(ostream &s) const {
     case LT:      s << "<";   break;
     case EQ:      s << "==";  break;
     case NE:      s << "!=";  break;
-    case IN:      s << " in "; break;
+    case IN:      s << "in";  break;
     case DEFINED: s << ":=";  break;
-    case POWER:   s << "**"; break;
+    case POWER:   s << "**";  break;
     default:
       cerr << "Unknown opCode for OpNode: " << opCode << endl;
       exit(1);
   }
 
-  s << right;
+  s << " " << right;
 
   return s;
 }
@@ -658,8 +658,8 @@ SyntaxNodeIx::printDiagnostic(ostream &fout) const {
   fout << "qualifier: " << qualifier << "\n";
   fout << "number of indexing expressions: " << ncomp << "\n";
   for(int i=0;i<ncomp;i++){
-    fout << i << ": dummyVar: " << dummyVarExpr[i] << "\n";
-    fout << i << ": set     : " << sets[i] << "\n";
+    fout << "  " << i << ": dummyVar: " << dummyVarExpr[i] << "\n";
+    fout << "     set     : " << sets[i] << "\n";
   }
 }
 

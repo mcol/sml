@@ -235,7 +235,7 @@ StochModel::expandStagesOfComp()
     }
   }
   out.close();
-  
+
   out.open("tmp.scr");
   out << "reset;\n";
   out << "model tmp.mod;\n";
@@ -267,7 +267,7 @@ StochModel::expandStagesOfComp()
       }
       in.getline(buffer, 500);
       in.close();
-      LogSM("Set " + stageSet->print() + " members: " + buffer + "\n");
+      LogSM("Set " + stageSet->print() + " definition: " + buffer + "\n");
 
       // parse the set members
       {
@@ -555,7 +555,7 @@ StochModel::expandToFlatModel()
   am->node = node;
   am->ix = node->indexing;
 
-  LogSM(" -----------------------------------------------------------\n");
+  LogSM("-----------------------------------------------------------\n");
   LogSM(" StochModel::expandToFlatModel: Finished Pass 1: ");
   if (GlobalVariables::prtLvl > 1)
     LogSM("printing FlatModel tree:");
@@ -574,14 +574,14 @@ StochModel::expandToFlatModel()
   AmplModel::applyChanges();
   am->reassignDependencies();
 
-  LogSM(" -----------------------------------------------------------\n");
+  LogSM("-----------------------------------------------------------\n");
   LogSM(" StochModel::expandToFlatModel: Finished converting: ");
   if (GlobalVariables::prtLvl > 1)
     LogSM("printing FlatModel tree:");
   LogSM("\n-----------------------------------------------------------\n");
   if (GlobalVariables::prtLvl > 1) {
     am->print();
-    LogSM(" -----------------------------------------------------------\n");
+    LogSM("-----------------------------------------------------------\n");
   }
 
   return am;

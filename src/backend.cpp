@@ -456,11 +456,10 @@ process_model(AmplModel *model, const string& datafilename) {
   */
 
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
-
-  cout << endl << "Calling AMPL to process script file..." << endl;
-
   {
     // call ampl to process script and analyse the output
+    if (GlobalVariables::prtLvl >= 1)
+      cout << "\nCalling AMPL to process script file... ";
 
     char buffer[256];
     int n_nocsobj=0; // number of model with "No constraints or objectives."
@@ -501,9 +500,10 @@ process_model(AmplModel *model, const string& datafilename) {
       cout << "AMPL: Unrecoverable error\n";
       return 1;
     }
+
+    if (GlobalVariables::prtLvl >= 1)
+      cout << "done.\n";
   }
-  if(GlobalVariables::prtLvl>=1)
-    cout << "done\n";
 
   return 0;
 }
@@ -909,7 +909,7 @@ modified_write(ostream &fout, ModelComp *comp)
       c_addIndex += l_addIndex[i].size();
     }
     /* write name and indexing expression */
-    fout << getGlobalName(comp, NULL, NULL, NOARG) << " ";
+    fout << getGlobalName(comp, NULL, NULL, NOARG);
     if (c_addIndex>0 || comp->indexing)
       fout << "{";
     /* write out the additional indices */
@@ -939,10 +939,12 @@ modified_write(ostream &fout, ModelComp *comp)
     
     /* write out special syntax for a particular statement type */
     if (comp->type==TCON||comp->type==TMIN||comp->type==TMAX) 
-      fout << ":";
+      fout << ":\n   ";
     
     /* write out the rest of the expression */
-    fout << comp->attributes << ";\n";
+    if (comp->attributes)
+      fout << " " << comp->attributes;
+    fout << ";\n";
     //fprintf(fout, "%s;\n",print_SyntaxNode(comp->attributes));
     //fprintf(fout, "%s;\n", print_SyntaxNodesymb(comp->attributes));
   }
