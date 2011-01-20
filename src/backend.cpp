@@ -156,7 +156,7 @@ process_model(AmplModel *model, const string& datafilename) {
     for(list<AmplModel*>::iterator mli=model_list.begin();mli!=model_list.end();
         ++mli,++i){
       AmplModel *thism = *mli;
-      cout << i << ": " << thism->name << " (level=" << thism->level << ")\n";
+      cout << i << ": " << thism->name << " (level " << thism->level << ")\n";
     }
 
     cout << "----------- generate submodel files --------------\n";
@@ -166,30 +166,18 @@ process_model(AmplModel *model, const string& datafilename) {
   /* and */
   /* 3) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> generate the script file */
   ofstream fscript("script.scr");
-  string filename;   /* this is the name of the model file */
   
   /* loop over every single model defined */
   for(list<AmplModel*>::iterator mli=model_list.begin(); mli!=model_list.end();
         ++mli){
     AmplModel *this_model = *mli;
-    /* need to construct the name of the model file:
-       => this is a concatenated list of the models down the path
-          (and 'root' for the top level model)
-    */
-    if (this_model->parent==NULL){
-      /* this is root */
-      filename = "root";
-    }else{
-      /* find name of model file by concatenating the names of all ancestors */
-      AmplModel *tmp_model = this_model;
-      filename = tmp_model->name;
-      while (tmp_model->parent){
-        tmp_model = tmp_model->parent;
-        filename = tmp_model->name + ("_" + filename);
-      }
-    }
-    filename = filename + ".mod";
-
+    // construct the name of the model file by concatenating the names of all
+    // ancestors (and 'root' for the top-level model)
+    AmplModel *tmp_model = this_model;
+    string filename = tmp_model->name;
+    while (tmp_model = tmp_model->parent)
+      filename = tmp_model->name + "_" + filename;
+    filename += ".mod";
 
     /* ==================== write the script file ===================== */
 
@@ -678,9 +666,9 @@ write_ampl_for_submodel_
    onto the l_addIndex stack
 */
 void
-write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel, 
-       AmplModel **listam, AmplModel *submodel)
-{
+write_ampl_for_submodel_(ostream& fout, int thislevel, int sublevel,
+                         AmplModel **listam, AmplModel *submodel) {
+
   AmplModel *thism = listam[thislevel];
   ModelComp *comp;
   
@@ -700,17 +688,18 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
         //SyntaxNode::default_model = comp->model;
         modified_write(fout, comp);
       }
-    }else{ // if (comp->type!=TMODEL)
+    }
+
+    else {
       /* this is a model declaration */
       /* check that it needs to be followed */
       if (thism!=submodel && listam[thislevel-1]==comp->other){
-        SyntaxNode *ix;
         list<add_index> li;
         /* ok, looks like this needs to be followed */
         /* add the indexing expression */
   
         // initialise the new entry in l_addIndex stack if not already done
-        ix = comp->indexing;
+        SyntaxNode *ix = comp->indexing;
         if (ix){
           add_index ai;
           
@@ -718,7 +707,7 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           // the stack stores the dummy variable and the SET separately, 
           // so take them to bits here
           if (ix->getOpCode() == LBRACE)
-            ix = ix->front(); // rem {..}
+            ix = ix->front(); // remove curly brackets
           if (ix->getOpCode() == IN) {
              SyntaxNode::iterator ixi = ix->begin();
             ai.dummyVar = *ixi;
@@ -731,7 +720,6 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
           /* okay we have placed the set description on the stack
              but really this should be modified:
              'i in ARCS' should read 'i in ARCS_SUB'
-             
              ought to 'write set ARCS_SUB within ARCS'; as well
           */
           
@@ -744,21 +732,19 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
              
              The ModelComp is of type SET, with no indexing expression
           */
+          SyntaxNode *setn = ai.set;
+          if (setn->getOpCode() != IDREF) {
+            cerr << "At the moment can index blocks only with simple sets\n";
+            cerr << "Indexing expression is " << setn->print() << "\n";
+            exit(1);
+          }
+          SyntaxNodeIDREF *setnref = dynamic_cast<SyntaxNodeIDREF*>(setn);
+          if (setnref==NULL){
+            cerr << "IDREF node should be of type SyntaxNodeIDREF\n";
+            exit(1);
+          }
+          ModelComp *setmc = setnref->getModelComp();
           {
-            SyntaxNode *setn = ai.set;
-            
-            // set name of the ModelComp
-            if (setn->getOpCode() != IDREF) {
-              cerr << "At the moment can index blocks only with simple sets\n";
-              cerr << "Indexing expression is " << setn->print() << "\n";
-              exit(1);
-            }
-            SyntaxNodeIDREF *setnref = dynamic_cast<SyntaxNodeIDREF*>(setn);
-            if (setnref==NULL){
-              cerr << "IDREF node should be of type SyntaxNodeIDREF\n";
-              exit(1);
-            }
-            ModelComp *setmc = setnref->getModelComp();
             ModelComp newmc(setmc->id + "_SUB", TSET,
                             NULL, new SyntaxNode(WITHIN, setn));
 
@@ -767,32 +753,26 @@ write_ampl_for_submodel_(ostream &fout, int thislevel, int sublevel,
             modified_write(fout, &newmc);
           }
           
-          SyntaxNode *setn = ai.set;
           //fprintf(fout, "set %s_SUB within %s;\n", 
           //      print_SyntaxNode(setn), print_SyntaxNode(setn));
           /* and now modify the set declaration */
-          if (setn->getOpCode() != IDREF) {
-            cerr << "At the moment can index blocks only with simple sets\n";
-            cerr << "Indexing expression is " << setn->print() << "\n";
-            exit(1);
-          }
+
           /* newn is the new node, first copy the old one */
-          SyntaxNodeIDREF *newn = ((SyntaxNodeIDREF *)setn)->clone();
+          SyntaxNodeIDREF *newn = setnref->clone();
           // clone the ModelComp that is referred to
-          newn->ref = ((SyntaxNodeIDREF*)setn)->getModelComp()->clone();
+          newn->ref = setmc->clone();
           // ???but associate this with the current model
           //newn->ref->model = thism;
 
-          /* and finally set the new name (add _SUB) to the name */
-          newn->getModelComp()->id = ((SyntaxNodeIDREF*)setn)->getModelComp()->id + "_SUB";
+          // set the new name by appending _SUB
+          newn->getModelComp()->id = setmc->id + "_SUB";
 
           /* and put this on the stack */
           ai.set = newn;
           li.push_back(ai);
         }       
         l_addIndex.push_back(li);
-        write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, 
-               submodel);
+        write_ampl_for_submodel_(fout, thislevel-1, sublevel, listam, submodel);
         SyntaxNode::default_model = thism;
         l_addIndex.pop_back();
       } /* end of (model on the current list branch) */
