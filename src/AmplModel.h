@@ -54,8 +54,8 @@ class AmplModel{
    *
    *  @attention Should have a global hash table of *all* defined model
    *  components. Could be used in find_var_ref_in_context which does the job
-   *  of finding the ModelComponent object reference for components refered to
-   *  in expressions.
+   *  of finding the ModelComponent object reference for components referred
+   *  to in expressions.
    *             => Need a way to only look for a match in the current part
    *                of the model tree.
    */

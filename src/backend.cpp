@@ -536,7 +536,7 @@ write_ampl_for_submodel
       (This could be done by using a dependency graph)
     - The declaration of the current subblock:
       - indexing 'i in ARCS' changed to 'i in ARCS_SUB'
-        this indexing is added as an extra (first) paremeter to all
+        this indexing is added as an extra (first) parameter to all
         entities declared within this block
     - all names of var/subject to/param/set entities declared within a block
       are changed to a global name by pre-pending the name of the block to

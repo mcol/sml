@@ -293,8 +293,7 @@ ModelComp::modifiedWriteAllTagged(ostream &fout)
 /* ---------------------------------------------------------------------------
 ModelComp::print()
 ---------------------------------------------------------------------------- */
-/** Print a detailed diagnostic description of this model component
- *  with the values of all its fields                                        */
+/** Print a detailed description of this model component and all its fields */
 void
 ModelComp::print() const {
   cout << "------------------------------------------------------------\n";
@@ -319,8 +318,7 @@ ModelComp::print() const {
 /* ---------------------------------------------------------------------------
 ModelComp::dump(ostream &fout)
 ---------------------------------------------------------------------------- */
-/** Print a detailed diagnostic description of this model component
- *  with the values of all its fields                                        */
+/** Print a detailed description of this model component and all its fields */
 void
 ModelComp::dump(ostream& fout) const {
   fout << "MC: ----------------------------------------------------------\n";
@@ -352,7 +350,7 @@ ModelComp::dump(ostream& fout) const {
 /* ---------------------------------------------------------------------------
 ModelComp::printBrief()
 ---------------------------------------------------------------------------- */
-/** Print a one line description of the object: type and name */
+/** Print a one line description of the object (type and name) */
 void
 ModelComp::printBrief() const {
   cout << ModelComp::nameTypes[type] << " " << id << endl;
@@ -614,7 +612,7 @@ getGlobalName(const ModelComp *node, const SyntaxNode *opn,
  from the indexing of the submodels in the tree up to this component
  This should be used in the rendering of expectation constraints
 
- I don't think this is going to work though: components might be refered to
+ I don't think this is going to work though: components might be referred to
  from below the model in which they are defined in which case some of the
  indexing is already part of the SyntaxNode structure (and different from just 
  using the submodel indexing)
@@ -622,7 +620,7 @@ getGlobalName(const ModelComp *node, const SyntaxNode *opn,
  Could get around this by making indexing dependent on the
   - model to which the comp belongs 
     (to be able to follow down submodels to get indexing expressions)
-  - model from which the component was refered to 
+  - model from which the component was referred to
     (indexing expressions between these two models are already part of
     the SyntaxNode structure)
  Indeed this is done in the old getGlobalName method.

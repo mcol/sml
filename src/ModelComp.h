@@ -94,8 +94,8 @@ class ModelComp{
  public:
 
   /** Constructor */
-  ModelComp(const std::string& id, compType type,
-            SyntaxNode *indexing, SyntaxNode *attrib);
+  ModelComp(const std::string& id_, compType type_,
+            SyntaxNode *indexing_, SyntaxNode *attrib);
 
   /** Default constructor */
   ModelComp(const std::string& id);
@@ -104,8 +104,8 @@ class ModelComp{
   virtual ~ModelComp();
 
   /** Set up an existing model comp to specified values */
-  void setTo(const std::string& id, compType type,
-             SyntaxNodeIx *indexing, SyntaxNode *attrib);
+  void setTo(const std::string& id_, compType type_,
+             SyntaxNodeIx *indexing_, SyntaxNode *attrib);
 
   /** Set up list of dependencies for this component */
   void setUpDependencies();
@@ -113,10 +113,10 @@ class ModelComp{
   /** Detailed debugging output */
   void dump(std::ostream& fout) const;
 
-  /** Print elements of the class */
+  /** Print a detailed description of this model component and all its fields */
   void print() const;
 
-  /** Print one liner */
+  /** Print a one line description of the object (type and name) */
   void printBrief() const;
 
   /** Tag this components and all its dependencies recursively */

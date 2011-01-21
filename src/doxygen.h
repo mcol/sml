@@ -415,7 +415,7 @@ From within the block all model components that were defined in the
 block and its ancestor blocks can be used in definitions. Model
 components defined in a sublock can be used by need to be accessed
 "through" the name of the subblock. That is from outside the block
-variable Flow can be refered to as
+variable Flow can be referred to as
 \code
  Net[k].Flow[j];
 \endcode

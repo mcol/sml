@@ -160,12 +160,12 @@ static void getListOfInstances(istream& file, list<string>& li);
 
 /** Recursively create an ExpandedModel tree from the flat AmplModel.
  *
- *  This method is given a location in the Expanded tree and the correspoding
+ *  This method is given a location in the Expanded tree and the corresponding
  *  node of the AmplModel tree and creates recursively the ExpandedModel 
  *  instances corresponding to it.
- *  The location in the ExpandedTree to be created is encoded in two 
- *  strings. One gives the location in the flat AmplModel tree, the other
- *  gives the instance of the node. 
+ *  The location in the ExpandedTree to be created is encoded in two strings:
+ *  -# one gives the location in the flat AmplModel tree;
+ *  -# the other gives the instance of the node.
  *
  *  @param smodelname       Name of model in flat model tree 
  *                          (this is identical to this->global_name?)
@@ -173,8 +173,8 @@ static void getListOfInstances(istream& file, list<string>& li);
  *                          Concatenating of the instances up to here:
  *       INS1_INS2... where INSn is the value of the indexing variable at
  *       the n-th level.
- *  
- *  The expanded tree is created by concatenating of strings and reading
+ *
+ *  The expanded tree is created by concatenating strings and reading
  *  the instance names of the nodes in the next level from the corresponding
  *  *.set file.
  *
@@ -477,7 +477,7 @@ AmplModel::dump(ostream& fout) const {
 /* ---------------------------------------------------------------------------
 AmplModel::check()
 ---------------------------------------------------------------------------- */
-/** Check consistency of the instance */
+/** Check instance for consistency */
 void
 AmplModel::check() const {
 
@@ -760,7 +760,7 @@ AmplModel::reassignDependencies()
 /* --------------------------------------------------------------------------
 AmplModel::findComponent(string id)
 ---------------------------------------------------------------------------- */
-/** Finds a component with name id in correct scoping order.
+/** Find a component with name id in correct scoping order.
  *
  *  It will first search this model's SymbolTable, and if it cannot find
  *  the component it will recurse to its parent node and so on up to the root.

@@ -214,7 +214,7 @@ ExpandedModel::setLocalVarInfo()
 /* --------------------------------------------------------------------------
 ExpandedModel::getLocalVarNames
 -------------------------------------------------------------------------- */
-/** Returns the names of variables local to this node.
+/** Return the names of the variables local to this node.
  *
  *  @return Names of the local variables.
  */
@@ -227,7 +227,7 @@ ExpandedModel::getLocalVarNames() const {
 /* --------------------------------------------------------------------------
 ExpandedModel::getLocalConNames
 -------------------------------------------------------------------------- */
-/** Returns the names of constraints local to this node.
+/** Return the names of the constraints local to this node.
  *
  *  @return Names of local constraints.
  */
@@ -240,7 +240,7 @@ ExpandedModel::getLocalConNames() const {
 /* --------------------------------------------------------------------------
 ExpandedModel::getNLocalVars
 -------------------------------------------------------------------------- */
-/** Returns the number of variables local to this node
+/** Return the number of variables local to this node
  *
  *  @return Number of local variables.
  */
@@ -253,7 +253,7 @@ ExpandedModel::getNLocalVars() const {
 /* --------------------------------------------------------------------------
 ExpandedModel::getNLocalCons
 -------------------------------------------------------------------------- */
-/** Returns the number of constraints local to this node.
+/** Return the number of constraints local to this node.
  *
  *  @return Number of local constraints.
  */
@@ -266,7 +266,8 @@ ExpandedModel::getNLocalCons() const {
 /* ----------------------------------------------------------------------------
 ExpandedModel::print()
 ---------------------------------------------------------------------------- */
-/** Recursively prints out the content of this node plus any of its children.
+/** Recursively print the contents of this instance and of its children.
+ *
  *  Used only for debugging.
  */
 void
@@ -307,9 +308,10 @@ ExpandedModel::print() const {
 /* ----------------------------------------------------------------------------
 ExpandedModel::getNzJacobianOfIntersection
 ---------------------------------------------------------------------------- */
-/** Returns the number of nonzeros in the Jacobian of the matrix defined
- *  by the intersection of the local constraints in this model with the
- *  local variables of another (or the same) model.
+/** Return the number of nonzeros in the Jacobian of a section of the model.
+ *
+ *  The matrix is defined by the intersection of the local constraints in
+ *  this model with the local variables of this or another model.
  *
  *  @param emcol_
  *         The model w.r.t. whose local variables the Jacobian should be
@@ -347,9 +349,10 @@ ExpandedModel::getNzJacobianOfIntersection(ExpandedModelInterface *emcol_)
 /* ----------------------------------------------------------------------------
 ExpandedModel::getJacobianOfIntersection
 ---------------------------------------------------------------------------- */
-/** Returns the Jacobian of the matrix defined by the intersection of
- *  the local constraints in this model with the local variables of
- *  another (or the same) model in sparse matrix format.
+/** Return the Jacobian of a section of the model in sparse matrix format.
+ *
+ *  The matrix is defined by the intersection of the local constraints in
+ *  this model with the local variables of this or another model.
  *
  *  @param[in] emcol_
  *             The model w.r.t. whose local variables the Jacobian should be
@@ -366,11 +369,10 @@ ExpandedModel::getJacobianOfIntersection
  *             Values of the nonzero entries.
  *
  *  @note Parameters colbeg, collen, rownbs, el are assumes to be of
- *  appropriate dimensions before the method is called. Namely
+ *  appropriate dimensions before the method is called, namely
  *  colbeg[n+1], collen[n], rownbs[nz], el[nz] (n=number of columns,
  *  nz=number nonzeros). The number of nonzeros in this section of the
- *  Jacobian can be obtained from a call to
- *  getNzJacobianInintersection.
+ *  Jacobian can be obtained from a call to getNzJacobianOfIntersection().
  */
 void 
 ExpandedModel::getJacobianOfIntersection(ExpandedModelInterface *emcol_, int *colbeg,
@@ -429,11 +431,10 @@ ExpandedModel::getRowUpBounds(double *elts) const {
 /* -------------------------------------------------------------------------
 ExpandedModel::getObjGradient
 -------------------------------------------------------------------------- */
-/** Return the gradient of the objective defined in this model with respect 
- *  to the local variables.
+/** Return the gradient of the objective defined in this model.
  * 
  *  @param[out] elts
- *              The objective gradient.
+ *              The objective gradient with respect to the local variables.
  */
 void
 ExpandedModel::getObjGradient(double *elts)
@@ -450,7 +451,7 @@ ExpandedModel::getObjGradient(double *elts)
 /* -------------------------------------------------------------------------
 ExpandedModel::getColLowBounds
 -------------------------------------------------------------------------- */
-/** Return the lower bounds of the local variables defined in this model.
+/** Return the lower bounds for the local variables defined in this model.
  * 
  *  @param[out] elts
  *              The variable lower bounds.
@@ -469,7 +470,7 @@ ExpandedModel::getColLowBounds(double *elts)
 /* -------------------------------------------------------------------------
 ExpandedModel::getColUpBounds
 -------------------------------------------------------------------------- */
-/** Return the upper bounds of the local variables defined in this model.
+/** Return the upper bounds for the local variables defined in this model.
  *
  *  @param[out] elts
  *              The variable upper bounds.
@@ -494,8 +495,7 @@ void ExpandedModel::setupNlFile(const string& name) {
 /* -------------------------------------------------------------------------
 ExpandedModel::findIxOfLocalVarsInNlFile
 -------------------------------------------------------------------------- */
-/** Find the indices of the local variables of this given model in a given 
- *  nlfile.
+/** Find the indices of the local variables of this model in a given nl file.
  *
  *  @param[in] nlf
  *             The NlFile that defines local constraints and all variables
@@ -637,7 +637,7 @@ void ExpandedModel::setDualSolRows(const double *elts) {
 /* -------------------------------------------------------------------------
 ExpandedModel::outputSolution
 -------------------------------------------------------------------------- */
-/** Outputs the solution to the supplied stream */
+/** Output the solution to the supplied stream with the given indent */
 void ExpandedModel::outputSolution(ostream &out, int indent) {
    assert(localVarInfoSet);
 

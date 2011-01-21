@@ -109,8 +109,7 @@ class SyntaxNode {
   /** Recursive printing of expression */
   std::string print() const;
 
-  /** for nodes that represent values (ID, INT_VAL, FLOAT_VAL), this returns
-      the value of this node as a c_string */
+  /** Return the value of this node as a string */
   virtual std::string getValue() const { throw std::exception(); return "(fail)"; }
 
   /** Diagnostic printing */
@@ -122,16 +121,16 @@ class SyntaxNode {
   /** Return comma separated list of arguments for IDREF nodes */
   std::string getArgumentList() const;
 
-  /** Find all IDREFs below current node */
+  /** Find all the IDREF nodes at or below the current node */
   virtual void findIDREF(std::list<ModelComp*>& lmc) const;
 
-  /** Find all IDREF nodes below current node */
+  /** Find all the IDREF nodes at or below the current node */
   virtual void findIDREF(std::list<SyntaxNode*> *lnd);
 
-  /** Find all nodes of opCode @a oc below current node */
+  /** Find all nodes of opCode @a oc at or below the current node */
   virtual void findOpCode(int oc, std::list<SyntaxNode*> *lnd);
 
-  /** Find the ModelComp (if it exists) refered to by this SyntaxNode.
+  /** Find the ModelComp (if it exists) referred to by this SyntaxNode.
    *
    *  If the expression given by this SyntaxNode is an immediate reference to
    *  a ModelComp then return that, otherwise return NULL.
@@ -140,7 +139,7 @@ class SyntaxNode {
 
   SyntaxNode &merge(const SyntaxNode &src);
 
-  /** Creates a deep_copy of the nodes: SyntaxNodes pointed to are recreated
+  /** Creates a deep copy of the nodes: SyntaxNodes pointed to are recreated
    *  as well. 
    *
    *  Non-SyntaxNode objects pointed to are not recreated, here just pointers
@@ -226,10 +225,10 @@ class SyntaxNodeIx : public SyntaxNode {
   //! Constructor
   SyntaxNodeIx(SyntaxNode *on);
 
-  //! Finds if the indexing expression defines a given dummy variable 
+  //! Find if the indexing expression defines the given dummy variable
   SyntaxNode *hasDummyVar(const std::string& name);
 
-  //! returns list of all dummy variables defined by this index'g expression 
+  //! Return the list of all dummy variables defined by this index's expression
   std::list<SyntaxNode *> getListDummyVars() const;
 
   //! Retrieve the number of indexing expressions
@@ -244,10 +243,10 @@ class SyntaxNodeIx : public SyntaxNode {
   //! Retrieve the ModelComp for the specified indexing expression
   ModelComp* getModelComp(int i) const { return sets_mc[i]; }
 
-  //! set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components 
+  //! Set up the ->sets, ->dummyVarExpr, ->ncomp, ->qualifier components
   void splitExpression();   
   
-  //! copies node and all its subnodes into new datastructures 
+  //! Copy the node and all its subnodes into new data structures
   SyntaxNodeIx *deep_copy();    
 
   //! Diagnostic printing of member variables

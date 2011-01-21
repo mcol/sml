@@ -88,7 +88,7 @@ class NlFile;
  * (identifying the particular node) of the indexing parameters). The
  * ExpandedModel object is also passed the corresponding *.nl file
  * (which provides only the local constraints, but not just the local
- * variables, but all the variables that are refered to in the local
+ * variables, but all the variables that are referred to in the local
  * constraints). The constructor then compares the (alphanumeric) list
  * of variable name stubs with the variables defined in the *.nl file
  * (from the corresponding *.col file) to generate the list of local
@@ -105,8 +105,11 @@ class ExpandedModel : public ExpandedModelInterface {
 
  private:
 
-  int nLocalVars;  //!< number of local variables
-  int nLocalCons;  //!< number of local constraints
+  //! Number of local variables
+  int nLocalVars;
+
+  //! Number of local constraints
+  int nLocalCons;
 
   /** Indicator if information on local variables (nLocalVars, listLocalVars,
    *  nLocalCons) has been obtained by comparing the localVarDef's with the
@@ -118,9 +121,9 @@ class ExpandedModel : public ExpandedModelInterface {
   double *pvar, *dvar;
   double *prow, *drow;
 
+  //! The flat model from which this expanded model was created
   AmplModel *src;
 
-  // local information:
   /** Name of the *.nl file that describes the problem data */
   std::string model_file;
 
@@ -173,41 +176,41 @@ class ExpandedModel : public ExpandedModelInterface {
   //! Destructor
   ~ExpandedModel();
 
-  //! Recursively print contents of this instance
+  //! Recursively print the contents of this instance and of its children
   void print() const;
   
-  //! Returns the number of local variables
+  //! Return the number of variables local to this node
   int getNLocalVars() const;
 
-  //! Returns the number of local constraints
+  //! Return the number of constraints local to this node
   int getNLocalCons() const;
 
-  //! Returns the names of local variables
+  //! Return the names of the variables local to this node
   const std::list<std::string>& getLocalVarNames() const;
 
-  //! Returns the names of local constraints
+  //! Return the names of the constraints local to this node
   const std::list<std::string>& getLocalConNames() const;
 
-  //! Returns the nonzeros in the Jacobian of a section of the model
+  //! Return the number of nonzeros in the Jacobian of a section of the model
   int getNzJacobianOfIntersection(ExpandedModelInterface *emcol);
 
-  //! Returns the nonzeros in the Jacobian of a section of the model
+  //! Return the Jacobian of a section of the model in sparse matrix format
   void getJacobianOfIntersection(ExpandedModelInterface *emcol, int *colbeg,
 				 int *collen, int *rownbs, double *el);
 
-  //! Returns the vector of lower bounds for the constraints in this model
+  //! Return the vector of lower bounds for the constraints in this model
   void getRowLowBounds(double *elts) const;
 
-  //! Returns the vector of upper bounds for the constraints in this model
+  //! Return the vector of upper bounds for the constraints in this model
   void getRowUpBounds(double *elts) const;
 
-  //! Returns the vector of lower bounds for the local variables in this model
+  //! Return the lower bounds for the local variables defined in this model
   void getColLowBounds(double *elts);
 
-  //! Returns the vector of upper bounds for the local variables in this model
+  //! Return the upper bounds for the local variables defined in this model
   void getColUpBounds(double *elts);
 
-  //! Returns the objective gradient for the local model w.r.t. local vars
+  //! Return the gradient of the objective defined in this model
   void getObjGradient(double *elts);
 
   //! Upload the local variable solutions
@@ -228,10 +231,10 @@ class ExpandedModel : public ExpandedModelInterface {
   //! Find the indices of the local variables of this model in a given nl file
   int findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar);
 
-  //! Returns unique name of this block
+  //! Return the unique name of this block
   std::string getName() const { return model_file; }
 
-  //! Outputs the solution to the supplied stream, at given indent
+  //! Output the solution to the supplied stream with the given indent
   void outputSolution(std::ostream &out, int indent=0);
 
   //! Append the variable to the list of local variable declarations
@@ -239,7 +242,7 @@ class ExpandedModel : public ExpandedModelInterface {
     localVarDef.push_back(name);
   }
 
-  //! Sets nLocalVar, listOfLocalVars, nLocalCons, listOfVarNames
+  //! Set nLocalVar, listOfLocalVars, nLocalCons, listOfVarNames
   void setLocalVarInfo();
 
  private:

@@ -47,7 +47,6 @@ NlFile::~NlFile() {
     delete (*it).second;
 }
 
-
 /* ===========================================================================
 methods
 ============================================================================ */
@@ -203,7 +202,7 @@ NlFile::getHessianEntries(int *colbegH, int *rownbsH, double *eltsH)
 /* ----------------------------------------------------------------------------
 getNoNonzerosAMPL
 ---------------------------------------------------------------------------- */
-/** Returns the number of nonzeros for a (vertical) slice of the
+/** Return the number of nonzeros for a (vertical) slice of the
  *  constraint matrix (Jacobian) defined in this file.
  *
  *  @param nvar
@@ -268,7 +267,7 @@ NlFile::getNoNonzerosAMPL(int nvar, const int *lvar) {
 /* ----------------------------------------------------------------------------
 fillSparseAMPL
 ---------------------------------------------------------------------------- */
-/** Returns a (vertical) slice of the constraint matrix (Jacobian)
+/** Return a (vertical) slice of the constraint matrix (Jacobian)
  *  defined in this file in (columnwise) sparse matrix format (by
  *  filling in the memory locations provided).
  *
@@ -346,7 +345,7 @@ NlFile::fillSparseAMPL(int nvar, const int *lvar,
 /* ----------------------------------------------------------------------------
 getRowLowBoundsAMPL
 ---------------------------------------------------------------------------- */
-/** Returns the constraint (row) lower bounds for the constraints
+/** Return the constraint (row) lower bounds for the constraints
  *  defined in this *.nl file.
  *
  *  @param[out] elts
@@ -383,7 +382,7 @@ NlFile::getRowLowBoundsAMPL(double *elts)
 /* ----------------------------------------------------------------------------
 getRowUpBoundsAMPL
 ---------------------------------------------------------------------------- */
-/** Returns the constraint (row) upper bounds for the constraints
+/** Return the constraint (row) upper bounds for the constraints
  *  defined in this *.nl file.
  *
  *  @param[out] elts
@@ -420,7 +419,7 @@ NlFile::getRowUpBoundsAMPL(double *elts)
 /* ----------------------------------------------------------------------------
 getObjAMPL
 ---------------------------------------------------------------------------- */
-/** Evaluates the objective gradient (linear coefficients) for a
+/** Evaluate the objective gradient (linear coefficients) for a
  *  (vertical) slice of the problem stored in the *.nl file.
  *
  *  @param[in] nvar
@@ -485,7 +484,7 @@ NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
 /* ----------------------------------------------------------------------------
 getColUpBoundsAMPL
 ---------------------------------------------------------------------------- */
-/** Returns upper variable (column) bounds for a selection of the
+/** Return upper variable (column) bounds for a selection of the
  *  variables in the *.nl file.
  *
  *  @param[in] nvar
@@ -524,11 +523,10 @@ NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
   ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 }
 
-
 /* ----------------------------------------------------------------------------
 getColLowBoundsAMPL
 ---------------------------------------------------------------------------- */
-/** Returns lower variable (column) bounds for a selection of the
+/** Return lower variable (column) bounds for a selection of the
  *  variables in the *.nl file.
  *
  *  @param[in] nvar

@@ -161,8 +161,7 @@ expandSet(SyntaxNode *set, vector<string>& member_list) {
 /* ---------------------------------------------------------------------------
 StochModel::expandStages()
 ---------------------------------------------------------------------------- */
-/** Expand the set used for the STAGES part in the sblock ... using (...)
- *  expression. 
+/** Expand the STAGES set into the actual elements to be stored in stagenames.
  *
  *  An AMPL model file and correspoding script file is created that
  *  when executed writes the components of the set to disk. This routine
@@ -178,8 +177,7 @@ StochModel::expandStages()
 /* ---------------------------------------------------------------------------
 StochModel::expandStagesOfComp()
 ---------------------------------------------------------------------------- */
-/** Expand the sets used in 'stages' qualifiers for all model components of 
- *  this model.
+/** Expand the STAGES sets of all StochModelComps in this model.
  *
  *  An AMPL model file and corresponding script file is created that
  *  when executed writes the components of the set to disk. This routine

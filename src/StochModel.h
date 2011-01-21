@@ -87,12 +87,13 @@ class StochModel: public AmplModel{
   //! Expand the STAGES set into the actual elements to be stored in stagenames
   void expandStages();
 
-  //! Expand STAGES set of all StochModelComps in this model
+  //! Expand the STAGES set of all StochModelComps in this model
   void expandStagesOfComp(); 
 
   //! Expand on AmplModel::addComp to setup stochmodel of component too
   void addComp(ModelComp *comp);
 
+  //! Retrieve the SyntaxNode corresponding to the probability term
   SyntaxNode* getProbs() const { return prob; }
 
   SyntaxNodeIDREF* find_var_ref_in_context(IDNode *ref);

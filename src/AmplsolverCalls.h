@@ -68,16 +68,24 @@ class IndexListValue {
 class NlFile {
   friend class ExpandedModel;
 
-  //! Filename of *.nl file without *.nl extension
+  /** Name of the *.nl file (without the '.nl' extension) */
   std::string nlfilename;
-  int ncol;          //!< # constraints defined in this file
-  int nrow;          //!< # variables defined in this file
-  int nzH;           //!< # Hessian nonzeros 
-  int nzA;           //!< # Jacoabian nonzeros (defined in this file)
+
+  /** Number of constraints defined in this file */
+  int ncol;
+
+  /** Number of variables defined in this file */
+  int nrow;
+
+  /** Number of nonzeros in the Hessian */
+  int nzH;
+
+  /** Number of nonzeros in the Jacobian */
+  int nzA;
 
   /** The NlFile defines constraints that span over several column
    * blocks. Typically only the intersection with one of these blocks
-   * needs to be avaluates. For this we need to know which columns in
+   * needs to be evaluated. For this we need to know which columns in
    * the NlFile belong to a given column block (given by an
    * ExpandedModel). This is stored in terms of this map: for every
    * ExpandedModel it gives an array of indices of the corresponding
@@ -100,7 +108,7 @@ class NlFile {
    * @note I am not sure if this is the correct place to store this map.
    */
   std::map<ExpandedModel*, IndexListValue*> indexList;
-  // -------------------------- methods ------------------------------------
+
  public:
 
   /** Constructor */
@@ -141,15 +149,13 @@ class NlFile {
   /** Return the number of Hessian entries defined in this *.nl file */
   int getNoHessianEntries();
 
-  /** return objective Hessian structure in this *.nl file.
+  /** Return the Hessian structure of the objective in this *.nl file.
    *  Assumes that the Hessian is constant (pass in x=0).
-   *  Only returns the Hessian of the objective.
    */
   void getHessianStructure(int *colbeg, int *rownbs);
 
-  /** return objective Hessian entries in this *.nl file.
+  /** Return the Hessian entries of the objective in this *.nl file.
    *  Assumes that the Hessian is constant (pass in x=0).
-   *  Only returns the Hessian of the objective.
    */
   void getHessianEntries(int *colbeg, int *rownbs, double *el);
 

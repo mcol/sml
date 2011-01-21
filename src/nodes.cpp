@@ -484,7 +484,7 @@ SyntaxNode::printDummyVar() const {
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<ModelComp> *lmc)
 ---------------------------------------------------------------------------- */
-/** Find the list of all the IDREF nodes at or below the current node */
+/** Find all the IDREF nodes at or below the current node */
 void
 SyntaxNode::findIDREF(list<ModelComp*>& lmc) const {
 
@@ -505,7 +505,7 @@ SyntaxNode::findIDREF(list<ModelComp*>& lmc) const {
 /* --------------------------------------------------------------------------
 SyntaxNode::findIDREF(list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
-/** Find the list of all the IDREF nodes at or below the current node */
+/** Find all the IDREF nodes at or below the current node */
 void
 SyntaxNode::findIDREF(list<SyntaxNode*> *lnd) {
 
@@ -515,7 +515,7 @@ SyntaxNode::findIDREF(list<SyntaxNode*> *lnd) {
 /* --------------------------------------------------------------------------
 SyntaxNode::findOpCode(int oc, list<SyntaxNode *> *lnd)
 ---------------------------------------------------------------------------- */
-/** Find the list of all nodes with opCode==oc at or below the current node */
+/** Find all nodes of opCode @a oc at or below the current node */
 void
 SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd) {
 
@@ -537,7 +537,7 @@ SyntaxNode::findOpCode(int oc, list<SyntaxNode*> *lnd) {
 /* --------------------------------------------------------------------------
 SyntaxNode::findModelComp()
 ---------------------------------------------------------------------------- */
-/** Find the ModelComp (if any) refered to by this SyntaxNode.
+/** Find the ModelComp (if it exists) referred to by this SyntaxNode.
  *
  *  @return The ModelComp only if the expression given by this SyntaxNode is
  *          an immediate reference to a ModelComp, otherwise NULL.
@@ -782,8 +782,7 @@ void SyntaxNodeIx::splitExpression()
 /*----------------------------------------------------------------------------
 SyntaxNodeIx::hasDummyVar
 ---------------------------------------------------------------------------- */
-/** Sees if the indexing Expression given by SyntaxNodeIx defines the 
- *  dummy variable given by name.
+/** Find if the indexing expression given defines the given dummy variable.
  *
  *  @param name
  *         The name of the dummy variable to look for.
@@ -830,7 +829,7 @@ SyntaxNode *SyntaxNodeIx::hasDummyVar(const string& name) {
 /*----------------------------------------------------------------------------
 SyntaxNodeIx::deep_copy
 ---------------------------------------------------------------------------- */
-/** Makes a recursive copy of this node that uses all new data structures.
+/** Copy the node and all its subnodes into new data structures.
  *
  *  SyntaxNodeIDREF nodes will also be duplicated, however they will point
  *  to the original ModelComp's (rather than duplicates of them).

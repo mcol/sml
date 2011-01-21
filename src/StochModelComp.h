@@ -42,21 +42,19 @@ class StochModelComp: public ModelComp {
   /* FIXME: No good idea, hides the AmplModel *model in ModelComp */
   //StochModel *model; 
 
-  /** The following field are only used for components in stochastic blocks
-   *  Usually all stochastic block components are repeated over all nodes
-   * in the scenario tree:
-   * A deterministic component only varies over stages, not over nodes */
-  bool is_deterministic;  //!< if component is deterministic
+  //! Whether the stochastic component is deterministic.
+  //!
+  //! By default all stochastic block components are repeated over all nodes
+  //! in the scenario tree: a deterministic component only varies over stages.
+  bool is_deterministic;
 
-  /** Set of stages in which component is present.
-   *  stageset is a SyntaxNode giving a set expression to be expanded by AMPL */
+  //! Set of stages in which component is present
   SyntaxNode *stageset;
 
-  /** List of stages in which this component is present.
-   *  stagenames is the expanded list of stage set members. */
+  //! List of stages in which this component is present
   std::vector<std::string> stagenames;
 
-  /** StochModel that this belongs to */
+  //! StochModel this component belongs to
   StochModel *stochmodel;
 
  public:

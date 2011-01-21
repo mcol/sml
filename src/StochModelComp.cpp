@@ -145,7 +145,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
     }
     ModelComp *mc = onr->ref;
     if (mc->model==thissm){
-      // ok, component refered to belongs to StochModel
+      // ok, component referred to belongs to StochModel
       // => change change the ->ref of this SyntaxNodeIDREF to point to
       //    a model comp in the ModelComp model
 
