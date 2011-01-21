@@ -29,7 +29,7 @@
 
 using namespace std;
 
-static const int MAX_NESTED_LEVELS = 5;
+static const int MAX_NESTED_BLOCKS = 5;
 
 static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
@@ -561,7 +561,7 @@ void modified_write(ostream &fout, ModelComp *comp);
 void
 write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
 {
-  AmplModel *listam[MAX_NESTED_LEVELS];
+  AmplModel *listam[MAX_NESTED_BLOCKS];
   int level;
   
   SyntaxNode::use_global_names = 1;
@@ -582,9 +582,12 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
     level = 0;
     while(tmp->parent){
       tmp = tmp->parent;
-      level++;
+      if (++level == MAX_NESTED_BLOCKS) {
+        cerr << "ERROR: Exceeded the maximum number of nested blocks "
+             << "(currently set at " << MAX_NESTED_BLOCKS << ").\n";
+        exit(1);
+      }
       listam[level] = tmp;
-      assert(level < MAX_NESTED_LEVELS);
     }
   }
   if (GlobalVariables::prtLvl>1){
