@@ -418,6 +418,7 @@ process_model(AmplModel *model, const string& datafilename) {
       cout << "Write to model file: " << filename << endl;
     write_ampl_for_submodel(fout, *mli);
     fout.close();
+    free(anc_list);
   }
 
   fscript.close();
