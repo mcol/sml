@@ -1,3 +1,7 @@
+2011-01-21  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Removed the calls to write_columnfile_for_submodel() that generated the
+    .acl files since they were not used.
+
 2011-01-20  Marco Colombo  <m.colombo@ed.ac.uk>
   * Improved the readability of the generated ampl models.
   * Fixed a bug for which the expressions in the Exp() where not properly

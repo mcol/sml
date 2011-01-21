@@ -35,7 +35,6 @@ static bool prt_modwrite = false;
 //produces: "Modified write (wealth), level=2, l_addIndex=2"
 
 static void write_ampl_for_submodel(ostream& fout, AmplModel *submodel);
-static void write_columnfile_for_submodel(ostream &fout, AmplModel *submodel);
 
 /* Stack of indexing expressions that are applicable to all variables that
    are printed:
@@ -419,14 +418,6 @@ process_model(AmplModel *model, const string& datafilename) {
       cout << "Write to model file: " << filename << endl;
     write_ampl_for_submodel(fout, *mli);
     fout.close();
-
-    /* FIXME: this looks redundant */
-    /* and also write the column file for this submodel */
-    filename.replace(filename.find(".mod"), 4, ".acl");
-    fout.open(filename.c_str());
-    write_columnfile_for_submodel(fout, *mli);
-    fout.close();
-    free(anc_list);
   }
 
   fscript.close();
@@ -800,6 +791,7 @@ write_ampl_for_submodel_(ostream& fout, int thislevel, int sublevel,
   }
 }
 
+#ifdef REDUNTANT_WAS_USED_FOR_ACL_FILES
 /* --------------------------------------------------------------------------
 write_columnfile_for_submodel
 --------------------------------------------------------------------------- */
@@ -830,6 +822,7 @@ write_columnfile_for_submodel(ostream &fout, AmplModel *submodel)
     }
   }
 }
+#endif /* REDUNDANT_WAS_USED_FOR_ACL_FILES */
 
 /* ---------------------------------------------------------------------------
 modified_write
@@ -862,11 +855,9 @@ modified_write
  *   => the argument list version of ModelComp::getGlobalName is called)  
  */
 void
-modified_write(ostream &fout, ModelComp *comp)
-{
-  int i;
+modified_write(ostream& fout, ModelComp *comp) {
+
   SyntaxNode *ixsn;
-  int c_addIndex;
 
   // we should check that the level of the model the component is attached to
   // tallies with the number of expressions on the indexing stack
@@ -880,6 +871,7 @@ modified_write(ostream &fout, ModelComp *comp)
   if (prt_modwrite)
     cout << "Modified write (" << comp->id << "), level=" << level << 
       ", l_addIndex=" << l_addIndex.size() << "\n";
+  assert(level <= l_addIndex.size());
 
   if (comp->type!=TMODEL){
     int first=1;
@@ -887,16 +879,16 @@ modified_write(ostream &fout, ModelComp *comp)
     fout << ModelComp::compTypes[comp->type] << " ";
     
     // find number of indexing expressions on stack
-    c_addIndex = 0;
-    for(i=0;i<level;i++){
+    int c_addIndex = 0;
+    for (int i = 0; i < level; ++i)
       c_addIndex += l_addIndex[i].size();
-    }
+
     /* write name and indexing expression */
     fout << getGlobalName(comp, NULL, NULL, NOARG);
     if (c_addIndex>0 || comp->indexing)
       fout << "{";
     /* write out the additional indices */
-    for(i=0;i<level;i++){
+    for (int i = 0; i < level; ++i) {
       list<add_index>& li = l_addIndex.at(i);
       for (list<add_index>::iterator p = li.begin(); p != li.end(); p++) {
         add_index ix = *p;
