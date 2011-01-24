@@ -45,6 +45,7 @@ class IndexListValue {
 
 // Forward declaration to avoid including asl_pfgh.h here
 class ASL_pfgh;
+class ASL;
 
 /** @class NlFile 
  *  This object represents a *.nl file: it is associated with
@@ -81,6 +82,9 @@ class NlFile {
 
   /** The structure used in reading the *.nl file with pfgh_read() */
   ASL_pfgh *asl_pfgh_ptr;
+
+  /** The structure used in reading the *.nl file with f_read() */
+  ASL *asl_ptr;
 
   /** The NlFile defines constraints that span over several column
    * blocks. Typically only the intersection with one of these blocks
@@ -123,6 +127,9 @@ class NlFile {
 
   /** Open the *.nl file and read it with pfgh_read() */
   void readNlFile();
+
+  /** Open the *.nl file and read it with f_read() */
+  void readNlFile_f();
 
   int getNoNonzerosAMPL(int nvar, const int *lvar);
 

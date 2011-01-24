@@ -33,6 +33,7 @@ NlFile::NlFile(const string& name) :
   nzH(-1),
   nzA(-1) {
   asl_pfgh_ptr = (ASL_pfgh*) ASL_alloc(ASL_read_pfgh);
+  asl_ptr = NULL;
   readNlFile();
 }
 
@@ -40,6 +41,11 @@ NlFile::NlFile(const string& name) :
 NlFile::~NlFile() {
 
   ASL_free((ASL**) &asl_pfgh_ptr);
+  if (asl_ptr) {
+    ASL *asl = asl_ptr;
+    free(A_vals);
+    ASL_free(&asl_ptr);
+  }
 
   map<ExpandedModel*, IndexListValue*>::iterator it;
   for (it = indexList.begin(); it != indexList.end(); ++it)
@@ -149,6 +155,31 @@ NlFile::getHessianEntries(int *colbegH, int *rownbsH, double *eltsH)
   //        and pass a pointer back to the caller.
 }
 
+void
+NlFile::readNlFile_f() {
+
+  ASL *asl = asl_ptr = ASL_alloc(ASL_read_f);
+  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
+  if (nl == NULL) {
+    printf("File not found %s\n", nlfilename.c_str());
+    exit(1);
+  }
+
+  // FIXME: The convenient column-wise data access is only available for the
+  // LP reader ASL_read_f. For ASL_read_pfgh this results in a segmentation
+  // fault due to Cgrad not being allocated (Cgrad is not allocated when
+  // A_vals is set). Will f_read fall over for a QP problem? In that case we
+  // need to rewrite this using the cgrad structures.
+
+  // to say we want column-wise representation
+  A_vals = (real*) Malloc(nzc * sizeof(real));
+
+  int err = f_read(nl, ASL_return_read_err);
+  if (err != 0) {
+    printf("pfgh_read returns error code %d\n", err);
+    exit(1);
+  }
+}
 
 /* ----------------------------------------------------------------------------
 getNoNonzerosAMPL
@@ -169,33 +200,13 @@ getNoNonzerosAMPL
 int 
 NlFile::getNoNonzerosAMPL(int nvar, const int *lvar) {
 
-  /* FIXME: the convenient column wise data access is only available for
-            the LP reader ASL_read_f. For ASL_read_pfgh this results in 
-	    a segmentation fault due to Cgrad not being allocated.
-	    (Cgrad is not allocated when A_vals is set). 
-	    f_read might fall over for a QP problem? In that case we
-	    need to rewrite this using the cgrad structures               */
-  ASL *asl = ASL_alloc(ASL_read_f);
-  int tt_nz;
-  
   if(log_NL) printf("NlFile::getNoNz   : (%-30s): ",nlfilename.c_str());
-  FILE *nl0 = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl0==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  A_vals = (real *)Malloc(nzc*sizeof(real)); // to say we want columnwise
-                                             // representation
-  //int err = pfgh_read(nl, ASL_return_read_err);
-  int err = f_read(nl0, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  free(A_vals);
 
-  tt_nz = 0;
+  if (!asl_ptr)
+    readNlFile_f();
+  ASL *asl = asl_ptr;
+
+  int tt_nz = 0;
   for(int i=0;i<nvar;i++){
     int col = lvar[i];
     // col==-1 indicates that this column is not present in the AMPL file
@@ -203,7 +214,6 @@ NlFile::getNoNonzerosAMPL(int nvar, const int *lvar) {
       tt_nz += A_colstarts[col+1]-A_colstarts[col];
   }
 
-  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
   if (tt_nz<0){
     printf("getNoNozerosAMPL returns tt_nz = %d\n",tt_nz);
     exit(1);
@@ -241,32 +251,13 @@ void
 NlFile::fillSparseAMPL(int nvar, const int *lvar,
 		       int *colbeg, int *collen, int *rownbs, double *el) {
 
-  /* FIXME: the convenient column wise data access is only available for
-            the LP reader ASL_read_f. For ASL_read_pfgh this results in 
-	    a segmentation fault due to Cgrad not being allocated.
-	    (Cgrad is not allocated when A_vals is set). 
-	    f_read might fall over for a QP problem? In that case we
-	    need to rewrite this using the cgrad structures               */
-  ASL *asl = ASL_alloc(ASL_read_f);
-  int tt_nz;
-  
   if(log_NL) printf("NlFile::fillSparse: (%s)\n",nlfilename.c_str());
-  FILE *nl0 = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl0==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  A_vals = (real *)Malloc(nzc*sizeof(real)); // to say we want columnwise
-                                             // representation
-  int err = f_read(nl0, ASL_return_read_err);
-  //int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
-  tt_nz = 0;
+
+  if (!asl_ptr)
+    readNlFile_f();
+  ASL *asl = asl_ptr;
+
+  int tt_nz = 0;
   for(int i=0;i<nvar;i++){
     int col = lvar[i];
     if (col==-1){
@@ -284,8 +275,6 @@ NlFile::fillSparseAMPL(int nvar, const int *lvar,
     }
   }
   colbeg[nvar] = tt_nz;
-  free(A_vals);
-  ASL_free(&asl);
 }
 
 
