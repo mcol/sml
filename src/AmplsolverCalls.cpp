@@ -14,22 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-/* the asl_pfgh.h file in amplsolver globally redefines list
-   => this is a separate file that provides all the calls to the
-      amplsolver library (and that cannot use c++ lists
-*/
 
 #include "AmplsolverCalls.h"
 #include "asl_pfgh.h"
-#include <string>
+#include <cassert>
 #include <limits>
-
-#define asl cur_ASL
+#include <string>
 
 using namespace std;
 
 const bool log_NL=false;
-
 
 /** Constructor */
 NlFile::NlFile(const string& name) :
@@ -37,10 +31,15 @@ NlFile::NlFile(const string& name) :
   ncol(-1),
   nrow(-1),
   nzH(-1),
-  nzA(-1) {}
+  nzA(-1) {
+  asl_pfgh_ptr = (ASL_pfgh*) ASL_alloc(ASL_read_pfgh);
+  readNlFile();
+}
 
 /** Destructor */
 NlFile::~NlFile() {
+
+  ASL_free((ASL**) &asl_pfgh_ptr);
 
   map<ExpandedModel*, IndexListValue*>::iterator it;
   for (it = indexList.begin(); it != indexList.end(); ++it)
@@ -51,12 +50,11 @@ NlFile::~NlFile() {
 methods
 ============================================================================ */
 void 
-NlFile::readCommonScalarValues()
-{
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
-  if(log_NL) printf("NlFile::readScalar: (%-30s): ",nlfilename.c_str());
+NlFile::readNlFile() {
+
+  if (log_NL) printf("NlFile::readNlFile: (%-30s): ", nlfilename.c_str());
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
   if (nl==NULL){
     printf("File not found %s\n",nlfilename.c_str());
@@ -73,7 +71,6 @@ NlFile::readCommonScalarValues()
   nzA = nzc;
 
   if(log_NL) printf("(%dx%d): %d nz\n",n_con, n_var,nzc);
-  ASL_free((ASL**)&asl);
 }
 
 /* ----------------------------------------------------------------------------
@@ -81,9 +78,7 @@ NlFile::getNoConstraints
 ---------------------------------------------------------------------------- */
 int
 NlFile::getNoConstraints(){
-  if (nrow>=0) return nrow;
-  
-  readCommonScalarValues();
+  assert(nrow >= 0);
   return nrow;
 }
 
@@ -92,9 +87,7 @@ NlFile::getNoVariables
 ---------------------------------------------------------------------------- */
 int
 NlFile::getNoVariables(){
-  if (ncol>=0) return ncol;
-  
-  readCommonScalarValues();
+  assert(ncol >= 0);
   return ncol;
 }
 
@@ -106,24 +99,11 @@ NlFile::getNoHessianEntries()
 {
   if (nzH>=0) return nzH;
 
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getNzHess:  (%-30s): ",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   nzH = sphsetup(/* nobj=*/0, /*ow =*/1, /*y=*/0, /*uptri=*/0); 
 
-  ASL_free((ASL**)&asl);
   if(log_NL) printf("%d\n",nzH);
   return nzH;
 }
@@ -134,21 +114,9 @@ NlFile::getHessianStructure
 void
 NlFile::getHessianStructure(int *colbegH, int *rownbsH)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getHessStr: (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   nzH = sphsetup(/* nobj=*/0, /*ow =*/1, /*y=*/0, /*uptri=*/0); 
   // this should have setup the sputinfo fields
 
@@ -158,8 +126,6 @@ NlFile::getHessianStructure(int *colbegH, int *rownbsH)
   //        call to ASL_free. If we have te asl pointer part of the
   //        class, then we can just keep this information in memory
   //        and pass a pointer back to the caller.
-
-  ASL_free((ASL**)&asl);
 }
 
 /* ----------------------------------------------------------------------------
@@ -168,34 +134,19 @@ NlFile::getHessianEntries
 void
 NlFile::getHessianEntries(int *colbegH, int *rownbsH, double *eltsH)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getHessian: (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   nzH = sphsetup(/* nobj=*/0, /*ow =*/1, /*y=*/0, /*uptri=*/0); 
   // this should have setup the sputinfo fields
   sphes(eltsH, /*nobj=*/0, NULL, NULL); 
 
   for(int i=0;i<=ncol;i++) colbegH[i] = sputinfo->hcolstarts[i];
   for(int i=0;i<nzH;i++) rownbsH[i] = sputinfo->hrownos[i];
-
   // FIXME: need to copy these since sputinfo will be deallocated by the
   //        call to ASL_free. If we have te asl pointer part of the
   //        class, then we can just keep this information in memory
   //        and pass a pointer back to the caller.
-
-  ASL_free((ASL**)&asl);
 }
 
 
@@ -224,14 +175,12 @@ NlFile::getNoNonzerosAMPL(int nvar, const int *lvar) {
 	    (Cgrad is not allocated when A_vals is set). 
 	    f_read might fall over for a QP problem? In that case we
 	    need to rewrite this using the cgrad structures               */
-
-  //ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   ASL *asl = ASL_alloc(ASL_read_f);
   int tt_nz;
   
   if(log_NL) printf("NlFile::getNoNz   : (%-30s): ",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
+  FILE *nl0 = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
+  if (nl0==NULL){
     printf("File not found %s\n",nlfilename.c_str());
     exit(1);
   }
@@ -239,7 +188,7 @@ NlFile::getNoNonzerosAMPL(int nvar, const int *lvar) {
   A_vals = (real *)Malloc(nzc*sizeof(real)); // to say we want columnwise
                                              // representation
   //int err = pfgh_read(nl, ASL_return_read_err);
-  int err = f_read(nl, ASL_return_read_err);
+  int err = f_read(nl0, ASL_return_read_err);
   if (err!=0){
     printf("pfgh_read returns err=%d\n",err);
     exit(1);
@@ -298,21 +247,19 @@ NlFile::fillSparseAMPL(int nvar, const int *lvar,
 	    (Cgrad is not allocated when A_vals is set). 
 	    f_read might fall over for a QP problem? In that case we
 	    need to rewrite this using the cgrad structures               */
-
-  //ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
   ASL *asl = ASL_alloc(ASL_read_f);
   int tt_nz;
   
   if(log_NL) printf("NlFile::fillSparse: (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
+  FILE *nl0 = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
+  if (nl0==NULL){
     printf("File not found %s\n",nlfilename.c_str());
     exit(1);
   }
   
   A_vals = (real *)Malloc(nzc*sizeof(real)); // to say we want columnwise
                                              // representation
-  int err = f_read(nl, ASL_return_read_err);
+  int err = f_read(nl0, ASL_return_read_err);
   //int err = pfgh_read(nl, ASL_return_read_err);
   if (err!=0){
     printf("pfgh_read returns err=%d\n",err);
@@ -354,29 +301,14 @@ getRowLowBoundsAMPL
 void 
 NlFile::getRowLowBoundsAMPL(double *elts)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   for(int i=0;i<n_con; i++){
     elts[i] = LUrhs[2*i];
     if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
     if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
-  
-  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 }
 
 /* ----------------------------------------------------------------------------
@@ -391,29 +323,14 @@ getRowUpBoundsAMPL
 void 
 NlFile::getRowUpBoundsAMPL(double *elts)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   for(int i=0;i<n_con; i++){
     elts[i] = LUrhs[2*i+1];
     if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
     if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
-  
-  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 }
 
 /* ----------------------------------------------------------------------------
@@ -448,22 +365,9 @@ getObjAMPL
 void 
 NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getObj    : (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   if (n_obj>1){
     real *c = (real *)Malloc(n_var*sizeof(real));
     real objsign = objtype[n_obj-2] ? -1. : 1; //set to -1 for maximise
@@ -477,8 +381,6 @@ NlFile::getObjAMPL(int nvar, int *lvar, double *elts)
     }
     free(c);
   }
-
-  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 }
 
 /* ----------------------------------------------------------------------------
@@ -497,30 +399,15 @@ getColUpBoundsAMPL
 void 
 NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   for(int i=0;i<nvar; i++){
     int ix = lvar[i];
     elts[i] = LUv[2*ix+1];
     if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
     if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
-  
-  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 }
 
 /* ----------------------------------------------------------------------------
@@ -539,30 +426,15 @@ getColLowBoundsAMPL
 void 
 NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
 {
-  ASL_pfgh *asl = (ASL_pfgh*)ASL_alloc(ASL_read_pfgh);
-  //asl = (ASL_pfgh*)ASL_alloc(ASL_read_f);
-  
   if(log_NL) printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
-  FILE *nl = jac0dim(const_cast<char*>(nlfilename.c_str()), nlfilename.size());
-  if (nl==NULL){
-    printf("File not found %s\n",nlfilename.c_str());
-    exit(1);
-  }
-  
-  int err = pfgh_read(nl, ASL_return_read_err);
-  if (err!=0){
-    printf("pfgh_read returns err=%d\n",err);
-    exit(1);
-  }
-  
+  ASL_pfgh *asl = asl_pfgh_ptr;
+
   for(int i=0;i<nvar; i++){
     int ix = lvar[i];
     elts[i] = LUv[2*ix];
     if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
     if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
   }
-  
-  ASL_free((ASL**)&asl); // FIXME: does this really free *all* the memory?
 }
 
 /* -------------------------------------------------------------------------

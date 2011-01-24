@@ -1,3 +1,8 @@
+2011-01-24  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Changed the NlFile class to store the pointer to the ASL_pfgh structure so
+    that the content of the *.nl file can be read only once (by readNlFile()
+    called from the constructor) and cached.
+
 2011-01-21  Marco Colombo  <m.colombo@ed.ac.uk>
   * Removed the calls to write_columnfile_for_submodel() that generated the
     .acl files since they were not used.

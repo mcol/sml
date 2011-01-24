@@ -43,6 +43,8 @@ class IndexListValue {
 
 };
 
+// Forward declaration to avoid including asl_pfgh.h here
+class ASL_pfgh;
 
 /** @class NlFile 
  *  This object represents a *.nl file: it is associated with
@@ -55,12 +57,6 @@ class IndexListValue {
  *  names like 'list'. This way, only this class has to avoid name
  *  clashes.
  *
- *  @attention This class only stores the filename as a
- *  reference, it therefore reopens the *.nl file every time a method
- *  is called. It would probably be better to open the file once and
- *  then keep a pointer to amplsolver's ASL structure. However it is
- *  not clear if this would work (due to global variables).
- * 
  *  @bug The Hessian routines are not tested. The interface should
  *  probably change as well (i.e. pass in a list of variables w.r.t
  *  which the Hessian should be evaluated.
@@ -82,6 +78,9 @@ class NlFile {
 
   /** Number of nonzeros in the Jacobian */
   int nzA;
+
+  /** The structure used in reading the *.nl file with pfgh_read() */
+  ASL_pfgh *asl_pfgh_ptr;
 
   /** The NlFile defines constraints that span over several column
    * blocks. Typically only the intersection with one of these blocks
@@ -122,12 +121,9 @@ class NlFile {
   /** Return the number of constraints defined in this *.nl file */
   int getNoConstraints();
 
-  /** common method that opens the *.nl file and reads the scalar values
-   *  n_con, n_var, nnz
-   *  FIXME: when the NlFile includes a pointer to asl then this methods
-   *         is redundant.
-   */
-  void readCommonScalarValues();
+  /** Open the *.nl file and read it with pfgh_read() */
+  void readNlFile();
+
   int getNoNonzerosAMPL(int nvar, const int *lvar);
 
   void fillSparseAMPL(int nvar, const int *lvar,
