@@ -287,23 +287,7 @@ ModelComp::print()
 /** Print a detailed description of this model component and all its fields */
 void
 ModelComp::print() const {
-  cout << "------------------------------------------------------------\n";
-  cout << "ModelComp: " << id << "\n";
-  cout << "  type: " << ModelComp::nameTypes[type] << "\n";
-  cout << "  attributes: " << *attributes << "\n";
-  cout << "  indexing: " << *indexing << "\n";
-  if (indexing) {
-    indexing->splitExpression();
-    indexing->printDiagnostic(cout);
-  }
-  cout << "  dependencies: " << dependencies.size() << ":\n";
-  cout << "      ";
-  for (list<ModelComp*>::const_iterator p = dependencies.begin();
-       p != dependencies.end(); ++p)
-    cout << (*p)->model->name << "::" << (*p)->id << " ";
-  cout << "  model: " << model->name<< "\n";
-  cout << "  count: " << count << "\n";
-  cout << "  tag: " << tag << "\n";
+  dump(cout);
 }
 
 /* ---------------------------------------------------------------------------
