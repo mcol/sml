@@ -198,11 +198,8 @@ class ExpandedModel : public ExpandedModelInterface {
   void getJacobianOfIntersection(ExpandedModelInterface *emcol, int *colbeg,
 				 int *collen, int *rownbs, double *el);
 
-  //! Return the vector of lower bounds for the constraints in this model
-  void getRowLowBounds(double *elts) const;
-
-  //! Return the vector of upper bounds for the constraints in this model
-  void getRowUpBounds(double *elts) const;
+  //! Return the arrays of bounds for the constraints in this model
+  void getRowBounds(double *lower, double *upper) const;
 
   //! Return the lower bounds for the local variables defined in this model
   void getColLowBounds(double *elts);

@@ -399,33 +399,20 @@ ExpandedModel::getJacobianOfIntersection(ExpandedModelInterface *emcol_, int *co
 }
 
 /* -------------------------------------------------------------------------
-ExpandedModel::getRowLowBounds
+ExpandedModel::getRowBounds
 -------------------------------------------------------------------------- */
-/** Return the vector of lower bounds for the constraints in this model.
+/** Return the upper and lower bounds for the constraints in this model.
  *
- *  @param[out] elts
+ *  @param[out] lower
  *              The lower bounds on the constraints.
- *
- *  The method is simply a wrapper around NlFile::getRowLowBoundsAMPL.
- */
-void
-ExpandedModel::getRowLowBounds(double *elts) const {
-  nlfile->getRowLowBoundsAMPL(elts);
-}
-
-/* -------------------------------------------------------------------------
-ExpandedModel::getRowUpBounds
--------------------------------------------------------------------------- */
-/** Return the vector of upper bounds for the constraints in this model.
- *
- *  @param[out] elts
+ *  @param[out] upper
  *              The upper bounds on the constraints.
  *
- *  The method is simply a wrapper around NlFile::getRowUpBoundsAMPL.
+ *  The method is simply a wrapper around NlFile::getRowBoundsAMPL().
  */
 void
-ExpandedModel::getRowUpBounds(double *elts) const {
-  nlfile->getRowUpBoundsAMPL(elts);
+ExpandedModel::getRowBounds(double *lower, double *upper) const {
+  nlfile->getRowBoundsAMPL(upper, lower);
 }
 
 /* -------------------------------------------------------------------------

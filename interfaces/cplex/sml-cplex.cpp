@@ -185,8 +185,7 @@ int createLP(CPXENVptr env, CPXLPptr lp, ExpandedModelInterface *root) {
       int nLocalCons = model->getNLocalCons();
       double lwr_bnds[nLocalCons];
       double upr_bnds[nLocalCons];
-      model->getRowLowBounds(lwr_bnds);
-      model->getRowUpBounds(upr_bnds);
+      model->getRowBounds(lwr_bnds, upr_bnds);
 
       int offset = row_offset[model->getName()];
       double *rr = rhs + offset;

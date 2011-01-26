@@ -277,48 +277,26 @@ NlFile::fillSparseAMPL(int nvar, const int *lvar,
   colbeg[nvar] = tt_nz;
 }
 
-
 /* ----------------------------------------------------------------------------
-getRowLowBoundsAMPL
+getRowBoundsAMPL
 ---------------------------------------------------------------------------- */
-/** Return the constraint (row) lower bounds for the constraints
- *  defined in this *.nl file.
+/** Return the row bounds for the constraints defined in this *.nl file.
  *
- *  @param[out] elts
- *              The row lower limits as a dense vector.
+ *  @param[out] lower
+ *              The row lower bounds as a dense array.
+ *  @param[out] upper
+ *              The row upper bounds as a dense array.
  */
-void 
-NlFile::getRowLowBoundsAMPL(double *elts)
-{
-  if(log_NL) printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
+void
+NlFile::getRowBoundsAMPL(double *lower, double *upper) const {
+
+  if (log_NL) printf("NlFile::getRowBnds: (%s)\n", nlfilename.c_str());
   ASL_pfgh *asl = asl_pfgh_ptr;
 
-  for(int i=0;i<n_con; i++){
-    elts[i] = LUrhs[2*i];
-    if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
-    if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
-  }
-}
-
-/* ----------------------------------------------------------------------------
-getRowUpBoundsAMPL
----------------------------------------------------------------------------- */
-/** Return the constraint (row) upper bounds for the constraints
- *  defined in this *.nl file.
- *
- *  @param[out] elts
- *              The row upper limits as a dense vector.
- */
-void 
-NlFile::getRowUpBoundsAMPL(double *elts)
-{
-  if(log_NL) printf("NlFile::getRhs    : (%s)\n",nlfilename.c_str());
-  ASL_pfgh *asl = asl_pfgh_ptr;
-
-  for(int i=0;i<n_con; i++){
-    elts[i] = LUrhs[2*i+1];
-    if(elts[i] == negInfinity) elts[i] = - numeric_limits<double>::infinity();
-    if(elts[i] == Infinity)    elts[i] =   numeric_limits<double>::infinity();
+  const double *elts = LUrhs;
+  for (int i = 0; i < nrow; ++i) {
+    *lower++ = *elts++;
+    *upper++ = *elts++;
   }
 }
 
@@ -388,7 +366,7 @@ getColUpBoundsAMPL
 void 
 NlFile::getColUpBoundsAMPL(int nvar, int *lvar, double *elts)
 {
-  if(log_NL) printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
+  if (log_NL) printf("NlFile::getUpBnd  : (%s)\n", nlfilename.c_str());
   ASL_pfgh *asl = asl_pfgh_ptr;
 
   for(int i=0;i<nvar; i++){
@@ -415,7 +393,7 @@ getColLowBoundsAMPL
 void 
 NlFile::getColLowBoundsAMPL(int nvar, int *lvar, double *elts)
 {
-  if(log_NL) printf("NlFile::getBnd    : (%s)\n",nlfilename.c_str());
+  if (log_NL) printf("NlFile::getLowBnd : (%s)\n", nlfilename.c_str());
   ASL_pfgh *asl = asl_pfgh_ptr;
 
   for(int i=0;i<nvar; i++){

@@ -135,8 +135,7 @@ class NlFile {
 
   void fillSparseAMPL(int nvar, const int *lvar,
 		      int *colbeg, int *collen, int *rownbs, double *el);
-  void getRowLowBoundsAMPL(double *elts);
-  void getRowUpBoundsAMPL(double *elts);
+  void getRowBoundsAMPL(double *lower, double *upper) const;
   void getObjAMPL(int nvar, int *lvar, double *elts);
   void getColLowBoundsAMPL(int nvar, int *lvar, double *elts);
   void getColUpBoundsAMPL(int nvar, int *lvar, double *elts);

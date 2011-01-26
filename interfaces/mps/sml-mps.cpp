@@ -122,8 +122,7 @@ void SML_MPS_driver(ExpandedModelInterface *root, string filename) {
       {
          double lwr_bnds[model->getNLocalCons()];
          double upr_bnds[model->getNLocalCons()];
-         model->getRowLowBounds(lwr_bnds);
-         model->getRowUpBounds(upr_bnds);
+         model->getRowBounds(lwr_bnds, upr_bnds);
          double *lb = lwr_bnds;
          double *ub = upr_bnds;
          for(int j=row_offset[model->getName()]; j<next_row; ++j,++lb,++ub) {

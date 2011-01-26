@@ -712,19 +712,13 @@ FillRhsVector(Vector *vb)
 
   Algebra *A = (Algebra*)T->nodeOfAlg; // the diagonal node that spawned this tree
   OOPSBlock *obl = (OOPSBlock*)A->id; // and its id structure
-  //NlFile *nlf = obl->emrow->nlfile;
   ExpandedModelInterface *emrow = obl->emrow;
 
   // FIXME: should the id structure include information on the ExpandedModelInterface
   //        as well? That way we could do some more sanity checks
 
-  emrow->getRowLowBounds(dense->elts);
-  emrow->getRowUpBounds(checkub);
+  emrow->getRowBounds(dense->elts, checkub);
 
-  //nlf->getRowLowBoundsAMPL(dense->elts);
-  //nlf->getRowUpBoundsAMPL(checkub);
-
-  
   // check that lower and upper constraint bounds are the same due to the 
   // OOPS restriction
   for(int i=0;i<dense->dim; i++){
