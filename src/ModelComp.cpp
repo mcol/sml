@@ -115,11 +115,11 @@ void
 ModelComp::findDependencies(const SyntaxNode* nd) {
   list<ModelComp*> lmc;
   nd->findIDREF(lmc);
-  for (list<ModelComp*>::iterator p = lmc.begin(); p != lmc.end(); ++p) {
+  list<ModelComp*>::iterator p, q;
+  for (p = lmc.begin(); p != lmc.end(); ++p) {
     // see if element already in the dependencies list
     bool found = false;
-    for (list<ModelComp*>::iterator q = dependencies.begin();
-         q != dependencies.end(); ++q)
+    for (q = dependencies.begin(); q != dependencies.end(); ++q)
       if (*p == *q) found = true;
     if (!found) {
       dependencies.push_back(*p);
@@ -136,7 +136,7 @@ ModelComp::setUpDependencies()
 
   LogMC("Analyse dependencies for " + id + "\n");
   if (indexing) {
-    LogMC(" dependencies in indexing:\n");
+    LogMC(" dependencies in indexing: " + indexing->print() + "\n");
     findDependencies(indexing);
   }
   if (attributes){
@@ -194,16 +194,7 @@ ModelComp::setTo(const string& id_, compType type_,
   /* now set up the dependency list for the component */
   //printf("Defining model component (%4d): %s\n",tt_count, id);
   this->count = tt_count++;
-  if (indexing) {
-    LogMC(" dependencies in indexing:\n");
-    findDependencies(indexing);
-  }
-  if (attrib){
-    LogMC(" dependencies in attributes: " + attrib->print() + "\n");
-    findDependencies(attrib);
-  }
-  LogMC("--------------------------------\n");
-
+  setUpDependencies();
   global_list.push_back(this);
 }
 
@@ -421,6 +412,15 @@ ModelComp::clone() const {
   return newm;
 }
 
+static int
+buildModelPath(const AmplModel *path[], const AmplModel *model) {
+  int len = 0;
+  path[len++] = model;
+  while(model = model->parent)
+    path[len++] = model;
+  return len;
+}
+
 /* ---------------------------------------------------------------------------
 getGlobalName
 ---------------------------------------------------------------------------- */
@@ -519,28 +519,14 @@ getGlobalName(const ModelComp *node, const SyntaxNode *opn,
   // ---- find the common ancestor of current_model and model of component ---
   {
     const AmplModel *path1[5], *path2[5];
-    int n_path1, n_path2;
+    int n_path1 = buildModelPath(path1, current_model);
+    int n_path2 = buildModelPath(path2, model_of_comp);
 
-    n_path1=1;n_path2=1;
-    tmp = current_model;
-    path1[0] = tmp;
-    while(tmp->parent) {
-      tmp = tmp->parent;
-      path1[n_path1] = tmp;
-      n_path1++;
-    }
-    tmp = model_of_comp;
-    path2[0] = tmp;
-    while(tmp->parent) {
-      tmp = tmp->parent;
-      path2[n_path2] = tmp;
-      n_path2++;
-    }
     /* okay the two paths are built, let's print them */
-    //printf("Path to current_model: %s:\n",current_model->name);
-    //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
-    //printf("Path to model_of_comp: %s:\n",model_of_comp->name);
-    //for(i=0;i<n_path2;i++)  printf("%d %s\n",i, path2[n_path2-1-i]->name);
+    cout << "Path to current_model: " << current_model->name << endl;
+    for(int i=0;i<n_path1;i++)  cout << i << " " << path1[n_path1-1-i]->name << endl;
+    cout << "Path to model_of_comp: " << model_of_comp->name << endl;
+    for(int i=0;i<n_path2;i++)  cout << i << " " << path2[n_path2-1-i]->name << endl;
     
     /* now go and find the last common node: 
        path[n_path-1] should be root in both cases */
@@ -720,23 +706,9 @@ getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,
   // ---- find the common ancestor of current_model and model of component ---
   {
     const AmplModel *path1[5], *path2[5];
-    int n_path1, n_path2;
+    int n_path1 = buildModelPath(path1, current_model);
+    int n_path2 = buildModelPath(path2, model_of_comp);
 
-    n_path1=1;n_path2=1;
-    tmp = current_model;
-    path1[0] = tmp;
-    while(tmp->parent) {
-      tmp = tmp->parent;
-      path1[n_path1] = tmp;
-      n_path1++;
-    }
-    tmp = model_of_comp;
-    path2[0] = tmp;
-    while(tmp->parent) {
-      tmp = tmp->parent;
-      path2[n_path2] = tmp;
-      n_path2++;
-    }
     /* okay the two paths are built, let's print them */
     //printf("Path to current_model: %s:\n",current_model->name);
     //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
@@ -769,10 +741,9 @@ getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,
           //SyntaxNode *dv = (l_addIndex[i])?l_addIndex[i]->dummyVar:NULL;
           SyntaxNode *dv = indexing_model->getDummyVarExpr(p);
           if (dv) {
-            if (n_index == 0)
-              arglist = dv->printDummyVar();
-            else
-              arglist += "," + dv->printDummyVar();
+            if (n_index > 0)
+              arglist += ",";
+            arglist += dv->printDummyVar();
             //printf("add dummy variable: %s\n",print_SyntaxNode(dv));
           }
           n_index++;
@@ -856,20 +827,18 @@ ModelComp::moveUp(int level){
 
   // get list of models from current model to root
   vector<AmplModel*> mlist;
-
   for(AmplModel *tmp=current;tmp->parent!=NULL;tmp=tmp->parent){
     mlist.push_back(tmp);
   }
 
-  list<SyntaxNode*> *idrefnodes = new list<SyntaxNode*>;
-
   // get list of all IDREF nodes in dependencies
-  if (indexing) indexing->findIDREF(idrefnodes); 
-  if (attributes) attributes->findIDREF(idrefnodes);
+  list<SyntaxNode*> idrefnodes;
+  if (indexing) indexing->findIDREF(&idrefnodes);
+  if (attributes) attributes->findIDREF(&idrefnodes);
 
   // loop over all IDREF nodes
-  for(list<SyntaxNode*>::iterator p = idrefnodes->begin();
-      p!=idrefnodes->end();p++){
+  list<SyntaxNode*>::const_iterator p;
+  for (p = idrefnodes.begin(); p != idrefnodes.end(); ++p) {
     SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
     AmplModel *am = mc->model;
@@ -900,7 +869,6 @@ ModelComp::moveUp(int level){
       }
     }
   }
-  delete idrefnodes;
 
   // and queue this item to be moved up by AmplModel::applyChanges 
   changeitem rem = {this, model, CHANGE_REM};
@@ -933,8 +901,8 @@ ModelComp::reassignDependencies()
   if (indexing) indexing->findIDREF(&idrefnodes);
   if (attributes) attributes->findIDREF(&idrefnodes);
 
-  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
-       p != idrefnodes.end(); p++){
+  list<SyntaxNode*>::const_iterator p;
+  for (p = idrefnodes.begin(); p != idrefnodes.end(); ++p) {
     SyntaxNodeIDREF *onidr = dynamic_cast<SyntaxNodeIDREF*>(*p);
     ModelComp *mc = onidr->ref;
     AmplModel *am = mc->model;
@@ -949,7 +917,6 @@ ModelComp::reassignDependencies()
           if (GlobalVariables::prtLvl>1)
             cout << "Model component " << mc->id << " referenced in "
                  << this->id << " is reassigned.\n";
-          found = true;
           onidr->ref = (*q);
         }
         newdep.push_back(*q);
