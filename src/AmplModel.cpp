@@ -284,8 +284,7 @@ AmplModel::createExpandedModel(const string& smodelname,
           int len = strlen(token);
           assert(token[len-1]==')');
           token[len-1]=0;
-          token++;
-          for(char*str=token; ;str=NULL){
+          for (char *str = token + 1; ; str = NULL) { // +1 to skip the '('
             char *tok = strtok(str, ",");
             if (tok==NULL) break;
             if (is_int(tok)){
@@ -294,8 +293,7 @@ AmplModel::createExpandedModel(const string& smodelname,
               globname += "'"+string(tok)+"',";
             }
           }
-          globname.replace(globname.size()-1,1,"");// delete last element
-          token--;
+          globname.resize(globname.size() - 1); // remove the last ','
           free(token);
         }else{
           if (is_int((*q).c_str())){
@@ -357,7 +355,6 @@ AmplModel::createExpandedModel(const string& smodelname,
       }else{
         // if this node is not repeated over an indexing set
         string subModelName = smodelname + "_" + mc->id;
-        string subModelInst;
         if(GlobalVariables::prtLvl>=1)
           cout << subModelName << ":" << sinstanceStub << endl;
         AmplModel *subampl = mc->other;
@@ -543,10 +540,7 @@ AmplModel::addDummyObjective()
 void
 AmplModel::addDummyObjective()
 {
-  ModelComp *newobj;
   vector<SyntaxNode*> list_on_sum;
-  SyntaxNode *attr;
-  ModelComp *comp;
 
   // get list of all variable declarations in the model:
   /* build up list_on_sum which is a list of all variable definitions in this
@@ -557,9 +551,9 @@ AmplModel::addDummyObjective()
           sum {dumN in SET} var[dumN]
         is added
   */
-
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    comp = *p;
+  list<ModelComp*>::iterator p;
+  for (p = comps.begin(); p != comps.end(); ++p) {
+    ModelComp *comp = *p;
     if (comp->type==TVAR){
       if (comp->indexing){
         SyntaxNodeIx *idx = comp->indexing;
@@ -603,21 +597,17 @@ AmplModel::addDummyObjective()
   // we have now built a list of SyntaxNodes representing the components:
   // build the attribute SyntaxNode as a sum of them all
   if (list_on_sum.size()>0){
-    if (list_on_sum.size()==1){
-      attr = list_on_sum[0];
-    }else{
-      attr = new OpNode('+', list_on_sum[0], list_on_sum[1]);
-      for (int i = 2; i < (int) list_on_sum.size(); ++i)
-        attr = new OpNode('+', attr, list_on_sum[i]);
-    }
-    
-    newobj = new ModelComp("dummy", TMIN, NULL, attr);
+    SyntaxNode *attr = list_on_sum[0];
+    for (unsigned int i = 1; i < list_on_sum.size(); ++i)
+      attr = new OpNode('+', attr, list_on_sum[i]);
+
+    ModelComp *newobj = new ModelComp("dummy", TMIN, NULL, attr);
     this->addComp(newobj);
   }
 
   // and recursively do this for all AmplModels below this one
-  for(list<ModelComp*>::iterator p = comps.begin();p!=comps.end();p++){
-    comp = *p;
+  for (p = comps.begin(); p != comps.end(); ++p) {
+    ModelComp *comp = *p;
     if (comp->type==TMODEL){
       // might be that we need to add the indexing expression on the stack 
       comp->other->addDummyObjective();
