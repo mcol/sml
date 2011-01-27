@@ -143,12 +143,16 @@ SML_OOPS_driver(ExpandedModelInterface *root)
 Here comes the generation with all subroutines
 =========================================================================== */
 
-Algebra *createBottom(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
-Algebra *createRhs(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
-void SMLCallBack(CallBackInterfaceType *cbi);
-Algebra *createBottomQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
-Algebra *createRhsQ(ExpandedModelInterface *diag, ExpandedModelInterface *offdiag);
-void SMLCallBackQ(CallBackInterfaceType *cbi);
+static Algebra* createBottom(ExpandedModelInterface *diag,
+                             ExpandedModelInterface *offdiag);
+static Algebra* createRhs(ExpandedModelInterface *diag,
+                          ExpandedModelInterface *offdiag);
+static Algebra* createBottomQ(ExpandedModelInterface *diag,
+                              ExpandedModelInterface *offdiag);
+static Algebra* createRhsQ(ExpandedModelInterface *diag,
+                           ExpandedModelInterface *offdiag);
+static void SMLCallBack(CallBackInterfaceType *cbi);
+static void SMLCallBackQ(CallBackInterfaceType *cbi);
 
 
 /* --------------------------------------------------------------------------
@@ -180,8 +184,6 @@ createA(ExpandedModelInterface *em)
     Alg = NewAlgebraSparse(em->getNLocalCons(), em->getNLocalVars(), 
                            (em->getName()+":"+em->getName()).c_str(),
                            (CallBackFunction)SMLCallBack, obl);
-      
-      
 
   }else{
     /* this is a complex node, set up DblBordDiag with
@@ -559,25 +561,19 @@ SMLCallBack(CallBackInterfaceType *cbi)
       int *lvar;
   */
 
-  
 
   OOPSBlock *obl = (OOPSBlock*)cbi->id;
 
   //NodeId *id = (NodeId*)cbi->id;
   if (cbi->row_nbs==NULL){
     // only want number of nonzeros back
-    //cbi->nz = obl->emrow->nlfile->getNoNonzerosAMPL(obl->nvar, obl->lvar);
     cbi->nz = obl->emrow->getNzJacobianOfIntersection(obl->emcol);
     //assert(nz==cbi->nz);
   }else{
     // want to fill in matrices
-    //obl->emrow->nlfile->fillSparseAMPL(obl->nvar, obl->lvar, cbi->col_beg,
-    //cbi->col_len, cbi->row_nbs, cbi->element);
     obl->emrow->getJacobianOfIntersection(obl->emcol, cbi->col_beg,
 		 cbi->col_len, cbi->row_nbs, cbi->element);
   }
-  
-
 }
 
 /* ---------------------------------------------------------------------------
