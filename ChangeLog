@@ -1,3 +1,13 @@
+2011-01-27  Marco Colombo  <m.colombo@ed.ac.uk>
+  * Fixed a bug in StochModelComp::transcribeToModelComp() that didn't apply
+    the probability terms to the objective function of a stochastic model
+    unless it was formulated with Exp(). By design, objectives given within 
+    stochastic models are to be interpreted as expectation, so we apply the
+    probability terms to such objectives. This corrects the alm, alm_xi and
+    newsvendor models, which before this fix needed Exp() in the objective to
+    produce the correct solution. We now report an error if Exp() is used
+    explicitly inside an objective.
+
 2011-01-24  Marco Colombo  <m.colombo@ed.ac.uk>
   * Changed the NlFile class to store the pointer to the ASL_pfgh structure so
     that the content of the *.nl file can be read only once (by readNlFile()

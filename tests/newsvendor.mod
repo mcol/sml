@@ -42,6 +42,6 @@ block sml stochastic using (nd in NODES, Parent, Probs, TIME): {
       profit = Demand[nd] * SellingPrice - initBuy * InitBuyCost - extraBuy * ExtraBuyCost;
 
     maximize Objective:
-      Exp(profit);
+      profit;
   }
 }

@@ -19,10 +19,15 @@
 #include "misc.h"
 #include "nodes.h"
 #include "sml.tab.h"
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 
 using namespace std;
+
+//! For objectives inside a stochastic block the expectation is implied,
+//! so we report an error if we use it explicitly
+#define STRICT_ERROR_FOR_EXP_INSIDE_OBJECTIVE 1
 
 static bool prtSM = false;
 
@@ -109,7 +114,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
      (3a) replace them with the values in SyntaxNode::stage and SyntaxNode::node
      (4)  find all EXP nodes in the attribute section
      (4a) replace them by path probabilities
-     //(4)  if this is an OBJ component, then add probabilities to it
+     (5)  if this is an OBJ component, then add probabilities to it
   */
   ModelComp *newmc;
   list<SyntaxNode*> idrefnodes;
@@ -201,7 +206,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       node->setName(StageNodeNode::node);
   }
 
-  // ---------- (4) add probablities to Exp components ---------------
+  // ---------- (4) add probabilities to Exp components ---------------
 
   /* Exp(..) can be used in two forms in the SML model files:
    *
@@ -261,19 +266,24 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
     if (child->getOpCode() != COMMA || child->nchild() == 1) {
 
-      // surround the argument of Exp(...) with brackets for the multiplication
-      // by the probability to apply correctly to all terms
-      SyntaxNode *up = buildPathProbTerm(level, thisam, thissm,
-                                         new SyntaxNode(LBRACKET, child));
-
       // one argument version of Exp within an objective function
       if (type==TMIN || type==TMAX){
-        (*p)->clear();
-        (*p)->push_back(up);
+
+        #if STRICT_ERROR_FOR_EXP_INSIDE_OBJECTIVE
+        // For an objective inside a stochastic block, the expectation is
+        // implied, so we report an error if we use it explicitly
+        cout << "\nERROR: Exp() used in the objective of a stochastic block!\n";
+        exit(1);
+        #endif
       }
 
       // one argument version of Exp used in constraint
       else {
+        // surround the argument of Exp() with brackets for the multiplication
+        // by the probability to apply correctly to all terms
+        SyntaxNode *up = buildPathProbTerm(level, thisam, thissm,
+                                           new SyntaxNode(LBRACKET, child));
+
         // this constraint should be moved to the top level, where it will
         // encompass all nodes that are in the current stage, like this:
         //     subject to ExpCons: 
@@ -331,6 +341,25 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
       cerr << "ERROR: Two argument version of Exp() not supported yet.\n";
       exit(1);
     }
+  }
+
+  // ---------- (5) add probabilities to the objective ---------------
+
+  if (type == TMIN || type == TMAX) {
+
+    #if STRICT_ERROR_FOR_EXP_INSIDE_OBJECTIVE
+    // we should have dealt with Exp() inside an objective above, so this
+    // assertion should never trigger
+    assert(attributes->getOpCode() != EXPECTATION);
+    #endif
+
+    // surround the objective expression with brackets for the multiplication
+    // by the probability to apply correctly to all terms
+    SyntaxNode *child = newmc->attributes->front();
+    SyntaxNode *up = buildPathProbTerm(level, thisam, thissm,
+                                       new SyntaxNode(LBRACKET, child));
+    newmc->attributes->clear();
+    newmc->attributes->push_back(up);
   }
 
   return newmc;

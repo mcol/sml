@@ -53,6 +53,6 @@ block alm stochastic using (nd in NODES, Parent, Probs, st in TIME): {
     subject to FinalWealth:
       wealth = sum{j in ASSETS} Price[j] * x_hold[j] + cash;
 
-    maximize objFunc: Exp(wealth);
+    maximize objFunc: wealth;
   }
 }
