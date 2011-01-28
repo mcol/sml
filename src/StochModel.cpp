@@ -79,8 +79,7 @@ StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *on
 
 /** Build the command to call Ampl and run it */
 static void callAmpl() {
-  string command = GlobalVariables::amplcommand;
-  command += " tmp.scr";
+  string command = GlobalVariables::amplcommand + " tmp.scr";
   if (GlobalVariables::prtLvl >= 1)
     cout << "Executing '" << command << "'\n";
   else

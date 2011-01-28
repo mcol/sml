@@ -31,7 +31,7 @@ using namespace std;
 
 /* global variables */
 string GlobalVariables::datafilename = "";
-const char *GlobalVariables::amplcommand = "ampl";
+const string GlobalVariables::amplcommand = "ampl";
 
 bool GlobalVariables::logParseModel = false;
 int GlobalVariables::prtLvl = 0;

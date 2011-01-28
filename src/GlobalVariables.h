@@ -34,7 +34,8 @@ class GlobalVariables{
   //! Name of the data file
   static std::string datafilename;
 
-  static const char *amplcommand; //!< Command for invoking ampl
+  //! Command used for invoking ampl
+  static const std::string amplcommand;
 
   /** prtLvl is 0: no printing
                 1: log: just phases and statistics for every phase
