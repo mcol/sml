@@ -507,11 +507,15 @@ getGlobalName(const ModelComp *node, const SyntaxNode *opn,
     int n_path2 = buildModelPath(path2, model_of_comp);
 
     /* okay the two paths are built, let's print them */
+    /*
     cout << "Path to current_model: " << current_model->name << endl;
-    for(int i=0;i<n_path1;i++)  cout << i << " " << path1[n_path1-1-i]->name << endl;
+    for(int i = 0; i < n_path1; ++i)
+      cout << i << " " << path1[n_path1 - 1 - i]->name << endl;
     cout << "Path to model_of_comp: " << model_of_comp->name << endl;
-    for(int i=0;i<n_path2;i++)  cout << i << " " << path2[n_path2-1-i]->name << endl;
-    
+    for (int i = 0; i < n_path2; ++i)
+      cout << i << " " << path2[n_path2 - 1 - i]->name << endl;
+    */
+
     /* now go and find the last common node: 
        path[n_path-1] should be root in both cases */
     int clvl = 0;
@@ -694,11 +698,15 @@ getGlobalNameNew(const ModelComp *node, const SyntaxNode *opn,
     int n_path2 = buildModelPath(path2, model_of_comp);
 
     /* okay the two paths are built, let's print them */
-    //printf("Path to current_model: %s:\n",current_model->name);
-    //for(i=0;i<n_path1;i++)  printf("%d %s\n",i, path1[n_path1-1-i]->name);
-    //printf("Path to model_of_comp: %s:\n",model_of_comp->name);
-    //for(i=0;i<n_path2;i++)  printf("%d %s\n",i, path2[n_path2-1-i]->name);
-    
+    /*
+    cout << "Path to current_model: " << current_model->name << endl;
+    for(int i = 0; i < n_path1; ++i)
+      cout << i << " " << path1[n_path1 - 1 - i]->name << endl;
+    cout << "Path to model_of_comp: " << model_of_comp->name << endl;
+    for (int i = 0; i < n_path2; ++i)
+      cout << i << " " << path2[n_path2 - 1 - i]->name << endl;
+    */
+
     /* now go and find the last common node: 
        path[n_path-1] should be root in both cases */
     int clvl = 0;
