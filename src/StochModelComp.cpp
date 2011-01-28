@@ -355,11 +355,10 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
     // surround the objective expression with brackets for the multiplication
     // by the probability to apply correctly to all terms
-    SyntaxNode *child = newmc->attributes->front();
+    SyntaxNode *child = newmc->attributes;
     SyntaxNode *up = buildPathProbTerm(level, thisam, thissm,
                                        new SyntaxNode(LBRACKET, child));
-    newmc->attributes->clear();
-    newmc->attributes->push_back(up);
+    newmc->attributes = up;
   }
 
   return newmc;
