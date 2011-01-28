@@ -80,7 +80,7 @@ StochModel::StochModel(SyntaxNode *onStages, SyntaxNode *onNodes, SyntaxNode *on
 /** Build the command to call Ampl and run it */
 static void callAmpl() {
   string command = GlobalVariables::amplcommand + " tmp.scr";
-  if (GlobalVariables::prtLvl >= 1)
+  if (GlobalVariables::prtLvl >= PRINT_LOG)
     cout << "Executing '" << command << "'\n";
   else
     command += " 2> /dev/null";
@@ -554,10 +554,10 @@ StochModel::expandToFlatModel()
 
   LogSM("-----------------------------------------------------------\n");
   LogSM(" StochModel::expandToFlatModel: Finished Pass 1: ");
-  if (GlobalVariables::prtLvl > 1)
+  if (GlobalVariables::prtLvl >= PRINT_INFO)
     LogSM("printing FlatModel tree:");
   LogSM("\n-----------------------------------------------------------\n");
-  if (GlobalVariables::prtLvl > 1)
+  if (GlobalVariables::prtLvl >= PRINT_INFO)
     am->print();
 
   /* =========================== PASS 2 ================================== */
@@ -573,10 +573,10 @@ StochModel::expandToFlatModel()
 
   LogSM("-----------------------------------------------------------\n");
   LogSM(" StochModel::expandToFlatModel: Finished converting: ");
-  if (GlobalVariables::prtLvl > 1)
+  if (GlobalVariables::prtLvl >= PRINT_INFO)
     LogSM("printing FlatModel tree:");
   LogSM("\n-----------------------------------------------------------\n");
-  if (GlobalVariables::prtLvl > 1) {
+  if (GlobalVariables::prtLvl >= PRINT_INFO) {
     am->print();
     LogSM("-----------------------------------------------------------\n");
   }

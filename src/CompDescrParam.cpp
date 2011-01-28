@@ -211,7 +211,7 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
     }
 
   }
-  if (GlobalVariables::prtLvl>0){
+  if (GlobalVariables::prtLvl >= PRINT_LOG) {
     cout << "Paramdef finished processing: " << mc->id << endl;
     cout << "  Read " << nread << " values, need " << n << endl;
   }

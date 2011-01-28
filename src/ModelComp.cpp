@@ -98,7 +98,7 @@ ModelComp::ModelComp(const string& id_, compType type_,
 
   this->indexing = dynamic_cast<SyntaxNodeIx*>(indexing_);
   if (indexing) (this->indexing)->splitExpression();
-  if (GlobalVariables::prtLvl>0) 
+  if (GlobalVariables::prtLvl >= PRINT_LOG) 
     cout << "Defining model component (" << this->count << "): " << id << "\n";
 
   /* now set up the dependency list for the component */
@@ -906,7 +906,7 @@ ModelComp::reassignDependencies()
       if ((*q)->id == mc->id) {
         found = true;
         if ((*q)!=mc){
-          if (GlobalVariables::prtLvl>1)
+          if (GlobalVariables::prtLvl >= PRINT_INFO)
             cout << "Model component " << mc->id << " referenced in "
                  << this->id << " is reassigned.\n";
           onidr->ref = (*q);

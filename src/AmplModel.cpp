@@ -342,7 +342,7 @@ AmplModel::createExpandedModel(const string& smodelname,
           string subModelInst;
           if (strlen(sinstanceStub.c_str())>0) subModelInst = sinstanceStub+"_";
           subModelInst += crush(*q);
-          if(GlobalVariables::prtLvl>=1)
+          if (GlobalVariables::prtLvl >= PRINT_LOG)
             cout << subModelName << ":" << subModelInst << endl;
           AmplModel *subampl = mc->other;
           ExpandedModel::pathToNodeStack.push_back(*q);
@@ -355,7 +355,7 @@ AmplModel::createExpandedModel(const string& smodelname,
       }else{
         // if this node is not repeated over an indexing set
         string subModelName = smodelname + "_" + mc->id;
-        if(GlobalVariables::prtLvl>=1)
+        if (GlobalVariables::prtLvl >= PRINT_LOG)
           cout << subModelName << ":" << sinstanceStub << endl;
         AmplModel *subampl = mc->other;
         ExpandedModel *subem = subampl->createExpandedModel(subModelName, sinstanceStub);

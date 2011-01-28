@@ -82,8 +82,6 @@ ExpandedModel::setLocalVarInfo()
   if (localVarInfoSet)
     return;
 
-  if (GlobalVariables::prtLvl>=2)
-    cout << "setLocalVarInfo(): " << model_file << endl;
   // FIXME: pretty unelegant to have to do n*m comparisons
 
   // ------- read the names of constraints defined in this NlFile ------------
@@ -131,7 +129,7 @@ ExpandedModel::setLocalVarInfo()
   fin.close();
   fin.clear(); // Recommended by Marco
   
-  if (GlobalVariables::prtLvl>=2)
+  if (GlobalVariables::prtLvl >= PRINT_VERBOSE)
     cout << "Read " << listOfConNames.size() << " lines from "
          << nlrowfile << ".\n";
 
@@ -152,7 +150,7 @@ ExpandedModel::setLocalVarInfo()
   }
   fin.close();
   
-  if (GlobalVariables::prtLvl>=2)
+  if (GlobalVariables::prtLvl >= PRINT_VERBOSE)
     cout << "Read " << colfilelist.size() << " lines from "
          << nlcolfile << ".\n";
 
@@ -163,7 +161,7 @@ ExpandedModel::setLocalVarInfo()
 
     int len = (*p).size();
     int cnt;
-    if (GlobalVariables::prtLvl >= 3)
+    if (GlobalVariables::prtLvl >= PRINT_VERBOSE)
       cout << "Trying to match variable definition " << (*p) << ":\n";
 
     for (q = colfilelist.begin(), cnt = 0; q != colfilelist.end(); ++q, ++cnt) {
@@ -182,7 +180,7 @@ ExpandedModel::setLocalVarInfo()
 
       // compare the first 'len' characters from q with p
       if ((*q).compare(0, len, *p) == 0) {
-        if (GlobalVariables::prtLvl>=3)
+        if (GlobalVariables::prtLvl >= PRINT_VERBOSE)
           cout << "  " << *q << " matches " << *p << "\n";
         listOfLocalVars.push_back(cnt);
         listOfVarNames.push_back(*q);
@@ -206,7 +204,7 @@ ExpandedModel::setLocalVarInfo()
 
   localVarInfoSet = true;
 
-  if (GlobalVariables::prtLvl>=1)
+  if (GlobalVariables::prtLvl >= PRINT_LOG)
     cout << "setLocalVarInfo(): " << model_file << " (" << nLocalCons <<
       "x" << nLocalVars << ")\n";
 }
@@ -538,10 +536,9 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
       getline(fin, line);
     }
   
-    if (GlobalVariables::prtLvl>=2){
+    if (GlobalVariables::prtLvl >= PRINT_VERBOSE)
       cout << "Read " <<  colfilelist.size() << " lines from "
            << nlcolfile << ".\n";
-    }
     
     // -------------- compare this listOfVarNames against this list
     int i=0;

@@ -19,6 +19,27 @@
 
 #include <string>
 
+/** The amount of printing required */
+enum PrintLevelValues {
+
+  //! Don't print anything
+  PRINT_NONE = 0,
+
+  //! Print phases and statistics for each phases
+  PRINT_LOG,
+
+  //! Print detailed information
+  PRINT_INFO,
+
+  //! Print debugging information verbosely
+  PRINT_VERBOSE,
+
+  //! Placeholder for the last item
+  LAST_LEVEL
+
+};
+
+
 /** @class GlobalVariables 
  *  This class provides some static global variables.
  *
@@ -37,12 +58,8 @@ class GlobalVariables{
   //! Command used for invoking ampl
   static const std::string amplcommand;
 
-  /** prtLvl is 0: no printing
-                1: log: just phases and statistics for every phase
-		2: detailed log
-		3: debugging printing
-   */
-  static int prtLvl; //!< The level of debugging printing to screen.
+  //! Level of debugging printing to screen
+  static PrintLevelValues prtLvl;
   
   static bool logParseModel; //!< Controls if the model parser should log
 };

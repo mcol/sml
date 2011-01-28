@@ -135,7 +135,7 @@ static void print_indent(ofstream& out, int k) {
 int
 process_model(AmplModel *model, const string& datafilename) {
 
-  if(GlobalVariables::prtLvl>=1)
+  if (GlobalVariables::prtLvl >= PRINT_LOG)
     cout << "-------------- start of process_model ----------------------\n";
 
   /* should be called from the root model */
@@ -150,7 +150,7 @@ process_model(AmplModel *model, const string& datafilename) {
      in the ampl file */
 
   //printf("These are the models on the list:\n");
-  if(GlobalVariables::prtLvl>=1) {
+  if (GlobalVariables::prtLvl >= PRINT_LOG) {
     int i=0;
     for(list<AmplModel*>::iterator mli=model_list.begin();mli!=model_list.end();
         ++mli,++i){
@@ -414,7 +414,7 @@ process_model(AmplModel *model, const string& datafilename) {
     /* write the submodel file */
     filename += ".mod";
     ofstream fout(filename.c_str());
-    if(GlobalVariables::prtLvl>=1)
+    if (GlobalVariables::prtLvl >= PRINT_LOG)
       cout << "Write to model file: " << filename << endl;
     write_ampl_for_submodel(fout, *mli);
     fout.close();
@@ -438,7 +438,7 @@ process_model(AmplModel *model, const string& datafilename) {
   /* 3b) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> call ampl to process script */
   {
     // call ampl to process script and analyse the output
-    if (GlobalVariables::prtLvl >= 1)
+    if (GlobalVariables::prtLvl >= PRINT_LOG)
       cout << "\nCalling AMPL to process script file... ";
 
     char buffer[256];
@@ -481,7 +481,7 @@ process_model(AmplModel *model, const string& datafilename) {
       return 1;
     }
 
-    if (GlobalVariables::prtLvl >= 1)
+    if (GlobalVariables::prtLvl >= PRINT_LOG)
       cout << "done.\n";
   }
 
@@ -559,7 +559,7 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
   SyntaxNode::use_global_names = 1;
   l_addIndex.clear();
 
-  if (GlobalVariables::prtLvl>1){
+  if (GlobalVariables::prtLvl >= PRINT_INFO) {
     cout << "==============================================================\n";
     cout << "     ampl model for part: " << submodel->name << "\n";
     cout << "==============================================================\n";
@@ -582,7 +582,7 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
       listam[level] = tmp;
     }
   }
-  if (GlobalVariables::prtLvl>1){
+  if (GlobalVariables::prtLvl >= PRINT_INFO) {
     cout << "-> this model is on level " <<  level << "\n";
     cout << "   Levels from top are: \n";
     for (int i = 0; i <= level; ++i)
@@ -599,7 +599,7 @@ write_ampl_for_submodel(ostream &fout, AmplModel *submodel)
       p!=submodel->comps.end();p++){
     (*p)->tagDependencies();
   }
-  if (GlobalVariables::prtLvl>1){
+  if (GlobalVariables::prtLvl >= PRINT_INFO) {
     cout << "processing " <<  submodel->name << "\n";
     cout << "-------> tagged now\n";
     //ModelComp::writeAllTagged();

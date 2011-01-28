@@ -265,7 +265,7 @@ void dataerror(const char *s) {
 
 void parse_data(AmplModel *current_model, const string& datafilename) {
         
-  if(GlobalVariables::prtLvl>=1) {
+  if (GlobalVariables::prtLvl >= PRINT_LOG) {
     cout << "===============================================================\n";
     cout << " Start parsing data file: " << datafilename << "\n";
     cout << "===============================================================\n";
@@ -279,7 +279,7 @@ void parse_data(AmplModel *current_model, const string& datafilename) {
   }
           
   dataparse();
-  if(GlobalVariables::prtLvl>=1) {
+  if (GlobalVariables::prtLvl >= PRINT_LOG) {
     cout << "===============================================================\n";
     cout << " Finished parsing data file\n";
     cout << "===============================================================\n";

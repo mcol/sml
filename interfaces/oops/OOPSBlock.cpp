@@ -37,7 +37,7 @@ OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *col
       - need a list of indices into the NlFile for these columns
    */
   
-  if (GlobalVariables::prtLvl>=2){
+  if (GlobalVariables::prtLvl >= PRINT_INFO) {
     cout << "-------------------------OOPS Block---------------------------\n";
     cout << "Generate OOPSBlock: col: " << colmod->getName() << 
       "/ row: " << rowmod->getName() << endl;
@@ -73,10 +73,9 @@ OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *col
     getline(fin, line);
   }
   
-  if (GlobalVariables::prtLvl>=2){
+  if (GlobalVariables::prtLvl >= PRINT_VERBOSE)
     printf("Read %d lines from file %s.col\n",colfilelist.size(),
            rowmod->getName().c_str());
-  }
 
   // -------------- compare this listOfVarNames against this list
   int i=0;
@@ -99,7 +98,7 @@ OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *col
   //printf("Col model: %s\n",colmod->getName().c_str());
   //printf("Nb_row = %d\n",ncon);
 
-  if (GlobalVariables::prtLvl>=3){
+  if (GlobalVariables::prtLvl >= PRINT_VERBOSE) {
     cout << "The NlFile declares these variables:\n"; 
     int cnt=0;
     for(list<string>::iterator p=colfilelist.begin();p!=colfilelist.end();p++){
@@ -116,10 +115,10 @@ OOPSBlock::OOPSBlock(ExpandedModelInterface *rowmod, ExpandedModelInterface *col
     }
   }
  
-  if (GlobalVariables::prtLvl>=1){
+  if (GlobalVariables::prtLvl >= PRINT_INFO)
     cout << "OOPS Block: " << rowmod->getName() << "(rw)/" <<
        colmod->getName() << "(cl): " << ncon << "x" << nvar << "\n";
-  }
+
 #endif  
 
 }

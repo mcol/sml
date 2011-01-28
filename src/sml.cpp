@@ -34,7 +34,7 @@ string GlobalVariables::datafilename = "";
 const string GlobalVariables::amplcommand = "ampl";
 
 bool GlobalVariables::logParseModel = false;
-int GlobalVariables::prtLvl = 0;
+PrintLevelValues GlobalVariables::prtLvl = PRINT_NONE;
 
 extern int yydebug;
 void parse_data(AmplModel*, const string& datafilename);
@@ -97,7 +97,8 @@ ExpandedModelInterface* sml_generate(const string& modelfilename,
 
    int errcode;
 
-   if(debug) GlobalVariables::prtLvl++;
+   if (debug)
+     GlobalVariables::prtLvl = PRINT_INFO;
 
    // ensure that the directory for temporary files exists and can be used
    errcode = createTmpDirIfNotPresent();
@@ -135,11 +136,11 @@ ExpandedModelInterface* sml_generate(const string& modelfilename,
    if (errcode)
      return NULL;
 
-   if(GlobalVariables::prtLvl>=1)
+   if (GlobalVariables::prtLvl >= PRINT_LOG)
       cout << "------------- Generate ExpandedModel tree ------------ \n";
    ExpandedModel *em = AmplModel::root->createExpandedModel("root", "");
 
-   if(GlobalVariables::prtLvl>=1)
+   if (GlobalVariables::prtLvl >= PRINT_LOG)
       em->print();
 
    return em;
