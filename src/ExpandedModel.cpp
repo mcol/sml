@@ -97,8 +97,10 @@ ExpandedModel::setLocalVarInfo()
   list<SymbolTable::Entry> objList = getObjList();
   string model_name = getName();
   bool isRoot = (model_name == "root");
-  if (!isRoot)
+  if (!isRoot) {
+    assert(model_name.compare(0, 5, "root_") == 0);
     model_name = model_name.substr(5); // skip "root_"
+  }
   while(!fin.eof()){
     string line;
     getline(fin, line);
