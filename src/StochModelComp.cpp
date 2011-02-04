@@ -40,7 +40,21 @@ StochModelComp::StochModelComp(const string& id_, compType type_,
   ModelComp(id_, type_, indexing_, attrib),
   stochmodel(stoch) {}
 
-/** Multiply the current expression by the conditional probability terms */
+/** Multiply the current expression by the conditional probability terms.
+ *
+ *  This builds a tree of OpNodes that represents the multiplication of the
+ *  current expression by the conditional probability terms to obtain the
+ *  path probability.
+ *  @param level
+ *         Level within the stochastic program block
+ *  @param thisam
+ *         AmplModel needed to get the list of dummy variables used until here
+ *  @param thissm
+ *         StochModel needed to get the name of the conditional probabilities
+ *         parameter
+ *  @param up
+ *         Current expression to be multiplied by the probabilities
+ */
 static SyntaxNode*
 buildPathProbTerm(int level, const AmplModel *thisam,
                   const StochModel *thissm, SyntaxNode *up) {
@@ -250,16 +264,6 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
   for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
        p != idrefnodes.end(); p++) {
-    // use "(*p)->..." to access the EXP-SyntaxNode
-    /* need to build a tree of OpNodes that represent
-         CP[ix0]*CP[ix1]*
-       for this we need to know
-       - level within the Stoch Program block
-       - list of dummy variable used until here
-         (can get this by following down the AmplModels)
-       - name of conditional probabilities parameter (CP)
-         (can get this from the StochModel)
-    */
 
     // (*p) is the EXPECTATION node, it should have one child
     SyntaxNode *child = (*p)->front();
