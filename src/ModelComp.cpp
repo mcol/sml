@@ -20,6 +20,7 @@
 #include "backend.h"
 #include "GlobalVariables.h" //for GlobalVariables class
 #include "nodes.h"
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 
@@ -819,9 +820,14 @@ ModelComp::moveUp(int level){
 
   // get list of models from current model to root
   vector<AmplModel*> mlist;
+  int nlevels = 0;
   for(AmplModel *tmp=current;tmp->parent!=NULL;tmp=tmp->parent){
     mlist.push_back(tmp);
+    nlevels++;
   }
+  // it's possible to move the model up by at most as many levels as there
+  // are from here to the root
+  assert(nlevels - level > 0);
 
   // get list of all IDREF nodes in dependencies
   list<SyntaxNode*> idrefnodes;
