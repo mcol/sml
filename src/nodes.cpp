@@ -621,10 +621,10 @@ SyntaxNode::getArgumentList() const
  *
  *  The items from src are prepended to this object's values.
  */
-SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
+SyntaxNode* SyntaxNode::merge(const SyntaxNode *src) {
 
    int nval = values.size();
-   int srcnval = src.nchild();
+   int srcnval = src->nchild();
    values.resize(srcnval + nval);
 
    // copy this object's values to the end
@@ -633,9 +633,9 @@ SyntaxNode &SyntaxNode::merge(const SyntaxNode &src) {
 
    // copy src's values to the beginning
    for (int i = 0; i < srcnval; ++i)
-     values[i] = src.values[i];
+     values[i] = src->values[i];
 
-   return (*this);
+   return this;
 }
 
 /* ==========================================================================

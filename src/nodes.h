@@ -137,7 +137,7 @@ class SyntaxNode {
    */
   ModelComp *findModelComp() const;
 
-  SyntaxNode &merge(const SyntaxNode &src);
+  SyntaxNode* merge(const SyntaxNode *src);
 
   /** Creates a deep copy of the nodes: SyntaxNodes pointed to are recreated
    *  as well. 

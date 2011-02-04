@@ -711,7 +711,7 @@ identifier: iditem {
                $$ = find_var_ref_in_context(local_context, $3);
 
                /* merge argument lists */
-               $$->merge(*($1));
+               $$->merge($1);
             }
           ;
 
