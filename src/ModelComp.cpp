@@ -871,9 +871,7 @@ ModelComp::moveUp(int level){
   // and queue this item to be moved up by AmplModel::applyChanges 
   changeitem rem = {this, model, CHANGE_REM};
   AmplModel::changes.push_back(rem); // Q for removal
-  for(i=0;i<level;i++){
-    model = model->parent;
-  }
+  model = mlist[level];
   changeitem add = {this, model, CHANGE_ADD};
   AmplModel::changes.push_back(add);
 }
