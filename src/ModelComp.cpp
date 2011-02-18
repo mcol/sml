@@ -116,7 +116,7 @@ void
 ModelComp::findDependencies(const SyntaxNode* nd) {
   list<ModelComp*> lmc;
   nd->findIDREF(lmc);
-  list<ModelComp*>::iterator p, q;
+  list<ModelComp*>::const_iterator p, q;
   for (p = lmc.begin(); p != lmc.end(); ++p) {
     // see if element already in the dependencies list
     bool found = false;

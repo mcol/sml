@@ -44,10 +44,10 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc)
  *         expressed in the data file.
  */
 CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
-  nix(-1),
+  nix(0),
   indices(NULL),
-  n(-1),
-  nread(-1),
+  n(1),
+  nread(0),
   values(NULL)
 {
 
@@ -78,10 +78,8 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
   if (ix){
     /* if an indexing set is given, then the parameter is a vector (matrix) */
     /* work out the dimension and cardinality of the parameter */
-    n = 1;
     nsets = ix->getNComp(); // the number of indexing sets given
     indices = new Set*[nsets];
-    nix =0;
     for (int i = 0; i < nsets; ++i) {
       indices[i] = dynamic_cast<Set*>(ix->getModelComp(i)->getValue());
       if (indices[i]==NULL){
@@ -99,11 +97,8 @@ CompDescrParam::CompDescrParam(ModelComp *mc, SyntaxNode *desc):
       nix += indices[i]->dim();
     }
   }else{ /* no indexing expression => scalar parameter */
-    nix = 0;
     nsets = 0;
-    n = 1;
   }
-  nread = 0;
 
   /* --------- 2) parse the actual parameter description ----------------- */
 

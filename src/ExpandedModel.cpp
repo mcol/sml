@@ -101,8 +101,8 @@ ExpandedModel::setLocalVarInfo()
     assert(model_name.compare(0, 5, "root_") == 0);
     model_name = model_name.substr(5); // skip "root_"
   }
+  string line;
   while(!fin.eof()){
-    string line;
     getline(fin, line);
     listOfConNames.push_back(line);
     // Trim away common characters between model name and var from varname
@@ -145,7 +145,6 @@ ExpandedModel::setLocalVarInfo()
 
   list<string> colfilelist;
   while(!fin.eof()){
-    string line;
     getline(fin, line);
     if (line.size() > 0)
       colfilelist.push_back(line);
@@ -157,7 +156,7 @@ ExpandedModel::setLocalVarInfo()
          << nlcolfile << ".\n";
 
   // -------------- compare this list against the given VarDefs
-  list<string>::iterator p, q;
+  list<string>::const_iterator p, q;
   for (p = localVarDef.begin(); p != localVarDef.end(); ++p) {
     // for all variable declarations in ExpandedModel
 
@@ -544,12 +543,12 @@ ExpandedModel::findIxOfLocalVarsInNlFile(NlFile *nlf, int *lvar) {
     
     // -------------- compare this listOfVarNames against this list
     int i=0;
-    for(list<string>::iterator p=em->listOfVarNames.begin();
-	p!=em->listOfVarNames.end();p++){
+    list<string>::const_iterator p, q;
+    for (p = em->listOfVarNames.begin(); p != em->listOfVarNames.end(); ++p) {
       // (*p) is a name of a local variable. Should see if we can find this
       // in this NlFile
       int cnt=0;
-      for(list<string>::iterator q=colfilelist.begin();q!=colfilelist.end();q++){
+      for (q = colfilelist.begin(); q != colfilelist.end(); ++q) {
 	if ((*p)==(*q)){
 	  lvar[i] = cnt;
 	  count++;  //increase number of matches

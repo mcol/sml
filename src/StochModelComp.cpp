@@ -124,14 +124,15 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
           - here xh(-1;i) or xh[i].parent(1) notation is resolved, that 
             indicates the IDREF should be resolved with respect to AmplModel 
             nodes higher up in the tree
-     (3)  find all STAGE and NODE nodes in the attribute section
-     (3a) replace them with the values in SyntaxNode::stage and SyntaxNode::node
+     (3)  find all STAGE and NODE nodes in the attribute section and replace
+          them with the values in SyntaxNode::stage and SyntaxNode::node
      (4)  find all EXP nodes in the attribute section
      (4a) replace them by path probabilities
      (5)  if this is an OBJ component, then add probabilities to it
   */
   ModelComp *newmc;
   list<SyntaxNode*> idrefnodes;
+  list<SyntaxNode*>::iterator p, q;
   StochModel *thissm = this->stochmodel;
   if (thissm==NULL){
     cerr << "ERROR: SMC.transcribeToModelComp: this->stochmodel not set.\n";
@@ -153,8 +154,7 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   // ---------- (2a) resolve IDREF nodes w.r.t AmplModel tree ----------------
 
   // loop through all IDREFs that are in dependency list
-  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
-       p != idrefnodes.end(); p++) {
+  for (p = idrefnodes.begin(); p != idrefnodes.end(); ++p) {
     // check if this is a reference within the current StochModel
     // (*p) is a SyntaxNodeIDREF
     SyntaxNodeIDREF *onr = dynamic_cast<SyntaxNodeIDREF*>(*p);
@@ -205,14 +205,11 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
   
   // find all STAGE & NODE nodes
   idrefnodes.clear();
-  if (newmc->attributes){
+  if (newmc->attributes)
     newmc->attributes->findOpCode(ID, &idrefnodes);
-  }
 
-  // ---------- (3a) and replace them by text -------------------------------
-
-  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
-       p != idrefnodes.end(); p++) {
+  // replace them by text
+  for (p = idrefnodes.begin(); p != idrefnodes.end(); ++p) {
     IDNode *node = static_cast<IDNode *>(*p);
     if (node->id() == stagedummy)
       node->setName(StageNodeNode::stage);
@@ -249,11 +246,10 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
    *              CP[ix0]*CP[ix1]*(sum{i in ASSETS}almS0_S1_S2_xh[ix0,ix1,i]));
    */
 
-  // find all STAGE & NODE nodes
+  // find all EXPECTATION nodes
   idrefnodes.clear();
-  if (newmc->attributes){
+  if (newmc->attributes)
     newmc->attributes->findOpCode(EXPECTATION, &idrefnodes);
-  }
 
   // -------- (4a) and replace them by path probabilities --------------------
   
@@ -262,10 +258,10 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
   AmplModel *thisam = current_model;
 
-  for (list<SyntaxNode*>::iterator p = idrefnodes.begin();
-       p != idrefnodes.end(); p++) {
+  for (p = idrefnodes.begin(); p != idrefnodes.end(); ++p) {
 
     // (*p) is the EXPECTATION node, it should have one child
+    assert((*p)->nchild() == 1);
     SyntaxNode *child = (*p)->front();
 
     if (child->getOpCode() != COMMA || child->nchild() == 1) {
@@ -311,10 +307,8 @@ StochModelComp::transcribeToModelComp(AmplModel *current_model,
 
         // build the comma separated list and put braces around it
         SyntaxNode *cslon = new ListNode(COMMA);
-        for(list<SyntaxNode*>::iterator q = listofsum.begin();q!=listofsum.end();
-            q++){
+        for (q = listofsum.begin(); q != listofsum.end(); ++q)
           cslon->push_back(*q);
-        }
         cslon = new SyntaxNode(LBRACE, cslon);
         
         // now build the sum
