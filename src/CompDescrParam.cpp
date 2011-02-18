@@ -240,6 +240,37 @@ CompDescrParam::toString() const {
   return str;
 }
 
+static int
+labelToSetElement(SyntaxNode *cl, const SyntaxNodeIx *ix,
+                  Set **indices, int ixcolset) {
+  IDNode *cli;
+  assert(cl->getOpCode() == ID || cl->getOpCode() == LBRACKET);
+  if (indices[ixcolset]->dim() > 1) {
+    if (cl->getOpCode() != LBRACKET) {
+      cerr << "ERROR: col_label for multidimensional set '"
+           << ix->getModelComp(ixcolset)->id
+           << "' must be a bracketed '(..,..)' expression.\n";
+      exit(1);
+    }
+    if (cl->nchild() != indices[ixcolset]->dim()) {
+      cerr << "ERROR: Number of entries in bracketed expression used as "
+           << "col_label (" << cl->nchild() << ")\n";
+      cerr << "does not match dimension (" << indices[ixcolset]->dim()
+           << ") of indexing set '" << ix->getModelComp(ixcolset)->id << "'.\n";
+      exit(1);
+    }
+    cl = cl->front(); // remove the brackets
+    assert(cl->getOpCode() == COMMA);
+    cli = (IDNode *) cl->front();
+  }
+  else {
+    // this is a set of dim 1
+    cli = (IDNode *) cl;
+  }
+
+  return indices[ixcolset]->findPos(SetElement(1, &cli));
+}
+
 /* ---------------------------------------------------------------------------
 CompDescrParam::processValueTableList
 ---------------------------------------------------------------------------- */
@@ -324,66 +355,14 @@ CompDescrParam::processValueTableList(const SyntaxNode *node,
     int jj=0;
     for(SyntaxNode::iterator j=on_collabel->begin();j!=on_collabel->end();++j,++jj){
       SyntaxNode *cl = *j;
-      assert(cl->getOpCode() == ID || cl->getOpCode() == LBRACKET);
-      // need to get reference to the first indexing set and 
-      // ask it for the position of this label
-      
-      // make the label into a SetElement
-      if (indices[ixcolset]->dim()>1){
-        if (cl->getOpCode() != LBRACKET) {
-          cerr << "ERROR: col_label for multidimensional set '"
-               << ix->getModelComp(ixcolset)->id
-               << "' must be a bracketed '(..,..)' expression.\n";
-          exit(1);
-        }
-        if (cl->nchild()!=indices[ixcolset]->dim()){
-          cerr << "ERROR: Number of entries in bracketed expression used as "
-            "col_label (" << cl->nchild() << ")\n";
-          cerr << "does not match dimension (" << indices[ixcolset]->dim() <<
-            ") of indexing set '" << ix->getModelComp(ixcolset)->id << "'.\n";
-          exit(1);
-        }
-        cl = cl->front();
-        assert(cl->getOpCode() == COMMA);
-        IDNode *cli = (IDNode *) (*cl)[0];
-        colpos[jj] = indices[ixcolset]->findPos(SetElement(1,&cli));
-      }else{
-        // this is a set of dim 1
-        colpos[jj] = indices[ixcolset]->findPos(SetElement(1,(IDNode **) &cl));
-      }
+      colpos[jj] = labelToSetElement(cl, ix, indices, ixcolset);
     }
     
     // also do the same loop for row_labels
     for(int j=0;j<nrow;j++){
       int pos = j*(ncol+1); // get position of next row label
       SyntaxNode *rl = (*on_values)[pos];
-      assert(rl->getOpCode() == ID || rl->getOpCode() == LBRACKET);
-      // need to get reference to the first indexing set and 
-      // ask it for the position of this label
-      
-      // make the label into a SetElement
-      if (indices[ixrowset]->dim()>1){
-        if (rl->getOpCode() != LBRACKET) {
-          cerr << "ERROR: row_label for multidimensional set '"
-               << ix->getModelComp(ixrowset)->id
-               << "' must be a bracketed '(..,..)' expression.\n";
-          exit(1);
-        }
-        if (rl->nchild()!=indices[ixrowset]->dim()){
-          cerr << "ERROR: Number of entries in bracketed expression used as "
-            "row_label (" << rl->nchild() << ")\n";
-          cerr << "does not match dimension (" << indices[ixrowset]->dim() <<
-            ") of indexing set '" << ix->getModelComp(ixrowset)->id << "'.\n";
-          exit(1);
-        }
-        rl = rl->front();
-        assert(rl->getOpCode() == COMMA);
-        IDNode *rli = (IDNode *) rl->front();
-        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, &rli));
-      }else{
-        // this is a set of dim 1
-        rowpos[j] = indices[ixrowset]->findPos(SetElement(1, (IDNode**)&rl));
-      }
+      rowpos[j] = labelToSetElement(rl, ix, indices, ixrowset);
     }
     // OK, we now have the lists colpos/rowpos that tell us where the
     // elements go in values/symvalues
