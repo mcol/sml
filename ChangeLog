@@ -1,3 +1,6 @@
+2011-02-18  Marco Colombo <m.colombo@ed.ac.uk>
+  * Version 0.7.2
+
 2011-01-28  Marco Colombo  <m.colombo@ed.ac.uk>
   * Introduced the PrintLevelValues enum to control the amount of printing 
     required.
