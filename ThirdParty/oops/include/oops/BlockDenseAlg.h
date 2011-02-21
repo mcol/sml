@@ -32,7 +32,10 @@
 #ifndef BLOCKDENSEALG_H
 #define BLOCKDENSEALG_H
 
-#include "oops/Algebra.h"
+
+/* Forward declarations */
+class Algebra;
+
 
 typedef struct BlockDenseMatrix_st {
   int      nb_row;

@@ -26,15 +26,22 @@
 #ifndef ALGEBRA_H
 #define ALGEBRA_H
 
-#include "oops/Vector.h"
-#include "oops/LogiVector.h"
-#include "oops/SparseVector.h"
-#include "oops/StrSparseVector.h"
 #include "oops/ParAlgList.h"
+#include "oops/Tree.h" // FIXME: only for host_stat_type
+#include <cstdio>
 
 #ifdef WITH_MPI
 #include "oops/Delay.h"
 #endif
+
+/* Forward declarations */
+class LogiVector;
+class OopsOpt;
+class SparseVector;
+class StrSparseVector;
+class Tree;
+class Vector;
+
 
 #define MAXNAME   200
 
@@ -113,7 +120,7 @@ typedef void (*AlgScale)
 typedef void (*AlgScaleVec)
      (AlgMatrix, double*, Vector*, Vector*);
 typedef void (*AlgComputeCholesky)
-     (struct Algebra*, FILE*, Vector*, Vector*, double reginit);
+  (struct Algebra*, Vector*, Vector*, double reginit, OopsOpt *opt);
 typedef void (*AlgSolveCholesky)
      (struct Algebra*, Vector*, Vector*, FILE*);
 typedef void (*AlgSolveSparseCholesky)
@@ -180,7 +187,9 @@ typedef struct Algebra* (*AlgMakeAugmentedSystemUnsym)
      (struct Algebra*, struct Algebra*, struct Algebra*); 
 
 /** Algebra */
-typedef struct Algebra {
+class Algebra {
+
+ public:
 
   /** pointer to Matrix object, exact implementation of Matrix depends
      on the type */
@@ -531,7 +540,7 @@ typedef struct Algebra {
      All of this is now done in the replacement for FakeOutAlgebra
      that also fills in values for SparseMatrices                       */
 
-} Algebra;
+};
 
 /* The following wraps allow a call MethodAlg(A, ...) = A->Method(A, ...)
    and only execute if DoItAlg(A,x,y) == 1
@@ -558,8 +567,8 @@ SolveSparseLAlg(Algebra* A, StrSparseVector *x, StrSparseVector *y);
 /* These are always excecuted, but still do 
                                MethodAlg(A, ...) = A->Method(A, ...) */
 int 
-ComputeCholeskyAlg(Algebra* A, FILE *f, Vector *primal_reg, Vector* dual_reg,
-		   const double reginit);
+ComputeCholeskyAlg(Algebra* A, Vector *primal_reg, Vector* dual_reg,
+		   const double reginit, OopsOpt *opt);
 
 int 
 SolveLtejAlg(Algebra* A, const int j, Vector *y, FILE *f);

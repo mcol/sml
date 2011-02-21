@@ -28,7 +28,10 @@
 #ifndef BLOCKDIAGSIMPLEALG_H
 #define BLOCKDIAGSIMPLEALG_H
 
-#include "oops/Algebra.h"
+
+/* Forward declarations */
+class Algebra;
+
 
 /* BlockDiagSimpleAlgebra:
 

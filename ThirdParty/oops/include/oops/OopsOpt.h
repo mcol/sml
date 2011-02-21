@@ -17,19 +17,40 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 /**
- *  @file GlobalOpt.h
+ * @class OopsOpt.h
  * 
- *  Global options set through the OOPS control file.
+ * Global options set through the OOPS control file.
+ * These are all the options that are read in through the control variable
+ * file (oops_ct_var.dat). 
+ * 
+ * These are options that control OOPS directly (rather than any of the
+ * applications build on top of OOPS).
  *
- *  @author Andreas Grothey
+ * Options are read in from a global control variables file. If needed
+ * an Application can subclass OopsOpt and have its own parseLine routine
+ * that tries to read its own options
+ *
+ * For example an application that does warmstarting might want to parse
+ * nb_beg_cen_it itself, remember it in its own options and pass this option 
+ * on to OOPS only when appropriate (i.e. only on warmstarted problems). 
+ *
+ * The first instance of OopsOpt that calls OopsOpt::readFile is stored in the
+ * class variable OopsOpt::defOpt. This enables methods that do not explicitly
+ * get an OopsOpt parameter passed to still access the default options.
+ * (Like SparseAugMatrix::ComputeCholesky)
+ *
+ *
+ * @author Andreas Grothey
  */
 
-#ifndef GLOBALOPT_H
-#define GLOBALOPT_H
+#ifndef OOPSOPT_H
+#define OOPSOPT_H
 
 /** Structure for the options that can be set through the OOPS control file. */
-typedef struct GlobalOpt
+class OopsOpt
 {
+ public:
+  static OopsOpt *defOpt;
   /* ----------------------- General options ---------------------------- */
   /** Printing level (for those routines that implement this)
       0=errors only, 1=log/stats, 2=details, 3=all                */
@@ -43,7 +64,7 @@ typedef struct GlobalOpt
 
   /* ------------- Options governing the main IPM method ---------------- */
   /** Split the Affine-Scaling Direction into three components */
-  int get_diff_dir;
+  bool get_diff_dir;
 
   /** Number of iterations in which the split direction are used */
   int n_diff_dir;
@@ -54,16 +75,16 @@ typedef struct GlobalOpt
   /** Enforce convergence of feasibility not much later than convergence
       of optimality (LAGGING).
       i.e if err_feas > 10*err_opt =>reduce barr by 0.5 (rather than 0.1) */
-  int force_feas;
+  bool force_feas;
 
   /** Detect numerical problems: if gap & primal & dual feas < 1e-4, then
       go into near convergence mode: if gap increases, allow 2 iters to
       decrease by a factor of 2, else return current point */
-  int det_num_prob;
+  bool det_num_prob;
 
   /** Cure numerical problems: as det_num_prob, but also decrease the PushVar
       amounts by a factor of 4 */
-  int cure_num_prob;
+  bool cure_num_prob;
 
   /* Initialise vpdRegx/y vector to a value (rather than 0) 
     (this is PDREG in qnmfct)                                             */
@@ -79,23 +100,25 @@ typedef struct GlobalOpt
 
   /** Always try at least one higher-order corrector (iDir=3),
       even if Mehrotra's corrector has failed */
-  int always_hoc; 
+  bool always_hoc; 
 
-  /** Use the weighted correctors technique */
+  /** Use the weighted correctors technique for given number of steps*/
   int weighted_hoc;
+
+  /** Return all iterates encountered by the algorithm */
+  bool ret_path;
 
   /* --------------- Options affecting the Linear Algebra --------------- */
   /** Type of reordering scheme to use: 0=MMD, 1=ND (Metis) */
   int LA_reorder;
 
   /** Use Sparse Schur complement */
-  int LA_use_sparse_schur;
+  bool LA_use_sparse_schur;
 
   /* -------------- Options governing Warmstart Behaviour --------------- */
-  /* Do Warmstart at all 
-     (picked up by model building routines to save starting point and set
-     hopdm->use_start_point option) */
-  int WS_do;         
+
+  /** Use passed in starting point (i.e warmstart this instance) */
+  bool WS_use_start_point;  
 
   /** Gap of advanced starting point to return */
   double WS_gap_adv_cen;
@@ -103,15 +126,24 @@ typedef struct GlobalOpt
   /** Target mu-value of advanced starting point to return */
   double WS_target_mu;
 
-  /** Number of additional centering iterations before returning an
-      advanced point */
-  int WS_ret_adv_cen_it;
+  /** If an advanced center should be returned */
+  bool WS_ret_adv_cen;
 
   /** Number of centering iterations at beginning of IPM */
-  int WS_beg_cen_it;
+  int WS_nb_beg_cen_it;
+
+  /** Number of additional centering iterations before returning an
+      advanced point */
+  int WS_nb_adv_cen_it;
+
+  /** Number of additional centering iteration on the solution */
+  int WS_nb_end_cen_it;
+
+  /** Set if we are only interested in the advanced point */
+  bool WS_only_ret_adv;
 
   /** Use a target vector of complementarity pairs in the search directions */
-  int WS_target;
+  bool WS_target;
 
   /* --------- Options about finding the new advanced starting point ----- */
   /* adjust to new bounds: Implemented is strategy 1, which uses the old
@@ -120,11 +152,11 @@ typedef struct GlobalOpt
                                 => set starting x same distance from new bnd
                             - solution was free but is now < sqrt(mu) from bnd
                                 => set sqrt(my) away from bound              */
-  int WS_adjust_to_bnds;
+  bool WS_adjust_to_bnds;
 
   /** Adjust z to reflect the change in objective, as long as z stays 
       greater than sqrt(mu)/2 */
-  int WS_adjust_z;
+  bool WS_adjust_z;
 
   /** Balance complementarity products: adjust smaller of x, z to have all
       complementarity products within [mu/WS_balance_xz, mu*WS_balance_xz] */
@@ -133,7 +165,7 @@ typedef struct GlobalOpt
 
   /* ---------- Options governing the Unblocking strategy -------------- */
   /* Do Unblocking at all */
-  int WS_unblk;
+  bool WS_unblk;
 
   /* Do unblocking in the first 'WS_n_unblk_it' iterations */
   int WS_n_unblk_it;
@@ -147,13 +179,23 @@ typedef struct GlobalOpt
   int WS_ForwardSens_TenWorst_Analyse;
   int WS_ForwardSens_TenWorst_TakeStep;
 
-}
-GlobalOpt;
+  /* ============================ methods =============================== */
 
-extern GlobalOpt *glopt;
+  /** base constructor */
+  OopsOpt();
 
-/** Read the OOPS control file. */
-GlobalOpt *
-ReadGlobalOpt(void);
+  /** Read the OOPS control file. */
+  void readFile(void);
+
+  /** parse a single line of the file. Return if option found or not */
+  bool parseLine(char *line);
+
+  void copyFrom(OopsOpt &os);
+
+  /** print Option settings to screen */
+  void print();
+};
+
+
 
 #endif

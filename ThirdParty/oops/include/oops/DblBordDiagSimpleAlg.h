@@ -28,7 +28,11 @@
 #ifndef DBLBORDDIAGSIMPLEALG_H
 #define DBLBORDDIAGSIMPLEALG_H
 
-#include "oops/Algebra.h"
+
+/* Forward declarations */
+class Algebra;
+class Tree;
+
 
 /* DblBordDiagAlgebra:
 

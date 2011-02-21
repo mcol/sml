@@ -19,8 +19,11 @@
 #ifndef WRITEMPS_H
 #define WRITEMPS_H
 
-#include "oops/Vector.h"
-#include "oops/Algebra.h"
+
+/* Forward declarations */
+class Algebra;
+class Vector;
+
 
 int
 Write_MpsFile(FILE *out, Algebra * AlgAug, Vector *rhs, Vector *obj,
@@ -29,6 +32,6 @@ Write_MpsFile(FILE *out, Algebra * AlgAug, Vector *rhs, Vector *obj,
 
 int
 WriteMps(const char *filename, Algebra *AlgAug,
-	 Vector *rhs, Vector *obj, Vector *upb);
+	 Vector *rhs, Vector *obj, Vector *upb, Vector *lob);
 
 #endif /* WRITEMPS_H */

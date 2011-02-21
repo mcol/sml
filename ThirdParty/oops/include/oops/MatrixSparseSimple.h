@@ -28,11 +28,7 @@
 #ifndef SPARSESIMPLEMATRIX_H
 #define SPARSESIMPLEMATRIX_H
 
-#include <stdlib.h>  
 #include <stdio.h>  
-#include <stdarg.h>  
-#include "oops/Vector.h"
-#include "oops/Algebra.h"
 #include "oops/CallBack.h"
 
 
@@ -54,7 +50,9 @@ typedef struct {
 } row_st;
 
 /** A SparseSimpleMatrix */
-typedef struct {
+class SparseSimpleMatrix {
+
+ public:
 
   /** Number of rows */
   int nb_row;
@@ -95,7 +93,7 @@ typedef struct {
   /** Function to call to fill in Sparse data (if deferred) */
   CallBackFunction cbf;
 
-} SparseSimpleMatrix;
+};
 
 /*========================== A useful macro  ===============================*/
 #define forall_elt(A, row_pt, col) \
@@ -148,6 +146,10 @@ PrtSparseMtxMatlab(FILE *out, SparseSimpleMatrix * A, const char *name);
 /** Add two sparse matrices, the second multiplied by the scalar f */
 void 
 AddSparseSimpleMatrix(SparseSimpleMatrix *A, SparseSimpleMatrix *B, double f);
+
+/** copy one sparse matrix to another (assumes memory is allocated) */
+void
+copySparseSimpleMatrix(SparseSimpleMatrix *from, SparseSimpleMatrix *to);
 
 #ifdef WITH_MPI
 void

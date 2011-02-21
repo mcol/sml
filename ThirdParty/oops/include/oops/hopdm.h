@@ -25,52 +25,19 @@
 #ifndef HOPDM_H
 #define HOPDM_H
 
-#include "oops/DenseVector.h"
-#include "oops/Vector.h"
-#include "oops/LogiVector.h"
-#include "oops/Algebra.h"
-#include "oops/GlobalOpt.h"
+#include <cstdio>
+
+
+/* Forward declarations */
+class Algebra;
+class LogiVector;
+class OopsOpt;
+class StatusVector;
+class Vector;
 
 
 /* temporary definitions while their usage may still exist */
-#define hopdm_opt_type HopdmOptions
 #define hopdm_prt_type PrintOptions
-#define primal_dual_pb PDProblem
-
-/**
- *  Parameters that control the behaviour of the solver.
- */
-class HopdmOptions {
-
- public:
-
-  /** Constructor */
-  HopdmOptions();
-
-  /** Destructor */
-  ~HopdmOptions();
-
-  /** Read the global options file */
-  int readGlobalOptions();
-
-  /** Use the supplied starting point */
-  int use_start_point;
-
-  /** Use Warm Start Heuristic */
-  int use_wsh;
-
-  int use_presolve;
-
-  int nb_beg_center_it;
-  int nb_end_center_it;
-  int ret_adv_center;
-  int nb_ret_adv_center_it;
-  double ret_adv_center_gap;
-  double ret_target_mu;
-  int ret_path;
-  GlobalOpt *glopt;
-
-};
 
 
 /** The amount of printing required. */
@@ -117,7 +84,7 @@ class PrintOptions {
    int PrtMakeS;
    int PrtTT;
 
- private:
+   // private:
 
   /** Set the member variables for the amount of printing required */
   void setPrintLevel(const int PrintLevel);
@@ -146,73 +113,10 @@ typedef struct {
   int found_adv_center;   /* -1: not required, 0: NO, 1:YES */
 
   /** Infeasibilities at end of solve */
-  double err_b, err_c, err_u;
+  double err_b, err_c, err_u, err_l;
   double gap;
 
 } hopdm_ret;
-
-
-/**
- *  Information on the primal-dual problem.
- */
-class PDProblem {
-
- public:
-
-  /** Constructor */
-  PDProblem(Algebra *AlgAug = NULL,
-            Vector *b = NULL, Vector *c = NULL, Vector *u = NULL,
-            Vector *x = NULL, Vector *y = NULL, Vector *z = NULL);
-
-  /** Destructor */
-  ~PDProblem();
-
-  /** Algebra */
-  Algebra *AlgAug;
-
-  /** Right-hand side vector */
-  Vector *b;
-
-  /** Objective coefficients */
-  Vector *c;
-
-  /** Upper bounds */
-  Vector *u;
-
-  /** Lower bounds */
-  Vector *l;
-
-  /** Solution vectors and vectors used for warmstart */
-      Vector *x, *cx;
-      Vector *y, *cy;
-      Vector *z, *cz;
-  /* These are only used for problems with bounds */
-      Vector *s, *cs;
-      Vector *w, *cw;
-
-  /** Average complementarity gap corresponding to advanced point,
-      also used to pass in mu of advanced starting point */
-  double adv_mu;
-
-  /** Complete primal path (if needed) */
-  Vector **path;
-
-  /** Target vector of complementarity pairs to be used for warm-start
-      (if not NULL) */
-  Vector *target;
-
-  /* Modifiers for feasibility problem */
-  /* OOPS_QP can solve an l_2 feasibility problem instead of the real 
-     problem, or put a factor on the objective. This is set by the
-     following two parameters:                                             */
-      int is_feas;
-      double obj_fact;
-  /* to check that problem has been defined by constructor                  */
-      int set_by_constr; 
-  /* for unmodified problem: is_feas=0, obj_fact = 1.0
-     for unmodified problem: is_feas=1, obj_fact = 0.0                      */
-
-};
 
 
 /**
@@ -243,13 +147,16 @@ NewInverseRep(Algebra *AlgAug, Vector *vtheta, Vector *vthetay,
  *  or a primal-dual direction.
  *  Components s, w are not used if no upper bounded variables are present.
  */
-typedef struct
-{
+class PDPoint {
+ public:
   /** x-component */
   Vector *x;
 
   /** y-component */
   Vector *y;
+
+  /** t-component */
+  Vector *t;
 
   /** z-component */
   Vector *z;
@@ -263,33 +170,49 @@ typedef struct
   /** combined xy-Vector (if needed, otherwise NULL) */
   Vector *xy;
 
-} PDPoint;
+  /* ================================================================== */
+  PDPoint(): 
+    x(NULL), y(NULL), t(NULL), z(NULL), s(NULL), w(NULL), xy(NULL)
+  {}
+  
+    PDPoint(Vector *x, Vector *y, Vector *t, Vector *z, 
+	    Vector *s=NULL, Vector *w = NULL, Vector *xy=NULL)
+      :x(x), y(y), t(t), z(z), s(s), w(w), xy(xy)
+  {}
+  
+  /** write the point to a Matlab file */  
+  void writeMatlab(FILE *mout);
+
+  /** write the point to a Matlab file */  
+  void writeMatlab(char *filename);
+};
 
 /* ----------------------------------------------------------------------------
    Stubs for OOPS functions that can be called from outside hopdm_qp.c
 ---------------------------------------------------------------------------- */
+
 void
 MaxStep(FILE *out, PDPoint *pdPoint, PDPoint *pdDir,
-	double *alphaX, double *alphaZ, double *alphaS, double *alphaW,
+	double *alphaT, double *alphaZ, double *alphaS, double *alphaW,
 	Algebra *AlgA, LogiVector *vwhere_u, LogiVector *vwhere_l, Vector *vstep,
         PrintOptions *Prt);
 
 void
 CompPDRes(FILE *out, Algebra * AlgA, Algebra *AlgQ,
-	  Vector *vb, Vector *vc, Vector *vu, PDPoint *pdPoint,
-	  Vector *vxib, Vector *vxic, Vector *vxiu,
-	  double *err_b, double *err_c, double *err_u, 
-          LogiVector *vwhere_u, PrintOptions *Prt);
+	  Vector *vb, Vector *vc, Vector *vl, Vector *vu, PDPoint *pdPoint,
+	  Vector *vxib, Vector *vxic, Vector *vxiu, Vector *vxil, 
+	  double *err_b, double *err_c, double *err_u, double *err_l, 
+          LogiVector *vwhere_l, LogiVector *vwhere_u, PrintOptions *Prt);
 
 int
-DefTheta(FILE *out, Vector *vx, Vector *vs, Vector *vz, Vector *vw,
+DefTheta(FILE *out, Vector *vt, Vector *vs, Vector *vz, Vector *vw,
          Vector *vtheta, LogiVector *vwhere_u, LogiVector *vwhere_l,
          PrintOptions *Prt);
 
 void
 pdFactor (FILE *out, Algebra *AlgAug, Vector *vtheta, Vector *vthetay, 
 	  Vector *vpdRegTh, Vector *vpdRegx, Vector *vpdRegy, 
-          PrintOptions *Prt);
+          PrintOptions *Prt, OopsOpt *opt);
 
 void
 IterRefSolveNew (FILE *out, InverseRep *ivr, int *Alarm,
@@ -302,56 +225,24 @@ IterRefSolveNew (FILE *out, InverseRep *ivr, int *Alarm,
 void
 HopdmDir(FILE *out, InverseRep *ivr, const int iDir, const int onlyCent,
 	 const double oldbarr, const double barr, double AlphaP, double AlphaD,
-	 Vector *vxib, Vector *vxic, Vector *vxiu,
+	 Vector *vxib, Vector *vxic, Vector *vxiu, Vector *vxil, 
 	 Vector *vXrhs_x, Vector *target,
 	  PDPoint *pdPoint, PDPoint *pdPredDir, PDPoint *pdNewDir,
-         LogiVector *vwhere_u, LogiVector *vwhere_l, PrintOptions *Prt,
+         LogiVector *vwhere_u, LogiVector *vwhere_l, 
+	 PrintOptions *Prt, OopsOpt *opt, 
 	 Vector *vNw1, Vector *vMw1, const double ireps);
 
-/** Solve an LP with the higher-order primal-dual method. */
-hopdm_ret*
-hopdm(FILE *out, PDProblem *P, HopdmOptions *opt, PrintOptions *Prt);
 
-hopdm_ret*
-hopdm_std(PDProblem *P, HopdmOptions *opt, PrintOptions *Prt);
-
-/** Solve an LP with the higher-order primal-dual method. */
-hopdm_ret*
-SolveOops(PDProblem* pb);
-
-/** Allocate space for a PDProblem object on the heap.
- *  @deprecated Use the PDProblem class directly instead.
- */
-PDProblem*
-NewPDProblem(Algebra *AlgAug, Vector *b, Vector *c, Vector *u,
-	     Vector *x, Vector *y, Vector *z);
-
-/** Free the space allocated for a PDProblem object on the heap.
- *  @deprecated Use the PDProblem class directly instead.
- */
-void
-FreePDProblem(PDProblem *P);
 
 /** Set up a PDPoint structure */
 PDPoint*
-NewPDPoint(Vector *x, Vector *y, Vector *z, Vector *s, Vector *w, Vector *xy);
+NewPDPoint(Vector *x, Vector *y, Vector *t, Vector *z, 
+	   Vector *s, Vector *w, Vector *xy);
 
 /** Free the space allocated for the PDPoint structure */
 void
 FreePDPoint(PDPoint *P);
 
-/** Allocate an HopdmOptions object on the heap.
- *  @deprecated Use the HopdmOptions object directly.
- */
-HopdmOptions*
-NewHopdmOptions(void);
-
-/** Free the space allocated for an HopdmOptions structure.
- *  @deprecated If the HopdmOptions object is used directly, this is not
- *              needed, the destructor will do the clean up.
- */
-void
-FreeHopdmOptions(HopdmOptions *opt);
 
 /** Allocate a PrintOptions object on the heap and set the print level.
  *  @ deprecated Use the PrintOptions object directly.

@@ -25,14 +25,16 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <cstdio>
+
 class Vector;
 typedef enum {notcomputed_proc=-3, computed_proc=-1, Contrib} CompStatus;
 typedef enum {Exact_st=-1,  NoStat=0, Contr_st=1} ContStatus; 
 
-#include "oops/Tree.h" 
-#include "oops/LogiVector.h" 
-#include "oops/DenseVector.h"
-
+/* Forward declarations*/
+class DenseVector;
+class LogiVector;
+class Tree;
 
 
 #ifdef REDUNDANT
@@ -55,7 +57,7 @@ typedef void (*KrnFctGen) (double**, int, double*);
 #define FuncToDenseVector(x,y,f) FuncToDenseVectorStatic(x, y->elts- x->node->begin, f)
 /* FIXME: can only be called for local||above nodes */
 #define FuncToDenseBcstVector(x,y,f) FuncToDenseBcstVector_(x, y->elts- x->node->begin, f)
-#define SubVector(v,i) v->subvectors[v->node->sons[i]->index]
+#define SubVector(v,i) (v?v->subvectors[v->node->sons[i]->index]:NULL)
 
 /** true if memory allocated to a node above */
 #define MEMORY_ABOVE(Node)          (Node->above != NULL)
@@ -263,6 +265,9 @@ class Vector
   /** Prints the vector *V to file out in matlab readable form: name = [...];*/
   void printMatlab(FILE *out, const char *name);
 
+  /** Read components of the vector from file */
+  void readFile(FILE *in);
+
 
 
 /* ------------ functions that need some degree of parallelism ----------- */
@@ -391,6 +396,9 @@ class Vector
   /* x=a*y+b*z where l is set */
   void setAypbzWhere(const double a, Vector *y, const double b, Vector *z,
 		     LogiVector *l);
+
+  /* x += a where l is set */
+  void addScalarWhere(const double a, LogiVector *l);
 
   /* x(i) *= f(y(i)) or x(i) *= y(i) where l is set */
   void multiplyCompwiseWhere(Vector *y, KrnFct f, LogiVector *l);

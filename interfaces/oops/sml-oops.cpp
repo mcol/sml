@@ -16,10 +16,17 @@
  */
 /* This is the OOPS driver for the Structured Modelling Language (SML) */
 
+#include "oops/Algebra.h"
+#include "oops/DenseVector.h"
 #include "oops/OopsInterface.h"
+#include "oops/OopsOpt.h"
+#include "oops/PDProblem.h"
+#include "oops/Tree.h"
+#include "oops/Vector.h"
 #include <cmath>
 #include <iostream>
 #include <cassert>
+#include <cstdlib>
 #include "OOPSBlock.h"
 #include "sml-oops.h"
 
@@ -76,7 +83,7 @@ SML_OOPS_driver(ExpandedModelInterface *root)
                 )
   printout = stdout;
   
-  HopdmOptions Opt;
+  OopsOpt Opt;
 
   Algebra *A = createA(root);
   Algebra *Q = createQ(root);
@@ -122,8 +129,7 @@ SML_OOPS_driver(ExpandedModelInterface *root)
   vx = new Vector(A->Tcol, "vx");
   vy = new Vector(A->Trow, "vy");
   vz = new Vector(A->Tcol, "vz");
-  PDProblem Prob(AlgAug, vb, vc, vu, vx, vy, vz);
-  Prob.l = vl;
+  PDProblem Prob(AlgAug, vb, vc, vl, vu, vx, vy, vz);
   hopdm(stdout, &Prob, &Opt, &Prt);
 
   /* hopdm returns the solution vector in Prob->x/y/z
